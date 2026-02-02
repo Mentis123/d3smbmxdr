@@ -397,21 +397,33 @@ export default function Home() {
           </div>
 
           <div className={styles.messages}>
-            {/* Hero Avatar Introduction */}
+            {/* Hero Avatar as first chat element */}
             {messages.length <= 1 && (
-              <div className={styles.heroIntro}>
-                {avatarLoading ? (
-                  <div className={styles.heroAvatarLoading}>
-                    <div className={styles.heroSpinner}></div>
-                    <span>Creating your AI advisor...</span>
-                  </div>
-                ) : advisorAvatar ? (
-                  <div className={styles.heroAvatarWrap}>
-                    <img src={advisorAvatar} alt="Your AI Security Advisor" className={styles.heroAvatar} />
-                    <div className={styles.heroAvatarGlow}></div>
-                    <span className={styles.heroAiTag}>✨ AI-Generated</span>
-                  </div>
-                ) : null}
+              <div className={`${styles.message} ${styles.bot} ${styles.heroMessage}`}>
+                <div className={styles.heroAvatarWrap}>
+                  {avatarLoading ? (
+                    <div className={styles.heroAvatarLoading}>
+                      <div className={styles.heroSpinner}></div>
+                    </div>
+                  ) : advisorAvatar ? (
+                    <>
+                      <img src={advisorAvatar} alt="Your AI Security Advisor" className={styles.heroAvatar} />
+                      <div className={styles.heroAvatarGlow}></div>
+                    </>
+                  ) : (
+                    <div className={styles.heroAvatarFallback}>🛡️</div>
+                  )}
+                </div>
+                <div className={styles.heroIntroText}>
+                  {avatarLoading ? (
+                    <span className={styles.generatingText}>Creating your AI advisor...</span>
+                  ) : (
+                    <>
+                      <span className={styles.heroName}>Your Security Advisor</span>
+                      <span className={styles.heroAiTag}>✨ AI-Generated</span>
+                    </>
+                  )}
+                </div>
               </div>
             )}
             

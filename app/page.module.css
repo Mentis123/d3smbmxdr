@@ -191,6 +191,31 @@
   white-space: nowrap;
 }
 
+/* Reset Button */
+.resetBtn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--border-default);
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  margin-left: 0.75rem;
+  flex-shrink: 0;
+}
+
+.resetBtn:hover {
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  border-color: var(--accent-cyan);
+  transform: rotate(180deg);
+}
+
 /* Messages */
 .messages {
   flex: 1;

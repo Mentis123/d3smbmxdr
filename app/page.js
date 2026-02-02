@@ -359,6 +359,41 @@ export default function Home() {
               <span className={styles.stageIcon}>{STAGE_INFO[currentStage]?.icon}</span>
               <span className={styles.stageLabel}>{STAGE_INFO[currentStage]?.label}</span>
             </div>
+            <button 
+              className={styles.resetBtn} 
+              onClick={() => {
+                if (window.confirm('Start a new conversation? Your current chat will be cleared.')) {
+                  setMessages([])
+                  setCurrentStage('discovery')
+                  setShowRecommendation(false)
+                  setShowLeadCapture(false)
+                  setAdvisorAvatar(null)
+                  setAvatarLoading(true)
+                  // Regenerate avatar
+                  const generateNewAvatar = async () => {
+                    const avatarPayload = {
+                      scene_goal: "Friendly AI security advisor portrait",
+                      hero: "abstract humanoid figure made of flowing digital particles and soft light",
+                      supporting_elements: ["shield motif integrated subtly", "warm glow", "professional yet approachable"],
+                      context_cue: "AI assistant",
+                      emotion: "welcoming and trustworthy"
+                    }
+                    try {
+                      const imageUrl = await generateImage(avatarPayload)
+                      setAdvisorAvatar(imageUrl)
+                    } catch (e) {}
+                    setAvatarLoading(false)
+                    setMessages([
+                      { role: 'bot', content: "Hi! I'm your AI security advisor. I'm here to help you figure out if managed security is right for your business.\n\nMind if I ask a few quick questions about your organization?" }
+                    ])
+                  }
+                  generateNewAvatar()
+                }
+              }}
+              title="Start new conversation"
+            >
+              ↻
+            </button>
           </div>
 
           <div className={styles.messages}>

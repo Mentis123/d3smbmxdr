@@ -24,14 +24,14 @@
 .logo {
   font-weight: 700;
   font-size: 1.5rem;
-  color: var(--text-primary);
+  color: white;
   text-decoration: none;
   letter-spacing: -0.02em;
 }
 
 .logo sup {
   font-size: 0.65em;
-  color: var(--accent-cyan);
+  color: white;
 }
 
 .badge {
@@ -598,10 +598,10 @@
 
 /* Hero Avatar Message in Chat */
 .heroMessage {
-  flex-direction: column !important;
-  align-items: center !important;
+  flex-direction: row !important;
+  align-items: flex-start !important;
   max-width: 100% !important;
-  padding: 1rem 0;
+  padding: 0.5rem 0;
 }
 
 .heroAvatarWrap {
@@ -612,19 +612,19 @@
 }
 
 .heroAvatarLoading {
-  width: 120px;
-  height: 120px;
+  width: 180px;
+  height: 180px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: linear-gradient(135deg, var(--bg-tertiary), var(--bg-elevated));
-  border-radius: 20px;
+  border-radius: 24px;
   border: 2px solid var(--border-default);
 }
 
 .heroSpinner {
-  width: 48px;
-  height: 48px;
+  width: 56px;
+  height: 56px;
   border: 3px solid rgba(0, 163, 224, 0.2);
   border-top-color: var(--d3-cyan);
   border-radius: 50%;
@@ -632,9 +632,9 @@
 }
 
 .heroAvatar {
-  width: 120px;
-  height: 120px;
-  border-radius: 20px;
+  width: 180px;
+  height: 180px;
+  border-radius: 24px;
   object-fit: cover;
   border: 3px solid var(--d3-cyan);
   box-shadow: 
@@ -670,14 +670,14 @@
 }
 
 .heroAvatarFallback {
-  width: 120px;
-  height: 120px;
+  width: 180px;
+  height: 180px;
   background: linear-gradient(135deg, var(--d3-blue), var(--d3-cyan));
-  border-radius: 20px;
+  border-radius: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 3rem;
+  font-size: 4rem;
 }
 
 .heroIntroText {

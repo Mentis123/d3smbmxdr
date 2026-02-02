@@ -397,7 +397,7 @@ export default function Home() {
           </div>
 
           <div className={styles.messages}>
-            {/* Hero Avatar as first chat element */}
+            {/* Hero Avatar as first chat element - just the image, no text */}
             {messages.length <= 1 && (
               <div className={`${styles.message} ${styles.bot} ${styles.heroMessage}`}>
                 <div className={styles.heroAvatarWrap}>
@@ -407,22 +407,11 @@ export default function Home() {
                     </div>
                   ) : advisorAvatar ? (
                     <>
-                      <img src={advisorAvatar} alt="Your AI Security Advisor" className={styles.heroAvatar} />
+                      <img src={advisorAvatar} alt="D3QA" className={styles.heroAvatar} />
                       <div className={styles.heroAvatarGlow}></div>
                     </>
                   ) : (
                     <div className={styles.heroAvatarFallback}>🛡️</div>
-                  )}
-                </div>
-                <div className={styles.heroIntroText}>
-                  {avatarLoading ? (
-                    <span className={styles.generatingText}>Initializing D3QA...</span>
-                  ) : (
-                    <>
-                      <span className={styles.heroName}>D3QA</span>
-                      <span className={styles.heroSubtitle}>Data#3 Qualifying Agent</span>
-                      <span className={styles.heroAiTag}>✨ AI-Generated</span>
-                    </>
                   )}
                 </div>
               </div>

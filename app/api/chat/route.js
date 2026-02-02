@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server'
-import { neon } from '@neondatabase/serverless'
 
 export const runtime = 'edge'
 
@@ -12,33 +11,11 @@ export async function POST(request) {
     }
 
     const apiKey = process.env.GOOGLE_API_KEY
-    const dbUrl = process.env.DATABASE_URL
-    const sql = dbUrl ? neon(dbUrl) : null
 
-    if (leadData && sql) {
-      try {
-        await sql`
-          INSERT INTO mxdr_leads (
-            company_name, industry, employee_count, 
-            contact_name, contact_email, contact_phone,
-            qualification_score, recommended_solution, chat_summary,
-            status
-          ) VALUES (
-            ${leadData.company || null}, 
-            ${leadData.industry || null}, 
-            ${leadData.employees || null},
-            ${leadData.name || null},
-            ${leadData.email || null},
-            ${leadData.phone || null},
-            ${leadData.score || 0},
-            ${leadData.recommendation || 'MXDR'},
-            ${leadData.summary || null},
-            'new'
-          )
-        `;
-      } catch (dbError) {
-        console.error('Failed to save lead:', dbError);
-      }
+    // TODO: Add Neon database lead saving later
+    // For now, just log lead data
+    if (leadData) {
+      console.log('Lead data received:', JSON.stringify(leadData));
     }
 
     if (!apiKey) {
@@ -76,7 +53,7 @@ export async function POST(request) {
     
     if (data.error) {
       console.error('Gemini API error:', data.error);
-      return NextResponse.json({ error: `Gemini error: ${data.error.message || JSON.stringify(data.error)}` }, { status: 500 })
+      return NextResponse.json({ error: `Gemini: ${data.error.message || JSON.stringify(data.error)}` }, { status: 500 })
     }
     
     const text = data.candidates?.[0]?.content?.parts?.[0]?.text || 'I apologize, I could not generate a response.'
@@ -85,6 +62,6 @@ export async function POST(request) {
 
   } catch (error) {
     console.error('Chat error:', error)
-    return NextResponse.json({ error: `Internal error: ${error.message}` }, { status: 500 })
+    return NextResponse.json({ error: `Error: ${error.message}` }, { status: 500 })
   }
 }

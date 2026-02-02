@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SMB MXDR Sales Tools | Data#3</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    :root {
+      --primary: #0066cc;
+      --secondary: #00a3e0;
+      --dark: #0a1628;
+      --accent: #00d4aa;
+      --light: #f8fafc;
+    }
+    
+    @page { size: A4 landscape; margin: 0; }
+    
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: #1a1a2e;
+      color: white;
+    }
+    
+    .slide {
+      width: 100vw;
+      height: 100vh;
+      padding: 4rem;
+      display: flex;
+      flex-direction: column;
+      page-break-after: always;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    @media print {
+      .slide { width: 297mm; height: 210mm; padding: 2.5rem; }
+    }
+    
+    /* Slide 1: Title */
+    .slide-title {
+      background: linear-gradient(135deg, var(--dark) 0%, #1e3a5f 50%, var(--primary) 100%);
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+    
+    .slide-title::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -20%;
+      width: 80%;
+      height: 200%;
+      background: radial-gradient(ellipse, rgba(0,163,224,0.15) 0%, transparent 70%);
+    }
+    
+    .logo-large {
+      font-size: 2rem;
+      font-weight: 700;
+      color: white;
+      margin-bottom: 3rem;
+    }
+    
+    .logo-large sup { font-size: 0.6em; color: var(--secondary); }
+    
+    .slide-title h1 {
+      font-size: 3.5rem;
+      font-weight: 800;
+      margin-bottom: 1rem;
+      background: linear-gradient(90deg, white 0%, var(--secondary) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .slide-title h2 {
+      font-size: 1.5rem;
+      font-weight: 400;
+      color: #94a3b8;
+      margin-bottom: 3rem;
+    }
+    
+    .title-meta {
+      font-size: 0.9rem;
+      color: #64748b;
+    }
+    
+    /* Slide 2+: Content slides */
+    .slide-content {
+      background: linear-gradient(180deg, var(--dark) 0%, #0f172a 100%);
+    }
+    
+    .slide-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2.5rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    .slide-logo {
+      font-size: 1.25rem;
+      font-weight: 700;
+    }
+    
+    .slide-logo sup { font-size: 0.6em; color: var(--secondary); }
+    
+    .slide-number {
+      background: rgba(255,255,255,0.1);
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+    
+    .slide-content h2 {
+      font-size: 2.25rem;
+      font-weight: 700;
+      margin-bottom: 2rem;
+      color: white;
+    }
+    
+    .slide-content h2 span { color: var(--secondary); }
+    
+    /* Two column layout */
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      flex: 1;
+    }
+    
+    .col h3 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 1.25rem;
+      color: var(--secondary);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    
+    .col h3 .icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+    }
+    
+    .col p, .col li {
+      color: #cbd5e1;
+      line-height: 1.7;
+      font-size: 1rem;
+    }
+    
+    .col ul {
+      list-style: none;
+    }
+    
+    .col li {
+      padding: 0.5rem 0;
+      padding-left: 1.5rem;
+      position: relative;
+    }
+    
+    .col li::before {
+      content: '→';
+      position: absolute;
+      left: 0;
+      color: var(--accent);
+    }
+    
+    /* Feature cards */
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+      flex: 1;
+    }
+    
+    .feature-card {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 16px;
+      padding: 1.5rem;
+      transition: all 0.3s;
+    }
+    
+    .feature-card:hover {
+      background: rgba(255,255,255,0.08);
+      border-color: var(--secondary);
+    }
+    
+    .feature-card .icon {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+    }
+    
+    .feature-card h4 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+    
+    .feature-card p {
+      color: #94a3b8;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+    
+    /* Stats row */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+    
+    .stat {
+      text-align: center;
+      padding: 1.5rem;
+      background: rgba(255,255,255,0.03);
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+    
+    .stat-value {
+      font-size: 2.5rem;
+      font-weight: 800;
+      background: linear-gradient(90deg, var(--secondary) 0%, var(--accent) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .stat-label {
+      font-size: 0.85rem;
+      color: #94a3b8;
+      margin-top: 0.5rem;
+    }
+    
+    /* Pricing table */
+    .pricing-table {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+      flex: 1;
+      align-items: start;
+    }
+    
+    .tier {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 16px;
+      padding: 1.5rem;
+      text-align: center;
+    }
+    
+    .tier.featured {
+      background: linear-gradient(135deg, rgba(0,102,204,0.2) 0%, rgba(0,163,224,0.2) 100%);
+      border-color: var(--secondary);
+      transform: scale(1.02);
+    }
+    
+    .tier h4 {
+      font-size: 1.25rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .tier .price {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--secondary);
+      margin: 1rem 0;
+    }
+    
+    .tier .price small {
+      font-size: 0.8rem;
+      color: #94a3b8;
+      font-weight: 400;
+    }
+    
+    .tier ul {
+      list-style: none;
+      text-align: left;
+      font-size: 0.85rem;
+      color: #cbd5e1;
+    }
+    
+    .tier li {
+      padding: 0.4rem 0;
+      padding-left: 1.25rem;
+      position: relative;
+    }
+    
+    .tier li::before {
+      content: '✓';
+      position: absolute;
+      left: 0;
+      color: var(--accent);
+    }
+    
+    /* CTA slide */
+    .slide-cta {
+      background: linear-gradient(135deg, var(--primary) 0%, #004c99 50%, var(--dark) 100%);
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+    
+    .slide-cta h2 {
+      font-size: 2.5rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .slide-cta p {
+      font-size: 1.25rem;
+      color: #cbd5e1;
+      margin-bottom: 2rem;
+      max-width: 600px;
+    }
+    
+    .cta-buttons {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+    }
+    
+    .cta-btn {
+      padding: 1rem 2rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.3s;
+    }
+    
+    .cta-btn.primary {
+      background: white;
+      color: var(--primary);
+    }
+    
+    .cta-btn.secondary {
+      background: transparent;
+      color: white;
+      border: 2px solid white;
+    }
+    
+    /* Three col */
+    .three-col {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2rem;
+      flex: 1;
+    }
+    
+    .use-case {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 16px;
+      padding: 1.5rem;
+    }
+    
+    .use-case .icon {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+    }
+    
+    .use-case h4 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+    }
+    
+    .use-case p {
+      color: #94a3b8;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Slide 1: Title -->
+  <section class="slide slide-title">
+    <div class="logo-large">Data<sup>#</sup>3</div>
+    <h1>SMB MXDR Sales Tools</h1>
+    <h2>Interactive Calculator & AI-Powered Assessment Bot</h2>
+    <p class="title-meta">Prepared for: Richard Dornhart, Head of Security Practice<br>February 2026</p>
+  </section>
+
+  <!-- Slide 2: The Challenge -->
+  <section class="slide slide-content">
+    <div class="slide-header">
+      <div class="slide-logo">Data<sup>#</sup>3</div>
+      <div class="slide-number">01</div>
+    </div>
+    <h2>The <span>Challenge</span></h2>
+    <div class="two-col">
+      <div class="col">
+        <h3><span class="icon">🎯</span> SMB Sales Friction</h3>
+        <ul>
+          <li>Prospects need pricing before engaging sales</li>
+          <li>Pre-sales time spent on unqualified leads</li>
+          <li>Complex offerings hard to explain quickly</li>
+          <li>No self-service discovery path</li>
+        </ul>
+      </div>
+      <div class="col">
+        <h3><span class="icon">💡</span> The Opportunity</h3>
+        <ul>
+          <li>Self-service tools qualify leads automatically</li>
+          <li>Instant pricing builds trust and urgency</li>
+          <li>AI explains concepts without jargon</li>
+          <li>Sales focuses on high-intent prospects</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 3: The Solution -->
+  <section class="slide slide-content">
+    <div class="slide-header">
+      <div class="slide-logo">Data<sup>#</sup>3</div>
+      <div class="slide-number">02</div>
+    </div>
+    <h2>Two <span>Self-Service Tools</span></h2>
+    <div class="feature-grid">
+      <div class="feature-card">
+        <div class="icon">🧮</div>
+        <h4>Quick Calculator</h4>
+        <p>Enter endpoints, industry, and SLA requirements. Get instant pricing with recommended tier. Volume discounts calculated automatically.</p>
+      </div>
+      <div class="feature-card">
+        <div class="icon">💬</div>
+        <h4>Guided Assessment Bot</h4>
+        <p>AI-powered conversation that asks the right questions. Explains security concepts simply. Recommends solutions with clear rationale.</p>
+      </div>
+      <div class="feature-card">
+        <div class="icon">📱</div>
+        <h4>Mobile Responsive</h4>
+        <p>Works on any device. Perfect for quick demos during meetings or prospects researching on their phones.</p>
+      </div>
+      <div class="feature-card">
+        <div class="icon">🔗</div>
+        <h4>Embeddable</h4>
+        <p>Add to Data#3 website, partner portals, or share direct links. No login required.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 4: Calculator Details -->
+  <section class="slide slide-content">
+    <div class="slide-header">
+      <div class="slide-logo">Data<sup>#</sup>3</div>
+      <div class="slide-number">03</div>
+    </div>
+    <h2>Quick <span>Calculator</span></h2>
+    <div class="two-col">
+      <div class="col">
+        <h3><span class="icon">📊</span> Input Fields</h3>
+        <ul>
+          <li>Number of endpoints (1-500+)</li>
+          <li>Number of employees</li>
+          <li>Industry vertical</li>
+          <li>Response SLA requirement</li>
+          <li>Add-on services checklist</li>
+        </ul>
+      </div>
+      <div class="col">
+        <h3><span class="icon">✨</span> Output</h3>
+        <ul>
+          <li>Recommended tier with rationale</li>
+          <li>Monthly price estimate</li>
+          <li>Per-endpoint breakdown</li>
+          <li>Features included at tier</li>
+          <li>CTA to speak with advisor</li>
+        </ul>
+      </div>
+    </div>
+    <div class="stats-row">
+      <div class="stat">
+        <div class="stat-value">3</div>
+        <div class="stat-label">Pricing Tiers</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">7</div>
+        <div class="stat-label">Industry Verticals</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">4</div>
+        <div class="stat-label">Add-on Services</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">15%</div>
+        <div class="stat-label">Volume Discount</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 5: Q&A Bot Details -->
+  <section class="slide slide-content">
+    <div class="slide-header">
+      <div class="slide-logo">Data<sup>#</sup>3</div>
+      <div class="slide-number">04</div>
+    </div>
+    <h2>Guided <span>Assessment Bot</span></h2>
+    <div class="two-col">
+      <div class="col">
+        <h3><span class="icon">🤖</span> AI-Powered</h3>
+        <ul>
+          <li>Google Gemini 3.0 Flash</li>
+          <li>Conversational, not scripted</li>
+          <li>Explains concepts in plain language</li>
+          <li>Adapts questions based on responses</li>
+          <li>Sample scenario buttons for demos</li>
+        </ul>
+      </div>
+      <div class="col">
+        <h3><span class="icon">🎯</span> Discovery Flow</h3>
+        <ul>
+          <li><strong>1.</strong> Business size & industry</li>
+          <li><strong>2.</strong> Current security setup</li>
+          <li><strong>3.</strong> Main concerns & pain points</li>
+          <li><strong>4.</strong> Compliance requirements</li>
+          <li><strong>5.</strong> Recommendation with pricing</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 6: Pricing Model -->
+  <section class="slide slide-content">
+    <div class="slide-header">
+      <div class="slide-logo">Data<sup>#</sup>3</div>
+      <div class="slide-number">05</div>
+    </div>
+    <h2>Pricing <span>Model</span> <small style="font-size: 0.5em; color: #64748b;">(Configurable)</small></h2>
+    <div class="pricing-table">
+      <div class="tier">
+        <h4>Essential</h4>
+        <div class="price">$30-35<small>/endpoint/mo</small></div>
+        <ul>
+          <li>24/7 threat monitoring</li>
+          <li>Endpoint detection & response</li>
+          <li>Expert threat hunting</li>
+          <li>Incident investigation</li>
+          <li>Monthly reports</li>
+        </ul>
+      </div>
+      <div class="tier featured">
+        <h4>Professional</h4>
+        <div class="price">$40-45<small>/endpoint/mo</small></div>
+        <ul>
+          <li>Everything in Essential</li>
+          <li>Vulnerability management</li>
+          <li>Compliance dashboards</li>
+          <li>Dedicated analyst</li>
+          <li>Weekly reports</li>
+        </ul>
+      </div>
+      <div class="tier">
+        <h4>Enterprise</h4>
+        <div class="price">$50-60<small>/endpoint/mo</small></div>
+        <ul>
+          <li>Full XDR capabilities</li>
+          <li>Dedicated security team</li>
+          <li>Executive briefings</li>
+          <li>Tabletop exercises</li>
+          <li>IR retainer included</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 7: Use Cases -->
+  <section class="slide slide-content">
+    <div class="slide-header">
+      <div class="slide-logo">Data<sup>#</sup>3</div>
+      <div class="slide-number">06</div>
+    </div>
+    <h2>Use <span>Cases</span></h2>
+    <div class="three-col">
+      <div class="use-case">
+        <div class="icon">🌐</div>
+        <h4>Website Lead Gen</h4>
+        <p>Embed on Data#3 SMB landing page. Captures qualified leads with specific requirements before sales contact.</p>
+      </div>
+      <div class="use-case">
+        <div class="icon">👔</div>
+        <h4>Sales Enablement</h4>
+        <p>Account managers use during discovery. "Let me run your details through our assessment tool..."</p>
+      </div>
+      <div class="use-case">
+        <div class="icon">🤝</div>
+        <h4>Partner Channel</h4>
+        <p>Provide to MSP partners for their SMB customers. Co-branded deployment possible.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 8: Cost & ROI -->
+  <section class="slide slide-content">
+    <div class="slide-header">
+      <div class="slide-logo">Data<sup>#</sup>3</div>
+      <div class="slide-number">07</div>
+    </div>
+    <h2>Cost <span>Analysis</span></h2>
+    <div class="two-col">
+      <div class="col">
+        <h3><span class="icon">💰</span> Investment</h3>
+        <ul>
+          <li><strong>Development:</strong> $0 (built in-house)</li>
+          <li><strong>Hosting:</strong> Free tier (Vercel)</li>
+          <li><strong>AI API:</strong> ~$0.01-0.02/conversation</li>
+          <li><strong>Monthly estimate:</strong> &lt;$50 at scale</li>
+        </ul>
+      </div>
+      <div class="col">
+        <h3><span class="icon">📈</span> Comparison</h3>
+        <ul>
+          <li>Custom dev agency: $15,000-30,000+</li>
+          <li>Off-shelf ROI calculator: $200-500/mo</li>
+          <li>This solution: Nearly free</li>
+          <li><strong>Time to value:</strong> Deploy today</li>
+        </ul>
+      </div>
+    </div>
+    <div class="stats-row">
+      <div class="stat">
+        <div class="stat-value">$0</div>
+        <div class="stat-label">Development Cost</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">&lt;$50</div>
+        <div class="stat-label">Monthly Run Cost</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">Today</div>
+        <div class="stat-label">Ready to Deploy</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">∞</div>
+        <div class="stat-label">ROI Potential</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 9: Next Steps -->
+  <section class="slide slide-cta">
+    <div class="slide-logo" style="position: absolute; top: 2rem; left: 2rem;">Data<sup>#</sup>3</div>
+    <h2>Ready to Deploy</h2>
+    <p>Review pricing model, add your actual rates, and launch on the SMB landing page.</p>
+    <div class="cta-buttons">
+      <a href="https://d3smbmxdr.vercel.app" class="cta-btn primary">View Live Demo</a>
+      <a href="https://www.data3.com/myd3/" class="cta-btn secondary">Schedule Discussion</a>
+    </div>
+    <p style="margin-top: 3rem; font-size: 0.9rem; color: #94a3b8;">
+      Adam Rappaport | AI Specialist | adam_rappaport@data3.com.au
+    </p>
+  </section>
+
+</body>
+</html>

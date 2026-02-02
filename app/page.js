@@ -123,12 +123,12 @@ const SAMPLE_SCENARIOS = [
 ]
 
 export default function Home() {
-  const [messages, setMessages] = useState([
-    { role: 'bot', content: "Hi! I'm here to help you figure out if managed security is right for your business.\n\nMind if I ask a few quick questions about your organization?" }
-  ])
+  const [messages, setMessages] = useState([])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const [generatingImage, setGeneratingImage] = useState(false)
+  const [advisorAvatar, setAdvisorAvatar] = useState(null)
+  const [avatarLoading, setAvatarLoading] = useState(true)
   const [showRecommendation, setShowRecommendation] = useState(false)
   const [showLeadCapture, setShowLeadCapture] = useState(false)
   const [leadEmail, setLeadEmail] = useState('')
@@ -139,6 +139,34 @@ export default function Home() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
+
+  // Generate AI advisor avatar on load
+  useEffect(() => {
+    const generateAdvisorAvatar = async () => {
+      const avatarPayload = {
+        scene_goal: "Friendly AI security advisor portrait",
+        hero: "abstract humanoid figure made of flowing digital particles and soft light",
+        supporting_elements: ["shield motif integrated subtly", "warm glow", "professional yet approachable"],
+        context_cue: "AI assistant",
+        emotion: "welcoming and trustworthy"
+      }
+      
+      try {
+        const imageUrl = await generateImage(avatarPayload)
+        setAdvisorAvatar(imageUrl)
+      } catch (e) {
+        console.error('Avatar generation failed:', e)
+      }
+      setAvatarLoading(false)
+      
+      // Show greeting after avatar loads (or fails)
+      setMessages([
+        { role: 'bot', content: "Hi! I'm your AI security advisor. I'm here to help you figure out if managed security is right for your business.\n\nMind if I ask a few quick questions about your organization?" }
+      ])
+    }
+    
+    generateAdvisorAvatar()
+  }, [])
 
   useEffect(() => {
     const lastBotMsg = [...messages].reverse().find(m => m.role === 'bot')
@@ -311,10 +339,21 @@ export default function Home() {
       <main className={styles.main}>
         <div className={styles.chatContainer}>
           <div className={styles.chatHeader}>
-            <div className={styles.avatar}>🛡️</div>
+            <div className={styles.avatarContainer}>
+              {avatarLoading ? (
+                <div className={styles.avatarLoading}>
+                  <div className={styles.avatarSpinner}></div>
+                </div>
+              ) : advisorAvatar ? (
+                <img src={advisorAvatar} alt="AI Advisor" className={styles.advisorAvatar} />
+              ) : (
+                <div className={styles.avatar}>🛡️</div>
+              )}
+              <span className={styles.aiTag}>✨ AI</span>
+            </div>
             <div>
               <h1>Security Assessment</h1>
-              <p>Let's find the right security solution for your business</p>
+              <p>Personalized visuals generated in real-time</p>
             </div>
             <div className={styles.stageIndicator}>
               <span className={styles.stageIcon}>{STAGE_INFO[currentStage]?.icon}</span>
@@ -327,10 +366,19 @@ export default function Home() {
               msg.role === 'image' ? (
                 <div key={i} className={styles.imageMessage}>
                   <img src={msg.content} alt="Security illustration" className={styles.generatedImage} />
+                  <span className={styles.imageAiTag}>✨ Generated for you</span>
                 </div>
               ) : (
                 <div key={i} className={`${styles.message} ${styles[msg.role]}`}>
-                  {msg.role === 'bot' && <div className={styles.msgAvatar}>🛡️</div>}
+                  {msg.role === 'bot' && (
+                    <div className={styles.msgAvatarWrap}>
+                      {advisorAvatar ? (
+                        <img src={advisorAvatar} alt="" className={styles.msgAvatarImg} />
+                      ) : (
+                        <div className={styles.msgAvatar}>🛡️</div>
+                      )}
+                    </div>
+                  )}
                   <div className={styles.bubble}>
                     {msg.content.split('\n').map((line, j) => <p key={j}>{line || '\u00A0'}</p>)}
                   </div>
@@ -341,7 +389,13 @@ export default function Home() {
             
             {loading && (
               <div className={`${styles.message} ${styles.bot}`}>
-                <div className={styles.msgAvatar}>🛡️</div>
+                <div className={styles.msgAvatarWrap}>
+                  {advisorAvatar ? (
+                    <img src={advisorAvatar} alt="" className={styles.msgAvatarImg} />
+                  ) : (
+                    <div className={styles.msgAvatar}>🛡️</div>
+                  )}
+                </div>
                 <div className={styles.bubble}><div className={styles.typing}><span></span><span></span><span></span></div></div>
               </div>
             )}

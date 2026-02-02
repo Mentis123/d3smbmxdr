@@ -1,19 +1,50 @@
 import { NextResponse } from 'next/server'
+import { neon } from '@neondatabase/serverless'
+
+export const runtime = 'edge'
 
 export async function POST(request) {
   try {
-    const { systemPrompt, messages } = await request.json()
+    const { systemPrompt, messages, leadData } = await request.json()
 
     if (!messages || !Array.isArray(messages)) {
       return NextResponse.json({ error: 'Messages required' }, { status: 400 })
     }
 
     const apiKey = process.env.GOOGLE_API_KEY
+    const dbUrl = process.env.DATABASE_URL
+    const sql = dbUrl ? neon(dbUrl) : null
+
+    if (leadData && sql) {
+      try {
+        await sql`
+          INSERT INTO mxdr_leads (
+            company_name, industry, employee_count, 
+            contact_name, contact_email, contact_phone,
+            qualification_score, recommended_solution, chat_summary,
+            status
+          ) VALUES (
+            ${leadData.company || null}, 
+            ${leadData.industry || null}, 
+            ${leadData.employees || null},
+            ${leadData.name || null},
+            ${leadData.email || null},
+            ${leadData.phone || null},
+            ${leadData.score || 0},
+            ${leadData.recommendation || 'MXDR'},
+            ${leadData.summary || null},
+            'new'
+          )
+        `;
+      } catch (dbError) {
+        console.error('Failed to save lead:', dbError);
+      }
+    }
+
     if (!apiKey) {
       return NextResponse.json({ error: 'API key not configured' }, { status: 500 })
     }
 
-    // Build Gemini request
     const geminiMessages = messages.map(m => ({
       role: m.role === 'assistant' ? 'model' : 'user',
       parts: [{ text: m.content }]
@@ -29,13 +60,7 @@ export async function POST(request) {
         topK: 40,
         topP: 0.95,
         maxOutputTokens: 1024,
-      },
-      safetySettings: [
-        { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
-        { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
-        { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
-        { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
-      ]
+      }
     }
 
     const response = await fetch(
@@ -46,11 +71,6 @@ export async function POST(request) {
         body: JSON.stringify(requestBody)
       }
     )
-
-    if (!response.ok) {
-      console.error('Gemini API error:', await response.text())
-      return NextResponse.json({ error: 'AI service error' }, { status: 500 })
-    }
 
     const data = await response.json()
     const text = data.candidates?.[0]?.content?.parts?.[0]?.text || 'I apologize, I could not generate a response.'

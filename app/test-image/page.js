@@ -1,41 +1,34 @@
 'use client'
 import { useState, useEffect } from 'react'
 
-// Test page for image generation - workshop and refine prompts
-// Access at /test-image
+// Prompt Workshop with Master Template
+// Locked prefix/suffix + editable zone per context
 
-const DEFAULT_PROMPTS = {
-  agent: `Professional digital avatar for a cybersecurity AI assistant named "Shield". 
-Gender-neutral humanoid figure with a sleek, modern design. 
-Subtle blue and cyan glow effects suggesting digital protection. 
-Clean corporate aesthetic suitable for enterprise B2B. 
-No text or logos. Simple background gradient.
-Professional, trustworthy, approachable.`,
-  
-  healthcare: `Modern healthcare facility security concept. Medical cross symbol with digital shield overlay. Clean, professional, blue and white color palette. No people, abstract representation. Enterprise security aesthetic.`,
-  
-  accounting: `Financial data protection concept. Abstract representation of secure documents and numbers. Professional blue and gold accents. Shield motif integrated subtly. Corporate aesthetic.`,
-  
-  manufacturing: `Industrial cybersecurity concept. Factory floor meets digital protection. Subtle shield overlay on machinery silhouettes. Blue and orange industrial palette. Modern, clean design.`,
-  
-  retail: `Retail point of sale security concept. Abstract POS terminal with protective digital shield. Clean commercial aesthetic. Blue security tones with retail warmth. No people.`,
-  
-  compliance: `Compliance and certification concept. Abstract checkmarks, shields, and document symbols. Professional blue palette. Clean corporate aesthetic suggesting trust and verification.`,
-  
-  visibility: `Security operations center concept. Abstract representation of monitoring dashboards and threat visibility. Blue glow effects. Dark professional background. Digital protection aesthetic.`,
-  
-  recommendation: `Managed security solution concept. Protective shield encompassing a business. 24/7 monitoring visualization. Professional blue and cyan. Trustworthy enterprise aesthetic.`
+const MASTER_TEMPLATE = {
+  prefix: `Professional enterprise cybersecurity illustration. Clean corporate B2B aesthetic. Abstract representation, no people, no text, no logos. Modern minimalist style. Blue and cyan color palette with subtle glow effects.`,
+  suffix: `Simple dark gradient background. High quality, sharp details. Suitable for enterprise marketing materials.`
 }
 
-const PROMPT_LABELS = {
-  agent: '🤖 Agent Avatar (Shield)',
-  healthcare: '🏥 Healthcare Context',
-  accounting: '📊 Accounting/Finance',
+const DEFAULT_ZONES = {
+  agent: `Digital AI assistant avatar. Gender-neutral humanoid silhouette. Protective shield motif. Trustworthy and approachable presence.`,
+  healthcare: `Medical healthcare security. Cross symbol with digital shield overlay. Clean clinical aesthetic with protective elements.`,
+  accounting: `Financial data protection. Secure documents, numbers, currency symbols. Gold accents suggesting value and trust.`,
+  manufacturing: `Industrial security. Factory machinery silhouettes with digital protection overlay. Orange industrial accents.`,
+  retail: `Retail point-of-sale security. POS terminal with protective barrier. Commercial warmth with security confidence.`,
+  compliance: `Compliance and certification. Checkmarks, verification badges, document seals. Trust and verification symbols.`,
+  visibility: `Security operations monitoring. Dashboard displays, threat radar, visibility metaphors. Dark SOC aesthetic with blue glow.`,
+  recommendation: `Managed security protection. Business building with encompassing shield. 24/7 protection visualization.`
+}
+
+const ZONE_LABELS = {
+  agent: '🤖 Agent Avatar',
+  healthcare: '🏥 Healthcare',
+  accounting: '📊 Finance',
   manufacturing: '🏭 Manufacturing',
   retail: '🛒 Retail',
-  compliance: '✅ Compliance/Third-Party',
-  visibility: '👁️ Security Visibility',
-  recommendation: '🛡️ MXDR Recommendation'
+  compliance: '✅ Compliance',
+  visibility: '👁️ Visibility',
+  recommendation: '🛡️ MXDR'
 }
 
 export default function TestImage() {
@@ -43,34 +36,47 @@ export default function TestImage() {
   const [image, setImage] = useState(null)
   const [error, setError] = useState(null)
   const [selectedKey, setSelectedKey] = useState('agent')
-  const [prompts, setPrompts] = useState(DEFAULT_PROMPTS)
+  const [masterPrefix, setMasterPrefix] = useState(MASTER_TEMPLATE.prefix)
+  const [masterSuffix, setMasterSuffix] = useState(MASTER_TEMPLATE.suffix)
+  const [zones, setZones] = useState(DEFAULT_ZONES)
   const [provider, setProvider] = useState(null)
   const [genTime, setGenTime] = useState(null)
   const [history, setHistory] = useState([])
-  const [showExport, setShowExport] = useState(false)
+  const [editingMaster, setEditingMaster] = useState(false)
 
-  // Load saved prompts from localStorage
+  // Load saved from localStorage
   useEffect(() => {
-    const saved = localStorage.getItem('mxdr-image-prompts')
+    const saved = localStorage.getItem('mxdr-prompt-workshop-v2')
     if (saved) {
       try {
-        setPrompts({ ...DEFAULT_PROMPTS, ...JSON.parse(saved) })
+        const data = JSON.parse(saved)
+        if (data.prefix) setMasterPrefix(data.prefix)
+        if (data.suffix) setMasterSuffix(data.suffix)
+        if (data.zones) setZones({ ...DEFAULT_ZONES, ...data.zones })
       } catch (e) {}
     }
   }, [])
 
-  // Save prompts to localStorage
-  const savePrompts = () => {
-    localStorage.setItem('mxdr-image-prompts', JSON.stringify(prompts))
-    alert('✅ Prompts saved to browser!')
+  const saveAll = () => {
+    localStorage.setItem('mxdr-prompt-workshop-v2', JSON.stringify({
+      prefix: masterPrefix,
+      suffix: masterSuffix,
+      zones
+    }))
+    alert('✅ Saved!')
   }
 
-  const resetPrompt = (key) => {
-    setPrompts(prev => ({ ...prev, [key]: DEFAULT_PROMPTS[key] }))
+  const resetZone = (key) => {
+    setZones(prev => ({ ...prev, [key]: DEFAULT_ZONES[key] }))
   }
 
-  const updatePrompt = (key, value) => {
-    setPrompts(prev => ({ ...prev, [key]: value }))
+  const resetMaster = () => {
+    setMasterPrefix(MASTER_TEMPLATE.prefix)
+    setMasterSuffix(MASTER_TEMPLATE.suffix)
+  }
+
+  const getFullPrompt = () => {
+    return `${masterPrefix}\n\n${zones[selectedKey]}\n\n${masterSuffix}`
   }
 
   const generateImage = async () => {
@@ -78,7 +84,7 @@ export default function TestImage() {
     setError(null)
     
     const startTime = Date.now()
-    const prompt = prompts[selectedKey]
+    const prompt = getFullPrompt()
 
     try {
       const res = await fetch('/api/image', {
@@ -89,23 +95,21 @@ export default function TestImage() {
       
       const data = await res.json()
       
-      if (data.error) {
-        throw new Error(data.error)
-      }
+      if (data.error) throw new Error(data.error)
       
       const result = {
         image: data.image,
         prompt,
+        zone: zones[selectedKey],
         key: selectedKey,
         provider: data.provider,
-        time: ((Date.now() - startTime) / 1000).toFixed(1),
-        timestamp: new Date().toISOString()
+        time: ((Date.now() - startTime) / 1000).toFixed(1)
       }
       
       setImage(result.image)
       setProvider(result.provider)
       setGenTime(result.time)
-      setHistory(prev => [result, ...prev.slice(0, 9)]) // Keep last 10
+      setHistory(prev => [result, ...prev.slice(0, 9)])
       
     } catch (err) {
       setError(err.message)
@@ -114,92 +118,104 @@ export default function TestImage() {
     }
   }
 
-  const exportPrompts = () => {
-    const json = JSON.stringify(prompts, null, 2)
-    navigator.clipboard.writeText(json)
-    alert('📋 Prompts copied to clipboard!')
+  const exportAll = () => {
+    const data = { prefix: masterPrefix, suffix: masterSuffix, zones }
+    navigator.clipboard.writeText(JSON.stringify(data, null, 2))
+    alert('📋 Copied to clipboard!')
   }
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      background: '#0f1419',
-      color: '#f0f6fc',
-      padding: '2rem',
-      fontFamily: '-apple-system, sans-serif'
-    }}>
-      <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+    <div style={{ minHeight: '100vh', background: '#0f1419', color: '#f0f6fc', padding: '1.5rem', fontFamily: '-apple-system, sans-serif' }}>
+      <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
+        
+        {/* Header */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
           <div>
-            <h1 style={{ marginBottom: '0.25rem' }}>🎨 Image Prompt Workshop</h1>
-            <p style={{ color: '#8b949e', margin: 0 }}>Edit prompts, generate, refine, save</p>
+            <h1 style={{ margin: 0, fontSize: '1.5rem' }}>🎨 Prompt Workshop</h1>
+            <p style={{ color: '#8b949e', margin: '0.25rem 0 0', fontSize: '0.85rem' }}>Master template + editable zones</p>
           </div>
           <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <button onClick={savePrompts} style={btnStyle}>💾 Save All</button>
-            <button onClick={exportPrompts} style={btnStyle}>📋 Export JSON</button>
+            <button onClick={() => setEditingMaster(!editingMaster)} style={btnStyle}>
+              {editingMaster ? '🔒 Lock Master' : '⚙️ Edit Master'}
+            </button>
+            <button onClick={saveAll} style={{ ...btnStyle, background: '#238636', borderColor: '#238636' }}>💾 Save</button>
+            <button onClick={exportAll} style={btnStyle}>📋 Export</button>
           </div>
         </div>
-        
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
-          {/* Left: Prompt Editor */}
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 400px', gap: '1.5rem' }}>
+          
+          {/* Left: Prompt Builder */}
           <div>
-            <div style={{ marginBottom: '1rem' }}>
-              <label style={{ display: 'block', marginBottom: '0.5rem', color: '#8b949e', fontSize: '0.85rem' }}>
-                Select context to edit:
-              </label>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-                {Object.keys(PROMPT_LABELS).map(key => (
-                  <button
-                    key={key}
-                    onClick={() => setSelectedKey(key)}
-                    style={{
-                      padding: '0.5rem 0.75rem',
-                      background: selectedKey === key ? '#58a6ff' : '#1a2332',
-                      border: '1px solid ' + (selectedKey === key ? '#58a6ff' : '#30363d'),
-                      borderRadius: '6px',
-                      color: selectedKey === key ? '#0f1419' : '#8b949e',
-                      cursor: 'pointer',
-                      fontSize: '0.8rem',
-                      fontWeight: selectedKey === key ? '600' : '400'
-                    }}
-                  >
-                    {PROMPT_LABELS[key]}
-                  </button>
-                ))}
-              </div>
-            </div>
-            
-            <div style={{ marginBottom: '1rem' }}>
+            {/* Master Prefix */}
+            <div style={{ ...boxStyle, marginBottom: '0.75rem', background: editingMaster ? '#1a2332' : '#0d1117' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                <label style={{ color: '#8b949e', fontSize: '0.85rem' }}>
-                  Prompt for {PROMPT_LABELS[selectedKey]}:
-                </label>
-                <button 
-                  onClick={() => resetPrompt(selectedKey)} 
-                  style={{ ...btnStyle, padding: '0.25rem 0.5rem', fontSize: '0.75rem' }}
+                <span style={{ color: '#8b949e', fontSize: '0.75rem', textTransform: 'uppercase' }}>🔒 Master Prefix</span>
+                {editingMaster && <button onClick={resetMaster} style={{ ...btnSmall, fontSize: '0.7rem' }}>↺ Reset</button>}
+              </div>
+              {editingMaster ? (
+                <textarea
+                  value={masterPrefix}
+                  onChange={(e) => setMasterPrefix(e.target.value)}
+                  style={{ ...textareaStyle, minHeight: '80px' }}
+                />
+              ) : (
+                <p style={{ margin: 0, fontSize: '0.85rem', color: '#6e7681', lineHeight: '1.4' }}>{masterPrefix}</p>
+              )}
+            </div>
+
+            {/* Zone Selector */}
+            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.75rem', flexWrap: 'wrap' }}>
+              {Object.keys(ZONE_LABELS).map(key => (
+                <button
+                  key={key}
+                  onClick={() => setSelectedKey(key)}
+                  style={{
+                    padding: '0.4rem 0.75rem',
+                    background: selectedKey === key ? '#58a6ff' : '#21262d',
+                    border: '1px solid ' + (selectedKey === key ? '#58a6ff' : '#30363d'),
+                    borderRadius: '6px',
+                    color: selectedKey === key ? '#0f1419' : '#8b949e',
+                    cursor: 'pointer',
+                    fontSize: '0.8rem',
+                    fontWeight: selectedKey === key ? '600' : '400'
+                  }}
                 >
-                  ↺ Reset
+                  {ZONE_LABELS[key]}
                 </button>
+              ))}
+            </div>
+
+            {/* Editable Zone */}
+            <div style={{ ...boxStyle, marginBottom: '0.75rem', borderColor: '#58a6ff', background: '#1a2332' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                <span style={{ color: '#58a6ff', fontSize: '0.75rem', textTransform: 'uppercase' }}>✏️ Editable Zone — {ZONE_LABELS[selectedKey]}</span>
+                <button onClick={() => resetZone(selectedKey)} style={btnSmall}>↺ Reset</button>
               </div>
               <textarea
-                value={prompts[selectedKey]}
-                onChange={(e) => updatePrompt(selectedKey, e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '1rem',
-                  background: '#1a2332',
-                  border: '1px solid #30363d',
-                  borderRadius: '8px',
-                  color: '#f0f6fc',
-                  fontSize: '0.9rem',
-                  minHeight: '200px',
-                  resize: 'vertical',
-                  fontFamily: 'inherit',
-                  lineHeight: '1.5'
-                }}
+                value={zones[selectedKey]}
+                onChange={(e) => setZones(prev => ({ ...prev, [selectedKey]: e.target.value }))}
+                style={{ ...textareaStyle, minHeight: '100px' }}
               />
             </div>
-            
+
+            {/* Master Suffix */}
+            <div style={{ ...boxStyle, marginBottom: '1rem', background: editingMaster ? '#1a2332' : '#0d1117' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                <span style={{ color: '#8b949e', fontSize: '0.75rem', textTransform: 'uppercase' }}>🔒 Master Suffix</span>
+              </div>
+              {editingMaster ? (
+                <textarea
+                  value={masterSuffix}
+                  onChange={(e) => setMasterSuffix(e.target.value)}
+                  style={{ ...textareaStyle, minHeight: '60px' }}
+                />
+              ) : (
+                <p style={{ margin: 0, fontSize: '0.85rem', color: '#6e7681', lineHeight: '1.4' }}>{masterSuffix}</p>
+              )}
+            </div>
+
+            {/* Generate Button */}
             <button
               onClick={generateImage}
               disabled={loading}
@@ -217,113 +233,75 @@ export default function TestImage() {
             >
               {loading ? '⏳ Generating...' : '🚀 Generate Image'}
             </button>
-            
+
             {error && (
-              <div style={{
-                marginTop: '1rem',
-                padding: '1rem',
-                background: 'rgba(255, 107, 107, 0.1)',
-                border: '1px solid rgba(255, 107, 107, 0.3)',
-                borderRadius: '8px',
-                color: '#ff6b6b'
-              }}>
+              <div style={{ marginTop: '0.75rem', padding: '0.75rem', background: 'rgba(255,107,107,0.1)', border: '1px solid rgba(255,107,107,0.3)', borderRadius: '8px', color: '#ff6b6b', fontSize: '0.85rem' }}>
                 ❌ {error}
               </div>
             )}
+
+            {/* Full Prompt Preview */}
+            <details style={{ marginTop: '1rem' }}>
+              <summary style={{ color: '#6e7681', cursor: 'pointer', fontSize: '0.8rem' }}>View full prompt</summary>
+              <pre style={{ marginTop: '0.5rem', padding: '0.75rem', background: '#0d1117', borderRadius: '6px', fontSize: '0.75rem', color: '#8b949e', whiteSpace: 'pre-wrap', overflow: 'auto' }}>
+                {getFullPrompt()}
+              </pre>
+            </details>
           </div>
-          
-          {/* Right: Generated Image */}
+
+          {/* Right: Image Output */}
           <div>
-            <div style={{
-              background: '#1a2332',
-              border: '1px solid #30363d',
-              borderRadius: '12px',
-              overflow: 'hidden',
-              minHeight: '400px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}>
+            <div style={{ ...boxStyle, minHeight: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0, overflow: 'hidden' }}>
               {image ? (
                 <div style={{ width: '100%' }}>
-                  <img 
-                    src={image} 
-                    alt="Generated" 
-                    style={{ width: '100%', display: 'block' }}
-                  />
-                  <div style={{ 
-                    padding: '0.75rem 1rem', 
-                    display: 'flex', 
-                    justifyContent: 'space-between',
-                    color: '#8b949e',
-                    fontSize: '0.8rem',
-                    borderTop: '1px solid #30363d'
-                  }}>
+                  <img src={image} alt="Generated" style={{ width: '100%', display: 'block' }} />
+                  <div style={{ padding: '0.5rem 0.75rem', display: 'flex', justifyContent: 'space-between', color: '#8b949e', fontSize: '0.75rem', borderTop: '1px solid #30363d' }}>
                     <span>{provider} • {genTime}s</span>
-                    <a 
-                      href={image} 
-                      download={`mxdr-${selectedKey}-${Date.now()}.png`}
-                      style={{ color: '#58a6ff', textDecoration: 'none' }}
-                    >
-                      ⬇️ Download
-                    </a>
+                    <a href={image} download={`mxdr-${selectedKey}-${Date.now()}.png`} style={{ color: '#58a6ff', textDecoration: 'none' }}>⬇️ Download</a>
                   </div>
                 </div>
               ) : (
                 <div style={{ color: '#6e7681', textAlign: 'center' }}>
-                  <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🖼️</div>
-                  <p>Generated image will appear here</p>
+                  <div style={{ fontSize: '3rem', marginBottom: '0.5rem' }}>🖼️</div>
+                  <p style={{ margin: 0, fontSize: '0.85rem' }}>Image appears here</p>
                 </div>
               )}
             </div>
-            
+
             {/* History */}
             {history.length > 0 && (
-              <div style={{ marginTop: '1.5rem' }}>
-                <h3 style={{ fontSize: '0.9rem', marginBottom: '0.75rem', color: '#8b949e' }}>
-                  Recent generations:
-                </h3>
+              <div style={{ marginTop: '1rem' }}>
+                <p style={{ fontSize: '0.75rem', color: '#6e7681', marginBottom: '0.5rem' }}>Recent:</p>
                 <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                   {history.map((item, i) => (
-                    <img
-                      key={i}
-                      src={item.image}
-                      alt={`History ${i}`}
-                      onClick={() => {
-                        setImage(item.image)
-                        setSelectedKey(item.key)
-                        setProvider(item.provider)
-                        setGenTime(item.time)
-                      }}
-                      style={{
-                        width: '60px',
-                        height: '60px',
-                        objectFit: 'cover',
-                        borderRadius: '6px',
-                        cursor: 'pointer',
-                        border: '2px solid transparent',
-                        opacity: 0.7,
-                        transition: 'all 0.2s'
-                      }}
-                      onMouseOver={(e) => { e.target.style.opacity = 1; e.target.style.borderColor = '#58a6ff' }}
-                      onMouseOut={(e) => { e.target.style.opacity = 0.7; e.target.style.borderColor = 'transparent' }}
-                    />
+                    <div key={i} style={{ position: 'relative' }}>
+                      <img
+                        src={item.image}
+                        alt={`History ${i}`}
+                        onClick={() => {
+                          setImage(item.image)
+                          setSelectedKey(item.key)
+                          setZones(prev => ({ ...prev, [item.key]: item.zone }))
+                        }}
+                        style={{ width: '50px', height: '50px', objectFit: 'cover', borderRadius: '4px', cursor: 'pointer', border: '2px solid transparent' }}
+                        onMouseOver={(e) => e.target.style.borderColor = '#58a6ff'}
+                        onMouseOut={(e) => e.target.style.borderColor = 'transparent'}
+                      />
+                      <span style={{ position: 'absolute', bottom: '2px', right: '2px', background: '#0f1419', padding: '0 3px', borderRadius: '2px', fontSize: '0.6rem', color: '#8b949e' }}>
+                        {ZONE_LABELS[item.key]?.split(' ')[0]}
+                      </span>
+                    </div>
                   ))}
                 </div>
               </div>
             )}
           </div>
         </div>
-        
-        <p style={{ 
-          marginTop: '2rem', 
-          textAlign: 'center', 
-          color: '#6e7681',
-          fontSize: '0.8rem'
-        }}>
-          <a href="/" style={{ color: '#58a6ff' }}>← Back to Chat</a>
-          {' | '}
-          <a href="/leads" style={{ color: '#58a6ff' }}>Lead Dashboard →</a>
+
+        <p style={{ marginTop: '1.5rem', textAlign: 'center', color: '#6e7681', fontSize: '0.8rem' }}>
+          <a href="/" style={{ color: '#58a6ff' }}>← Chat</a>
+          {' • '}
+          <a href="/leads" style={{ color: '#58a6ff' }}>Leads →</a>
         </p>
       </div>
     </div>
@@ -332,10 +310,40 @@ export default function TestImage() {
 
 const btnStyle = {
   padding: '0.5rem 1rem',
-  background: '#232d3f',
+  background: '#21262d',
   border: '1px solid #30363d',
   borderRadius: '6px',
   color: '#f0f6fc',
   cursor: 'pointer',
   fontSize: '0.85rem'
+}
+
+const btnSmall = {
+  padding: '0.25rem 0.5rem',
+  background: '#21262d',
+  border: '1px solid #30363d',
+  borderRadius: '4px',
+  color: '#8b949e',
+  cursor: 'pointer',
+  fontSize: '0.75rem'
+}
+
+const boxStyle = {
+  background: '#161b22',
+  border: '1px solid #30363d',
+  borderRadius: '8px',
+  padding: '0.75rem'
+}
+
+const textareaStyle = {
+  width: '100%',
+  padding: '0.75rem',
+  background: '#0d1117',
+  border: '1px solid #30363d',
+  borderRadius: '6px',
+  color: '#f0f6fc',
+  fontSize: '0.85rem',
+  resize: 'vertical',
+  fontFamily: 'inherit',
+  lineHeight: '1.4'
 }

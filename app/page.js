@@ -144,11 +144,11 @@ export default function Home() {
   useEffect(() => {
     const generateAdvisorAvatar = async () => {
       const avatarPayload = {
-        scene_goal: "Friendly AI security advisor portrait",
-        hero: "abstract humanoid figure made of flowing digital particles and soft light",
-        supporting_elements: ["shield motif integrated subtly", "warm glow", "professional yet approachable"],
-        context_cue: "AI assistant",
-        emotion: "welcoming and trustworthy"
+        scene_goal: "Professional AI security advisor avatar on dark background",
+        hero: "stylized robotic head with glowing cyan visor slit, metallic dark blue and charcoal armor plating",
+        supporting_elements: ["subtle shield emblem", "cyan accent lighting on edges", "deep navy to black gradient background"],
+        context_cue: "cybersecurity AI guardian",
+        emotion: "trustworthy and vigilant"
       }
       
       try {
@@ -372,11 +372,11 @@ export default function Home() {
                   // Regenerate avatar
                   const generateNewAvatar = async () => {
                     const avatarPayload = {
-                      scene_goal: "Friendly AI security advisor portrait",
-                      hero: "abstract humanoid figure made of flowing digital particles and soft light",
-                      supporting_elements: ["shield motif integrated subtly", "warm glow", "professional yet approachable"],
-                      context_cue: "AI assistant",
-                      emotion: "welcoming and trustworthy"
+                      scene_goal: "Professional AI security advisor avatar on dark background",
+                      hero: "stylized robotic head with glowing cyan visor slit, metallic dark blue and charcoal armor plating",
+                      supporting_elements: ["subtle shield emblem", "cyan accent lighting on edges", "deep navy to black gradient background"],
+                      context_cue: "cybersecurity AI guardian",
+                      emotion: "trustworthy and vigilant"
                     }
                     try {
                       const imageUrl = await generateImage(avatarPayload)

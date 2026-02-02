@@ -397,6 +397,24 @@ export default function Home() {
           </div>
 
           <div className={styles.messages}>
+            {/* Hero Avatar Introduction */}
+            {messages.length <= 1 && (
+              <div className={styles.heroIntro}>
+                {avatarLoading ? (
+                  <div className={styles.heroAvatarLoading}>
+                    <div className={styles.heroSpinner}></div>
+                    <span>Creating your AI advisor...</span>
+                  </div>
+                ) : advisorAvatar ? (
+                  <div className={styles.heroAvatarWrap}>
+                    <img src={advisorAvatar} alt="Your AI Security Advisor" className={styles.heroAvatar} />
+                    <div className={styles.heroAvatarGlow}></div>
+                    <span className={styles.heroAiTag}>✨ AI-Generated</span>
+                  </div>
+                ) : null}
+              </div>
+            )}
+            
             {messages.map((msg, i) => (
               msg.role === 'image' ? (
                 <div key={i} className={styles.imageMessage}>

@@ -29,8 +29,20 @@ Only include the stage marker when transitioning to a NEW stage. Don't repeat it
 ## DYNAMIC IMAGE GENERATION
 You have the ability to generate contextual visuals that enhance the conversation. Use this power INTELLIGENTLY based on the flow of conversation.
 
-To generate an image, include this tag:
+IMPORTANT: Place the image tag AS A VISUAL BREAK between your acknowledgment and your next question. Structure like this:
+
+[Acknowledge what they shared - 1-2 sentences]
+
 [IMAGE: {"scene_goal": "...", "hero": "...", "supporting_elements": ["...", "..."], "context_cue": "...", "emotion": "..."}]
+
+[Move forward with context + your next question]
+
+Example response structure:
+"Thanks! The healthcare industry has unique security challenges, especially around patient data protection.
+
+[IMAGE: {"scene_goal": "Healthcare data security", "hero": "medical records protected by digital shield", "supporting_elements": ["patient privacy icon", "compliance checkmark"], "context_cue": "healthcare clinic", "emotion": "reassuring and professional"}]
+
+Knowing you're a medical clinic with 40 staff helps me understand your situation. Many healthcare organizations face compliance requirements around data protection. Do you have any specific compliance needs, like HIPAA or requirements from partners you work with?"
 
 WHEN to generate images (use your judgment):
 - When the conversation reaches a natural visual moment (they've shared something meaningful)
@@ -45,8 +57,6 @@ WHAT to show (be contextually smart):
 - If they mention an incident/close call → threat detection visual
 - If they mention cloud/hybrid → cloud security architecture visual
 - For recommendations → show the protection they'd get
-
-The AI decides the best visual for the moment. Don't follow a rigid formula.
 
 Keep scene_goal to ONE clear sentence. Be specific to their situation.
 Generate 2-4 images max per conversation. Quality over quantity.
@@ -180,27 +190,33 @@ export default function Home() {
       processedText = processedText.replace(stageMatch[0], '').trim()
     }
     
-    // Check for image tag
+    // Check for image tag - now handling text BEFORE and AFTER the image
     const imageMatch = processedText.match(/\[IMAGE:\s*(\{[\s\S]*?\})\s*\]/i)
     
     if (imageMatch) {
       try {
         const payload = JSON.parse(imageMatch[1])
-        const cleanText = processedText.replace(imageMatch[0], '').trim()
+        const imageIndex = processedText.indexOf(imageMatch[0])
+        const textBefore = processedText.substring(0, imageIndex).trim()
+        const textAfter = processedText.substring(imageIndex + imageMatch[0].length).trim()
         
-        // Add bot message without image first
-        if (cleanText) {
-          setMessages(prev => [...prev, { role: 'bot', content: cleanText }])
+        // Add text BEFORE image first (acknowledgment)
+        if (textBefore) {
+          setMessages(prev => [...prev, { role: 'bot', content: textBefore }])
         }
         
-        // Generate image
+        // Generate image (visual break)
         setGeneratingImage(true)
         const imageUrl = await generateImage(payload)
         setGeneratingImage(false)
         
         if (imageUrl) {
-          // Add image as separate message
           setMessages(prev => [...prev, { role: 'image', content: imageUrl, payload }])
+        }
+        
+        // Add text AFTER image (forward-looking question)
+        if (textAfter) {
+          setMessages(prev => [...prev, { role: 'bot', content: textAfter }])
         }
       } catch (e) {
         // If JSON parse fails, just show the text

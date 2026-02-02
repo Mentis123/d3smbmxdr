@@ -122,8 +122,35 @@ export default function Home() {
       lastBotMsg.content.toLowerCase().includes('right solution')
     )) {
       setShowRecommendation(true)
+      
+      // Auto-extract lead data when recommendation is made
+      saveLeadData()
     }
   }, [messages])
+
+  const saveLeadData = async () => {
+    // Basic extraction logic - usually we'd use an LLM for this
+    // but for now we'll send the transcript for the backend to handle
+    const transcript = messages.map(m => `${m.role}: ${m.content}`).join('\n')
+    
+    try {
+      await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          leadData: {
+            company: "Auto-detected Organization",
+            summary: transcript.substring(0, 1000),
+            score: 8,
+            recommendation: "MXDR"
+          },
+          messages: [] // Just sending lead data
+        })
+      })
+    } catch (e) {
+      console.error('Failed to auto-save lead');
+    }
+  }
 
   const sendMessage = async (text) => {
     const messageText = text || input.trim()

@@ -60,8 +60,9 @@ INDUSTRY CONTEXT (ask early):
    - Keep it simple — 2-3 sentences max
 
 5. HANDOFF: End with clear next steps:
-   "Here's our data sheet for more details: [they'll see a link]
-   Ready to talk to someone on our team? Click below and we'll reach out."
+   "Based on what you've shared, I'd recommend our Managed Extended Detection & Response (MXDR) service. It gives you 24/7 threat monitoring and expert response — exactly what you need given [their specific situation].
+   
+   Ready to take the next step? You can download our data sheet for more details, or connect with our team to discuss your specific needs."
 
 ## TONE & STYLE
 
@@ -106,6 +107,10 @@ export default function Home() {
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const [showRecommendation, setShowRecommendation] = useState(false)
+  const [showLeadCapture, setShowLeadCapture] = useState(false)
+  const [leadEmail, setLeadEmail] = useState('')
+  const [leadPhone, setLeadPhone] = useState('')
+  const [chatClosed, setChatClosed] = useState(false)
   const messagesEndRef = useRef(null)
 
   useEffect(() => {
@@ -119,37 +124,70 @@ export default function Home() {
       lastBotMsg.content.toLowerCase().includes('would recommend') ||
       lastBotMsg.content.toLowerCase().includes('mxdr would be') ||
       lastBotMsg.content.toLowerCase().includes('great fit') ||
-      lastBotMsg.content.toLowerCase().includes('right solution')
+      lastBotMsg.content.toLowerCase().includes('right solution') ||
+      lastBotMsg.content.toLowerCase().includes('i\'d recommend') ||
+      lastBotMsg.content.toLowerCase().includes('next step')
     )) {
       setShowRecommendation(true)
-      
-      // Auto-extract lead data when recommendation is made
-      saveLeadData()
     }
   }, [messages])
 
-  const saveLeadData = async () => {
-    // Basic extraction logic - usually we'd use an LLM for this
-    // but for now we'll send the transcript for the backend to handle
+  const extractLeadData = () => {
+    // Extract info from conversation
     const transcript = messages.map(m => `${m.role}: ${m.content}`).join('\n')
+    
+    // Basic extraction
+    let company = null
+    let industry = null
+    let employees = null
+    
+    // Look for industry mentions
+    const industryMatches = transcript.match(/(?:medical|healthcare|accounting|manufacturing|retail|finance|legal|construction|education)/gi)
+    if (industryMatches) industry = industryMatches[0]
+    
+    // Look for employee count
+    const empMatches = transcript.match(/(\d+)\s*(?:staff|employees|people)/i)
+    if (empMatches) employees = empMatches[1]
+    
+    return {
+      company: company || 'Unknown',
+      industry: industry || 'Unknown',
+      employees: employees || 'Unknown',
+      email: leadEmail || null,
+      phone: leadPhone || null,
+      summary: transcript.substring(0, 2000),
+      score: showRecommendation ? 8 : 5,
+      recommendation: 'MXDR'
+    }
+  }
+
+  const saveLead = async () => {
+    const leadData = extractLeadData()
     
     try {
       await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          leadData: {
-            company: "Auto-detected Organization",
-            summary: transcript.substring(0, 1000),
-            score: 8,
-            recommendation: "MXDR"
-          },
-          messages: [] // Just sending lead data
+          leadData,
+          messages: [] // Empty - just saving lead
         })
       })
     } catch (e) {
-      console.error('Failed to auto-save lead');
+      console.error('Failed to save lead:', e)
     }
+  }
+
+  const handleClose = async () => {
+    await saveLead()
+    setChatClosed(true)
+  }
+
+  const handleLeadSubmit = async (e) => {
+    e.preventDefault()
+    await saveLead()
+    setShowLeadCapture(false)
+    setChatClosed(true)
   }
 
   const sendMessage = async (text) => {
@@ -189,11 +227,43 @@ export default function Home() {
     }
   }
 
+  if (chatClosed) {
+    return (
+      <div className={styles.container}>
+        <header className={styles.header}>
+          <a href="https://www.data3.com" className={styles.logo} target="_blank" rel="noopener noreferrer">Data<sup>#</sup>3</a>
+          <a href="https://www.data3.com/services/managed-services/managed-security-services/" className={styles.badge} target="_blank" rel="noopener noreferrer">SMB Security</a>
+        </header>
+        <main className={styles.main}>
+          <div className={styles.chatContainer} style={{ textAlign: 'center', padding: '3rem' }}>
+            <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>✅</div>
+            <h2 style={{ marginBottom: '1rem', color: 'var(--text-primary)' }}>Thanks for chatting!</h2>
+            <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>
+              Our team will be in touch soon to discuss your security needs.
+            </p>
+            <a 
+              href="https://www.data3.com/services/managed-services/managed-security-services/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className={styles.ctaPrimary}
+              style={{ display: 'inline-block' }}
+            >
+              Learn More About MXDR →
+            </a>
+          </div>
+        </main>
+        <footer className={styles.footer}>
+          <p>Data<sup>#</sup>3 Limited | Australia's leading technology solutions provider</p>
+        </footer>
+      </div>
+    )
+  }
+
   return (
     <div className={styles.container}>
       <header className={styles.header}>
-        <a href="https://www.data3.com" className={styles.logo}>Data<sup>#</sup>3</a>
-        <a href="https://www.data3.com/services/managed-services/managed-security-services/" className={styles.badge}>SMB Security</a>
+        <a href="https://www.data3.com" className={styles.logo} target="_blank" rel="noopener noreferrer">Data<sup>#</sup>3</a>
+        <a href="https://www.data3.com/services/managed-services/managed-security-services/" className={styles.badge} target="_blank" rel="noopener noreferrer">SMB Security</a>
       </header>
 
       <main className={styles.main}>
@@ -246,14 +316,61 @@ export default function Home() {
             </div>
           )}
 
-          {showRecommendation && (
+          {showLeadCapture && (
+            <div className={styles.leadCapture}>
+              <h3>📧 Get your personalized security brief</h3>
+              <form onSubmit={handleLeadSubmit} className={styles.leadForm}>
+                <input
+                  type="email"
+                  placeholder="Your email"
+                  value={leadEmail}
+                  onChange={(e) => setLeadEmail(e.target.value)}
+                  className={styles.leadInput}
+                />
+                <input
+                  type="tel"
+                  placeholder="Phone (optional)"
+                  value={leadPhone}
+                  onChange={(e) => setLeadPhone(e.target.value)}
+                  className={styles.leadInput}
+                />
+                <button type="submit" className={styles.leadSubmit}>
+                  Send My Brief →
+                </button>
+              </form>
+            </div>
+          )}
+
+          {showRecommendation && !showLeadCapture && (
             <div className={styles.ctaBox}>
-              <a href="https://www.data3.com/wp-content/uploads/2024/07/Data3-Managed-Extended-Detection-Response-Service-Brief.pdf" target="_blank" rel="noopener noreferrer" className={styles.ctaLink}>
-                📄 Download MXDR Data Sheet
+              <a 
+                href="https://www.data3.com/wp-content/uploads/2024/07/Data3-Managed-Extended-Detection-Response-Service-Brief.pdf" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className={styles.ctaLink}
+              >
+                📄 MXDR Data Sheet
               </a>
-              <a href="https://www.data3.com/myd3/" target="_blank" rel="noopener noreferrer" className={styles.ctaPrimary}>
+              <a 
+                href="https://www.data3.com/services/managed-services/managed-security-services/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className={styles.ctaPrimary}
+              >
                 Talk to Our Team →
               </a>
+              <button 
+                onClick={() => setShowLeadCapture(true)} 
+                className={styles.ctaClose}
+              >
+                📧 Email me details
+              </button>
+              <button 
+                onClick={handleClose} 
+                className={styles.ctaClose}
+              >
+                ✕ Close
+              </button>
             </div>
           )}
 

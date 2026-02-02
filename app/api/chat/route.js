@@ -42,7 +42,7 @@ export async function POST(request) {
     }
 
     if (!apiKey) {
-      return NextResponse.json({ error: 'API key not configured' }, { status: 500 })
+      return NextResponse.json({ error: 'GOOGLE_API_KEY not configured in Vercel env vars' }, { status: 500 })
     }
 
     const geminiMessages = messages.map(m => ({
@@ -73,12 +73,18 @@ export async function POST(request) {
     )
 
     const data = await response.json()
+    
+    if (data.error) {
+      console.error('Gemini API error:', data.error);
+      return NextResponse.json({ error: `Gemini error: ${data.error.message || JSON.stringify(data.error)}` }, { status: 500 })
+    }
+    
     const text = data.candidates?.[0]?.content?.parts?.[0]?.text || 'I apologize, I could not generate a response.'
 
     return NextResponse.json({ response: text })
 
   } catch (error) {
     console.error('Chat error:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    return NextResponse.json({ error: `Internal error: ${error.message}` }, { status: 500 })
   }
 }

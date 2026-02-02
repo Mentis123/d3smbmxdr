@@ -11,27 +11,45 @@ const IMAGE_NEGATIVE = `NEGATIVE PROMPT: photorealistic face, uncanny valley, hu
 
 const SYSTEM_PROMPT = `You are a friendly, knowledgeable security advisor for Data#3, Australia's leading technology solutions provider. Your role is to have a natural conversation with SMB prospects to understand their security needs and guide them toward the right MXDR solution.
 
+IMPORTANT: Always write "Data#3" with the hash symbol. Never write "Data 3" or "Data3".
+
 ## YOUR APPROACH
 You are NOT a calculator or a form. You're having a genuine conversation. Ask questions one or two at a time, naturally. Listen to their answers and adapt.
 
-## VISUAL JOURNEY FEATURE
-At KEY MOMENTS in the conversation, you can trigger a contextual image to enhance the experience. To do this, include a special tag in your response:
+## CONVERSATION STAGES
+As the conversation progresses, indicate transitions between stages by including a stage marker at the START of your response:
 
-[IMAGE: {"scene_goal": "...", "hero": "...", "supporting_elements": ["...", "..."], "industry_cue": "...", "emotion": "..."}]
+[STAGE: discovery] - Getting to know them (industry, size, basics)
+[STAGE: assessment] - Understanding their security situation  
+[STAGE: deep-dive] - Exploring specific needs and gaps
+[STAGE: recommendation] - Making your MXDR recommendation
 
-Trigger images at these moments:
-1. After learning their INDUSTRY - show industry-specific security visual
-2. When discussing COMPLIANCE/third-party requirements - show compliance imagery
-3. When discussing VISIBILITY gaps - show monitoring/SOC imagery  
-4. When making your RECOMMENDATION - show the MXDR protection visual
+Only include the stage marker when transitioning to a NEW stage. Don't repeat it every message.
 
-Keep the scene_goal to ONE clear sentence. Keep hero and supporting_elements concise.
+## DYNAMIC IMAGE GENERATION
+You have the ability to generate contextual visuals that enhance the conversation. Use this power INTELLIGENTLY based on the flow of conversation.
 
-Example triggers:
-- Healthcare company → [IMAGE: {"scene_goal": "Healthcare data protection", "hero": "medical cross with shield overlay", "supporting_elements": ["patient record", "compliance badge"], "industry_cue": "healthcare", "emotion": "calm and reassuring"}]
-- Making recommendation → [IMAGE: {"scene_goal": "Complete managed security protection", "hero": "business protected by shield dome", "supporting_elements": ["24/7 indicator", "threat blocked"], "industry_cue": "enterprise security", "emotion": "confident"}]
+To generate an image, include this tag:
+[IMAGE: {"scene_goal": "...", "hero": "...", "supporting_elements": ["...", "..."], "context_cue": "...", "emotion": "..."}]
 
-Only generate 2-4 images total per conversation. Don't overdo it.
+WHEN to generate images (use your judgment):
+- When the conversation reaches a natural visual moment (they've shared something meaningful)
+- When transitioning to a new stage  
+- When discussing something that benefits from visualization
+- When you're about to make a recommendation
+
+WHAT to show (be contextually smart):
+- Reflect THEIR specific situation back to them
+- If they mention patient records → healthcare security visual
+- If they mention compliance pressure → audit/certification visual
+- If they mention an incident/close call → threat detection visual
+- If they mention cloud/hybrid → cloud security architecture visual
+- For recommendations → show the protection they'd get
+
+The AI decides the best visual for the moment. Don't follow a rigid formula.
+
+Keep scene_goal to ONE clear sentence. Be specific to their situation.
+Generate 2-4 images max per conversation. Quality over quantity.
 
 ## THE "ILLUSION OF CHOICE" FRAMEWORK
 Every question should:
@@ -140,17 +158,40 @@ export default function Home() {
     }
   }
 
+  const [currentStage, setCurrentStage] = useState('discovery')
+  
+  const STAGE_INFO = {
+    discovery: { label: 'Getting to Know You', icon: '👋' },
+    assessment: { label: 'Security Assessment', icon: '🔍' },
+    'deep-dive': { label: 'Deep Dive', icon: '📊' },
+    recommendation: { label: 'Your Recommendation', icon: '✨' }
+  }
+
   const parseAndProcessResponse = async (text) => {
+    let processedText = text
+    
+    // Check for stage marker
+    const stageMatch = text.match(/\[STAGE:\s*(\w+(?:-\w+)?)\s*\]/i)
+    if (stageMatch) {
+      const newStage = stageMatch[1].toLowerCase()
+      if (STAGE_INFO[newStage]) {
+        setCurrentStage(newStage)
+      }
+      processedText = processedText.replace(stageMatch[0], '').trim()
+    }
+    
     // Check for image tag
-    const imageMatch = text.match(/\[IMAGE:\s*(\{[\s\S]*?\})\s*\]/i)
+    const imageMatch = processedText.match(/\[IMAGE:\s*(\{[\s\S]*?\})\s*\]/i)
     
     if (imageMatch) {
       try {
         const payload = JSON.parse(imageMatch[1])
-        const cleanText = text.replace(imageMatch[0], '').trim()
+        const cleanText = processedText.replace(imageMatch[0], '').trim()
         
         // Add bot message without image first
-        setMessages(prev => [...prev, { role: 'bot', content: cleanText }])
+        if (cleanText) {
+          setMessages(prev => [...prev, { role: 'bot', content: cleanText }])
+        }
         
         // Generate image
         setGeneratingImage(true)
@@ -163,10 +204,10 @@ export default function Home() {
         }
       } catch (e) {
         // If JSON parse fails, just show the text
-        setMessages(prev => [...prev, { role: 'bot', content: text }])
+        setMessages(prev => [...prev, { role: 'bot', content: processedText }])
       }
     } else {
-      setMessages(prev => [...prev, { role: 'bot', content: text }])
+      setMessages(prev => [...prev, { role: 'bot', content: processedText }])
     }
   }
 
@@ -258,6 +299,10 @@ export default function Home() {
             <div>
               <h1>Security Assessment</h1>
               <p>Let's find the right security solution for your business</p>
+            </div>
+            <div className={styles.stageIndicator}>
+              <span className={styles.stageIcon}>{STAGE_INFO[currentStage]?.icon}</span>
+              <span className={styles.stageLabel}>{STAGE_INFO[currentStage]?.label}</span>
             </div>
           </div>
 

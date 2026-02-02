@@ -352,8 +352,8 @@ export default function Home() {
               <span className={styles.aiTag}>✨ AI</span>
             </div>
             <div>
-              <h1>Security Assessment</h1>
-              <p>Personalized visuals generated in real-time</p>
+              <h1>D3QA</h1>
+              <p>Your Data<sup>#</sup>3 Qualifying Agent</p>
             </div>
             <div className={styles.stageIndicator}>
               <span className={styles.stageIcon}>{STAGE_INFO[currentStage]?.icon}</span>
@@ -384,7 +384,7 @@ export default function Home() {
                     } catch (e) {}
                     setAvatarLoading(false)
                     setMessages([
-                      { role: 'bot', content: "Hi! I'm your AI security advisor. I'm here to help you figure out if managed security is right for your business.\n\nMind if I ask a few quick questions about your organization?" }
+                      { role: 'bot', content: "Hi! I'm D3QA, your Data#3 Qualifying Agent. I'm here to help you figure out if managed security is right for your business.\n\nMind if I ask a few quick questions about your organization?" }
                     ])
                   }
                   generateNewAvatar()
@@ -416,10 +416,11 @@ export default function Home() {
                 </div>
                 <div className={styles.heroIntroText}>
                   {avatarLoading ? (
-                    <span className={styles.generatingText}>Creating your AI advisor...</span>
+                    <span className={styles.generatingText}>Initializing D3QA...</span>
                   ) : (
                     <>
-                      <span className={styles.heroName}>Your Security Advisor</span>
+                      <span className={styles.heroName}>D3QA</span>
+                      <span className={styles.heroSubtitle}>Data#3 Qualifying Agent</span>
                       <span className={styles.heroAiTag}>✨ AI-Generated</span>
                     </>
                   )}

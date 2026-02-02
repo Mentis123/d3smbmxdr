@@ -1,30 +1,6 @@
 /* D3 MXDR Qualifier - Dark Mode Professional */
 /* Direction: Dark enterprise, clarity-first UX */
-
-:root {
-  --bg-primary: #0f1419;
-  --bg-secondary: #1a2332;
-  --bg-tertiary: #232d3f;
-  --bg-elevated: #2a3649;
-  
-  --text-primary: #f0f6fc;
-  --text-secondary: #8b949e;
-  --text-muted: #6e7681;
-  
-  --accent-blue: #58a6ff;
-  --accent-green: #3fb950;
-  --accent-cyan: #39d0d8;
-  
-  --border-default: #30363d;
-  --border-muted: #21262d;
-  
-  --d3-blue: #0066cc;
-  --d3-cyan: #00a3e0;
-}
-
-* {
-  box-sizing: border-box;
-}
+/* CSS variables defined in globals.css */
 
 .container {
   min-height: 100vh;

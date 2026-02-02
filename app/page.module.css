@@ -493,3 +493,50 @@
   .leadForm { flex-direction: column; }
   .leadInput { min-width: 100%; }
 }
+
+/* Generated Images in Chat */
+.imageMessage {
+  align-self: center;
+  max-width: 320px;
+  margin: 0.5rem 0;
+  animation: fadeIn 0.4s ease;
+}
+
+.generatedImage {
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid var(--border-default);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.imageLoading {
+  align-self: center;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-default);
+  border-radius: 12px;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  margin: 0.5rem 0;
+}
+
+.imageSpinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--border-default);
+  border-top-color: var(--accent-cyan);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}

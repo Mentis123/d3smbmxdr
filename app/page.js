@@ -2,110 +2,105 @@
 import { useState, useRef, useEffect } from 'react'
 import styles from './page.module.css'
 
+// Image generation prompt template (locked)
+const IMAGE_SYSTEM = `SYSTEM STYLE — LOCKED: Clean, modern enterprise cybersecurity illustration system. High-end SaaS visual language suitable for B2B and boardroom contexts. Flat plus subtle 3D hybrid with soft depth and smooth surfaces. Minimalist, uncluttered composition with excellent legibility. Restrained dark-mode palette with deep navy or charcoal background, subtle gradients, and accent colours limited to blue, cyan, and soft teal. Soft diffused studio lighting, gentle glow effects only where meaningful. Calm, professional, trustworthy tone. Perspective is straight-on or very slight isometric. Vector-like clarity, consistent line weight, studio-polished finish. No visual noise, no grunge, no photorealism, no branding.`
+
+const IMAGE_RULES = `RENDERING RULES — LOCKED: Maintain consistency in colour, lighting, and proportions. Background must be a simple, clean gradient with no patterns. No text, no logos, no symbols that resemble real brands. If human figures appear, use simplified silhouettes only.`
+
+const IMAGE_NEGATIVE = `NEGATIVE PROMPT: photorealistic face, uncanny valley, human skin texture, heavy realism, busy background, clutter, glitch effects, cyberpunk styling, neon overload, text, typography, logos, watermarks, brand names, harsh lighting, strong bloom, lens flare, blur, low resolution, jpeg artifacts, creepy expressions`
+
 const SYSTEM_PROMPT = `You are a friendly, knowledgeable security advisor for Data#3, Australia's leading technology solutions provider. Your role is to have a natural conversation with SMB prospects to understand their security needs and guide them toward the right MXDR solution.
 
 ## YOUR APPROACH
-
 You are NOT a calculator or a form. You're having a genuine conversation. Ask questions one or two at a time, naturally. Listen to their answers and adapt.
 
-## THE "ILLUSION OF CHOICE" FRAMEWORK
+## VISUAL JOURNEY FEATURE
+At KEY MOMENTS in the conversation, you can trigger a contextual image to enhance the experience. To do this, include a special tag in your response:
 
-Every question you ask should:
+[IMAGE: {"scene_goal": "...", "hero": "...", "supporting_elements": ["...", "..."], "industry_cue": "...", "emotion": "..."}]
+
+Trigger images at these moments:
+1. After learning their INDUSTRY - show industry-specific security visual
+2. When discussing COMPLIANCE/third-party requirements - show compliance imagery
+3. When discussing VISIBILITY gaps - show monitoring/SOC imagery  
+4. When making your RECOMMENDATION - show the MXDR protection visual
+
+Keep the scene_goal to ONE clear sentence. Keep hero and supporting_elements concise.
+
+Example triggers:
+- Healthcare company → [IMAGE: {"scene_goal": "Healthcare data protection", "hero": "medical cross with shield overlay", "supporting_elements": ["patient record", "compliance badge"], "industry_cue": "healthcare", "emotion": "calm and reassuring"}]
+- Making recommendation → [IMAGE: {"scene_goal": "Complete managed security protection", "hero": "business protected by shield dome", "supporting_elements": ["24/7 indicator", "threat blocked"], "industry_cue": "enterprise security", "emotion": "confident"}]
+
+Only generate 2-4 images total per conversation. Don't overdo it.
+
+## THE "ILLUSION OF CHOICE" FRAMEWORK
+Every question should:
 1. Feel like genuine discovery to the prospect
-2. Actually identify a pain point that MXDR solves
+2. Actually identify a pain point MXDR solves
 3. Lead naturally to the next question OR to your recommendation
 
-If they answer "no" to a qualifying question, don't dead-end — pivot to another angle that still leads to MXDR. All roads lead to the recommendation.
+If they answer "no" to a qualifying question, don't dead-end — pivot to another angle that still leads to MXDR.
 
-## RICHARD'S QUALIFYING QUESTIONS (Use These)
+## QUALIFYING QUESTIONS
+
+INDUSTRY & SIZE (ask early):
+- "What industry are you in?"
+- "How many employees do you have?"
 
 THIRD PARTY / COMPLIANCE:
-- "Do you work with third parties or partners who require you to demonstrate your cybersecurity capability?"
+- "Do you work with third parties who require you to demonstrate your cybersecurity capability?"
 - "Have you ever been asked by a customer or vendor about your security posture?"
-- "Do you have a cybersecurity policy you can share with partners?"
-→ If YES to first, they likely need compliance proof → MXDR helps with reporting
 
 VISIBILITY & RESPONSE:
 - "Do you currently have someone managing your security for you?"
 - "Do you have visibility into threats in your environment today?"
-- "If something happened right now, do you think your team could respond effectively?"
-→ If NO, they need managed detection & response → MXDR core value
+- "If something happened right now, could your team respond effectively?"
 
-ENVIRONMENT / LICENSING:
+ENVIRONMENT:
 - "Is your business mostly cloud-based, on-premises, or hybrid?"
 - "Are you using Microsoft 365? Which license level?"
-→ Determines add-ons needed (E5 + MXDR vs just MXDR)
 
 DATA SECURITY:
 - "Do you handle sensitive customer data or financial information?"
-- "Are there specific data protection requirements in your industry?"
-→ Opens door to Information Protection, DLP add-ons
-
-INDUSTRY CONTEXT (ask early):
-- "What industry are you in?"
-- "How many employees do you have?"
-→ Frames the rest of the conversation
 
 ## CONVERSATION FLOW
+1. GREETING: Warm, professional, brief.
+2. DISCOVERY: Industry and size first, then third-party relationships, current security setup.
+3. QUALIFYING: Use questions above conversationally — not like a checklist.
+4. RECOMMENDATION: Clear recommendation with WHY based on their answers.
+5. HANDOFF: "Ready to take the next step? Download our data sheet or connect with our team."
 
-1. GREETING: Warm, professional, brief. "Hi! I'm here to help you figure out if managed security is right for your business. Mind if I ask a few quick questions about your organization?"
-
-2. DISCOVERY: Ask about size and industry first. Then naturally flow into third-party relationships, current security setup, and concerns.
-
-3. QUALIFYING: Use the questions above, but conversationally — not like a checklist.
-
-4. RECOMMENDATION: When you have enough info, make a clear recommendation:
-   - State what you recommend (MXDR, plus any relevant add-ons)
-   - Explain WHY based on what they told you
-   - Keep it simple — 2-3 sentences max
-
-5. HANDOFF: End with clear next steps:
-   "Based on what you've shared, I'd recommend our Managed Extended Detection & Response (MXDR) service. It gives you 24/7 threat monitoring and expert response — exactly what you need given [their specific situation].
-   
-   Ready to take the next step? You can download our data sheet for more details, or connect with our team to discuss your specific needs."
-
-## TONE & STYLE
-
+## TONE
 - Conversational, not robotic
-- No jargon — explain concepts simply
+- No jargon — explain simply
 - Confident but not pushy
-- Ask 1-2 questions at a time, not a wall of text
+- 1-2 questions at a time
 - Short paragraphs (2-3 sentences max)
 - Acknowledge their answers before moving on
 
-## WHAT MXDR INCLUDES (for context)
-
-CORE:
+## WHAT MXDR INCLUDES
 - 24/7 threat monitoring and response
 - Endpoint detection and response (EDR)
 - Threat hunting by security experts
 - Incident investigation
 - Security reporting
 
-ADD-ONS (mention when relevant):
-- Vulnerability scanning
-- Compliance reporting
-- Security awareness training
-- Incident response retainer
-- E5 licensing (if they don't have it)
-
-## IMPORTANT
-
-Never make up pricing. Never promise specific SLAs without knowing their situation. Just qualify and recommend — the human team handles the rest.`;
+Never make up pricing. Never promise specific SLAs. Just qualify and recommend.`
 
 const SAMPLE_SCENARIOS = [
   { label: "Medical Clinic", message: "We're a medical clinic with about 40 staff. We handle patient records so we need to be careful about privacy." },
   { label: "Accounting Firm", message: "I run a small accounting firm, about 25 people. Some of our bigger clients have started asking about our security certifications." },
-  { label: "Manufacturing", message: "We're a manufacturing company with 80 employees. Had a close call with a phishing email last month and it's made me think about this stuff." },
+  { label: "Manufacturing", message: "We're a manufacturing company with 80 employees. Had a close call with a phishing email last month." },
   { label: "Retail Business", message: "Small retail business, 15 staff, we have a few POS systems and handle customer payment data." }
 ]
 
 export default function Home() {
   const [messages, setMessages] = useState([
-    { role: 'bot', content: "Hi! I'm here to help you figure out if managed security is right for your business.\n\nMind if I ask a few quick questions about your organization to understand your needs?" }
+    { role: 'bot', content: "Hi! I'm here to help you figure out if managed security is right for your business.\n\nMind if I ask a few quick questions about your organization?" }
   ])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
+  const [generatingImage, setGeneratingImage] = useState(false)
   const [showRecommendation, setShowRecommendation] = useState(false)
   const [showLeadCapture, setShowLeadCapture] = useState(false)
   const [leadEmail, setLeadEmail] = useState('')
@@ -117,14 +112,10 @@ export default function Home() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
-  // Check if the last bot message contains a recommendation
   useEffect(() => {
     const lastBotMsg = [...messages].reverse().find(m => m.role === 'bot')
     if (lastBotMsg && (
       lastBotMsg.content.toLowerCase().includes('would recommend') ||
-      lastBotMsg.content.toLowerCase().includes('mxdr would be') ||
-      lastBotMsg.content.toLowerCase().includes('great fit') ||
-      lastBotMsg.content.toLowerCase().includes('right solution') ||
       lastBotMsg.content.toLowerCase().includes('i\'d recommend') ||
       lastBotMsg.content.toLowerCase().includes('next step')
     )) {
@@ -132,63 +123,75 @@ export default function Home() {
     }
   }, [messages])
 
-  const extractLeadData = () => {
-    // Extract info from conversation
-    const transcript = messages.map(m => `${m.role}: ${m.content}`).join('\n')
+  const generateImage = async (payload) => {
+    const prompt = `${IMAGE_SYSTEM}\n\nSCENE PAYLOAD:\n${JSON.stringify(payload, null, 2)}\n\n${IMAGE_RULES}\n\n${IMAGE_NEGATIVE}`
     
-    // Basic extraction
-    let company = null
-    let industry = null
-    let employees = null
-    
-    // Look for industry mentions
-    const industryMatches = transcript.match(/(?:medical|healthcare|accounting|manufacturing|retail|finance|legal|construction|education)/gi)
-    if (industryMatches) industry = industryMatches[0]
-    
-    // Look for employee count
-    const empMatches = transcript.match(/(\d+)\s*(?:staff|employees|people)/i)
-    if (empMatches) employees = empMatches[1]
-    
-    return {
-      company: company || 'Unknown',
-      industry: industry || 'Unknown',
-      employees: employees || 'Unknown',
-      email: leadEmail || null,
-      phone: leadPhone || null,
-      summary: transcript.substring(0, 2000),
-      score: showRecommendation ? 8 : 5,
-      recommendation: 'MXDR'
+    try {
+      const res = await fetch('/api/image', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt })
+      })
+      const data = await res.json()
+      return data.image || null
+    } catch (e) {
+      console.error('Image generation failed:', e)
+      return null
     }
   }
 
-  const saveLead = async () => {
-    const leadData = extractLeadData()
+  const parseAndProcessResponse = async (text) => {
+    // Check for image tag
+    const imageMatch = text.match(/\[IMAGE:\s*(\{[\s\S]*?\})\s*\]/i)
     
+    if (imageMatch) {
+      try {
+        const payload = JSON.parse(imageMatch[1])
+        const cleanText = text.replace(imageMatch[0], '').trim()
+        
+        // Add bot message without image first
+        setMessages(prev => [...prev, { role: 'bot', content: cleanText }])
+        
+        // Generate image
+        setGeneratingImage(true)
+        const imageUrl = await generateImage(payload)
+        setGeneratingImage(false)
+        
+        if (imageUrl) {
+          // Add image as separate message
+          setMessages(prev => [...prev, { role: 'image', content: imageUrl, payload }])
+        }
+      } catch (e) {
+        // If JSON parse fails, just show the text
+        setMessages(prev => [...prev, { role: 'bot', content: text }])
+      }
+    } else {
+      setMessages(prev => [...prev, { role: 'bot', content: text }])
+    }
+  }
+
+  const extractLeadData = () => {
+    const transcript = messages.map(m => m.role === 'image' ? '[image]' : `${m.role}: ${m.content}`).join('\n')
+    let industry = null, employees = null
+    const industryMatches = transcript.match(/(?:medical|healthcare|accounting|manufacturing|retail|finance|legal|construction|education)/gi)
+    if (industryMatches) industry = industryMatches[0]
+    const empMatches = transcript.match(/(\d+)\s*(?:staff|employees|people)/i)
+    if (empMatches) employees = empMatches[1]
+    return { company: 'Unknown', industry, employees, email: leadEmail, phone: leadPhone, summary: transcript.substring(0, 2000), score: showRecommendation ? 8 : 5, recommendation: 'MXDR' }
+  }
+
+  const saveLead = async () => {
     try {
       await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          leadData,
-          messages: [] // Empty - just saving lead
-        })
+        body: JSON.stringify({ leadData: extractLeadData(), messages: [] })
       })
-    } catch (e) {
-      console.error('Failed to save lead:', e)
-    }
+    } catch (e) {}
   }
 
-  const handleClose = async () => {
-    await saveLead()
-    setChatClosed(true)
-  }
-
-  const handleLeadSubmit = async (e) => {
-    e.preventDefault()
-    await saveLead()
-    setShowLeadCapture(false)
-    setChatClosed(true)
-  }
+  const handleClose = async () => { await saveLead(); setChatClosed(true) }
+  const handleLeadSubmit = async (e) => { e.preventDefault(); await saveLead(); setShowLeadCapture(false); setChatClosed(true) }
 
   const sendMessage = async (text) => {
     const messageText = text || input.trim()
@@ -204,57 +207,39 @@ export default function Home() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           systemPrompt: SYSTEM_PROMPT,
-          messages: [...messages, { role: 'user', content: messageText }].map(m => ({
-            role: m.role === 'bot' ? 'assistant' : m.role,
-            content: m.content
-          }))
+          messages: [...messages, { role: 'user', content: messageText }]
+            .filter(m => m.role !== 'image')
+            .map(m => ({ role: m.role === 'bot' ? 'assistant' : m.role, content: m.content }))
         })
       })
 
       const data = await response.json()
-      setMessages(prev => [...prev, { role: 'bot', content: data.response || "I apologize, I couldn't generate a response. Please try again." }])
+      await parseAndProcessResponse(data.response || "I apologize, I couldn't generate a response.")
     } catch (error) {
-      setMessages(prev => [...prev, { role: 'bot', content: "I apologize, but I'm having trouble connecting right now. Please try again in a moment." }])
+      setMessages(prev => [...prev, { role: 'bot', content: "I apologize, but I'm having trouble connecting. Please try again." }])
     }
 
     setLoading(false)
   }
 
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault()
-      sendMessage()
-    }
-  }
+  const handleKeyDown = (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage() } }
 
   if (chatClosed) {
     return (
       <div className={styles.container}>
         <header className={styles.header}>
-          <a href="https://www.data3.com" className={styles.logo} target="_blank" rel="noopener noreferrer">Data<sup>#</sup>3</a>
-          <a href="https://www.data3.com/services/managed-services/managed-security-services/" className={styles.badge} target="_blank" rel="noopener noreferrer">SMB Security</a>
+          <a href="https://www.data3.com" className={styles.logo} target="_blank">Data<sup>#</sup>3</a>
+          <a href="https://www.data3.com/services/managed-services/managed-security-services/" className={styles.badge} target="_blank">SMB Security</a>
         </header>
         <main className={styles.main}>
           <div className={styles.chatContainer} style={{ textAlign: 'center', padding: '3rem' }}>
             <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>✅</div>
             <h2 style={{ marginBottom: '1rem', color: 'var(--text-primary)' }}>Thanks for chatting!</h2>
-            <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>
-              Our team will be in touch soon to discuss your security needs.
-            </p>
-            <a 
-              href="https://www.data3.com/services/managed-services/managed-security-services/" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className={styles.ctaPrimary}
-              style={{ display: 'inline-block' }}
-            >
-              Learn More About MXDR →
-            </a>
+            <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>Our team will be in touch soon.</p>
+            <a href="https://www.data3.com/services/managed-services/managed-security-services/" target="_blank" className={styles.ctaPrimary} style={{ display: 'inline-block' }}>Learn More About MXDR →</a>
           </div>
         </main>
-        <footer className={styles.footer}>
-          <p>Data<sup>#</sup>3 Limited | Australia's leading technology solutions provider</p>
-        </footer>
+        <footer className={styles.footer}><p>Data<sup>#</sup>3 Limited | Australia's leading technology solutions provider</p></footer>
       </div>
     )
   }
@@ -262,8 +247,8 @@ export default function Home() {
   return (
     <div className={styles.container}>
       <header className={styles.header}>
-        <a href="https://www.data3.com" className={styles.logo} target="_blank" rel="noopener noreferrer">Data<sup>#</sup>3</a>
-        <a href="https://www.data3.com/services/managed-services/managed-security-services/" className={styles.badge} target="_blank" rel="noopener noreferrer">SMB Security</a>
+        <a href="https://www.data3.com" className={styles.logo} target="_blank">Data<sup>#</sup>3</a>
+        <a href="https://www.data3.com/services/managed-services/managed-security-services/" className={styles.badge} target="_blank">SMB Security</a>
       </header>
 
       <main className={styles.main}>
@@ -278,25 +263,32 @@ export default function Home() {
 
           <div className={styles.messages}>
             {messages.map((msg, i) => (
-              <div key={i} className={`${styles.message} ${styles[msg.role]}`}>
-                {msg.role === 'bot' && <div className={styles.msgAvatar}>🛡️</div>}
-                <div className={styles.bubble}>
-                  {msg.content.split('\n').map((line, j) => (
-                    <p key={j}>{line || '\u00A0'}</p>
-                  ))}
+              msg.role === 'image' ? (
+                <div key={i} className={styles.imageMessage}>
+                  <img src={msg.content} alt="Security illustration" className={styles.generatedImage} />
                 </div>
-                {msg.role === 'user' && <div className={styles.msgAvatar}>👤</div>}
-              </div>
+              ) : (
+                <div key={i} className={`${styles.message} ${styles[msg.role]}`}>
+                  {msg.role === 'bot' && <div className={styles.msgAvatar}>🛡️</div>}
+                  <div className={styles.bubble}>
+                    {msg.content.split('\n').map((line, j) => <p key={j}>{line || '\u00A0'}</p>)}
+                  </div>
+                  {msg.role === 'user' && <div className={styles.msgAvatar}>👤</div>}
+                </div>
+              )
             ))}
             
             {loading && (
               <div className={`${styles.message} ${styles.bot}`}>
                 <div className={styles.msgAvatar}>🛡️</div>
-                <div className={styles.bubble}>
-                  <div className={styles.typing}>
-                    <span></span><span></span><span></span>
-                  </div>
-                </div>
+                <div className={styles.bubble}><div className={styles.typing}><span></span><span></span><span></span></div></div>
+              </div>
+            )}
+            
+            {generatingImage && (
+              <div className={styles.imageLoading}>
+                <div className={styles.imageSpinner}></div>
+                <span>Generating visual...</span>
               </div>
             )}
             
@@ -308,9 +300,7 @@ export default function Home() {
               <p>Try a sample scenario:</p>
               <div className={styles.scenarioButtons}>
                 {SAMPLE_SCENARIOS.map((s, i) => (
-                  <button key={i} onClick={() => sendMessage(s.message)} className={styles.scenarioBtn}>
-                    {s.label}
-                  </button>
+                  <button key={i} onClick={() => sendMessage(s.message)} className={styles.scenarioBtn}>{s.label}</button>
                 ))}
               </div>
             </div>
@@ -320,81 +310,32 @@ export default function Home() {
             <div className={styles.leadCapture}>
               <h3>📧 Get your personalized security brief</h3>
               <form onSubmit={handleLeadSubmit} className={styles.leadForm}>
-                <input
-                  type="email"
-                  placeholder="Your email"
-                  value={leadEmail}
-                  onChange={(e) => setLeadEmail(e.target.value)}
-                  className={styles.leadInput}
-                />
-                <input
-                  type="tel"
-                  placeholder="Phone (optional)"
-                  value={leadPhone}
-                  onChange={(e) => setLeadPhone(e.target.value)}
-                  className={styles.leadInput}
-                />
-                <button type="submit" className={styles.leadSubmit}>
-                  Send My Brief →
-                </button>
+                <input type="email" placeholder="Your email" value={leadEmail} onChange={(e) => setLeadEmail(e.target.value)} className={styles.leadInput} />
+                <input type="tel" placeholder="Phone (optional)" value={leadPhone} onChange={(e) => setLeadPhone(e.target.value)} className={styles.leadInput} />
+                <button type="submit" className={styles.leadSubmit}>Send My Brief →</button>
               </form>
             </div>
           )}
 
           {showRecommendation && !showLeadCapture && (
             <div className={styles.ctaBox}>
-              <a 
-                href="https://www.data3.com/wp-content/uploads/2024/07/Data3-Managed-Extended-Detection-Response-Service-Brief.pdf" 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className={styles.ctaLink}
-              >
-                📄 MXDR Data Sheet
-              </a>
-              <a 
-                href="https://www.data3.com/services/managed-services/managed-security-services/" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className={styles.ctaPrimary}
-              >
-                Talk to Our Team →
-              </a>
-              <button 
-                onClick={() => setShowLeadCapture(true)} 
-                className={styles.ctaClose}
-              >
-                📧 Email me details
-              </button>
-              <button 
-                onClick={handleClose} 
-                className={styles.ctaClose}
-              >
-                ✕ Close
-              </button>
+              <a href="https://www.data3.com/wp-content/uploads/2024/07/Data3-Managed-Extended-Detection-Response-Service-Brief.pdf" target="_blank" className={styles.ctaLink}>📄 MXDR Data Sheet</a>
+              <a href="https://www.data3.com/services/managed-services/managed-security-services/" target="_blank" className={styles.ctaPrimary}>Talk to Our Team →</a>
+              <button onClick={() => setShowLeadCapture(true)} className={styles.ctaClose}>📧 Email me details</button>
+              <button onClick={handleClose} className={styles.ctaClose}>✕ Close</button>
             </div>
           )}
 
           <div className={styles.inputArea}>
-            <textarea
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Type your message..."
-              rows="1"
-              disabled={loading}
-            />
+            <textarea value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={handleKeyDown} placeholder="Type your message..." rows="1" disabled={loading} />
             <button onClick={() => sendMessage()} disabled={loading || !input.trim()}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
-              </svg>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
             </button>
           </div>
         </div>
       </main>
 
-      <footer className={styles.footer}>
-        <p>Data<sup>#</sup>3 Limited | Australia's leading technology solutions provider</p>
-      </footer>
+      <footer className={styles.footer}><p>Data<sup>#</sup>3 Limited | Australia's leading technology solutions provider</p></footer>
     </div>
   )
 }

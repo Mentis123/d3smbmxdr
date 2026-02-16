@@ -54,6 +54,66 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
+  /* ── SITE NAVIGATION BAR ──────────────────────────────── */
+
+  .site-bar {
+    background: #1a2332;
+    border-bottom: 1px solid #30363d;
+    padding: 0.875rem 2.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .site-logo {
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 1.5rem;
+    color: white;
+    text-decoration: none;
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+
+  .site-logo sup {
+    font-size: 0.65em;
+    color: white;
+  }
+
+  .nav-pills {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+  }
+
+  .nav-pill {
+    background: linear-gradient(135deg, #0066cc, #00a3e0);
+    color: white;
+    padding: 0.35rem 0.9rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    white-space: nowrap;
+  }
+
+  .nav-pill:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 163, 224, 0.3);
+  }
+
+  .nav-pill-active {
+    background: rgba(0, 163, 224, 0.15);
+    border: 1px solid rgba(0, 163, 224, 0.3);
+    color: #39d0d8;
+    padding: 0.35rem 0.9rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
   /* ── HEADER ─────────────────────────────────────────────── */
 
   header {
@@ -101,8 +161,8 @@
   .header-top {
     display: flex;
     align-items: flex-start;
-    justify-content: space-between;
-    margin-bottom: 2.5rem;
+    justify-content: flex-end;
+    margin-bottom: 1.5rem;
   }
 
   .logo {
@@ -777,10 +837,25 @@
   }
 
   .footer-brand .fh { color: var(--d3-red); }
+  .footer-brand sup { font-size: 0.6em; }
+
+  .footer-nav {
+    color: #00a3e0;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.8rem;
+    transition: color 0.2s ease;
+  }
+
+  .footer-nav:hover {
+    color: #39d0d8;
+  }
 
   /* ── RESPONSIVE ────────────────────────────────────────── */
 
   @media (max-width: 900px) {
+    .site-bar { padding: 0.75rem 1.5rem; }
+    .nav-pill, .nav-pill-active { font-size: 0.7rem; padding: 0.3rem 0.7rem; }
     .header-inner { padding: 1.5rem; }
     .header-top { flex-direction: column; gap: 1rem; }
     .header-meta { flex-wrap: wrap; gap: 1.25rem; }
@@ -795,14 +870,16 @@
   }
 
   @media (max-width: 640px) {
+    .site-bar { flex-wrap: wrap; gap: 0.5rem; }
+    .site-logo { font-size: 1.25rem; }
     .header-title-block h1 { font-size: 1.5rem; }
-    .logo { font-size: 1.75rem; }
     .data-section { padding: 1.25rem; }
   }
 
   /* ── PRINT ─────────────────────────────────────────────── */
 
   @media print {
+    .site-bar { display: none; }
     body { font-size: 11pt; }
     header { break-after: avoid; }
     .app-card { break-inside: avoid; transform: none !important; }
@@ -830,39 +907,29 @@
 </head>
 <body>
 
+<nav class="site-bar">
+  <a href="/" class="site-logo">Data<sup>#</sup>3</a>
+  <div class="nav-pills">
+    <a href="/" class="nav-pill">D3QA Agent</a>
+    <span class="nav-pill-active">AI Security Report</span>
+  </div>
+</nav>
+
 <header>
   <div class="header-inner">
-    <div class="header-top">
-      <div class="logo">
-        <span class="logo-data">Data</span><span class="logo-hash">#</span><span class="logo-three">3</span>
-      </div>
-      <div class="header-classification">
-        <span class="classification-dot"></span>
-        Internal Use Only
-      </div>
-    </div>
-
     <div class="header-title-block">
       <h1>Top 10 Enterprise AI Applications &mdash; Data Security Assessment</h1>
-      <p class="header-subtitle">ISMT Request: Data management, storage locations, and offshore data transfer analysis for AI applications likely to be used within the organisation.</p>
+      <p class="header-subtitle">Data management, storage locations, and offshore data transfer analysis for AI applications commonly used within Australian enterprise environments.</p>
     </div>
 
     <div class="header-meta">
       <div class="meta-item">
-        <div class="meta-label">Prepared For</div>
-        <div class="meta-value">Richard Dornhart, Head of Security</div>
+        <div class="meta-label">Author</div>
+        <div class="meta-value">Adam Rappaport, AI Product and Solutions</div>
       </div>
       <div class="meta-item">
         <div class="meta-label">Date</div>
         <div class="meta-value">16 February 2026</div>
-      </div>
-      <div class="meta-item">
-        <div class="meta-label">Reference</div>
-        <div class="meta-value">ISMT-AI-2026-001</div>
-      </div>
-      <div class="meta-item">
-        <div class="meta-label">Jurisdiction</div>
-        <div class="meta-value">Privacy Act 1988 (Cth) &mdash; APP 8</div>
       </div>
     </div>
   </div>
@@ -1607,8 +1674,9 @@
 
 <footer>
   <div class="footer-inner">
-    <div class="footer-brand">Data<span class="fh">#</span>3 Limited</div>
-    <div>ISMT Security Assessment &mdash; 16 February 2026 &mdash; Information sourced from vendor documentation, official announcements, and public filings.</div>
+    <div class="footer-brand">Data<sup>#</sup>3 Limited</div>
+    <div>Information sourced from vendor documentation, official announcements, and public filings.</div>
+    <a href="/" class="footer-nav">D3QA Agent &rarr;</a>
   </div>
 </footer>
 

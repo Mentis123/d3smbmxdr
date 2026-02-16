@@ -50,6 +50,12 @@
   box-shadow: 0 4px 12px rgba(0, 163, 224, 0.3);
 }
 
+.navPills {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
 /* Main Content */
 .main {
   flex: 1;

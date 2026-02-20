@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Copy Box</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #0f1419;
+      color: #f0f6fc;
+    }
+    .copy-box {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      max-width: 720px;
+      width: 90%;
+      padding: 12px;
+      border: 1px solid #30363d;
+      border-radius: 10px;
+      background: #1a2332;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+    }
+    .copy-text {
+      flex: 1;
+      white-space: pre-wrap;
+      word-break: break-word;
+      margin: 0;
+      line-height: 1.4;
+      font-size: 14px;
+      color: #c9d1d9;
+    }
+    .copy-btn {
+      border: 1px solid #30363d;
+      background: #232d3f;
+      border-radius: 8px;
+      padding: 8px 10px;
+      cursor: pointer;
+      font-size: 13px;
+      line-height: 1;
+      user-select: none;
+      color: #f0f6fc;
+      transition: background 0.15s ease, border-color 0.15s ease;
+    }
+    .copy-btn:hover {
+      background: #2a3649;
+      border-color: #58a6ff;
+    }
+    .copy-btn:active { transform: translateY(1px); }
+    .copy-btn[aria-busy="true"] { opacity: 0.7; cursor: default; }
+  </style>
+</head>
+<body>
+
+  <div class="copy-box">
+    <pre id="textToCopy" class="copy-text">Create a skill by wrapping this MCP: https://mcp.exa.ai/mcp?tools=web_search_exa,web_search_advanced_exa,get_code_context_exa,crawling_exa,company_research_exa,people_search_exa,deep_researcher_start,deep_researcher_check</pre>
+
+    <button id="copyBtn" class="copy-btn" type="button" aria-label="Copy text">
+      Copy
+    </button>
+  </div>
+
+  <script>
+    const btn = document.getElementById("copyBtn");
+    const el = document.getElementById("textToCopy");
+
+    async function copyText(text) {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text);
+        return;
+      }
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      ta.style.position = "fixed";
+      ta.style.left = "-9999px";
+      ta.style.top = "0";
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      document.execCommand("copy");
+      ta.remove();
+    }
+
+    btn.addEventListener("click", async () => {
+      const text = el.textContent ?? "";
+      btn.setAttribute("aria-busy", "true");
+      const original = btn.textContent;
+
+      try {
+        await copyText(text);
+        btn.textContent = "Copied!";
+        setTimeout(() => (btn.textContent = original), 900);
+      } catch (e) {
+        btn.textContent = "Failed";
+        setTimeout(() => (btn.textContent = original), 1200);
+      } finally {
+        btn.setAttribute("aria-busy", "false");
+      }
+    });
+  </script>
+
+</body>
+</html>

@@ -10,10 +10,46 @@
       margin: 0;
       min-height: 100vh;
       display: flex;
-      align-items: center;
-      justify-content: center;
+      flex-direction: column;
       background: #0f1419;
       color: #f0f6fc;
+    }
+    .site-bar {
+      background: #1a2332;
+      border-bottom: 1px solid #30363d;
+      padding: 0.875rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .site-bar-logo {
+      font-weight: 700;
+      font-size: 1.5rem;
+      color: white;
+      text-decoration: none;
+      letter-spacing: -0.02em;
+    }
+    .site-bar-logo sup { font-size: 0.65em; }
+    .nav-pills { display: flex; gap: 0.5rem; align-items: center; }
+    .nav-pill {
+      background: linear-gradient(135deg, #0066cc, #00a3e0);
+      color: white;
+      padding: 0.35rem 0.9rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .nav-pill:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 163, 224, 0.3);
+    }
+    .content {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     .copy-box {
       display: flex;
@@ -58,12 +94,22 @@
 </head>
 <body>
 
+  <nav class="site-bar">
+    <a href="/" class="site-bar-logo">Data<sup>#</sup>3</a>
+    <div class="nav-pills">
+      <a href="/" class="nav-pill">D3QA Agent</a>
+      <a href="/aitop10.html" class="nav-pill">AI Security Report</a>
+    </div>
+  </nav>
+
+  <div class="content">
   <div class="copy-box">
     <pre id="textToCopy" class="copy-text">Create a skill by wrapping this MCP: https://mcp.exa.ai/mcp?tools=web_search_exa,web_search_advanced_exa,get_code_context_exa,crawling_exa,company_research_exa,people_search_exa,deep_researcher_start,deep_researcher_check</pre>
 
     <button id="copyBtn" class="copy-btn" type="button" aria-label="Copy text">
       Copy
     </button>
+  </div>
   </div>
 
   <script>

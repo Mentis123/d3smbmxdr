@@ -1402,12 +1402,12 @@ body.show-deleted [data-block-id].deleted::after {
   animation: save-flash 0.8s ease;
 }
 
-/* Show Deleted toggle button */
-.show-deleted-toggle {
+/* Changes panel trigger */
+.changes-trigger {
   position: fixed;
   bottom: 1.5rem;
   right: 1.5rem;
-  z-index: 999;
+  z-index: 998;
   font-family: 'JetBrains Mono', monospace;
   font-size: 0.65rem;
   letter-spacing: 0.05em;
@@ -1421,15 +1421,166 @@ body.show-deleted [data-block-id].deleted::after {
   box-shadow: 0 4px 16px rgba(0,0,0,0.4);
 }
 
-.show-deleted-toggle:hover {
+.changes-trigger:hover {
   border-color: var(--border-accent);
   color: var(--text-primary);
 }
 
-.show-deleted-toggle.active {
-  background: rgba(251, 113, 133, 0.1);
-  border-color: rgba(251, 113, 133, 0.3);
+.changes-trigger.has-changes {
+  border-color: rgba(59, 130, 246, 0.4);
+  color: var(--blue-light);
+}
+
+/* Changes panel */
+.changes-panel {
+  position: fixed;
+  bottom: 4rem;
+  right: 1.5rem;
+  z-index: 997;
+  width: 360px;
+  max-height: 60vh;
+  background: var(--bg-card);
+  border: 1px solid var(--border-accent);
+  border-radius: 12px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.6);
+  display: none;
+  flex-direction: column;
+  overflow: hidden;
+  animation: panel-in 0.2s ease;
+}
+
+.changes-panel.open { display: flex; }
+
+@keyframes panel-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.changes-panel-header {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.changes-panel-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.changes-panel-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.changes-panel-actions button {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.55rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-show-deleted {
+  background: rgba(251, 113, 133, 0.08);
+  color: var(--text-muted);
+  border-color: rgba(251, 113, 133, 0.15);
+}
+.btn-show-deleted:hover, .btn-show-deleted.active {
+  background: rgba(251, 113, 133, 0.15);
   color: var(--rose-accent);
+  border-color: rgba(251, 113, 133, 0.3);
+}
+
+.changes-panel-body {
+  overflow-y: auto;
+  padding: 0.5rem;
+  flex: 1;
+}
+
+.changes-panel-empty {
+  padding: 2rem 1rem;
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.change-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.6rem;
+  border-radius: 6px;
+  margin-bottom: 0.25rem;
+  transition: background 0.15s;
+}
+
+.change-item:hover {
+  background: rgba(99, 140, 255, 0.05);
+}
+
+.change-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.5rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 0.15rem 0.35rem;
+  border-radius: 3px;
+  flex-shrink: 0;
+  font-weight: 600;
+}
+
+.change-badge.edited {
+  background: rgba(59, 130, 246, 0.12);
+  color: var(--blue-light);
+}
+
+.change-badge.deleted-badge {
+  background: rgba(251, 113, 133, 0.12);
+  color: var(--rose-accent);
+}
+
+.change-label {
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.change-label:hover {
+  color: var(--text-primary);
+}
+
+.change-reset {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.5rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 0.2rem 0.4rem;
+  border-radius: 3px;
+  border: 1px solid rgba(251, 191, 36, 0.2);
+  background: rgba(251, 191, 36, 0.08);
+  color: var(--amber-accent);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.15s;
+}
+
+.change-reset:hover {
+  background: rgba(251, 191, 36, 0.18);
 }
 
 /* ─── Print ─── */
@@ -2124,8 +2275,17 @@ body.show-deleted [data-block-id].deleted::after {
 
 </div>
 
-<!-- Show Deleted toggle -->
-<button class="show-deleted-toggle" id="showDeletedBtn" onclick="toggleShowDeleted()">Show Deleted (0)</button>
+<!-- Changes Panel -->
+<button class="changes-trigger" id="changesTrigger">Changes (0)</button>
+<div class="changes-panel" id="changesPanel">
+  <div class="changes-panel-header">
+    <span class="changes-panel-title">Change History</span>
+    <div class="changes-panel-actions">
+      <button class="btn-show-deleted" id="showDeletedBtn">Show Deleted</button>
+    </div>
+  </div>
+  <div class="changes-panel-body" id="changesList"></div>
+</div>
 
 <!-- ═══════════════════ INLINE EDIT SCRIPT ═══════════════════ -->
 <script>
@@ -2133,11 +2293,16 @@ body.show-deleted [data-block-id].deleted::after {
   const PAGE_ID = 'agentic-resourcing';
   const API = '/api/page-edits';
 
+  // Snapshot original HTML for every editable block (for reset)
+  const originals = {};
+  document.querySelectorAll('[data-block-id]').forEach(function(el) {
+    originals[el.getAttribute('data-block-id')] = el.innerHTML;
+  });
+
   let editsMap = {};
   let activeBlock = null;
   let originalContent = '';
   let toolbar = null;
-  let deletedCount = 0;
 
   // ─── Status Indicator ───
   const statusEl = document.getElementById('editStatus');
@@ -2146,73 +2311,130 @@ body.show-deleted [data-block-id].deleted::after {
     statusEl.className = 'edit-status ' + type;
     statusEl.textContent = text;
     if (type === 'saved') {
-      setTimeout(() => { statusEl.className = 'edit-status'; }, 2000);
+      setTimeout(function() { statusEl.className = 'edit-status'; }, 2000);
     }
   }
 
   // ─── Load Edits from DB ───
   async function loadEdits() {
     try {
-      const res = await fetch(API + '?page_id=' + encodeURIComponent(PAGE_ID));
+      var res = await fetch(API + '?page_id=' + encodeURIComponent(PAGE_ID));
       if (!res.ok) return;
-      const data = await res.json();
+      var data = await res.json();
       editsMap = data.edits || {};
       applyEdits();
+      renderChangesPanel();
     } catch (e) {
       console.error('Failed to load edits:', e);
     }
   }
 
   function applyEdits() {
-    deletedCount = 0;
-    for (const [blockId, edit] of Object.entries(editsMap)) {
-      const el = document.querySelector('[data-block-id="' + blockId + '"]');
+    for (var blockId in editsMap) {
+      var edit = editsMap[blockId];
+      var el = document.querySelector('[data-block-id="' + blockId + '"]');
       if (!el) continue;
       if (edit.content !== null && edit.content !== undefined) {
         el.innerHTML = edit.content;
       }
       if (edit.deleted) {
         el.classList.add('deleted');
-        deletedCount++;
       } else {
         el.classList.remove('deleted');
       }
     }
-    updateDeletedBtn();
   }
 
-  function updateDeletedBtn() {
-    const btn = document.getElementById('showDeletedBtn');
-    btn.textContent = 'Show Deleted (' + deletedCount + ')';
-    btn.style.display = deletedCount > 0 ? 'block' : 'none';
+  // ─── Changes Panel ───
+  function getChangeCounts() {
+    var edited = 0, deleted = 0;
+    for (var k in editsMap) {
+      if (editsMap[k].deleted) deleted++; else edited++;
+    }
+    return { edited: edited, deleted: deleted, total: edited + deleted };
+  }
+
+  function renderChangesPanel() {
+    var counts = getChangeCounts();
+    // Trigger button
+    var trigger = document.getElementById('changesTrigger');
+    var parts = [];
+    if (counts.edited) parts.push(counts.edited + ' edited');
+    if (counts.deleted) parts.push(counts.deleted + ' deleted');
+    trigger.textContent = counts.total > 0 ? 'Changes (' + parts.join(', ') + ')' : 'No Changes';
+    trigger.classList.toggle('has-changes', counts.total > 0);
+    // Show deleted button
+    var sdBtn = document.getElementById('showDeletedBtn');
+    sdBtn.textContent = counts.deleted > 0 ? 'Show Deleted (' + counts.deleted + ')' : 'Show Deleted';
+    // List
+    var list = document.getElementById('changesList');
+    if (counts.total === 0) {
+      list.innerHTML = '<div class="changes-panel-empty">No changes yet.<br>Click any text to edit it.</div>';
+      return;
+    }
+    var html = '';
+    var entries = Object.keys(editsMap).sort();
+    for (var i = 0; i < entries.length; i++) {
+      var bid = entries[i];
+      var edit = editsMap[bid];
+      var isDel = edit.deleted;
+      var badgeClass = isDel ? 'deleted-badge' : 'edited';
+      var badgeText = isDel ? 'Del' : 'Edit';
+      var el = document.querySelector('[data-block-id="' + bid + '"]');
+      var label = bid;
+      if (el) {
+        var text = el.textContent.trim();
+        label = text.length > 40 ? text.substring(0, 40) + '...' : (text || bid);
+      }
+      html += '<div class="change-item">' +
+        '<span class="change-badge ' + badgeClass + '">' + badgeText + '</span>' +
+        '<span class="change-label" data-goto="' + bid + '" title="' + bid + '">' + label.replace(/</g, '&lt;') + '</span>' +
+        '<button class="change-reset" data-reset="' + bid + '">Reset</button>' +
+        '</div>';
+    }
+    list.innerHTML = html;
   }
 
   // ─── Save Edit to DB ───
   async function saveEdit(blockId, content, deleted) {
     showStatus('saving', 'Saving...');
     try {
-      const res = await fetch(API, {
+      var res = await fetch(API, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          page_id: PAGE_ID,
-          block_id: blockId,
-          content: content,
-          deleted: deleted
-        })
+        body: JSON.stringify({ page_id: PAGE_ID, block_id: blockId, content: content, deleted: deleted })
       });
       if (!res.ok) throw new Error('Save failed');
       showStatus('saved', 'Saved');
-
-      // Update local map
-      editsMap[blockId] = { content, deleted, updated_at: new Date().toISOString() };
-
-      // Recount deleted
-      deletedCount = Object.values(editsMap).filter(e => e.deleted).length;
-      updateDeletedBtn();
+      editsMap[blockId] = { content: content, deleted: deleted, updated_at: new Date().toISOString() };
+      renderChangesPanel();
     } catch (e) {
       showStatus('error', 'Error saving');
       console.error('Save failed:', e);
+    }
+  }
+
+  // ─── Reset Block to Original ───
+  async function resetBlock(blockId) {
+    showStatus('saving', 'Resetting...');
+    try {
+      var res = await fetch(API, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ page_id: PAGE_ID, block_id: blockId })
+      });
+      if (!res.ok) throw new Error('Reset failed');
+      showStatus('saved', 'Reset to original');
+      delete editsMap[blockId];
+      var el = document.querySelector('[data-block-id="' + blockId + '"]');
+      if (el && originals[blockId] !== undefined) {
+        el.innerHTML = originals[blockId];
+        el.classList.remove('deleted');
+      }
+      renderChangesPanel();
+    } catch (e) {
+      showStatus('error', 'Reset failed');
+      console.error('Reset failed:', e);
     }
   }
 
@@ -2227,23 +2449,16 @@ body.show-deleted [data-block-id].deleted::after {
 
   function positionToolbar(el) {
     if (!toolbar) return;
-    const rect = el.getBoundingClientRect();
-    const toolbarHeight = 40;
-
-    // Position above the element by default
-    let top = rect.top - toolbarHeight - 8;
-    let left = rect.left;
-
-    // If near top of viewport, position below
+    var rect = el.getBoundingClientRect();
+    var toolbarHeight = 40;
+    var top = rect.top - toolbarHeight - 8;
+    var left = rect.left;
     if (rect.top < toolbarHeight + 20) {
-      top = rect.bottom + 8 + window.scrollY;
+      top = rect.bottom + 8;
     }
-
-    // Keep within viewport horizontally
-    const maxLeft = window.innerWidth - 260;
+    var maxLeft = window.innerWidth - 340;
     if (left > maxLeft) left = maxLeft;
     if (left < 8) left = 8;
-
     toolbar.style.top = top + 'px';
     toolbar.style.left = left + 'px';
   }
@@ -2251,27 +2466,32 @@ body.show-deleted [data-block-id].deleted::after {
   // ─── Enter Edit Mode ───
   function enterEdit(el) {
     if (activeBlock) cancelEdit();
-
     activeBlock = el;
     originalContent = el.innerHTML;
     el.classList.add('editing');
     el.setAttribute('contenteditable', 'true');
     el.focus();
 
-    const isDeleted = el.classList.contains('deleted');
-    const tb = createToolbar();
+    var blockId = el.getAttribute('data-block-id');
+    var isDeleted = el.classList.contains('deleted');
+    var hasBeenEdited = blockId in editsMap;
+    var tb = createToolbar();
 
     if (isDeleted) {
       tb.innerHTML =
         '<button class="btn-restore" onclick="window._editRestore()">Restore</button>' +
-        '<button class="btn-cancel" onclick="window._editCancel()">Cancel</button>';
+        '<button class="btn-cancel" onclick="window._editCancel()">Cancel</button>' +
+        '<button class="btn-delete" style="background:rgba(251,191,36,0.1);color:var(--amber-accent);border-color:rgba(251,191,36,0.2)" onclick="window._editReset()">Reset to Original</button>';
     } else {
-      tb.innerHTML =
+      var buttons =
         '<button class="btn-save" onclick="window._editSave()">Save</button>' +
         '<button class="btn-cancel" onclick="window._editCancel()">Cancel</button>' +
         '<button class="btn-delete" onclick="window._editDelete()">Delete</button>';
+      if (hasBeenEdited) {
+        buttons += '<button class="btn-delete" style="background:rgba(251,191,36,0.1);color:var(--amber-accent);border-color:rgba(251,191,36,0.2)" onclick="window._editReset()">Reset</button>';
+      }
+      tb.innerHTML = buttons;
     }
-
     positionToolbar(el);
   }
 
@@ -2289,75 +2509,106 @@ body.show-deleted [data-block-id].deleted::after {
   // ─── Save Edit ───
   async function doSave() {
     if (!activeBlock) return;
-    const blockId = activeBlock.getAttribute('data-block-id');
-    const content = activeBlock.innerHTML;
-
+    var blockId = activeBlock.getAttribute('data-block-id');
+    var content = activeBlock.innerHTML;
     activeBlock.classList.remove('editing');
     activeBlock.removeAttribute('contenteditable');
     activeBlock.classList.add('just-saved');
-    setTimeout(() => activeBlock && activeBlock.classList.remove('just-saved'), 800);
-
+    setTimeout(function() { var el = document.querySelector('[data-block-id="' + blockId + '"]'); if (el) el.classList.remove('just-saved'); }, 800);
     if (toolbar) { toolbar.remove(); toolbar = null; }
-    const savedBlock = activeBlock;
     activeBlock = null;
     originalContent = '';
-
     await saveEdit(blockId, content, false);
   }
 
   // ─── Delete Block ───
   async function doDelete() {
     if (!activeBlock) return;
-    const blockId = activeBlock.getAttribute('data-block-id');
-    const content = activeBlock.innerHTML;
-
+    var blockId = activeBlock.getAttribute('data-block-id');
+    var content = activeBlock.innerHTML;
     activeBlock.classList.remove('editing');
     activeBlock.removeAttribute('contenteditable');
     activeBlock.classList.add('deleted');
-
     if (toolbar) { toolbar.remove(); toolbar = null; }
     activeBlock = null;
     originalContent = '';
-
     await saveEdit(blockId, content, true);
   }
 
   // ─── Restore Block ───
   async function doRestore() {
     if (!activeBlock) return;
-    const blockId = activeBlock.getAttribute('data-block-id');
-    const content = activeBlock.innerHTML;
-
+    var blockId = activeBlock.getAttribute('data-block-id');
+    var content = activeBlock.innerHTML;
     activeBlock.classList.remove('editing', 'deleted');
     activeBlock.removeAttribute('contenteditable');
-
     if (toolbar) { toolbar.remove(); toolbar = null; }
     activeBlock = null;
     originalContent = '';
-
     await saveEdit(blockId, content, false);
   }
 
-  // ─── Expose to global for inline onclick ───
+  // ─── Reset from Toolbar ───
+  async function doReset() {
+    if (!activeBlock) return;
+    var blockId = activeBlock.getAttribute('data-block-id');
+    activeBlock.classList.remove('editing');
+    activeBlock.removeAttribute('contenteditable');
+    if (toolbar) { toolbar.remove(); toolbar = null; }
+    activeBlock = null;
+    originalContent = '';
+    await resetBlock(blockId);
+  }
+
+  // ─── Expose to global ───
   window._editSave = doSave;
   window._editCancel = cancelEdit;
   window._editDelete = doDelete;
   window._editRestore = doRestore;
+  window._editReset = doReset;
 
   // ─── Click Handler ───
   document.addEventListener('click', function(e) {
-    const block = e.target.closest('[data-block-id]');
+    // Changes panel trigger
+    if (e.target.closest('.changes-trigger')) {
+      document.getElementById('changesPanel').classList.toggle('open');
+      return;
+    }
+    // Inside changes panel
+    if (e.target.closest('.changes-panel')) {
+      if (e.target.id === 'showDeletedBtn' || e.target.closest('#showDeletedBtn')) {
+        document.body.classList.toggle('show-deleted');
+        document.getElementById('showDeletedBtn').classList.toggle('active');
+        return;
+      }
+      var resetBtn = e.target.closest('[data-reset]');
+      if (resetBtn) {
+        if (activeBlock) cancelEdit();
+        resetBlock(resetBtn.getAttribute('data-reset'));
+        return;
+      }
+      var gotoLabel = e.target.closest('[data-goto]');
+      if (gotoLabel) {
+        var bid = gotoLabel.getAttribute('data-goto');
+        var target = document.querySelector('[data-block-id="' + bid + '"]');
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          target.classList.add('just-saved');
+          setTimeout(function() { target.classList.remove('just-saved'); }, 1000);
+        }
+        return;
+      }
+      return;
+    }
 
-    // Click outside active block = cancel
+    var block = e.target.closest('[data-block-id]');
     if (activeBlock && !block) {
-      // But not if clicking toolbar
       if (e.target.closest('.edit-toolbar')) return;
       cancelEdit();
       return;
     }
-
-    // Click on a block
     if (block && block !== activeBlock) {
+      document.getElementById('changesPanel').classList.remove('open');
       enterEdit(block);
     }
   });
@@ -2365,33 +2616,16 @@ body.show-deleted [data-block-id].deleted::after {
   // ─── Keyboard Shortcuts ───
   document.addEventListener('keydown', function(e) {
     if (!activeBlock) return;
-
-    // Escape = cancel
-    if (e.key === 'Escape') {
-      e.preventDefault();
-      cancelEdit();
-    }
-
-    // Ctrl+Enter = save
-    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
-      e.preventDefault();
-      doSave();
-    }
+    if (e.key === 'Escape') { e.preventDefault(); cancelEdit(); }
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); doSave(); }
   });
 
-  // ─── Reposition toolbar on scroll/resize ───
+  // ─── Reposition on scroll/resize ───
   function onReposition() {
     if (activeBlock && toolbar) positionToolbar(activeBlock);
   }
   window.addEventListener('scroll', onReposition, { passive: true });
   window.addEventListener('resize', onReposition, { passive: true });
-
-  // ─── Show Deleted Toggle ───
-  window.toggleShowDeleted = function() {
-    document.body.classList.toggle('show-deleted');
-    const btn = document.getElementById('showDeletedBtn');
-    btn.classList.toggle('active');
-  };
 
   // ─── Init ───
   loadEdits();

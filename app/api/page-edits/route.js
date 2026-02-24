@@ -97,3 +97,31 @@ export async function PUT(request) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 }
+
+// DELETE - Remove a single block edit (revert to original)
+export async function DELETE(request) {
+  try {
+    const { page_id, block_id } = await request.json()
+
+    if (!page_id || !block_id) {
+      return NextResponse.json({ error: 'page_id and block_id required' }, { status: 400 })
+    }
+
+    const sql = getDb()
+    if (!sql) {
+      return NextResponse.json({ error: 'DATABASE_URL not configured' }, { status: 500 })
+    }
+
+    await ensureTable(sql)
+
+    await sql`
+      DELETE FROM page_edits
+      WHERE page_id = ${page_id} AND block_id = ${block_id}
+    `
+
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    console.error('Failed to delete page edit:', error)
+    return NextResponse.json({ error: error.message }, { status: 500 })
+  }
+}

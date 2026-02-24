@@ -1,0 +1,2402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agentic AI Practice — Resourcing &amp; Delivery Model | Data<sup>#</sup>3</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap');
+
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+
+:root {
+  --bg-deep: #060913;
+  --bg-surface: #0c1021;
+  --bg-card: #111628;
+  --bg-card-hover: #161d36;
+  --bg-elevated: #1a2242;
+  --border-subtle: rgba(99, 140, 255, 0.08);
+  --border-mid: rgba(99, 140, 255, 0.15);
+  --border-accent: rgba(99, 140, 255, 0.3);
+  --blue-primary: #3b82f6;
+  --blue-light: #60a5fa;
+  --blue-bright: #93bbfd;
+  --purple-primary: #8b5cf6;
+  --purple-light: #a78bfa;
+  --cyan-accent: #22d3ee;
+  --green-accent: #34d399;
+  --amber-accent: #fbbf24;
+  --rose-accent: #fb7185;
+  --text-primary: #e8ecf4;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --text-bright: #f1f5f9;
+  --gradient-brand: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  --gradient-surface: linear-gradient(180deg, #0c1021 0%, #060913 100%);
+  --shadow-card: 0 1px 3px rgba(0,0,0,0.4), 0 0 0 1px var(--border-subtle);
+  --shadow-elevated: 0 4px 24px rgba(0,0,0,0.5), 0 0 0 1px var(--border-subtle);
+}
+
+html {
+  scroll-behavior: smooth;
+  font-size: 15px;
+}
+
+body {
+  font-family: 'DM Sans', -apple-system, sans-serif;
+  background: var(--bg-deep);
+  color: var(--text-primary);
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* ─── Ambient Background ─── */
+body::before {
+  content: '';
+  position: fixed;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background:
+    radial-gradient(ellipse at 20% 20%, rgba(59, 130, 246, 0.04) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 80%, rgba(139, 92, 246, 0.03) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 50%, rgba(34, 211, 238, 0.015) 0%, transparent 40%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ─── Grid Texture ─── */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(99, 140, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(99, 140, 255, 0.02) 1px, transparent 1px);
+  background-size: 60px 60px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.page-wrapper {
+  position: relative;
+  z-index: 1;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+/* ─── Navigation ─── */
+.doc-nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  backdrop-filter: blur(20px) saturate(1.4);
+  -webkit-backdrop-filter: blur(20px) saturate(1.4);
+  background: rgba(6, 9, 19, 0.85);
+  border-bottom: 1px solid var(--border-subtle);
+  padding: 0.75rem 2rem;
+  margin: 0 -2rem;
+}
+
+.nav-inner {
+  max-width: 1120px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.nav-brand {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.nav-brand span {
+  color: var(--blue-primary);
+  font-weight: 600;
+}
+
+.nav-status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.7rem;
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--amber-accent);
+}
+
+.nav-status::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--amber-accent);
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+/* ─── Edit Status Indicator ─── */
+.edit-status {
+  display: none;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.65rem;
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.25rem 0.6rem;
+  border-radius: 4px;
+  margin-left: 0.75rem;
+}
+
+.edit-status.saving {
+  display: inline-flex;
+  color: var(--blue-light);
+  background: rgba(59, 130, 246, 0.1);
+}
+
+.edit-status.saved {
+  display: inline-flex;
+  color: var(--green-accent);
+  background: rgba(52, 211, 153, 0.1);
+}
+
+.edit-status.error {
+  display: inline-flex;
+  color: var(--rose-accent);
+  background: rgba(251, 113, 133, 0.1);
+}
+
+/* ─── Hero ─── */
+.hero {
+  padding: 6rem 0 4rem;
+  position: relative;
+}
+
+.hero-eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--blue-primary);
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.hero-eyebrow::before {
+  content: '';
+  width: 32px;
+  height: 1px;
+  background: var(--gradient-brand);
+}
+
+.hero h1 {
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-size: 3.8rem;
+  font-weight: 400;
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  color: var(--text-bright);
+  margin-bottom: 1.5rem;
+  max-width: 800px;
+}
+
+.hero h1 em {
+  font-style: italic;
+  background: var(--gradient-brand);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero-subtitle {
+  font-size: 1.15rem;
+  color: var(--text-secondary);
+  max-width: 600px;
+  line-height: 1.7;
+}
+
+.hero-meta {
+  margin-top: 2.5rem;
+  display: flex;
+  gap: 2.5rem;
+  flex-wrap: wrap;
+}
+
+.hero-meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.hero-meta-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.hero-meta-value {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+/* ─── Section Structure ─── */
+.section {
+  padding: 4rem 0;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.section-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--purple-primary);
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.section-num::after {
+  content: '';
+  flex: 1;
+  max-width: 60px;
+  height: 1px;
+  background: linear-gradient(90deg, var(--purple-primary), transparent);
+}
+
+.section h2 {
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-size: 2.4rem;
+  font-weight: 400;
+  line-height: 1.15;
+  color: var(--text-bright);
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.01em;
+}
+
+.section h2 em {
+  font-style: italic;
+  color: var(--blue-light);
+}
+
+.section-lead {
+  font-size: 1.05rem;
+  color: var(--text-secondary);
+  max-width: 700px;
+  margin-bottom: 2.5rem;
+  line-height: 1.75;
+}
+
+h3 {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--text-bright);
+  margin-bottom: 0.75rem;
+  margin-top: 2rem;
+}
+
+h4 {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+p {
+  margin-bottom: 1rem;
+  color: var(--text-secondary);
+}
+
+/* ─── Callout / Quote ─── */
+.callout {
+  position: relative;
+  padding: 2rem 2.5rem;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.06), rgba(139, 92, 246, 0.04));
+  border: 1px solid var(--border-mid);
+  border-radius: 12px;
+  margin: 2rem 0;
+}
+
+.callout::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 1.5rem;
+  bottom: 1.5rem;
+  width: 3px;
+  background: var(--gradient-brand);
+  border-radius: 2px;
+}
+
+.callout-quote {
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-size: 1.6rem;
+  font-style: italic;
+  color: var(--text-bright);
+  line-height: 1.4;
+  margin-bottom: 0.5rem;
+}
+
+.callout-attr {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.05em;
+}
+
+/* ─── Pipeline Visualization ─── */
+.pipeline {
+  margin: 3rem 0;
+}
+
+.pipeline-track {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 2px;
+  margin-bottom: 1rem;
+}
+
+.pipeline-phase {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  padding: 1.75rem 1.25rem;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.pipeline-phase:first-child {
+  border-radius: 10px 0 0 10px;
+}
+
+.pipeline-phase:last-child {
+  border-radius: 0 10px 10px 0;
+}
+
+.pipeline-phase:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-accent);
+  z-index: 2;
+}
+
+.pipeline-phase::after {
+  content: '→';
+  position: absolute;
+  right: -9px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  z-index: 3;
+}
+
+.pipeline-phase:last-child::after {
+  display: none;
+}
+
+.phase-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.55rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 0.5rem;
+}
+
+.phase-name {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--text-bright);
+  margin-bottom: 0.35rem;
+  line-height: 1.3;
+}
+
+.phase-duration {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  color: var(--blue-light);
+  margin-bottom: 0.75rem;
+}
+
+.phase-desc {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  line-height: 1.55;
+}
+
+/* Pipeline annotations */
+.pipeline-annotations {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.pipeline-annotation {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.annotation-bar {
+  height: 3px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.annotation-bar.governance {
+  width: 60%;
+  margin-left: 40%;
+  background: linear-gradient(90deg, var(--purple-primary), var(--blue-primary));
+  opacity: 0.5;
+}
+
+.annotation-bar.remediation {
+  width: 85%;
+  background: linear-gradient(90deg, var(--amber-accent), transparent);
+  opacity: 0.35;
+}
+
+.annotation-bar.flywheel {
+  width: 60%;
+  margin-left: 20%;
+  background: linear-gradient(90deg, transparent, var(--green-accent), transparent);
+  opacity: 0.4;
+}
+
+.annotation-label {
+  white-space: nowrap;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.annotation-label.purple { color: var(--purple-light); }
+.annotation-label.amber { color: var(--amber-accent); }
+.annotation-label.green { color: var(--green-accent); }
+
+/* ─── Cards Grid ─── */
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1rem;
+  margin: 2rem 0;
+}
+
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  padding: 1.75rem;
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-mid);
+}
+
+.card-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  margin-bottom: 1rem;
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.15);
+  color: var(--blue-light);
+}
+
+.card-icon.purple {
+  background: rgba(139, 92, 246, 0.1);
+  border-color: rgba(139, 92, 246, 0.15);
+  color: var(--purple-light);
+}
+
+.card-icon.cyan {
+  background: rgba(34, 211, 238, 0.1);
+  border-color: rgba(34, 211, 238, 0.15);
+  color: var(--cyan-accent);
+}
+
+.card-icon.green {
+  background: rgba(52, 211, 153, 0.1);
+  border-color: rgba(52, 211, 153, 0.15);
+  color: var(--green-accent);
+}
+
+.card-icon.amber {
+  background: rgba(251, 191, 36, 0.1);
+  border-color: rgba(251, 191, 36, 0.15);
+  color: var(--amber-accent);
+}
+
+.card-icon.rose {
+  background: rgba(251, 113, 133, 0.1);
+  border-color: rgba(251, 113, 133, 0.15);
+  color: var(--rose-accent);
+}
+
+.card h4 {
+  margin-bottom: 0.5rem;
+}
+
+.card p {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* 5-column card grid for dimensions */
+.cards-grid-5 {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.75rem;
+  margin: 2rem 0;
+}
+
+.card-sm {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  padding: 1.25rem;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.card-sm:hover {
+  border-color: var(--border-mid);
+  background: var(--bg-card-hover);
+}
+
+.card-sm .card-sm-icon {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.card-sm h4 {
+  font-size: 0.75rem;
+  line-height: 1.35;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+/* ─── Tables ─── */
+.table-wrap {
+  margin: 2rem 0;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-card);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+thead {
+  background: var(--bg-elevated);
+}
+
+th {
+  padding: 0.9rem 1.25rem;
+  text-align: left;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  font-weight: 500;
+  border-bottom: 1px solid var(--border-mid);
+}
+
+td {
+  padding: 0.85rem 1.25rem;
+  border-bottom: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  vertical-align: top;
+}
+
+tr:last-child td {
+  border-bottom: none;
+}
+
+tr:hover td {
+  background: rgba(59, 130, 246, 0.02);
+}
+
+tr.row-total td {
+  background: rgba(59, 130, 246, 0.06);
+  font-weight: 600;
+  color: var(--text-bright);
+  border-top: 2px solid var(--border-accent);
+}
+
+.fte-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  padding: 0.2rem 0.6rem;
+  border-radius: 6px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.fte-badge.full { background: rgba(59, 130, 246, 0.15); color: var(--blue-light); }
+.fte-badge.half { background: rgba(139, 92, 246, 0.12); color: var(--purple-light); }
+.fte-badge.double { background: rgba(34, 211, 238, 0.12); color: var(--cyan-accent); }
+.fte-badge.total-badge { background: var(--gradient-brand); color: #fff; font-size: 0.85rem; padding: 0.3rem 0.8rem; }
+
+.phase-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.phase-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.55rem;
+  letter-spacing: 0.05em;
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+  background: rgba(99, 140, 255, 0.08);
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+/* ─── Tier Cards ─── */
+.tier-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin: 2rem 0;
+}
+
+.tier-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  padding: 2rem;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.tier-card:hover {
+  border-color: var(--border-accent);
+}
+
+.tier-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+}
+
+.tier-card.t1::before { background: var(--blue-primary); }
+.tier-card.t2::before { background: var(--purple-primary); }
+.tier-card.t3::before { background: var(--gradient-brand); }
+
+.tier-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 0.35rem;
+}
+
+.tier-card.t1 .tier-label { color: var(--blue-primary); }
+.tier-card.t2 .tier-label { color: var(--purple-primary); }
+.tier-card.t3 .tier-label { color: var(--purple-light); }
+
+.tier-title {
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-size: 1.5rem;
+  color: var(--text-bright);
+  margin-bottom: 1rem;
+}
+
+.tier-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.tier-stat-val {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-bright);
+}
+
+.tier-stat-label {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.tier-details {
+  list-style: none;
+  padding: 0;
+}
+
+.tier-details li {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  padding: 0.3rem 0;
+  padding-left: 1rem;
+  position: relative;
+}
+
+.tier-details li::before {
+  content: '›';
+  position: absolute;
+  left: 0;
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
+/* ─── Org Chart ─── */
+.org-chart {
+  margin: 2.5rem 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+}
+
+.org-row {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  position: relative;
+}
+
+.org-connector {
+  width: 1px;
+  height: 28px;
+  background: var(--border-mid);
+  margin: 0 auto;
+}
+
+.org-branch-connector {
+  width: 50%;
+  max-width: 500px;
+  height: 20px;
+  border-left: 1px solid var(--border-mid);
+  border-right: 1px solid var(--border-mid);
+  border-top: 1px solid var(--border-mid);
+  border-radius: 6px 6px 0 0;
+  margin: 0 auto;
+}
+
+.org-node {
+  padding: 0.85rem 1.5rem;
+  border-radius: 8px;
+  text-align: center;
+  font-size: 0.8rem;
+  font-weight: 500;
+  min-width: 180px;
+  transition: all 0.3s ease;
+}
+
+.org-node.primary {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.15));
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  color: var(--text-bright);
+}
+
+.org-node.secondary {
+  background: var(--bg-card);
+  border: 1px solid var(--border-mid);
+  color: var(--text-primary);
+}
+
+.org-node .org-role {
+  font-weight: 600;
+  margin-bottom: 0.2rem;
+  font-size: 0.82rem;
+}
+
+.org-node .org-desc {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.03em;
+}
+
+/* ─── Tech Stack ─── */
+.tech-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+  margin: 2rem 0;
+}
+
+.tech-item {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  padding: 1.35rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  transition: all 0.3s ease;
+}
+
+.tech-item:hover {
+  border-color: var(--border-mid);
+  background: var(--bg-card-hover);
+}
+
+.tech-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-top: 0.35rem;
+  flex-shrink: 0;
+}
+
+.tech-dot.blue { background: var(--blue-primary); }
+.tech-dot.purple { background: var(--purple-primary); }
+.tech-dot.cyan { background: var(--cyan-accent); }
+
+.tech-name {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--text-primary);
+  margin-bottom: 0.2rem;
+}
+
+.tech-desc {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+/* ─── Research Insights ─── */
+.insight-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+  margin: 2rem 0;
+}
+
+.insight-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  padding: 1.5rem;
+  display: flex;
+  gap: 1rem;
+  transition: all 0.3s ease;
+}
+
+.insight-card:hover {
+  border-color: var(--border-mid);
+}
+
+.insight-source {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--blue-primary);
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  white-space: nowrap;
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+
+.insight-content {
+  flex: 1;
+}
+
+.insight-text {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.insight-text strong {
+  color: var(--text-bright);
+  font-weight: 600;
+}
+
+/* ─── Readiness Philosophy ─── */
+.readiness-contrast {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin: 2rem 0;
+}
+
+.readiness-box {
+  padding: 2rem;
+  border-radius: 10px;
+  position: relative;
+}
+
+.readiness-box.wrong {
+  background: rgba(251, 113, 133, 0.04);
+  border: 1px solid rgba(251, 113, 133, 0.12);
+}
+
+.readiness-box.right {
+  background: rgba(52, 211, 153, 0.04);
+  border: 1px solid rgba(52, 211, 153, 0.12);
+}
+
+.readiness-box-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 0.75rem;
+}
+
+.readiness-box.wrong .readiness-box-label { color: var(--rose-accent); }
+.readiness-box.right .readiness-box-label { color: var(--green-accent); }
+
+.readiness-box h4 {
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-size: 1.15rem;
+  font-weight: 400;
+  margin-bottom: 0.75rem;
+}
+
+.readiness-box.wrong h4 { color: var(--rose-accent); }
+.readiness-box.right h4 { color: var(--green-accent); }
+
+.readiness-box p {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* ─── Remediation Streams ─── */
+.remediation-list {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+  margin: 2rem 0;
+}
+
+.remediation-item {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  padding: 1.25rem;
+  border-left: 3px solid var(--amber-accent);
+  transition: all 0.3s ease;
+}
+
+.remediation-item:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-mid);
+  border-left-color: var(--amber-accent);
+}
+
+.remediation-item h4 {
+  font-size: 0.82rem;
+  margin-bottom: 0.35rem;
+}
+
+.remediation-item p {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.remediation-note {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  font-style: italic;
+  margin-top: 1rem;
+  padding: 1rem 1.25rem;
+  background: rgba(251, 191, 36, 0.04);
+  border: 1px solid rgba(251, 191, 36, 0.1);
+  border-radius: 8px;
+}
+
+.remediation-note strong {
+  color: var(--amber-accent);
+  font-style: normal;
+}
+
+/* ─── Next Steps ─── */
+.steps-list {
+  list-style: none;
+  padding: 0;
+  margin: 2rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.steps-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  transition: all 0.3s ease;
+}
+
+.steps-list li:hover {
+  border-color: var(--border-mid);
+  background: var(--bg-card-hover);
+}
+
+.step-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--blue-primary);
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.15);
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+}
+
+/* ─── Flywheel Diagram ─── */
+.flywheel-wrap {
+  margin: 2.5rem 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.flywheel {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding: 2rem 0;
+}
+
+.flywheel-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  position: relative;
+}
+
+.flywheel-circle {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-bright);
+  border: 2px solid;
+  position: relative;
+  z-index: 2;
+}
+
+.flywheel-circle.fc-uc { background: rgba(59, 130, 246, 0.1); border-color: rgba(59, 130, 246, 0.4); }
+.flywheel-circle.fc-proto { background: rgba(139, 92, 246, 0.1); border-color: rgba(139, 92, 246, 0.4); }
+.flywheel-circle.fc-pilot { background: rgba(34, 211, 238, 0.1); border-color: rgba(34, 211, 238, 0.4); }
+.flywheel-circle.fc-prod { background: rgba(52, 211, 153, 0.1); border-color: rgba(52, 211, 153, 0.4); }
+
+.flywheel-arrow {
+  width: 48px;
+  height: 2px;
+  background: var(--border-mid);
+  position: relative;
+  z-index: 1;
+}
+
+.flywheel-arrow::after {
+  content: '›';
+  position: absolute;
+  right: -4px;
+  top: -9px;
+  color: var(--text-muted);
+  font-size: 1rem;
+}
+
+.flywheel-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.55rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-top: 0.75rem;
+}
+
+.flywheel-return {
+  margin-top: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.08em;
+  color: var(--green-accent);
+  opacity: 0.6;
+}
+
+.flywheel-return-line {
+  height: 1px;
+  width: 300px;
+  background: linear-gradient(90deg, var(--green-accent), transparent);
+  opacity: 0.3;
+}
+
+/* ─── Governance Wrapper Visual ─── */
+.gov-wrapper-visual {
+  margin: 2rem 0;
+  border: 2px dashed rgba(139, 92, 246, 0.25);
+  border-radius: 14px;
+  padding: 1.5rem;
+  position: relative;
+}
+
+.gov-wrapper-label {
+  position: absolute;
+  top: -0.55rem;
+  left: 2rem;
+  background: var(--bg-deep);
+  padding: 0 0.75rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--purple-light);
+}
+
+/* ─── Footer ─── */
+.doc-footer {
+  margin-top: 2rem;
+  padding: 2.5rem 0;
+  border-top: 1px solid var(--border-subtle);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.footer-brand {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+}
+
+.footer-brand span {
+  color: var(--blue-primary);
+  font-weight: 600;
+}
+
+.footer-conf {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--rose-accent);
+  opacity: 0.6;
+}
+
+/* ─── Divider ─── */
+.divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border-mid), transparent);
+  margin: 1.5rem 0;
+}
+
+/* ─── Utility ─── */
+.text-blue { color: var(--blue-light); }
+.text-purple { color: var(--purple-light); }
+.text-cyan { color: var(--cyan-accent); }
+.text-green { color: var(--green-accent); }
+.text-amber { color: var(--amber-accent); }
+.text-rose { color: var(--rose-accent); }
+.text-bright { color: var(--text-bright); }
+.mono { font-family: 'JetBrains Mono', monospace; }
+.fw-600 { font-weight: 600; }
+
+/* ═══════════════════ INLINE EDIT STYLES ═══════════════════ */
+
+/* Hover indicator */
+[data-block-id] {
+  cursor: pointer;
+  transition: outline 0.15s ease, outline-offset 0.15s ease;
+  outline: 2px dashed transparent;
+  outline-offset: 3px;
+  border-radius: 3px;
+}
+
+[data-block-id]:hover {
+  outline-color: rgba(59, 130, 246, 0.35);
+}
+
+/* Editing state */
+[data-block-id].editing {
+  outline: 2px solid var(--blue-primary) !important;
+  outline-offset: 4px;
+  background: rgba(59, 130, 246, 0.04) !important;
+}
+
+/* Deleted state */
+[data-block-id].deleted {
+  opacity: 0;
+  max-height: 0;
+  overflow: hidden;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: none !important;
+  pointer-events: none;
+  transition: opacity 0.3s, max-height 0.3s;
+}
+
+/* Show-deleted mode */
+body.show-deleted [data-block-id].deleted {
+  opacity: 0.35;
+  max-height: 500px;
+  overflow: visible;
+  text-decoration: line-through;
+  pointer-events: auto;
+  padding: revert !important;
+  margin: revert !important;
+  position: relative;
+}
+
+body.show-deleted [data-block-id].deleted::after {
+  content: 'DELETED';
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.5rem;
+  letter-spacing: 0.1em;
+  color: var(--rose-accent);
+  background: rgba(251, 113, 133, 0.15);
+  padding: 0.1rem 0.4rem;
+  border-radius: 3px;
+  text-decoration: none;
+}
+
+/* Floating toolbar */
+.edit-toolbar {
+  position: fixed;
+  z-index: 9999;
+  display: flex;
+  gap: 0.35rem;
+  padding: 0.4rem;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-accent);
+  border-radius: 8px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  animation: toolbar-in 0.15s ease;
+}
+
+@keyframes toolbar-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.edit-toolbar button {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 0.35rem 0.7rem;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.edit-toolbar .btn-save {
+  background: rgba(52, 211, 153, 0.15);
+  color: var(--green-accent);
+  border-color: rgba(52, 211, 153, 0.3);
+}
+.edit-toolbar .btn-save:hover { background: rgba(52, 211, 153, 0.25); }
+
+.edit-toolbar .btn-cancel {
+  background: rgba(148, 163, 184, 0.1);
+  color: var(--text-secondary);
+  border-color: rgba(148, 163, 184, 0.2);
+}
+.edit-toolbar .btn-cancel:hover { background: rgba(148, 163, 184, 0.2); }
+
+.edit-toolbar .btn-delete {
+  background: rgba(251, 113, 133, 0.1);
+  color: var(--rose-accent);
+  border-color: rgba(251, 113, 133, 0.2);
+}
+.edit-toolbar .btn-delete:hover { background: rgba(251, 113, 133, 0.2); }
+
+.edit-toolbar .btn-restore {
+  background: rgba(59, 130, 246, 0.15);
+  color: var(--blue-light);
+  border-color: rgba(59, 130, 246, 0.3);
+}
+.edit-toolbar .btn-restore:hover { background: rgba(59, 130, 246, 0.25); }
+
+/* Save flash */
+@keyframes save-flash {
+  0% { outline-color: var(--green-accent); }
+  100% { outline-color: transparent; }
+}
+[data-block-id].just-saved {
+  animation: save-flash 0.8s ease;
+}
+
+/* Show Deleted toggle button */
+.show-deleted-toggle {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  z-index: 999;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.05em;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  border: 1px solid var(--border-mid);
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+}
+
+.show-deleted-toggle:hover {
+  border-color: var(--border-accent);
+  color: var(--text-primary);
+}
+
+.show-deleted-toggle.active {
+  background: rgba(251, 113, 133, 0.1);
+  border-color: rgba(251, 113, 133, 0.3);
+  color: var(--rose-accent);
+}
+
+/* ─── Print ─── */
+@media print {
+  body { background: #fff; color: #111; }
+  body::before, body::after { display: none; }
+  .doc-nav { display: none; }
+  .page-wrapper { max-width: 100%; padding: 0 1cm; }
+  .hero { padding: 2cm 0 1cm; }
+  .section { padding: 1.5cm 0; break-inside: avoid; }
+  .pipeline-phase, .card, .tier-card, .insight-card, .tech-item {
+    background: #f8f9fa;
+    border-color: #ddd;
+    break-inside: avoid;
+  }
+  .pipeline-phase:hover, .card:hover { background: #f8f9fa; }
+  * { color: #222 !important; }
+  th { color: #666 !important; }
+  td { color: #333 !important; }
+  .hero h1, h2, h3, h4 { color: #111 !important; }
+  .phase-name, .text-bright, .tier-title { color: #111 !important; }
+  .callout-quote { color: #222 !important; }
+  .fte-badge { background: #e8edf5 !important; color: #333 !important; }
+  .tier-card::before { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+  [data-block-id] { outline: none !important; cursor: default; }
+  .edit-toolbar, .show-deleted-toggle, .edit-status { display: none !important; }
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 900px) {
+  .hero h1 { font-size: 2.4rem; }
+  .section h2 { font-size: 1.8rem; }
+  .pipeline-track { grid-template-columns: 1fr; }
+  .pipeline-phase { border-radius: 8px !important; }
+  .pipeline-phase::after { display: none; }
+  .cards-grid-5 { grid-template-columns: repeat(3, 1fr); }
+  .tier-grid { grid-template-columns: 1fr; }
+  .readiness-contrast { grid-template-columns: 1fr; }
+  .tech-grid { grid-template-columns: 1fr 1fr; }
+  .insight-grid { grid-template-columns: 1fr; }
+  .remediation-list { grid-template-columns: 1fr 1fr; }
+  .flywheel { flex-wrap: wrap; justify-content: center; }
+  .org-row { flex-wrap: wrap; }
+}
+
+@media (max-width: 600px) {
+  html { font-size: 14px; }
+  .cards-grid-5 { grid-template-columns: 1fr 1fr; }
+  .tech-grid { grid-template-columns: 1fr; }
+  .remediation-list { grid-template-columns: 1fr; }
+  .hero-meta { flex-direction: column; gap: 1rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="doc-nav">
+  <div class="nav-inner">
+    <div class="nav-brand">Data<sup>#</sup>3 &nbsp;·&nbsp; Agentic AI Practice</div>
+    <div style="display:flex;align-items:center;">
+      <div class="nav-status">Draft — Internal Only</div>
+      <span class="edit-status" id="editStatus"></span>
+    </div>
+  </div>
+</nav>
+
+<div class="page-wrapper">
+
+  <!-- ═══════════════════ HERO ═══════════════════ -->
+  <header class="hero">
+    <div class="hero-eyebrow">Business Case Input</div>
+    <h1 data-block-id="hero-h1-1">Agentic AI Practice<br><em>Resourcing &amp; Delivery Model</em></h1>
+    <p class="hero-subtitle" data-block-id="hero-p-1">
+      Defining the minimum viable squad, delivery methodology, and resource investment model for Data<sup>#</sup>3's Agentic AI practice — built for speed to value with governance by design.
+    </p>
+    <div class="hero-meta">
+      <div class="hero-meta-item">
+        <span class="hero-meta-label">Prepared</span>
+        <span class="hero-meta-value" data-block-id="hero-meta-1">February 2026</span>
+      </div>
+      <div class="hero-meta-item">
+        <span class="hero-meta-label">Classification</span>
+        <span class="hero-meta-value text-amber" data-block-id="hero-meta-2">DRAFT — For Internal Use Only</span>
+      </div>
+      <div class="hero-meta-item">
+        <span class="hero-meta-label">Deadline</span>
+        <span class="hero-meta-value" data-block-id="hero-meta-3">Business case by 13 March 2026</span>
+      </div>
+      <div class="hero-meta-item">
+        <span class="hero-meta-label">Next Step</span>
+        <span class="hero-meta-value" data-block-id="hero-meta-4">Workshop with Jack Latrobe</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ═══════════════════ S1: EXECUTIVE CONTEXT ═══════════════════ -->
+  <section class="section" id="s1">
+    <div class="section-num">01 &mdash; Executive Context</div>
+    <h2 data-block-id="s1-h2-1">What We're <em>Building For</em></h2>
+    <p class="section-lead" data-block-id="s1-lead-1">
+      Matthew Gooden requires a resource model and business case for Data<sup>#</sup>3's Agentic AI delivery capability.
+      This document provides the first-pass thinking on methodology, team composition, and investment needed to stand up a
+      repeatable AI practice that can be dropped onto customer sites from FY27.
+    </p>
+
+    <div class="callout">
+      <div class="callout-quote" data-block-id="s1-quote-1">"Time to value, not time to governance."</div>
+      <div class="callout-attr" data-block-id="s1-attr-1">— Matthew Gooden, on the delivery philosophy</div>
+    </div>
+
+    <div class="cards-grid">
+      <div class="card">
+        <div class="card-icon">◎</div>
+        <h4 data-block-id="s1-card-h4-1">The Ask</h4>
+        <p data-block-id="s1-card-p-1">Model an AI practice. Define the minimum viable squad — the critical mass of skills and resources needed to start driving agentic delivery at customer sites.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon purple">⬡</div>
+        <h4 data-block-id="s1-card-h4-2">The Constraint</h4>
+        <p data-block-id="s1-card-p-2">Business case must be submitted by 13 March 2026 — or it doesn't happen this financial year. Numbers don't have to be perfect, but need logic and justification.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon cyan">↻</div>
+        <h4 data-block-id="s1-card-h4-3">The Model</h4>
+        <p data-block-id="s1-card-p-3">A reusable squad that lands on-site: once foundation is in place, it's the rinse-and-repeat flywheel of Use Case → Prototype → Pilot → Production.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════ S2: METHODOLOGY ═══════════════════ -->
+  <section class="section" id="s2">
+    <div class="section-num">02 &mdash; Methodology Overview</div>
+    <h2 data-block-id="s2-h2-1">Delivery <em>Pipeline</em></h2>
+    <p class="section-lead" data-block-id="s2-lead-1">
+      Five phases from initial assessment through to ongoing operations. Governance and security wrap the delivery cycle.
+      Remediation runs in parallel from day one — not blocking, but enabling.
+    </p>
+
+    <div class="pipeline">
+      <div class="pipeline-track">
+        <div class="pipeline-phase">
+          <div class="phase-num">Phase 01</div>
+          <div class="phase-name" data-block-id="s2-phase-name-1">Agentic AI Readiness Assessment</div>
+          <div class="phase-duration" data-block-id="s2-phase-dur-1">2–4 weeks</div>
+          <div class="phase-desc" data-block-id="s2-phase-desc-1">"Not 'is everything ready?' but 'is anything stopping us?'" — Identify showstoppers in governance, risk, compliance, security. Non-showstoppers become parallel remediation.</div>
+        </div>
+        <div class="pipeline-phase">
+          <div class="phase-num">Phase 02</div>
+          <div class="phase-name" data-block-id="s2-phase-name-2">Agentic AI Foundation</div>
+          <div class="phase-duration" data-block-id="s2-phase-dur-2">4–8 weeks</div>
+          <div class="phase-desc" data-block-id="s2-phase-desc-2">Stand up Azure Landing Zone &amp; Security, Microsoft Fabric, Azure AI Foundry, governance framework. The "Enterprise AI Launchpad."</div>
+        </div>
+        <div class="pipeline-phase">
+          <div class="phase-num">Phase 03</div>
+          <div class="phase-name" data-block-id="s2-phase-name-3">Pilot</div>
+          <div class="phase-duration" data-block-id="s2-phase-dur-3">4–6 wks / use case</div>
+          <div class="phase-desc" data-block-id="s2-phase-desc-3">Repeatable cycle. Each selected use case: Prototype → Pilot → validate value hypothesis. Rinse and repeat flywheel.</div>
+        </div>
+        <div class="pipeline-phase">
+          <div class="phase-num">Phase 04</div>
+          <div class="phase-name" data-block-id="s2-phase-name-4">Production inc. OCM</div>
+          <div class="phase-duration" data-block-id="s2-phase-dur-4">4–8 wks / use case</div>
+          <div class="phase-desc" data-block-id="s2-phase-desc-4">Harden, scale, embed change. OCM is critical. Security review, production deployment, adoption programs.</div>
+        </div>
+        <div class="pipeline-phase">
+          <div class="phase-num">Phase 05</div>
+          <div class="phase-name" data-block-id="s2-phase-name-5">Operate</div>
+          <div class="phase-duration" data-block-id="s2-phase-dur-5">Ongoing</div>
+          <div class="phase-desc" data-block-id="s2-phase-desc-5">Monitoring, optimization, support, continuous improvement. Managed service model.</div>
+        </div>
+      </div>
+
+      <div class="pipeline-annotations">
+        <div class="pipeline-annotation">
+          <span class="annotation-label purple">Governance &amp; Security</span>
+          <div class="annotation-bar governance"></div>
+          <span style="font-size:0.6rem;color:var(--text-muted);font-family:'JetBrains Mono',monospace;">Wraps Phases 3–5</span>
+        </div>
+        <div class="pipeline-annotation">
+          <span class="annotation-label amber">Parallel Remediation</span>
+          <div class="annotation-bar remediation"></div>
+          <span style="font-size:0.6rem;color:var(--text-muted);font-family:'JetBrains Mono',monospace;">From Phase 1 onwards</span>
+        </div>
+        <div class="pipeline-annotation">
+          <span class="annotation-label green">Repeatable Flywheel</span>
+          <div class="annotation-bar flywheel"></div>
+          <span style="font-size:0.6rem;color:var(--text-muted);font-family:'JetBrains Mono',monospace;">UC → Proto → Pilot → Prod</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Flywheel Diagram -->
+    <h3 data-block-id="s2-h3-1">The Repeatable Delivery Cycle</h3>
+    <p data-block-id="s2-p-1">Once the foundation is in place, every new business problem enters the same flywheel — wrapped by governance and security at all times.</p>
+
+    <div class="gov-wrapper-visual">
+      <div class="gov-wrapper-label">⬡ Governance &amp; Security Wrap</div>
+      <div class="flywheel-wrap">
+        <div class="flywheel">
+          <div class="flywheel-step">
+            <div class="flywheel-circle fc-uc">Use Case<br>Discovery</div>
+            <div class="flywheel-label">Ideation</div>
+          </div>
+          <div class="flywheel-arrow"></div>
+          <div class="flywheel-step">
+            <div class="flywheel-circle fc-proto">Prototype</div>
+            <div class="flywheel-label">Value Hypothesis</div>
+          </div>
+          <div class="flywheel-arrow"></div>
+          <div class="flywheel-step">
+            <div class="flywheel-circle fc-pilot">Pilot</div>
+            <div class="flywheel-label">Validate &amp; Refine</div>
+          </div>
+          <div class="flywheel-arrow"></div>
+          <div class="flywheel-step">
+            <div class="flywheel-circle fc-prod">Production<br>+ OCM</div>
+            <div class="flywheel-label">Scale &amp; Embed</div>
+          </div>
+        </div>
+        <div class="flywheel-return">
+          <div class="flywheel-return-line"></div>
+          ↩ Next Use Case — Repeat
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════ S3: READINESS DEEP DIVE ═══════════════════ -->
+  <section class="section" id="s3">
+    <div class="section-num">03 &mdash; Readiness Assessment</div>
+    <h2 data-block-id="s3-h2-1">The Philosophy of <em>Readiness</em></h2>
+    <p class="section-lead" data-block-id="s3-lead-1">
+      Readiness is a 2–4 week engagement measured in weeks, not months.
+      Its purpose is singular: clear the path for delivery. Everything else runs in parallel.
+    </p>
+
+    <div class="readiness-contrast">
+      <div class="readiness-box wrong">
+        <div class="readiness-box-label">✕ &nbsp;Not This</div>
+        <h4 data-block-id="s3-rb-h4-1">"Is everything in place?"</h4>
+        <p data-block-id="s3-rb-p-1">The traditional approach stalls on perfection. Organisations spend 12 months developing a data classification framework before deploying a single agent. Time to governance kills momentum and value.</p>
+      </div>
+      <div class="readiness-box right">
+        <div class="readiness-box-label">✓ &nbsp;This</div>
+        <h4 data-block-id="s3-rb-h4-2">"Is anything stopping us?"</h4>
+        <p data-block-id="s3-rb-p-2">Identify showstoppers — things that will damage your business if not addressed before moving forward. Mitigate those. Everything else is remediation in parallel.</p>
+      </div>
+    </div>
+
+    <h3 data-block-id="s3-h3-1">Five Assessment Dimensions</h3>
+    <p data-block-id="s3-p-1">Aligned with TDWI's Agentic AI Readiness framework — assess across five critical pillars to identify blockers quickly.</p>
+
+    <div class="cards-grid-5">
+      <div class="card-sm">
+        <div class="card-sm-icon">🏛</div>
+        <h4 data-block-id="s3-dim-1">Organizational Readiness</h4>
+      </div>
+      <div class="card-sm">
+        <div class="card-sm-icon">◈</div>
+        <h4 data-block-id="s3-dim-2">Data &amp; Context Readiness</h4>
+      </div>
+      <div class="card-sm">
+        <div class="card-sm-icon">⚙</div>
+        <h4 data-block-id="s3-dim-3">Tech &amp; Engineering Readiness</h4>
+      </div>
+      <div class="card-sm">
+        <div class="card-sm-icon">⛊</div>
+        <h4 data-block-id="s3-dim-4">Governance, Risk &amp; Control</h4>
+      </div>
+      <div class="card-sm">
+        <div class="card-sm-icon">↗</div>
+        <h4 data-block-id="s3-dim-5">Change Readiness</h4>
+      </div>
+    </div>
+
+    <h3 data-block-id="s3-h3-2">Outputs</h3>
+    <div class="cards-grid">
+      <div class="card">
+        <h4 class="text-rose" data-block-id="s3-out-h4-1">Showstopper Register</h4>
+        <p data-block-id="s3-out-p-1">Critical blockers that must be resolved before any deployment. These are the "damage your business" risks.</p>
+      </div>
+      <div class="card">
+        <h4 class="text-amber" data-block-id="s3-out-h4-2">Remediation Backlog</h4>
+        <p data-block-id="s3-out-p-2">Non-critical items that need work but don't block progress. These become parallel workstreams — and additional service revenue.</p>
+      </div>
+      <div class="card">
+        <h4 class="text-green" data-block-id="s3-out-h4-3">Go / No-Go Recommendation</h4>
+        <p data-block-id="s3-out-p-3">Clear recommendation on readiness to proceed to Foundation, with risk heat map and prioritized action plan.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════ S4: CORE SQUAD ═══════════════════ -->
+  <section class="section" id="s4">
+    <div class="section-num">04 &mdash; Core Delivery Squad</div>
+    <h2 data-block-id="s4-h2-1">Minimum Viable <em>Squad</em></h2>
+    <p class="section-lead" data-block-id="s4-lead-1">
+      The team that drops onto a customer site once the door is open. Sized for a medium-complexity engagement running 1–2 concurrent use cases through the delivery cycle.
+    </p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:24%">Role</th>
+            <th style="width:7%">FTE</th>
+            <th style="width:24%">Phases Active</th>
+            <th>Key Responsibilities</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="fw-600 text-bright" data-block-id="s4-td-role-1">Principal Consultant / AI Strategist</td>
+            <td><span class="fte-badge full">1.0</span></td>
+            <td><div class="phase-tags"><span class="phase-tag">Readiness</span><span class="phase-tag">Foundation</span><span class="phase-tag">Pilot</span><span class="phase-tag">Production</span><span class="phase-tag">Operate</span></div></td>
+            <td data-block-id="s4-td-resp-1">Engagement lead, customer advisory, methodology ownership, value articulation, stakeholder management</td>
+          </tr>
+          <tr>
+            <td class="fw-600 text-bright" data-block-id="s4-td-role-2">AI / ML Engineer</td>
+            <td><span class="fte-badge double">2.0</span></td>
+            <td><div class="phase-tags"><span class="phase-tag">Foundation</span><span class="phase-tag">Pilot</span><span class="phase-tag">Production</span><span class="phase-tag">Operate</span></div></td>
+            <td data-block-id="s4-td-resp-2">Agent development (Copilot Studio, AI Foundry), prompt engineering, model integration, multi-agent orchestration, testing</td>
+          </tr>
+          <tr>
+            <td class="fw-600 text-bright" data-block-id="s4-td-role-3">Solution Architect</td>
+            <td><span class="fte-badge full">1.0</span></td>
+            <td><div class="phase-tags"><span class="phase-tag">Readiness</span><span class="phase-tag">Foundation</span><span class="phase-tag">Pilot</span><span class="phase-tag">Production</span></div></td>
+            <td data-block-id="s4-td-resp-3">Azure architecture, Fabric design, AI Foundry patterns, security architecture, Well-Architected alignment</td>
+          </tr>
+          <tr>
+            <td class="fw-600 text-bright" data-block-id="s4-td-role-4">Business Analyst</td>
+            <td><span class="fte-badge full">1.0</span></td>
+            <td><div class="phase-tags"><span class="phase-tag">Readiness</span><span class="phase-tag">Foundation</span><span class="phase-tag">Pilot</span><span class="phase-tag">Production</span></div></td>
+            <td data-block-id="s4-td-resp-4">Use case discovery, requirements elicitation, process mapping, value hypothesis development, acceptance criteria</td>
+          </tr>
+          <tr>
+            <td class="fw-600 text-bright" data-block-id="s4-td-role-5">Cloud / Platform Engineer</td>
+            <td><span class="fte-badge full">1.0</span></td>
+            <td><div class="phase-tags"><span class="phase-tag">Foundation</span><span class="phase-tag">Pilot</span><span class="phase-tag">Production</span><span class="phase-tag">Operate</span></div></td>
+            <td data-block-id="s4-td-resp-5">Azure Landing Zone deployment, Infrastructure as Code, CI/CD pipelines, platform operations, monitoring</td>
+          </tr>
+          <tr>
+            <td class="fw-600 text-bright" data-block-id="s4-td-role-6">Data Engineer</td>
+            <td><span class="fte-badge full">1.0</span></td>
+            <td><div class="phase-tags"><span class="phase-tag">Foundation</span><span class="phase-tag">Pilot</span></div></td>
+            <td data-block-id="s4-td-resp-6">Microsoft Fabric implementation, data pipelines, data integration, knowledge stores, lakehouse architecture</td>
+          </tr>
+          <tr>
+            <td class="fw-600 text-bright" data-block-id="s4-td-role-7">Security &amp; Compliance Specialist</td>
+            <td><span class="fte-badge half">0.5</span></td>
+            <td><div class="phase-tags"><span class="phase-tag">Readiness</span><span class="phase-tag">Foundation</span><span class="phase-tag">Production</span></div></td>
+            <td data-block-id="s4-td-resp-7">Security review, DLP configuration, identity &amp; access, compliance frameworks, Responsible AI guardrails</td>
+          </tr>
+          <tr>
+            <td class="fw-600 text-bright" data-block-id="s4-td-role-8">OCM / Change Specialist</td>
+            <td><span class="fte-badge full">1.0</span></td>
+            <td><div class="phase-tags"><span class="phase-tag">Pilot</span><span class="phase-tag">Production</span><span class="phase-tag">Operate</span></div></td>
+            <td data-block-id="s4-td-resp-8">Adoption strategy, training program design, communications, stakeholder engagement, impact measurement, surveys &amp; telemetry</td>
+          </tr>
+          <tr>
+            <td class="fw-600 text-bright" data-block-id="s4-td-role-9">Delivery / Project Manager</td>
+            <td><span class="fte-badge full">1.0</span></td>
+            <td><div class="phase-tags"><span class="phase-tag">Readiness</span><span class="phase-tag">Foundation</span><span class="phase-tag">Pilot</span><span class="phase-tag">Production</span><span class="phase-tag">Operate</span></div></td>
+            <td data-block-id="s4-td-resp-9">Delivery governance, resource coordination, risk &amp; issue management, customer reporting, budget tracking</td>
+          </tr>
+          <tr class="row-total">
+            <td>Total Core Squad</td>
+            <td><span class="fte-badge total-badge">9.5</span></td>
+            <td></td>
+            <td data-block-id="s4-td-total-desc" style="font-weight:400;color:var(--text-secondary)">Minimum viable team for medium-complexity, 1–2 concurrent use case delivery</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout" style="margin-top:2rem">
+      <div class="callout-quote" style="font-size:1.1rem" data-block-id="s4-quote-1">"I just need to understand what is the minimum viable squad or team critical mass that we need to start with next year."</div>
+      <div class="callout-attr" data-block-id="s4-attr-1">— Matthew Gooden</div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════ S5: SCALING MODEL ═══════════════════ -->
+  <section class="section" id="s5">
+    <div class="section-num">05 &mdash; Scaling Model</div>
+    <h2 data-block-id="s5-h2-1">Three Engagement <em>Tiers</em></h2>
+    <p class="section-lead" data-block-id="s5-lead-1">
+      The squad scales with customer need. Start small to land, expand as value is proven.
+      The foundation investment is a one-time setup; the use case cycle is where the flywheel generates recurring revenue.
+    </p>
+
+    <div class="tier-grid">
+      <div class="tier-card t1">
+        <div class="tier-label">Tier 1</div>
+        <div class="tier-title" data-block-id="s5-tier-title-1">Targeted</div>
+        <div class="tier-stats">
+          <div>
+            <div class="tier-stat-val">6–7</div>
+            <div class="tier-stat-label">FTE</div>
+          </div>
+          <div>
+            <div class="tier-stat-val">3–4 mo</div>
+            <div class="tier-stat-label">Duration</div>
+          </div>
+        </div>
+        <ul class="tier-details">
+          <li data-block-id="s5-t1-li-1">Single use case delivery</li>
+          <li data-block-id="s5-t1-li-2">First engagement / proof of value</li>
+          <li data-block-id="s5-t1-li-3">Land deal — establish trust</li>
+          <li data-block-id="s5-t1-li-4">Fixed-price or T&amp;M model</li>
+          <li data-block-id="s5-t1-li-5">Ideal for Juice IT pipeline leads</li>
+        </ul>
+      </div>
+
+      <div class="tier-card t2">
+        <div class="tier-label">Tier 2</div>
+        <div class="tier-title" data-block-id="s5-tier-title-2">Standard</div>
+        <div class="tier-stats">
+          <div>
+            <div class="tier-stat-val">9–12</div>
+            <div class="tier-stat-label">FTE</div>
+          </div>
+          <div>
+            <div class="tier-stat-val">6–9 mo</div>
+            <div class="tier-stat-label">Duration</div>
+          </div>
+        </div>
+        <ul class="tier-details">
+          <li data-block-id="s5-t2-li-1">2–3 concurrent use cases</li>
+          <li data-block-id="s5-t2-li-2">Post-foundation flywheel running</li>
+          <li data-block-id="s5-t2-li-3">Medium enterprise engagement</li>
+          <li data-block-id="s5-t2-li-4">Retainer + T&amp;M model</li>
+          <li data-block-id="s5-t2-li-5">Cross-sell into remediation streams</li>
+        </ul>
+      </div>
+
+      <div class="tier-card t3">
+        <div class="tier-label">Tier 3</div>
+        <div class="tier-title" data-block-id="s5-tier-title-3">Enterprise</div>
+        <div class="tier-stats">
+          <div>
+            <div class="tier-stat-val">15–20</div>
+            <div class="tier-stat-label">FTE</div>
+          </div>
+          <div>
+            <div class="tier-stat-val">12+ mo</div>
+            <div class="tier-stat-label">Duration</div>
+          </div>
+        </div>
+        <ul class="tier-details">
+          <li data-block-id="s5-t3-li-1">4+ concurrent use cases</li>
+          <li data-block-id="s5-t3-li-2">Large enterprise transformation</li>
+          <li data-block-id="s5-t3-li-3">Strategic accounts</li>
+          <li data-block-id="s5-t3-li-4">Multi-year managed service</li>
+          <li data-block-id="s5-t3-li-5">Embedded practice model</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════ S6: REMEDIATION REVENUE ═══════════════════ -->
+  <section class="section" id="s6">
+    <div class="section-num">06 &mdash; Additional Revenue Streams</div>
+    <h2 data-block-id="s6-h2-1">Remediation as <em>Revenue</em></h2>
+    <p class="section-lead" data-block-id="s6-lead-1">
+      The Readiness Assessment doesn't just clear the path — it opens doors. Non-showstopper findings become
+      parallel workstreams delivered as separate SOWs, often pulling in broader Data<sup>#</sup>3 practice capabilities.
+    </p>
+
+    <div class="remediation-list">
+      <div class="remediation-item">
+        <h4 data-block-id="s6-rem-h4-1">Information Governance &amp; Data Classification</h4>
+        <p data-block-id="s6-rem-p-1">Data labelling, sensitivity frameworks, Purview deployment, retention policies — the work customers know they need but haven't started.</p>
+      </div>
+      <div class="remediation-item">
+        <h4 data-block-id="s6-rem-h4-2">Identity &amp; Access Management Uplift</h4>
+        <p data-block-id="s6-rem-p-2">Entra ID hardening, conditional access, privileged identity management, zero-trust alignment for AI workloads.</p>
+      </div>
+      <div class="remediation-item">
+        <h4 data-block-id="s6-rem-h4-3">Security Posture &amp; Hardening</h4>
+        <p data-block-id="s6-rem-p-3">Defender for Cloud, security baselines, network segmentation, DLP policies, threat protection for AI endpoints.</p>
+      </div>
+      <div class="remediation-item">
+        <h4 data-block-id="s6-rem-h4-4">Compliance Framework Development</h4>
+        <p data-block-id="s6-rem-p-4">AI-specific policies, responsible AI governance, regulatory alignment, risk registers, audit readiness.</p>
+      </div>
+      <div class="remediation-item">
+        <h4 data-block-id="s6-rem-h4-5">Data Platform Modernization</h4>
+        <p data-block-id="s6-rem-p-5">Migration to Fabric, data quality uplift, master data management, analytics modernization — enabling the data layer agents need.</p>
+      </div>
+      <div class="remediation-item">
+        <h4 data-block-id="s6-rem-h4-6">Business Process Re-engineering</h4>
+        <p data-block-id="s6-rem-p-6">Process mapping, automation opportunity assessment, workflow redesign — the BA-heavy work that makes agents effective.</p>
+      </div>
+    </div>
+
+    <div class="remediation-note" data-block-id="s6-rem-note-1">
+      <strong>Revenue multiplier:</strong> Every Readiness Assessment generates a remediation backlog. Each backlog item is a potential SOW that cross-sells into Data<sup>#</sup>3's Security, Modern Workspace, and Hybrid Cloud practices. The AI practice becomes the tip of the spear.
+    </div>
+  </section>
+
+  <!-- ═══════════════════ S7: PRACTICE STRUCTURE ═══════════════════ -->
+  <section class="section" id="s7">
+    <div class="section-num">07 &mdash; Practice Structure</div>
+    <h2 data-block-id="s7-h2-1">Organizational <em>Alignment</em></h2>
+    <p class="section-lead" data-block-id="s7-lead-1">
+      The AI practice follows Data<sup>#</sup>3's standard practice structure with delivery teams adapted for the squad model.
+      Practice Manager and Product Manager work in lockstep — one runs the business, the other evolves the offering.
+    </p>
+
+    <div class="org-chart">
+      <div class="org-row">
+        <div class="org-node primary">
+          <div class="org-role" data-block-id="s7-org-role-1">Practice Manager</div>
+          <div class="org-desc" data-block-id="s7-org-desc-1">P&amp;L · Team Management · Market Strategy</div>
+        </div>
+        <div class="org-node primary">
+          <div class="org-role" data-block-id="s7-org-role-2">Product Manager</div>
+          <div class="org-desc" data-block-id="s7-org-desc-2">Offerings · Methodology · Go-to-Market · Innovation</div>
+        </div>
+      </div>
+      <div class="org-branch-connector"></div>
+      <div class="org-row" style="gap: 0.75rem;">
+        <div class="org-node secondary">
+          <div class="org-role" data-block-id="s7-org-role-3">Principal Consultants</div>
+          <div class="org-desc" data-block-id="s7-org-desc-3">Advisory · Pre-Sales · Engagement Lead</div>
+        </div>
+        <div class="org-node secondary">
+          <div class="org-role" data-block-id="s7-org-role-4">Sales Specialists</div>
+          <div class="org-desc" data-block-id="s7-org-desc-4">Pipeline · Account Strategy · Revenue</div>
+        </div>
+        <div class="org-node secondary">
+          <div class="org-role" data-block-id="s7-org-role-5">Delivery Squads</div>
+          <div class="org-desc" data-block-id="s7-org-desc-5">Core Team Model (9.5 FTE per squad)</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout" style="margin-top: 2rem;">
+      <div class="callout-quote" style="font-size:1rem" data-block-id="s7-quote-1">"The practice manager and a product manager — they're in lockstep with each other. They're the ones that are bashing down the doors with the customers and with our internal staff to enable to sell."</div>
+      <div class="callout-attr" data-block-id="s7-attr-1">— Matthew Gooden, on practice structure</div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════ S8: TECH STACK ═══════════════════ -->
+  <section class="section" id="s8">
+    <div class="section-num">08 &mdash; Technology Stack</div>
+    <h2 data-block-id="s8-h2-1">The Platform <em>Foundation</em></h2>
+    <p class="section-lead" data-block-id="s8-lead-1">
+      Built on Microsoft's enterprise AI stack — leveraging the Azure Well-Architected Framework and Cloud Adoption Framework best practices.
+      This is the "Agentic AI Foundation" that forms the launchpad.
+    </p>
+
+    <div class="tech-grid">
+      <div class="tech-item">
+        <div class="tech-dot blue"></div>
+        <div>
+          <div class="tech-name" data-block-id="s8-tech-name-1">Microsoft Copilot Studio</div>
+          <div class="tech-desc" data-block-id="s8-tech-desc-1">Low-code agent development, M365 integration, rapid prototyping, citizen developer enablement</div>
+        </div>
+      </div>
+      <div class="tech-item">
+        <div class="tech-dot purple"></div>
+        <div>
+          <div class="tech-name" data-block-id="s8-tech-name-2">Azure AI Foundry</div>
+          <div class="tech-desc" data-block-id="s8-tech-desc-2">Enterprise agent platform, multi-agent orchestration, model catalogue, code-first development</div>
+        </div>
+      </div>
+      <div class="tech-item">
+        <div class="tech-dot cyan"></div>
+        <div>
+          <div class="tech-name" data-block-id="s8-tech-name-3">Microsoft Fabric</div>
+          <div class="tech-desc" data-block-id="s8-tech-desc-3">Unified data &amp; analytics platform, lakehouse architecture, data pipelines, knowledge stores</div>
+        </div>
+      </div>
+      <div class="tech-item">
+        <div class="tech-dot blue"></div>
+        <div>
+          <div class="tech-name" data-block-id="s8-tech-name-4">Azure Landing Zone</div>
+          <div class="tech-desc" data-block-id="s8-tech-desc-4">Well-Architected secure foundation, IaC templates, networking, identity, subscription management</div>
+        </div>
+      </div>
+      <div class="tech-item">
+        <div class="tech-dot purple"></div>
+        <div>
+          <div class="tech-name" data-block-id="s8-tech-name-5">Microsoft 365 Ecosystem</div>
+          <div class="tech-desc" data-block-id="s8-tech-desc-5">Teams integration, SharePoint, Graph API, Power Platform connectors, enterprise content</div>
+        </div>
+      </div>
+      <div class="tech-item">
+        <div class="tech-dot cyan"></div>
+        <div>
+          <div class="tech-name" data-block-id="s8-tech-name-6">Governance &amp; Security</div>
+          <div class="tech-desc" data-block-id="s8-tech-desc-6">Azure Policy, Microsoft Purview, Defender for Cloud, Entra ID, Responsible AI tooling</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════ S9: RESEARCH INSIGHTS ═══════════════════ -->
+  <section class="section" id="s9">
+    <div class="section-num">09 &mdash; Industry Context</div>
+    <h2 data-block-id="s9-h2-1">Research <em>Insights</em></h2>
+    <p class="section-lead" data-block-id="s9-lead-1">
+      The market is moving. These findings from leading analysts and consultancies validate the methodology and urgency —
+      and provide ammunition for the business case.
+    </p>
+
+    <div class="insight-grid">
+      <div class="insight-card">
+        <div class="insight-source">McKinsey</div>
+        <div class="insight-content">
+          <p class="insight-text" data-block-id="s9-insight-1">Agentic AI is projected to help unlock <strong>$2.6 trillion to $4.4 trillion annually</strong> in value across 60+ use cases. Just 1% of organisations believe their AI adoption has reached maturity.</p>
+        </div>
+      </div>
+      <div class="insight-card">
+        <div class="insight-source">Deloitte</div>
+        <div class="insight-content">
+          <p class="insight-text" data-block-id="s9-insight-2"><strong>Path to Scale 2.0:</strong> Six fundamentals must move together — Leadership &amp; Accountability, Strategy &amp; Value, Trustworthy AI, Operating Model, Technology &amp; Data Foundations, Change Readiness. Tackled in isolation, they will fail.</p>
+        </div>
+      </div>
+      <div class="insight-card">
+        <div class="insight-source">KPMG</div>
+        <div class="insight-content">
+          <p class="insight-text" data-block-id="s9-insight-3">"This isn't just a tech conversation — <strong>it's a leadership one.</strong> Agents will demand tighter alignment between business and technology leaders than anything that's come before."</p>
+        </div>
+      </div>
+      <div class="insight-card">
+        <div class="insight-source">Bain</div>
+        <div class="insight-content">
+          <p class="insight-text" data-block-id="s9-insight-4">Early movers are focusing investments on <strong>the most valuable areas, building foundational capabilities, and using agents in the transformation</strong> itself. Most companies aren't ready.</p>
+        </div>
+      </div>
+      <div class="insight-card">
+        <div class="insight-source">TDWI</div>
+        <div class="insight-content">
+          <p class="insight-text" data-block-id="s9-insight-5">Agentic AI Readiness Assessment evaluates <strong>five critical dimensions:</strong> Organizational, Data &amp; Context, Tech &amp; Engineering, Governance/Risk/Control, and Operationalization readiness.</p>
+        </div>
+      </div>
+      <div class="insight-card">
+        <div class="insight-source">IPM</div>
+        <div class="insight-content">
+          <p class="insight-text" data-block-id="s9-insight-6">"Scaling Agentic AI is <strong>a program challenge as much as an engineering challenge.</strong>" Organisations trapped in "Pilot Purgatory" need a new operating model, not new tools.</p>
+        </div>
+      </div>
+      <div class="insight-card" style="grid-column: 1 / -1;">
+        <div class="insight-source" style="writing-mode:horizontal-tb;">Maai Services</div>
+        <div class="insight-content">
+          <p class="insight-text" data-block-id="s9-insight-7"><strong>The Adoption-Value Gap:</strong> While 88% of firms use AI, only 6% capture significant value. Most are stuck in "Pilot Purgatory" with minimal EBIT impact. The value tipping point comes at cross-functional orchestration — when agents move from individual tasks to managing end-to-end value streams. Moving from Phase 1 to Phase 4 shifts growth from <strong>-26.5 pp to +13.9 pp relative to peers.</strong></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════ S10: NEXT STEPS ═══════════════════ -->
+  <section class="section" id="s10">
+    <div class="section-num">10 &mdash; Next Steps</div>
+    <h2 data-block-id="s10-h2-1">Path <em>Forward</em></h2>
+    <p class="section-lead" data-block-id="s10-lead-1">
+      Immediate actions to take this from first-pass thinking to business-case-ready numbers.
+    </p>
+
+    <ol class="steps-list">
+      <li>
+        <span class="step-num">1</span>
+        <div data-block-id="s10-step-1"><strong class="text-bright">Workshop with Jack Latrobe</strong> — Validate resourcing model, stress-test role definitions and FTE counts against delivery reality. Refine squad composition for Data<sup>#</sup>3 context.</div>
+      </li>
+      <li>
+        <span class="step-num">2</span>
+        <div data-block-id="s10-step-2"><strong class="text-bright">Map existing resources</strong> — Identify who in the current org can fill squad roles. Determine delta between current bench and target squad. Quantify hiring vs. redeployment.</div>
+      </li>
+      <li>
+        <span class="step-num">3</span>
+        <div data-block-id="s10-step-3"><strong class="text-bright">Finalize business case numbers</strong> — Cost model per tier, revenue projections per engagement type, break-even analysis. Target: ready for Matt by ~10 March 2026.</div>
+      </li>
+      <li>
+        <span class="step-num">4</span>
+        <div data-block-id="s10-step-4"><strong class="text-bright">Test against Juice IT Season 1 pipeline</strong> — Use upcoming customer conversations across all cities to validate demand, refine offerings, and identify first pilot engagement candidates.</div>
+      </li>
+      <li>
+        <span class="step-num">5</span>
+        <div data-block-id="s10-step-5"><strong class="text-bright">Refine methodology through delivery</strong> — First customer engagement ratifies the model. "We need to ratify the methodology of making sure we're not over-engineering or under-engineering it." — Iterate.</div>
+      </li>
+    </ol>
+  </section>
+
+  <!-- ═══════════════════ FOOTER ═══════════════════ -->
+  <footer class="doc-footer">
+    <div class="footer-brand">Data<sup>#</sup>3 &nbsp;·&nbsp; Australia's Trusted AI Partner</div>
+    <div class="footer-conf">Confidential — For Internal Use Only</div>
+  </footer>
+
+</div>
+
+<!-- Show Deleted toggle -->
+<button class="show-deleted-toggle" id="showDeletedBtn" onclick="toggleShowDeleted()">Show Deleted (0)</button>
+
+<!-- ═══════════════════ INLINE EDIT SCRIPT ═══════════════════ -->
+<script>
+(function() {
+  const PAGE_ID = 'agentic-resourcing';
+  const API = '/api/page-edits';
+
+  let editsMap = {};
+  let activeBlock = null;
+  let originalContent = '';
+  let toolbar = null;
+  let deletedCount = 0;
+
+  // ─── Status Indicator ───
+  const statusEl = document.getElementById('editStatus');
+
+  function showStatus(type, text) {
+    statusEl.className = 'edit-status ' + type;
+    statusEl.textContent = text;
+    if (type === 'saved') {
+      setTimeout(() => { statusEl.className = 'edit-status'; }, 2000);
+    }
+  }
+
+  // ─── Load Edits from DB ───
+  async function loadEdits() {
+    try {
+      const res = await fetch(API + '?page_id=' + encodeURIComponent(PAGE_ID));
+      if (!res.ok) return;
+      const data = await res.json();
+      editsMap = data.edits || {};
+      applyEdits();
+    } catch (e) {
+      console.error('Failed to load edits:', e);
+    }
+  }
+
+  function applyEdits() {
+    deletedCount = 0;
+    for (const [blockId, edit] of Object.entries(editsMap)) {
+      const el = document.querySelector('[data-block-id="' + blockId + '"]');
+      if (!el) continue;
+      if (edit.content !== null && edit.content !== undefined) {
+        el.innerHTML = edit.content;
+      }
+      if (edit.deleted) {
+        el.classList.add('deleted');
+        deletedCount++;
+      } else {
+        el.classList.remove('deleted');
+      }
+    }
+    updateDeletedBtn();
+  }
+
+  function updateDeletedBtn() {
+    const btn = document.getElementById('showDeletedBtn');
+    btn.textContent = 'Show Deleted (' + deletedCount + ')';
+    btn.style.display = deletedCount > 0 ? 'block' : 'none';
+  }
+
+  // ─── Save Edit to DB ───
+  async function saveEdit(blockId, content, deleted) {
+    showStatus('saving', 'Saving...');
+    try {
+      const res = await fetch(API, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          page_id: PAGE_ID,
+          block_id: blockId,
+          content: content,
+          deleted: deleted
+        })
+      });
+      if (!res.ok) throw new Error('Save failed');
+      showStatus('saved', 'Saved');
+
+      // Update local map
+      editsMap[blockId] = { content, deleted, updated_at: new Date().toISOString() };
+
+      // Recount deleted
+      deletedCount = Object.values(editsMap).filter(e => e.deleted).length;
+      updateDeletedBtn();
+    } catch (e) {
+      showStatus('error', 'Error saving');
+      console.error('Save failed:', e);
+    }
+  }
+
+  // ─── Create / Position Toolbar ───
+  function createToolbar() {
+    if (toolbar) toolbar.remove();
+    toolbar = document.createElement('div');
+    toolbar.className = 'edit-toolbar';
+    document.body.appendChild(toolbar);
+    return toolbar;
+  }
+
+  function positionToolbar(el) {
+    if (!toolbar) return;
+    const rect = el.getBoundingClientRect();
+    const toolbarHeight = 40;
+
+    // Position above the element by default
+    let top = rect.top - toolbarHeight - 8 + window.scrollY;
+    let left = rect.left + window.scrollX;
+
+    // If near top of viewport, position below
+    if (rect.top < toolbarHeight + 20) {
+      top = rect.bottom + 8 + window.scrollY;
+    }
+
+    // Keep within viewport horizontally
+    const maxLeft = window.innerWidth - 260;
+    if (left > maxLeft) left = maxLeft;
+    if (left < 8) left = 8;
+
+    toolbar.style.top = top + 'px';
+    toolbar.style.left = left + 'px';
+  }
+
+  // ─── Enter Edit Mode ───
+  function enterEdit(el) {
+    if (activeBlock) cancelEdit();
+
+    activeBlock = el;
+    originalContent = el.innerHTML;
+    el.classList.add('editing');
+    el.setAttribute('contenteditable', 'true');
+    el.focus();
+
+    const isDeleted = el.classList.contains('deleted');
+    const tb = createToolbar();
+
+    if (isDeleted) {
+      tb.innerHTML =
+        '<button class="btn-restore" onclick="window._editRestore()">Restore</button>' +
+        '<button class="btn-cancel" onclick="window._editCancel()">Cancel</button>';
+    } else {
+      tb.innerHTML =
+        '<button class="btn-save" onclick="window._editSave()">Save</button>' +
+        '<button class="btn-cancel" onclick="window._editCancel()">Cancel</button>' +
+        '<button class="btn-delete" onclick="window._editDelete()">Delete</button>';
+    }
+
+    positionToolbar(el);
+  }
+
+  // ─── Cancel Edit ───
+  function cancelEdit() {
+    if (!activeBlock) return;
+    activeBlock.innerHTML = originalContent;
+    activeBlock.classList.remove('editing');
+    activeBlock.removeAttribute('contenteditable');
+    activeBlock = null;
+    originalContent = '';
+    if (toolbar) { toolbar.remove(); toolbar = null; }
+  }
+
+  // ─── Save Edit ───
+  async function doSave() {
+    if (!activeBlock) return;
+    const blockId = activeBlock.getAttribute('data-block-id');
+    const content = activeBlock.innerHTML;
+
+    activeBlock.classList.remove('editing');
+    activeBlock.removeAttribute('contenteditable');
+    activeBlock.classList.add('just-saved');
+    setTimeout(() => activeBlock && activeBlock.classList.remove('just-saved'), 800);
+
+    if (toolbar) { toolbar.remove(); toolbar = null; }
+    const savedBlock = activeBlock;
+    activeBlock = null;
+    originalContent = '';
+
+    await saveEdit(blockId, content, false);
+  }
+
+  // ─── Delete Block ───
+  async function doDelete() {
+    if (!activeBlock) return;
+    const blockId = activeBlock.getAttribute('data-block-id');
+    const content = activeBlock.innerHTML;
+
+    activeBlock.classList.remove('editing');
+    activeBlock.removeAttribute('contenteditable');
+    activeBlock.classList.add('deleted');
+
+    if (toolbar) { toolbar.remove(); toolbar = null; }
+    activeBlock = null;
+    originalContent = '';
+
+    await saveEdit(blockId, content, true);
+  }
+
+  // ─── Restore Block ───
+  async function doRestore() {
+    if (!activeBlock) return;
+    const blockId = activeBlock.getAttribute('data-block-id');
+    const content = activeBlock.innerHTML;
+
+    activeBlock.classList.remove('editing', 'deleted');
+    activeBlock.removeAttribute('contenteditable');
+
+    if (toolbar) { toolbar.remove(); toolbar = null; }
+    activeBlock = null;
+    originalContent = '';
+
+    await saveEdit(blockId, content, false);
+  }
+
+  // ─── Expose to global for inline onclick ───
+  window._editSave = doSave;
+  window._editCancel = cancelEdit;
+  window._editDelete = doDelete;
+  window._editRestore = doRestore;
+
+  // ─── Click Handler ───
+  document.addEventListener('click', function(e) {
+    const block = e.target.closest('[data-block-id]');
+
+    // Click outside active block = cancel
+    if (activeBlock && !block) {
+      // But not if clicking toolbar
+      if (e.target.closest('.edit-toolbar')) return;
+      cancelEdit();
+      return;
+    }
+
+    // Click on a block
+    if (block && block !== activeBlock) {
+      enterEdit(block);
+    }
+  });
+
+  // ─── Keyboard Shortcuts ───
+  document.addEventListener('keydown', function(e) {
+    if (!activeBlock) return;
+
+    // Escape = cancel
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      cancelEdit();
+    }
+
+    // Ctrl+Enter = save
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+      e.preventDefault();
+      doSave();
+    }
+  });
+
+  // ─── Reposition toolbar on scroll ───
+  window.addEventListener('scroll', function() {
+    if (activeBlock && toolbar) {
+      positionToolbar(activeBlock);
+    }
+  }, { passive: true });
+
+  // ─── Show Deleted Toggle ───
+  window.toggleShowDeleted = function() {
+    document.body.classList.toggle('show-deleted');
+    const btn = document.getElementById('showDeletedBtn');
+    btn.classList.toggle('active');
+  };
+
+  // ─── Init ───
+  loadEdits();
+})();
+</script>
+
+</body>
+</html>

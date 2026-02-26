@@ -98,13 +98,13 @@ export async function PUT(request) {
   }
 }
 
-// DELETE - Remove a single block edit (revert to original)
+// DELETE - Remove edit(s). If block_id provided, remove single block. Otherwise clear all edits for page.
 export async function DELETE(request) {
   try {
     const { page_id, block_id } = await request.json()
 
-    if (!page_id || !block_id) {
-      return NextResponse.json({ error: 'page_id and block_id required' }, { status: 400 })
+    if (!page_id) {
+      return NextResponse.json({ error: 'page_id required' }, { status: 400 })
     }
 
     const sql = getDb()
@@ -114,10 +114,17 @@ export async function DELETE(request) {
 
     await ensureTable(sql)
 
-    await sql`
-      DELETE FROM page_edits
-      WHERE page_id = ${page_id} AND block_id = ${block_id}
-    `
+    if (block_id) {
+      await sql`
+        DELETE FROM page_edits
+        WHERE page_id = ${page_id} AND block_id = ${block_id}
+      `
+    } else {
+      await sql`
+        DELETE FROM page_edits
+        WHERE page_id = ${page_id}
+      `
+    }
 
     return NextResponse.json({ success: true })
   } catch (error) {

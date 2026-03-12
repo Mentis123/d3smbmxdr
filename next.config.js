@@ -7,6 +7,10 @@ const nextConfig = {
         source: '/examcp',
         destination: '/examcp.html',
       },
+      {
+        source: '/customer-pnl',
+        destination: '/customer-virtual-pnl.html',
+      },
     ]
   },
 }

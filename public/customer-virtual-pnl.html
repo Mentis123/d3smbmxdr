@@ -1,0 +1,1977 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Customer Virtual P&amp;L — One Customer, One View, One Decision | Data#3</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap');
+
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+
+:root {
+  --bg-deep: #060913;
+  --bg-surface: #0c1021;
+  --bg-card: #111628;
+  --bg-card-hover: #161d36;
+  --bg-elevated: #1a2242;
+  --border-subtle: rgba(99, 140, 255, 0.08);
+  --border-mid: rgba(99, 140, 255, 0.15);
+  --border-accent: rgba(99, 140, 255, 0.3);
+  --blue-primary: #3b82f6;
+  --blue-light: #60a5fa;
+  --blue-bright: #93bbfd;
+  --purple-primary: #8b5cf6;
+  --purple-light: #a78bfa;
+  --cyan-accent: #22d3ee;
+  --green-accent: #34d399;
+  --amber-accent: #fbbf24;
+  --rose-accent: #fb7185;
+  --text-primary: #e8ecf4;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --text-bright: #f1f5f9;
+  --gradient-brand: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  --gradient-surface: linear-gradient(180deg, #0c1021 0%, #060913 100%);
+  --shadow-card: 0 1px 3px rgba(0,0,0,0.4), 0 0 0 1px var(--border-subtle);
+  --shadow-elevated: 0 4px 24px rgba(0,0,0,0.5), 0 0 0 1px var(--border-subtle);
+}
+
+html {
+  scroll-behavior: smooth;
+  font-size: 15px;
+}
+
+body {
+  font-family: 'DM Sans', -apple-system, sans-serif;
+  background: var(--bg-deep);
+  color: var(--text-primary);
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  top: -50%; left: -50%;
+  width: 200%; height: 200%;
+  background:
+    radial-gradient(ellipse at 20% 20%, rgba(59, 130, 246, 0.04) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 80%, rgba(139, 92, 246, 0.03) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 50%, rgba(34, 211, 238, 0.015) 0%, transparent 40%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(99, 140, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(99, 140, 255, 0.02) 1px, transparent 1px);
+  background-size: 60px 60px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.page-wrapper {
+  position: relative;
+  z-index: 1;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+/* ─── Navigation ─── */
+.doc-nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  backdrop-filter: blur(20px) saturate(1.4);
+  -webkit-backdrop-filter: blur(20px) saturate(1.4);
+  background: rgba(6, 9, 19, 0.85);
+  border-bottom: 1px solid var(--border-subtle);
+  padding: 0.75rem 2rem;
+  margin: 0 -2rem;
+}
+
+.nav-inner {
+  max-width: 1120px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.nav-brand {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.nav-brand span {
+  color: var(--blue-primary);
+  font-weight: 600;
+}
+
+.nav-status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.7rem;
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--amber-accent);
+}
+
+.nav-status::before {
+  content: '';
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--amber-accent);
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+/* ─── Hero ─── */
+.hero {
+  padding: 6rem 0 4rem;
+  position: relative;
+}
+
+.hero-eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--blue-primary);
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.hero-eyebrow::before {
+  content: '';
+  width: 32px; height: 1px;
+  background: var(--gradient-brand);
+}
+
+.hero h1 {
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-size: 3.8rem;
+  font-weight: 400;
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  color: var(--text-bright);
+  margin-bottom: 1.5rem;
+  max-width: 800px;
+}
+
+.hero h1 em {
+  font-style: italic;
+  background: var(--gradient-brand);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero-subtitle {
+  font-size: 1.15rem;
+  color: var(--text-secondary);
+  max-width: 600px;
+  line-height: 1.7;
+}
+
+.hero-meta {
+  margin-top: 2.5rem;
+  display: flex;
+  gap: 2.5rem;
+  flex-wrap: wrap;
+}
+
+.hero-meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.hero-meta-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.hero-meta-value {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+/* ─── Section Structure ─── */
+.section {
+  padding: 4rem 0;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.section-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--purple-primary);
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.section-num::after {
+  content: '';
+  flex: 1;
+  max-width: 60px;
+  height: 1px;
+  background: linear-gradient(90deg, var(--purple-primary), transparent);
+}
+
+.section h2 {
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-size: 2.4rem;
+  font-weight: 400;
+  line-height: 1.15;
+  color: var(--text-bright);
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.01em;
+}
+
+.section h2 em {
+  font-style: italic;
+  color: var(--blue-light);
+}
+
+.section-lead {
+  font-size: 1.05rem;
+  color: var(--text-secondary);
+  max-width: 700px;
+  margin-bottom: 2.5rem;
+  line-height: 1.75;
+}
+
+h3 {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--text-bright);
+  margin-bottom: 0.75rem;
+  margin-top: 2rem;
+}
+
+h4 {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+p {
+  margin-bottom: 1rem;
+  color: var(--text-secondary);
+}
+
+/* ─── Callout / Quote ─── */
+.callout {
+  position: relative;
+  padding: 2rem 2.5rem;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.06), rgba(139, 92, 246, 0.04));
+  border: 1px solid var(--border-mid);
+  border-radius: 12px;
+  margin: 2rem 0;
+}
+
+.callout::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 1.5rem; bottom: 1.5rem;
+  width: 3px;
+  background: var(--gradient-brand);
+  border-radius: 2px;
+}
+
+.callout-quote {
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-size: 1.6rem;
+  font-style: italic;
+  color: var(--text-bright);
+  line-height: 1.4;
+  margin-bottom: 0.5rem;
+}
+
+.callout-attr {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.05em;
+}
+
+/* ─── Cards Grid ─── */
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+  margin: 2rem 0;
+}
+
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  padding: 1.75rem;
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-mid);
+}
+
+.card-icon {
+  width: 36px; height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  margin-bottom: 1rem;
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.15);
+  color: var(--blue-light);
+}
+
+.card-icon.purple { background: rgba(139, 92, 246, 0.1); border-color: rgba(139, 92, 246, 0.15); color: var(--purple-light); }
+.card-icon.cyan { background: rgba(34, 211, 238, 0.1); border-color: rgba(34, 211, 238, 0.15); color: var(--cyan-accent); }
+.card-icon.green { background: rgba(52, 211, 153, 0.1); border-color: rgba(52, 211, 153, 0.15); color: var(--green-accent); }
+.card-icon.amber { background: rgba(251, 191, 36, 0.1); border-color: rgba(251, 191, 36, 0.15); color: var(--amber-accent); }
+.card-icon.rose { background: rgba(251, 113, 133, 0.1); border-color: rgba(251, 113, 133, 0.15); color: var(--rose-accent); }
+
+.card h4 { margin-bottom: 0.5rem; }
+.card p { font-size: 0.85rem; color: var(--text-muted); line-height: 1.6; margin: 0; }
+
+/* ─── Pipeline Visualization ─── */
+.pipeline { margin: 3rem 0; }
+
+.pipeline-track {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 2px;
+  margin-bottom: 1rem;
+}
+
+.pipeline-phase {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  padding: 1.75rem 1.25rem;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.pipeline-phase:first-child { border-radius: 10px 0 0 10px; }
+.pipeline-phase:last-child { border-radius: 0 10px 10px 0; }
+
+.pipeline-phase:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-accent);
+  z-index: 2;
+}
+
+.pipeline-phase::after {
+  content: '\2192';
+  position: absolute;
+  right: -9px; top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  z-index: 3;
+}
+
+.pipeline-phase:last-child::after { display: none; }
+
+.phase-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.55rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 0.5rem;
+}
+
+.phase-name {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--text-bright);
+  margin-bottom: 0.35rem;
+  line-height: 1.3;
+}
+
+.phase-duration {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  color: var(--blue-light);
+  margin-bottom: 0.75rem;
+}
+
+.phase-desc {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  line-height: 1.55;
+}
+
+/* ─── Data Flow Diagram ─── */
+.data-flow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  margin: 2.5rem 0;
+  flex-wrap: wrap;
+  padding: 2rem 0;
+}
+
+.flow-node {
+  padding: 0.7rem 1.1rem;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-align: center;
+  min-width: 90px;
+  white-space: nowrap;
+}
+
+.flow-node.source {
+  background: var(--bg-card);
+  border: 1px solid var(--border-mid);
+  color: var(--text-secondary);
+}
+
+.flow-node.agent {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.15));
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  color: var(--text-bright);
+  font-weight: 600;
+}
+
+.flow-node.output {
+  background: rgba(52, 211, 153, 0.1);
+  border: 1px solid rgba(52, 211, 153, 0.2);
+  color: var(--green-accent);
+  font-weight: 600;
+}
+
+.flow-arrow {
+  width: 28px;
+  height: 2px;
+  background: var(--border-mid);
+  position: relative;
+  flex-shrink: 0;
+}
+
+.flow-arrow::after {
+  content: '\203A';
+  position: absolute;
+  right: -4px; top: -9px;
+  color: var(--text-muted);
+  font-size: 1rem;
+}
+
+/* ─── Architecture Layers ─── */
+.arch-layers {
+  margin: 2.5rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.arch-layer {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--border-subtle);
+  transition: all 0.3s ease;
+}
+
+.arch-layer:hover {
+  border-color: var(--border-mid);
+}
+
+.arch-layer-label {
+  width: 180px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.arch-layer-name {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--text-bright);
+  margin-bottom: 0.15rem;
+}
+
+.arch-layer-sub {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.55rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.arch-layer-items {
+  flex: 1;
+  display: flex;
+  gap: 0.5rem;
+  padding: 1rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.arch-chip {
+  padding: 0.4rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.arch-layer.l-data { background: rgba(59, 130, 246, 0.04); }
+.arch-layer.l-data .arch-layer-label { border-right: 3px solid var(--blue-primary); }
+.arch-layer.l-data .arch-chip { background: rgba(59, 130, 246, 0.1); color: var(--blue-light); border: 1px solid rgba(59, 130, 246, 0.15); }
+
+.arch-layer.l-intel { background: rgba(139, 92, 246, 0.04); }
+.arch-layer.l-intel .arch-layer-label { border-right: 3px solid var(--purple-primary); }
+.arch-layer.l-intel .arch-chip { background: rgba(139, 92, 246, 0.1); color: var(--purple-light); border: 1px solid rgba(139, 92, 246, 0.15); }
+
+.arch-layer.l-orch { background: rgba(34, 211, 238, 0.04); }
+.arch-layer.l-orch .arch-layer-label { border-right: 3px solid var(--cyan-accent); }
+.arch-layer.l-orch .arch-chip { background: rgba(34, 211, 238, 0.1); color: var(--cyan-accent); border: 1px solid rgba(34, 211, 238, 0.15); }
+
+.arch-layer.l-exp { background: rgba(52, 211, 153, 0.04); }
+.arch-layer.l-exp .arch-layer-label { border-right: 3px solid var(--green-accent); }
+.arch-layer.l-exp .arch-chip { background: rgba(52, 211, 153, 0.1); color: var(--green-accent); border: 1px solid rgba(52, 211, 153, 0.15); }
+
+/* ─── Agent Roster ─── */
+.agent-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin: 2rem 0;
+}
+
+.agent-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  padding: 1.75rem;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.agent-card:hover {
+  border-color: var(--border-accent);
+  background: var(--bg-card-hover);
+}
+
+.agent-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--gradient-brand);
+  opacity: 0.5;
+}
+
+.agent-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.55rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 0.5rem;
+}
+
+.agent-card h4 {
+  font-size: 0.95rem;
+  margin-bottom: 0.5rem;
+  color: var(--text-bright);
+}
+
+.agent-card p {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  line-height: 1.55;
+  margin: 0;
+}
+
+/* ─── Simulator ─── */
+.sim-container {
+  margin: 2rem 0;
+  background: var(--bg-card);
+  border: 1px solid var(--border-mid);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.sim-header {
+  padding: 1.5rem 2rem;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.08), rgba(139, 92, 246, 0.06));
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.sim-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--blue-light);
+}
+
+.sim-customer {
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-size: 1.3rem;
+  color: var(--text-bright);
+}
+
+.sim-toggle {
+  display: flex;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--border-mid);
+}
+
+.sim-toggle button {
+  padding: 0.5rem 1.25rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border: none;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  background: transparent;
+  color: var(--text-muted);
+}
+
+.sim-toggle button.active {
+  background: var(--gradient-brand);
+  color: #fff;
+}
+
+.sim-toggle button:hover:not(.active) {
+  background: rgba(99, 140, 255, 0.08);
+  color: var(--text-primary);
+}
+
+.sim-presets {
+  padding: 1.25rem 2rem;
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.preset-btn {
+  padding: 0.45rem 1rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border: 1px solid var(--border-mid);
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.preset-btn:hover {
+  border-color: var(--border-accent);
+  color: var(--text-primary);
+}
+
+.preset-btn.active {
+  background: rgba(59, 130, 246, 0.12);
+  border-color: rgba(59, 130, 246, 0.3);
+  color: var(--blue-light);
+  font-weight: 600;
+}
+
+.sim-body {
+  padding: 2rem;
+}
+
+.sim-sliders {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem 2.5rem;
+  margin-bottom: 2rem;
+}
+
+.slider-group label {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: 0.5rem;
+}
+
+.slider-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.slider-row input[type="range"] {
+  flex: 1;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  background: var(--bg-elevated);
+  border-radius: 2px;
+  outline: none;
+}
+
+.slider-row input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  background: var(--blue-primary);
+  cursor: pointer;
+  border: 2px solid var(--bg-deep);
+  box-shadow: 0 0 8px rgba(59, 130, 246, 0.4);
+}
+
+.slider-row input[type="range"]::-moz-range-thumb {
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  background: var(--blue-primary);
+  cursor: pointer;
+  border: 2px solid var(--bg-deep);
+  box-shadow: 0 0 8px rgba(59, 130, 246, 0.4);
+}
+
+.slider-val {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--blue-light);
+  min-width: 52px;
+  text-align: right;
+}
+
+.sim-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.kpi-card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  padding: 1.25rem;
+  text-align: center;
+  transition: all 0.4s ease;
+}
+
+.kpi-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.55rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 0.5rem;
+}
+
+.kpi-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: var(--text-bright);
+  transition: all 0.3s ease;
+}
+
+.kpi-value.positive { color: var(--green-accent); }
+.kpi-value.negative { color: var(--rose-accent); }
+.kpi-value.platinum { color: var(--amber-accent); }
+.kpi-value.no-platinum { color: var(--text-muted); }
+
+.kpi-delta {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem;
+  margin-top: 0.25rem;
+  color: var(--text-muted);
+}
+
+/* Siloed view */
+.sim-siloed {
+  display: none;
+}
+
+.sim-siloed.visible {
+  display: block;
+}
+
+.sim-unified {
+  display: block;
+}
+
+.sim-unified.hidden {
+  display: none;
+}
+
+.siloed-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.siloed-lob {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  padding: 1.25rem;
+  opacity: 0.7;
+}
+
+.siloed-lob-name {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 0.75rem;
+}
+
+.siloed-lob-rev {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+}
+
+.siloed-lob-margin {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.siloed-warning {
+  text-align: center;
+  padding: 1.5rem;
+  background: rgba(251, 113, 133, 0.04);
+  border: 1px solid rgba(251, 113, 133, 0.12);
+  border-radius: 10px;
+  margin-bottom: 2rem;
+}
+
+.siloed-warning p {
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-size: 1.1rem;
+  color: var(--rose-accent);
+  margin: 0;
+}
+
+.siloed-warning span {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  display: block;
+  margin-top: 0.5rem;
+}
+
+/* Recommendation panel */
+.sim-rec {
+  padding: 1.5rem 2rem;
+  background: linear-gradient(135deg, rgba(52, 211, 153, 0.06), rgba(59, 130, 246, 0.04));
+  border: 1px solid rgba(52, 211, 153, 0.15);
+  border-radius: 10px;
+}
+
+.sim-rec-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--green-accent);
+  margin-bottom: 0.5rem;
+}
+
+.sim-rec-text {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.65;
+  margin: 0;
+}
+
+.sim-rec-text strong {
+  color: var(--text-bright);
+}
+
+.sim-rec.empty {
+  background: rgba(251, 113, 133, 0.04);
+  border-color: rgba(251, 113, 133, 0.12);
+}
+
+.sim-rec.empty .sim-rec-label {
+  color: var(--rose-accent);
+}
+
+/* ─── Tech Grid ─── */
+.tech-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin: 2rem 0;
+}
+
+.tech-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  padding: 1.75rem;
+  transition: all 0.3s ease;
+}
+
+.tech-card:hover {
+  border-color: var(--border-mid);
+  background: var(--bg-card-hover);
+}
+
+.tech-card h4 {
+  margin-bottom: 0.35rem;
+}
+
+.tech-card .tech-role {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--blue-primary);
+  margin-bottom: 0.75rem;
+}
+
+.tech-card p {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* ─── Steps List ─── */
+.steps-list {
+  list-style: none;
+  padding: 0;
+  margin: 2rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.steps-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  transition: all 0.3s ease;
+}
+
+.steps-list li:hover {
+  border-color: var(--border-mid);
+  background: var(--bg-card-hover);
+}
+
+.step-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--blue-primary);
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.15);
+  width: 24px; height: 24px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+}
+
+/* ─── Governance Grid ─── */
+.gov-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin: 2rem 0;
+}
+
+.gov-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  padding: 1.75rem;
+  border-left: 3px solid var(--purple-primary);
+  transition: all 0.3s ease;
+}
+
+.gov-card:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-mid);
+  border-left-color: var(--purple-primary);
+}
+
+.gov-card h4 { font-size: 0.9rem; margin-bottom: 0.35rem; }
+.gov-card p { font-size: 0.8rem; color: var(--text-muted); line-height: 1.55; margin: 0; }
+
+/* ─── Urgency Callout ─── */
+.urgency-callout {
+  padding: 1.5rem 2rem;
+  background: rgba(251, 191, 36, 0.04);
+  border: 1px solid rgba(251, 191, 36, 0.15);
+  border-radius: 10px;
+  margin: 2rem 0;
+}
+
+.urgency-callout p {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.urgency-callout strong {
+  color: var(--amber-accent);
+}
+
+/* ─── Key Message Box ─── */
+.key-message {
+  padding: 2rem 2.5rem;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.06), rgba(139, 92, 246, 0.04));
+  border: 1px solid var(--border-mid);
+  border-radius: 12px;
+  margin: 2rem 0;
+  text-align: center;
+}
+
+.key-message p {
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-size: 1.4rem;
+  color: var(--text-bright);
+  line-height: 1.45;
+  margin: 0;
+}
+
+.key-message p em {
+  font-style: italic;
+  color: var(--blue-light);
+}
+
+/* ─── Footer ─── */
+.doc-footer {
+  margin-top: 2rem;
+  padding: 2.5rem 0;
+  border-top: 1px solid var(--border-subtle);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.footer-brand {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+}
+
+.footer-brand span {
+  color: var(--blue-primary);
+  font-weight: 600;
+}
+
+.footer-conf {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--rose-accent);
+  opacity: 0.6;
+}
+
+/* ─── Divider ─── */
+.divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border-mid), transparent);
+  margin: 1.5rem 0;
+}
+
+/* ─── Utility ─── */
+.text-blue { color: var(--blue-light); }
+.text-purple { color: var(--purple-light); }
+.text-cyan { color: var(--cyan-accent); }
+.text-green { color: var(--green-accent); }
+.text-amber { color: var(--amber-accent); }
+.text-rose { color: var(--rose-accent); }
+.text-bright { color: var(--text-bright); }
+.mono { font-family: 'JetBrains Mono', monospace; }
+
+/* ─── Responsive ─── */
+@media (max-width: 900px) {
+  .hero h1 { font-size: 2.4rem; }
+  .section h2 { font-size: 1.8rem; }
+  .pipeline-track { grid-template-columns: 1fr; }
+  .pipeline-phase { border-radius: 8px !important; }
+  .pipeline-phase::after { display: none; }
+  .agent-grid { grid-template-columns: 1fr 1fr; }
+  .sim-sliders { grid-template-columns: 1fr; }
+  .sim-kpis { grid-template-columns: repeat(2, 1fr); }
+  .siloed-grid { grid-template-columns: repeat(2, 1fr); }
+  .arch-layer { flex-direction: column; }
+  .arch-layer-label { width: 100%; border-right: none !important; border-bottom: 3px solid; padding: 1rem 1.25rem 0.5rem; }
+  .arch-layer.l-data .arch-layer-label { border-bottom-color: var(--blue-primary); }
+  .arch-layer.l-intel .arch-layer-label { border-bottom-color: var(--purple-primary); }
+  .arch-layer.l-orch .arch-layer-label { border-bottom-color: var(--cyan-accent); }
+  .arch-layer.l-exp .arch-layer-label { border-bottom-color: var(--green-accent); }
+  .data-flow { gap: 0.25rem; }
+  .flow-node { font-size: 0.65rem; padding: 0.5rem 0.7rem; min-width: auto; }
+  .flow-arrow { width: 16px; }
+  .gov-grid { grid-template-columns: 1fr; }
+  .tech-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 600px) {
+  html { font-size: 14px; }
+  .hero-meta { flex-direction: column; gap: 1rem; }
+  .agent-grid { grid-template-columns: 1fr; }
+  .sim-kpis { grid-template-columns: 1fr 1fr; }
+  .siloed-grid { grid-template-columns: 1fr 1fr; }
+  .data-flow { flex-direction: column; gap: 0.5rem; }
+  .flow-arrow { width: 2px; height: 20px; }
+  .flow-arrow::after { right: -9px; top: auto; bottom: -4px; transform: rotate(90deg); }
+}
+
+@media print {
+  body { background: #fff; color: #111; }
+  body::before, body::after { display: none; }
+  .doc-nav { display: none; }
+  .page-wrapper { max-width: 100%; padding: 0 1cm; }
+  .hero { padding: 2cm 0 1cm; }
+  .section { padding: 1.5cm 0; break-inside: avoid; }
+  .pipeline-phase, .card, .agent-card, .tech-card, .kpi-card {
+    background: #f8f9fa;
+    border-color: #ddd;
+    break-inside: avoid;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="doc-nav">
+  <div class="nav-inner">
+    <div class="nav-brand">Data<sup>#</sup>3 &nbsp;&middot;&nbsp; <span>Agentic AI Practice</span></div>
+    <div class="nav-status">Strategic Proposal</div>
+  </div>
+</nav>
+
+<div class="page-wrapper">
+
+<!-- Hero -->
+<header class="hero">
+  <div class="hero-eyebrow">Customer Virtual P&amp;L</div>
+  <h1>One Customer. One View.<br><em>One Decision.</em></h1>
+  <p class="hero-subtitle">
+    A unified decision surface across all Lines of Business &mdash; eliminating siloed P&amp;Ls, enabling Platinum Account identification, and turning cross-LOB revenue into a single strategic view.
+  </p>
+  <div class="hero-meta">
+    <div class="hero-meta-item">
+      <span class="hero-meta-label">Date</span>
+      <span class="hero-meta-value">March 2025</span>
+    </div>
+    <div class="hero-meta-item">
+      <span class="hero-meta-label">Audience</span>
+      <span class="hero-meta-value">David Gold / Executive Team</span>
+    </div>
+    <div class="hero-meta-item">
+      <span class="hero-meta-label">Author</span>
+      <span class="hero-meta-value">Matt Gooden</span>
+    </div>
+    <div class="hero-meta-item">
+      <span class="hero-meta-label">Status</span>
+      <span class="hero-meta-value text-amber">Proposal</span>
+    </div>
+  </div>
+</header>
+
+<!-- ─── 01 — The Problem We Heard ─── -->
+<div class="section" id="s01">
+  <div class="section-num">01 &mdash; Context</div>
+  <h2>The Problem <em>We Heard</em></h2>
+  <p class="section-lead">Conversations across Practice Managers, account teams, and leadership surfaced a consistent pattern: structural silos are preventing Data#3 from seeing &mdash; and serving &mdash; customers as a single company.</p>
+
+  <div class="callout">
+    <div class="callout-quote">&ldquo;The current LOB structure is a boa constrictor choking the business to death.&rdquo;</div>
+    <div class="callout-attr">Scott &mdash; Practice Managers Meeting</div>
+  </div>
+
+  <div class="callout">
+    <div class="callout-quote">&ldquo;Our customers see two different companies. They shouldn&rsquo;t have to.&rdquo;</div>
+    <div class="callout-attr">Customer Feedback &mdash; Account Review</div>
+  </div>
+
+  <div class="callout">
+    <div class="callout-quote">&ldquo;This isn&rsquo;t an operationalisation problem. It&rsquo;s that we haven&rsquo;t operationalised anything yet.&rdquo;</div>
+    <div class="callout-attr">Paula &mdash; Practice Managers Meeting</div>
+  </div>
+
+  <div class="cards-grid" style="grid-template-columns: repeat(4, 1fr);">
+    <div class="card">
+      <div class="card-icon rose">!</div>
+      <h4>Siloed P&amp;Ls</h4>
+      <p>Each LOB optimises for its own margin. No one sees the full customer picture across Business Apps, Services, MXDR, and ProServ.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon amber">?</div>
+      <h4>Customer Fragmentation</h4>
+      <p>The same customer has separate relationships, separate forecasts, and separate billing across multiple LOBs.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon purple">&harr;</div>
+      <h4>Billing &amp; Ops Gaps</h4>
+      <p>Cross-LOB deals require manual workarounds. Kimble PSA handles BA and Services &mdash; but MXDR billing lives elsewhere.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">$</div>
+      <h4>Revenue Recognition</h4>
+      <p>Blended margin calculations are impossible when each LOB reports independently. Cross-sell revenue falls through the cracks.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ─── 02 — What David Gold Is Asking For ─── -->
+<div class="section" id="s02">
+  <div class="section-num">02 &mdash; The Ask</div>
+  <h2>What David Gold <em>Is Asking For</em></h2>
+  <p class="section-lead">A Customer Virtual P&amp;L &mdash; not a new financial system, but an intelligence layer that unifies data across every LOB into a single, actionable customer view.</p>
+
+  <h3>The Data Flow</h3>
+  <div class="data-flow">
+    <div class="flow-node source">Kimble (BA)</div>
+    <div class="flow-arrow"></div>
+    <div class="flow-node source">Kimble (SRV)</div>
+    <div class="flow-arrow"></div>
+    <div class="flow-node source">CRM</div>
+    <div class="flow-arrow"></div>
+    <div class="flow-node source">Finance</div>
+    <div class="flow-arrow"></div>
+    <div class="flow-node agent">Virtual PnL Agent</div>
+    <div class="flow-arrow"></div>
+    <div class="flow-node output">Unified View</div>
+  </div>
+
+  <div class="cards-grid" style="grid-template-columns: repeat(2, 1fr);">
+    <div class="card">
+      <div class="card-icon">%</div>
+      <h4>Blended Margin Visibility</h4>
+      <p>See the true margin across all LOBs for any customer &mdash; not just the fragment each practice reports.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon purple">&uarr;</div>
+      <h4>Cross-LOB Forecasting</h4>
+      <p>Unified pipeline view that spots revenue at risk, cross-sell opportunities, and deal dependencies across LOBs.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon amber">&starf;</div>
+      <h4>Platinum Account Identification</h4>
+      <p>Automatically flag customers who meet Platinum thresholds based on total relationship value &mdash; not just one LOB.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon green">&check;</div>
+      <h4>Deal Operationalisation</h4>
+      <p>End-to-end visibility from opportunity to delivery to billing &mdash; with cross-LOB coordination built in.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ─── 03 — The Platinum Account Concept ─── -->
+<div class="section" id="s03">
+  <div class="section-num">03 &mdash; Platinum Accounts</div>
+  <h2>The Platinum <em>Account Concept</em></h2>
+  <p class="section-lead">Brad is asking real questions about Platinum Accounts. The concept is simple &mdash; the highest-value customers get a differentiated experience. The problem is: without a unified view, you can&rsquo;t identify them.</p>
+
+  <div class="cards-grid" style="grid-template-columns: repeat(2, 1fr);">
+    <div class="card">
+      <div class="card-icon amber">&starf;</div>
+      <h4>Threshold Logic</h4>
+      <p>Platinum qualification based on total cross-LOB revenue exceeding $2M annually with engagement across 3+ LOBs and blended margin above 35%.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon green">&check;</div>
+      <h4>Benefits Package</h4>
+      <p>Dedicated account executive, quarterly business reviews, priority escalation paths, early access to new services, and custom SLAs.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon rose">!</div>
+      <h4>Why It Doesn&rsquo;t Exist Yet</h4>
+      <p>No system today can calculate total customer value across LOBs. Each practice sees its own slice. Platinum candidates are invisible.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon purple">&rarr;</div>
+      <h4>How Virtual PnL Enables It</h4>
+      <p>The Virtual PnL agent aggregates revenue, margin, and deal count across all LOBs &mdash; making Platinum identification automatic and real-time.</p>
+    </div>
+  </div>
+
+  <div class="urgency-callout">
+    <p><strong>Urgency:</strong> Brad is actively asking questions about Platinum Account criteria. This isn&rsquo;t theoretical &mdash; leadership wants to move on this. The Virtual PnL is the prerequisite.</p>
+  </div>
+</div>
+
+<!-- ─── 04 — The Agentic AI Solution Architecture ─── -->
+<div class="section" id="s04">
+  <div class="section-num">04 &mdash; Architecture</div>
+  <h2>The Agentic AI <em>Solution Architecture</em></h2>
+  <p class="section-lead">A four-layer architecture that sits on top of existing systems &mdash; no rip-and-replace. Agents harmonise data, calculate the Virtual PnL, and surface decisions through familiar Microsoft tools.</p>
+
+  <div class="arch-layers">
+    <div class="arch-layer l-exp">
+      <div class="arch-layer-label">
+        <div class="arch-layer-name">Experience Layer</div>
+        <div class="arch-layer-sub">What users see</div>
+      </div>
+      <div class="arch-layer-items">
+        <span class="arch-chip">Customer Dashboard</span>
+        <span class="arch-chip">Platinum Alerts</span>
+        <span class="arch-chip">Deal Assistant</span>
+        <span class="arch-chip">Executive Reports</span>
+      </div>
+    </div>
+    <div class="arch-layer l-orch">
+      <div class="arch-layer-label">
+        <div class="arch-layer-name">Orchestration Layer</div>
+        <div class="arch-layer-sub">Copilot Studio</div>
+      </div>
+      <div class="arch-layer-items">
+        <span class="arch-chip">Multi-Agent Coordination</span>
+        <span class="arch-chip">Workflow Triggers</span>
+        <span class="arch-chip">Human-in-the-Loop</span>
+      </div>
+    </div>
+    <div class="arch-layer l-intel">
+      <div class="arch-layer-label">
+        <div class="arch-layer-name">Intelligence Layer</div>
+        <div class="arch-layer-sub">Microsoft Foundry</div>
+      </div>
+      <div class="arch-layer-items">
+        <span class="arch-chip">PnL Calculation</span>
+        <span class="arch-chip">Platinum Scoring</span>
+        <span class="arch-chip">Forecast Modelling</span>
+        <span class="arch-chip">Anomaly Detection</span>
+      </div>
+    </div>
+    <div class="arch-layer l-data">
+      <div class="arch-layer-label">
+        <div class="arch-layer-name">Data Layer</div>
+        <div class="arch-layer-sub">Connectors</div>
+      </div>
+      <div class="arch-layer-items">
+        <span class="arch-chip">Kimble PSA</span>
+        <span class="arch-chip">Salesforce CRM</span>
+        <span class="arch-chip">Finance Systems</span>
+        <span class="arch-chip">MXDR Billing</span>
+        <span class="arch-chip">Microsoft Fabric</span>
+      </div>
+    </div>
+  </div>
+
+  <p style="font-size:0.85rem; color:var(--text-muted); text-align:center; margin-top:1rem;">This is what Matt Gooden&rsquo;s Agentic AI practice delivers &mdash; the intelligence layer that turns fragmented data into unified decisions.</p>
+</div>
+
+<!-- ─── 05 — The Agent Roster ─── -->
+<div class="section" id="s05">
+  <div class="section-num">05 &mdash; Agents</div>
+  <h2>The Agent <em>Roster</em></h2>
+  <p class="section-lead">Six specialised agents, each with a defined role, working together through the orchestration layer to deliver the Customer Virtual PnL.</p>
+
+  <div class="agent-grid">
+    <div class="agent-card">
+      <div class="agent-num">Agent 01</div>
+      <h4>Data Harmonization</h4>
+      <p>Ingests and normalises data from Kimble, Salesforce, Finance, and MXDR billing. Resolves entity matching across systems &mdash; ensuring "Acme Corp" in Kimble is the same as "ACME Corporation" in CRM.</p>
+    </div>
+    <div class="agent-card">
+      <div class="agent-num">Agent 02</div>
+      <h4>Virtual PnL Calculator</h4>
+      <p>Aggregates revenue, cost, and margin across all LOBs for each customer. Computes blended margin, weighted revenue, and total relationship value in real-time.</p>
+    </div>
+    <div class="agent-card">
+      <div class="agent-num">Agent 03</div>
+      <h4>Platinum Qualification</h4>
+      <p>Evaluates customers against Platinum thresholds: total revenue, LOB breadth, margin quality, and growth trajectory. Flags new qualifiers and at-risk downgrades.</p>
+    </div>
+    <div class="agent-card">
+      <div class="agent-num">Agent 04</div>
+      <h4>Deal Orchestration</h4>
+      <p>Monitors cross-LOB deal dependencies. If a BA deal is at risk, alerts the MXDR team if their revenue is coupled. Coordinates billing and delivery across practices.</p>
+    </div>
+    <div class="agent-card">
+      <div class="agent-num">Agent 05</div>
+      <h4>Forecasting</h4>
+      <p>Builds unified customer-level forecasts combining pipeline data from every LOB. Identifies revenue concentration risk and models scenarios for churn, expansion, and cross-sell.</p>
+    </div>
+    <div class="agent-card">
+      <div class="agent-num">Agent 06</div>
+      <h4>Revenue Recognition</h4>
+      <p>Tracks revenue recognition status across LOBs. Ensures cross-LOB deals are correctly attributed, margin is reported at the customer level, and no revenue falls between the cracks.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ─── 06 — Interactive Simulator ─── -->
+<div class="section" id="s06">
+  <div class="section-num">06 &mdash; Interactive</div>
+  <h2>Customer Virtual PnL <em>Simulator</em></h2>
+  <p class="section-lead">See what a unified customer view looks like. Adjust assumptions, switch between presets, and toggle between Unified and Siloed views to feel the difference.</p>
+
+  <div class="sim-container">
+    <div class="sim-header">
+      <div>
+        <div class="sim-title">Live Simulator</div>
+        <div class="sim-customer">Acme Corporation</div>
+      </div>
+      <div class="sim-toggle" id="viewToggle">
+        <button class="active" data-view="unified">Unified</button>
+        <button data-view="siloed">Siloed</button>
+      </div>
+    </div>
+
+    <div class="sim-presets" id="presets">
+      <button class="preset-btn active" data-preset="current">Current State</button>
+      <button class="preset-btn" data-preset="platinum">With Platinum</button>
+      <button class="preset-btn" data-preset="lose-ba">If We Lose BA Deal</button>
+      <button class="preset-btn" data-preset="mxdr-ramp">MXDR Ramp</button>
+    </div>
+
+    <div class="sim-body">
+      <!-- Unified View -->
+      <div class="sim-unified" id="unifiedView">
+        <div class="sim-sliders" id="sliders">
+          <div class="slider-group">
+            <label>Business Apps Revenue Adjustment</label>
+            <div class="slider-row">
+              <input type="range" id="slider-ba" min="-50" max="50" value="0" step="5">
+              <span class="slider-val" id="val-ba">0%</span>
+            </div>
+          </div>
+          <div class="slider-group">
+            <label>MXDR Ramp Month</label>
+            <div class="slider-row">
+              <input type="range" id="slider-mxdr" min="1" max="12" value="6" step="1">
+              <span class="slider-val" id="val-mxdr">M6</span>
+            </div>
+          </div>
+          <div class="slider-group">
+            <label>Cross-Sell Uplift</label>
+            <div class="slider-row">
+              <input type="range" id="slider-cross" min="0" max="40" value="10" step="5">
+              <span class="slider-val" id="val-cross">10%</span>
+            </div>
+          </div>
+          <div class="slider-group">
+            <label>ProServ Utilisation</label>
+            <div class="slider-row">
+              <input type="range" id="slider-util" min="40" max="100" value="72" step="2">
+              <span class="slider-val" id="val-util">72%</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="sim-kpis" id="kpiCards">
+          <div class="kpi-card">
+            <div class="kpi-label">Total Revenue</div>
+            <div class="kpi-value" id="kpi-revenue">$2.4M</div>
+            <div class="kpi-delta" id="kpi-revenue-delta"></div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Blended Margin</div>
+            <div class="kpi-value" id="kpi-margin">36.2%</div>
+            <div class="kpi-delta" id="kpi-margin-delta"></div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Platinum Status</div>
+            <div class="kpi-value platinum" id="kpi-platinum">YES</div>
+            <div class="kpi-delta" id="kpi-platinum-delta"></div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Cross-LOB Deals</div>
+            <div class="kpi-value" id="kpi-deals">7</div>
+            <div class="kpi-delta" id="kpi-deals-delta"></div>
+          </div>
+        </div>
+
+        <div class="sim-rec" id="recPanel">
+          <div class="sim-rec-label">Agent Recommendation</div>
+          <p class="sim-rec-text" id="recText">
+            <strong>Maintain Platinum trajectory.</strong> Current blended margin is healthy at 36.2%. Consider accelerating MXDR ramp to lock in recurring revenue before BA renewal window in Q4.
+          </p>
+        </div>
+      </div>
+
+      <!-- Siloed View -->
+      <div class="sim-siloed" id="siloedView">
+        <div class="siloed-grid" id="siloedCards">
+          <div class="siloed-lob">
+            <div class="siloed-lob-name">Business Apps</div>
+            <div class="siloed-lob-rev" id="silo-ba-rev">$820K</div>
+            <div class="siloed-lob-margin">Margin: 42%</div>
+          </div>
+          <div class="siloed-lob">
+            <div class="siloed-lob-name">Services</div>
+            <div class="siloed-lob-rev" id="silo-srv-rev">$680K</div>
+            <div class="siloed-lob-margin">Margin: 28%</div>
+          </div>
+          <div class="siloed-lob">
+            <div class="siloed-lob-name">MXDR</div>
+            <div class="siloed-lob-rev" id="silo-mxdr-rev">$540K</div>
+            <div class="siloed-lob-margin">Margin: 45%</div>
+          </div>
+          <div class="siloed-lob">
+            <div class="siloed-lob-name">ProServ</div>
+            <div class="siloed-lob-rev" id="silo-ps-rev">$360K</div>
+            <div class="siloed-lob-margin">Margin: 31%</div>
+          </div>
+        </div>
+
+        <div class="siloed-warning">
+          <p>No total view. No blended margin. No Platinum identification.</p>
+          <span>Each LOB sees only its own fragment &mdash; this is today&rsquo;s reality.</span>
+        </div>
+
+        <div class="sim-rec empty" id="recPanelSiloed">
+          <div class="sim-rec-label">Agent Recommendation</div>
+          <p class="sim-rec-text">No recommendation available. Without a unified view, the system cannot assess cross-LOB impact or identify strategic opportunities.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── 07 — Technology Platform ─── -->
+<div class="section" id="s07">
+  <div class="section-num">07 &mdash; Technology</div>
+  <h2>Technology <em>Platform</em></h2>
+  <p class="section-lead">Built entirely on the Microsoft stack Data#3 already sells and supports. Not a rip-and-replace &mdash; an intelligence layer on top.</p>
+
+  <div class="tech-grid">
+    <div class="tech-card">
+      <h4>Copilot Studio</h4>
+      <div class="tech-role">Orchestration</div>
+      <p>Multi-agent coordination, workflow triggers, human-in-the-loop approvals. The control plane that routes work between agents and surfaces results to users.</p>
+    </div>
+    <div class="tech-card">
+      <h4>Microsoft Foundry</h4>
+      <div class="tech-role">Agent Factory</div>
+      <p>Where the six agents are built, trained, and deployed. Each agent has its own tools, data access, and decision logic &mdash; all governed centrally.</p>
+    </div>
+    <div class="tech-card">
+      <h4>Microsoft Fabric</h4>
+      <div class="tech-role">Data Unification</div>
+      <p>The data lakehouse that ingests from Kimble, Salesforce, Finance, and MXDR billing. Single source of truth for all agent calculations.</p>
+    </div>
+    <div class="tech-card">
+      <h4>Kimble PSA</h4>
+      <div class="tech-role">Stays As-Is</div>
+      <p>No changes to Kimble. The agents read from it &mdash; they don&rsquo;t replace it. Practice Managers keep their existing workflows. The intelligence sits alongside.</p>
+    </div>
+  </div>
+
+  <div class="key-message">
+    <p>Not a rip-and-replace. <em>An intelligence layer on top.</em></p>
+  </div>
+
+  <p style="font-size:0.85rem; color:var(--text-muted); text-align:center;">Reference: <a href="https://supplie-ai-demo.vercel.app" target="_blank" style="color:var(--blue-light); text-decoration:none; border-bottom: 1px solid rgba(96,165,250,0.3);">Supplie.ai</a> demonstrates this exact decision-intelligence pattern &mdash; transparent logic, no black-box ML, sliders-to-recommendations.</p>
+</div>
+
+<!-- ─── 08 — Delivery Roadmap ─── -->
+<div class="section" id="s08">
+  <div class="section-num">08 &mdash; Roadmap</div>
+  <h2>Delivery <em>Roadmap</em></h2>
+  <p class="section-lead">A phased approach that delivers value incrementally. The pilot proves the concept with 5 real Platinum candidates before scaling.</p>
+
+  <div class="pipeline">
+    <div class="pipeline-track">
+      <div class="pipeline-phase">
+        <div class="phase-num">Phase 01</div>
+        <div class="phase-name">Discovery &amp; Data Audit</div>
+        <div class="phase-duration">3&ndash;4 weeks</div>
+        <div class="phase-desc">Map all data sources across Kimble, CRM, Finance, MXDR billing. Identify entity matching challenges. Define Platinum threshold criteria with leadership.</div>
+      </div>
+      <div class="pipeline-phase">
+        <div class="phase-num">Phase 02</div>
+        <div class="phase-name">Foundation Build</div>
+        <div class="phase-duration">4&ndash;6 weeks</div>
+        <div class="phase-desc">Stand up Fabric data lakehouse. Build Data Harmonization and Virtual PnL Calculator agents. Establish entity resolution pipeline.</div>
+      </div>
+      <div class="pipeline-phase">
+        <div class="phase-num">Phase 03</div>
+        <div class="phase-name">Virtual PnL Pilot</div>
+        <div class="phase-duration">4&ndash;6 weeks</div>
+        <div class="phase-desc">Run with 5 Platinum candidates. Validate calculations against manual P&amp;Ls. Refine thresholds. Build executive dashboard.</div>
+      </div>
+      <div class="pipeline-phase">
+        <div class="phase-num">Phase 04</div>
+        <div class="phase-name">Agent Expansion</div>
+        <div class="phase-duration">6&ndash;8 weeks</div>
+        <div class="phase-desc">Deploy Platinum Qualification, Deal Orchestration, and Forecasting agents. Integrate Copilot Studio orchestration. Roll to 25+ customers.</div>
+      </div>
+      <div class="pipeline-phase">
+        <div class="phase-num">Phase 05</div>
+        <div class="phase-name">Operationalise</div>
+        <div class="phase-duration">Ongoing</div>
+        <div class="phase-desc">Revenue Recognition agent. Full customer base rollout. Governance framework. PM incentive alignment. Continuous improvement flywheel.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── 09 — The Operationalisation Answer ─── -->
+<div class="section" id="s09">
+  <div class="section-num">09 &mdash; Operationalisation</div>
+  <h2>The Operationalisation <em>Answer</em></h2>
+  <p class="section-lead">Paula&rsquo;s challenge was direct: &ldquo;This isn&rsquo;t an operationalisation problem &mdash; it&rsquo;s that we haven&rsquo;t operationalised anything yet.&rdquo; Here&rsquo;s how the Virtual PnL changes that.</p>
+
+  <div class="gov-grid">
+    <div class="gov-card">
+      <h4>Governance Framework</h4>
+      <p>Clear ownership model: each agent has a designated Practice Manager as business owner. Quarterly reviews against defined KPIs. Escalation paths for cross-LOB disputes.</p>
+    </div>
+    <div class="gov-card">
+      <h4>PM Incentive Alignment</h4>
+      <p>Introduce cross-LOB incentive metrics alongside existing LOB targets. PMs rewarded for customer-level outcomes, not just practice-level margin. Virtual PnL provides the measurement layer.</p>
+    </div>
+    <div class="gov-card">
+      <h4>Change Management</h4>
+      <p>Phased rollout starting with 5 pilot accounts. Champions in each LOB. Fortnightly show-and-tell sessions. The dashboard sells itself once PMs see their customers in full.</p>
+    </div>
+    <div class="gov-card">
+      <h4>Measurable KPIs</h4>
+      <p>Cross-LOB deal count (+30% target Y1). Platinum account identification rate. Blended margin improvement. Time-to-quote for cross-LOB opportunities. PM adoption rate.</p>
+    </div>
+  </div>
+
+  <div class="callout">
+    <div class="callout-quote">&ldquo;The system doesn&rsquo;t replace Practice Managers &mdash; it gives them the view they&rsquo;ve never had.&rdquo;</div>
+    <div class="callout-attr">Positioning &mdash; Agentic AI Practice</div>
+  </div>
+</div>
+
+<!-- ─── 10 — Next Steps ─── -->
+<div class="section" id="s10">
+  <div class="section-num">10 &mdash; Next Steps</div>
+  <h2>Next <em>Steps</em></h2>
+  <p class="section-lead">Three concrete actions to move from proposal to pilot.</p>
+
+  <ul class="steps-list">
+    <li>
+      <span class="step-num">1</span>
+      <div>
+        <strong style="color:var(--text-bright);">Schedule Virtual PnL Workshop</strong><br>
+        Half-day session with Graham Robinson and key Practice Managers. Walk through the architecture, define Platinum criteria, and align on pilot scope. Target: within 2 weeks.
+      </div>
+    </li>
+    <li>
+      <span class="step-num">2</span>
+      <div>
+        <strong style="color:var(--text-bright);">Commission Kimble Data Audit</strong><br>
+        Map entity structures across Kimble BA, Kimble Services, CRM, and Finance. Identify the top 50 customers by total relationship value. Quantify data quality gaps. Target: 3&ndash;4 weeks.
+      </div>
+    </li>
+    <li>
+      <span class="step-num">3</span>
+      <div>
+        <strong style="color:var(--text-bright);">Stand Up Supplie-Style Pilot</strong><br>
+        Using the same decision-intelligence pattern proven in Supplie.ai, build a working Virtual PnL for 5 real customers. Transparent logic, no black-box ML, real data. Target: 8&ndash;10 weeks end-to-end.
+      </div>
+    </li>
+  </ul>
+
+  <div class="key-message">
+    <p>The question isn&rsquo;t whether Data#3 needs a unified customer view.<br><em>It&rsquo;s how quickly we can build one.</em></p>
+  </div>
+</div>
+
+<!-- Footer -->
+<footer class="doc-footer">
+  <div class="footer-brand">Data<sup>#</sup>3 &nbsp;&middot;&nbsp; <span>Agentic AI Practice</span> &nbsp;&middot;&nbsp; Matt Gooden</div>
+  <div class="footer-conf">Internal &mdash; Strategic</div>
+</footer>
+
+</div><!-- /page-wrapper -->
+
+<!-- ─── Simulator JavaScript ─── -->
+<script>
+(function() {
+  'use strict';
+
+  // Synthetic base data for Acme Corporation
+  var BASE = {
+    ba:   { rev: 820000, margin: 0.42 },
+    srv:  { rev: 680000, margin: 0.28 },
+    mxdr: { rev: 540000, margin: 0.45 },
+    ps:   { rev: 360000, margin: 0.31 }
+  };
+
+  // Presets: slider values [ba%, mxdrMonth, cross%, util%]
+  var PRESETS = {
+    'current':   { ba: 0,   mxdr: 6,  cross: 10, util: 72 },
+    'platinum':  { ba: 15,  mxdr: 3,  cross: 25, util: 85 },
+    'lose-ba':   { ba: -40, mxdr: 6,  cross: 0,  util: 72 },
+    'mxdr-ramp': { ba: 0,   mxdr: 2,  cross: 15, util: 78 }
+  };
+
+  // DOM refs
+  var sliderBA    = document.getElementById('slider-ba');
+  var sliderMXDR  = document.getElementById('slider-mxdr');
+  var sliderCross = document.getElementById('slider-cross');
+  var sliderUtil  = document.getElementById('slider-util');
+
+  var valBA    = document.getElementById('val-ba');
+  var valMXDR  = document.getElementById('val-mxdr');
+  var valCross = document.getElementById('val-cross');
+  var valUtil  = document.getElementById('val-util');
+
+  var kpiRevenue  = document.getElementById('kpi-revenue');
+  var kpiMargin   = document.getElementById('kpi-margin');
+  var kpiPlatinum = document.getElementById('kpi-platinum');
+  var kpiDeals    = document.getElementById('kpi-deals');
+
+  var kpiRevDelta  = document.getElementById('kpi-revenue-delta');
+  var kpiMarDelta  = document.getElementById('kpi-margin-delta');
+  var kpiPlatDelta = document.getElementById('kpi-platinum-delta');
+  var kpiDealDelta = document.getElementById('kpi-deals-delta');
+
+  var recText      = document.getElementById('recText');
+  var recPanel     = document.getElementById('recPanel');
+
+  var unifiedView = document.getElementById('unifiedView');
+  var siloedView  = document.getElementById('siloedView');
+
+  // Siloed revenue elements
+  var siloBA   = document.getElementById('silo-ba-rev');
+  var siloSRV  = document.getElementById('silo-srv-rev');
+  var siloMXDR = document.getElementById('silo-mxdr-rev');
+  var siloPS   = document.getElementById('silo-ps-rev');
+
+  function fmt(n) {
+    if (n >= 1000000) return '$' + (n / 1000000).toFixed(1) + 'M';
+    return '$' + Math.round(n / 1000) + 'K';
+  }
+
+  function calculate() {
+    var baAdj    = parseInt(sliderBA.value) / 100;
+    var mxdrMo   = parseInt(sliderMXDR.value);
+    var crossPct = parseInt(sliderCross.value) / 100;
+    var utilPct  = parseInt(sliderUtil.value) / 100;
+
+    // Calculate adjusted revenues
+    var baRev   = BASE.ba.rev * (1 + baAdj);
+    var srvRev  = BASE.srv.rev * (1 + crossPct * 0.5);
+    var mxdrRev = BASE.mxdr.rev * (12 - mxdrMo + 1) / 7; // ramp factor
+    var psRev   = BASE.ps.rev * (utilPct / 0.72);
+
+    // Cross-sell uplift on total
+    var totalRev = (baRev + srvRev + mxdrRev + psRev) * (1 + crossPct * 0.3);
+
+    // Blended margin
+    var totalCost = baRev * (1 - BASE.ba.margin) +
+                    srvRev * (1 - BASE.srv.margin) +
+                    mxdrRev * (1 - BASE.mxdr.margin) +
+                    psRev * (1 - BASE.ps.margin * (utilPct / 0.72));
+    var blendedMargin = totalRev > 0 ? (totalRev - totalCost) / totalRev : 0;
+    blendedMargin = Math.max(0.05, Math.min(0.65, blendedMargin));
+
+    // Platinum: >$2M, margin > 32%, 3+ LOBs active
+    var activeLOBs = 0;
+    if (baRev > 100000) activeLOBs++;
+    if (srvRev > 100000) activeLOBs++;
+    if (mxdrRev > 100000) activeLOBs++;
+    if (psRev > 50000) activeLOBs++;
+
+    var isPlatinum = totalRev >= 2000000 && blendedMargin >= 0.32 && activeLOBs >= 3;
+
+    // Cross-LOB deals estimate
+    var deals = Math.round(3 + crossPct * 15 + (activeLOBs - 2) * 1.5);
+    deals = Math.max(1, Math.min(15, deals));
+
+    // Baseline for delta
+    var baseTotal = BASE.ba.rev + BASE.srv.rev + BASE.mxdr.rev + BASE.ps.rev;
+
+    // Update display - slider values
+    valBA.textContent    = (baAdj >= 0 ? '+' : '') + Math.round(baAdj * 100) + '%';
+    valMXDR.textContent  = 'M' + mxdrMo;
+    valCross.textContent = Math.round(crossPct * 100) + '%';
+    valUtil.textContent  = Math.round(utilPct * 100) + '%';
+
+    // Update KPIs
+    kpiRevenue.textContent = fmt(totalRev);
+    kpiMargin.textContent  = (blendedMargin * 100).toFixed(1) + '%';
+    kpiPlatinum.textContent = isPlatinum ? 'YES' : 'NO';
+    kpiDeals.textContent = deals;
+
+    // Style KPIs
+    kpiPlatinum.className = 'kpi-value ' + (isPlatinum ? 'platinum' : 'no-platinum');
+
+    var revDelta = ((totalRev - baseTotal) / baseTotal * 100).toFixed(0);
+    kpiRevDelta.textContent = revDelta >= 0 ? '+' + revDelta + '% vs baseline' : revDelta + '% vs baseline';
+    kpiRevDelta.style.color = revDelta >= 0 ? 'var(--green-accent)' : 'var(--rose-accent)';
+
+    kpiMarDelta.textContent = blendedMargin >= 0.35 ? 'Healthy' : 'Below target';
+    kpiMarDelta.style.color = blendedMargin >= 0.35 ? 'var(--green-accent)' : 'var(--amber-accent)';
+
+    kpiPlatDelta.textContent = isPlatinum ? activeLOBs + ' LOBs active' : 'Threshold: $2M + 32% + 3 LOBs';
+    kpiDealDelta.textContent = deals > 5 ? 'Strong cross-sell' : 'Opportunity to grow';
+
+    // Update siloed view
+    siloBA.textContent   = fmt(baRev);
+    siloSRV.textContent  = fmt(srvRev);
+    siloMXDR.textContent = fmt(mxdrRev);
+    siloPS.textContent   = fmt(psRev);
+
+    // Recommendation
+    generateRecommendation(totalRev, blendedMargin, isPlatinum, baAdj, mxdrMo, crossPct, utilPct, deals);
+  }
+
+  function generateRecommendation(rev, margin, platinum, baAdj, mxdrMo, crossPct, utilPct, deals) {
+    var lines = [];
+
+    if (platinum) {
+      lines.push('<strong>Platinum status confirmed.</strong>');
+    } else if (rev > 1800000) {
+      lines.push('<strong>Near Platinum threshold.</strong>');
+    } else {
+      lines.push('<strong>Below Platinum threshold.</strong>');
+    }
+
+    if (baAdj < -0.2) {
+      lines.push('BA revenue decline is significant. Accelerate MXDR and cross-sell to compensate. Consider retention play for the BA relationship.');
+    } else if (baAdj > 0.1) {
+      lines.push('BA growth trajectory is strong. Leverage the relationship to introduce MXDR and ProServ services.');
+    }
+
+    if (mxdrMo <= 3) {
+      lines.push('Early MXDR ramp locks in high-margin recurring revenue. Prioritise onboarding to capture full-year value.');
+    } else if (mxdrMo >= 9) {
+      lines.push('Late MXDR start limits annual impact. Consider interim security assessment to bridge the gap.');
+    }
+
+    if (crossPct >= 0.2) {
+      lines.push('Cross-sell at ' + Math.round(crossPct * 100) + '% is generating strong multi-LOB engagement with ' + deals + ' active deals.');
+    } else if (crossPct <= 0.05) {
+      lines.push('Minimal cross-sell activity. This customer has untapped potential across LOBs.');
+    }
+
+    if (utilPct < 0.65) {
+      lines.push('ProServ utilisation at ' + Math.round(utilPct * 100) + '% is dragging blended margin. Address staffing or scope allocation.');
+    } else if (utilPct > 0.85) {
+      lines.push('ProServ running hot at ' + Math.round(utilPct * 100) + '% utilisation. Watch for delivery quality risks.');
+    }
+
+    if (margin < 0.30) {
+      lines.push('Blended margin below 30% &mdash; review pricing across all LOBs. MXDR and BA carry the best margins.');
+    }
+
+    recText.innerHTML = lines.join(' ');
+  }
+
+  // Slider event listeners
+  [sliderBA, sliderMXDR, sliderCross, sliderUtil].forEach(function(s) {
+    s.addEventListener('input', function() {
+      // Deselect preset buttons
+      document.querySelectorAll('.preset-btn').forEach(function(b) { b.classList.remove('active'); });
+      calculate();
+    });
+  });
+
+  // Preset buttons
+  document.getElementById('presets').addEventListener('click', function(e) {
+    var btn = e.target.closest('.preset-btn');
+    if (!btn) return;
+    var key = btn.dataset.preset;
+    var p = PRESETS[key];
+    if (!p) return;
+
+    sliderBA.value    = p.ba;
+    sliderMXDR.value  = p.mxdr;
+    sliderCross.value = p.cross;
+    sliderUtil.value  = p.util;
+
+    document.querySelectorAll('.preset-btn').forEach(function(b) { b.classList.remove('active'); });
+    btn.classList.add('active');
+    calculate();
+  });
+
+  // Unified / Siloed toggle
+  document.getElementById('viewToggle').addEventListener('click', function(e) {
+    var btn = e.target.closest('button');
+    if (!btn) return;
+    var view = btn.dataset.view;
+
+    document.querySelectorAll('#viewToggle button').forEach(function(b) { b.classList.remove('active'); });
+    btn.classList.add('active');
+
+    if (view === 'unified') {
+      unifiedView.classList.remove('hidden');
+      unifiedView.classList.add('sim-unified');
+      siloedView.classList.remove('visible');
+    } else {
+      unifiedView.classList.add('hidden');
+      siloedView.classList.add('visible');
+    }
+
+    calculate();
+  });
+
+  // Initial calculation
+  calculate();
+})();
+</script>
+
+</body>
+</html>

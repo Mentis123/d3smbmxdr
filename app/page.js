@@ -323,6 +323,7 @@ export default function Home() {
           <a href="https://www.data3.com" className={styles.logo} target="_blank">Data<sup>#</sup>3</a>
           <div className={styles.navPills}>
             <a href="/aitop10.html" className={styles.badge}>AI Security Report</a>
+            <a href="/customer-pnl" className={styles.badge}>Customer PnL</a>
             <a href="/examcp" className={styles.badge}>Exa MCP</a>
           </div>
         </header>

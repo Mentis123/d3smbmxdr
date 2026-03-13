@@ -1151,6 +1151,351 @@ p {
 .text-bright { color: var(--text-bright); }
 .mono { font-family: 'JetBrains Mono', monospace; }
 
+/* ═══════════════════ INLINE EDIT STYLES ═══════════════════ */
+
+/* Edit Status Indicator */
+.edit-status {
+  display: none;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.65rem;
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.25rem 0.6rem;
+  border-radius: 4px;
+  margin-left: 0.75rem;
+}
+
+.edit-status.saving {
+  display: inline-flex;
+  color: var(--blue-light);
+  background: rgba(59, 130, 246, 0.1);
+}
+
+.edit-status.saved {
+  display: inline-flex;
+  color: var(--green-accent);
+  background: rgba(52, 211, 153, 0.1);
+}
+
+.edit-status.error {
+  display: inline-flex;
+  color: var(--rose-accent);
+  background: rgba(251, 113, 133, 0.1);
+}
+
+/* Hover indicator */
+[data-block-id] {
+  cursor: pointer;
+  transition: outline 0.15s ease, outline-offset 0.15s ease;
+  outline: 2px dashed transparent;
+  outline-offset: 3px;
+  border-radius: 3px;
+}
+
+[data-block-id]:hover {
+  outline-color: rgba(59, 130, 246, 0.35);
+}
+
+/* Editing state */
+[data-block-id].editing {
+  outline: 2px solid var(--blue-primary) !important;
+  outline-offset: 4px;
+  background: rgba(59, 130, 246, 0.04) !important;
+}
+
+/* Deleted state */
+[data-block-id].deleted {
+  opacity: 0;
+  max-height: 0;
+  overflow: hidden;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: none !important;
+  pointer-events: none;
+  transition: opacity 0.3s, max-height 0.3s;
+}
+
+/* Show-deleted mode */
+body.show-deleted [data-block-id].deleted {
+  opacity: 0.35;
+  max-height: 500px;
+  overflow: visible;
+  text-decoration: line-through;
+  pointer-events: auto;
+  padding: revert !important;
+  margin: revert !important;
+  position: relative;
+}
+
+body.show-deleted [data-block-id].deleted::after {
+  content: 'DELETED';
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.5rem;
+  letter-spacing: 0.1em;
+  color: var(--rose-accent);
+  background: rgba(251, 113, 133, 0.15);
+  padding: 0.1rem 0.4rem;
+  border-radius: 3px;
+  text-decoration: none;
+}
+
+/* Floating toolbar */
+.edit-toolbar {
+  position: fixed;
+  z-index: 9999;
+  display: flex;
+  gap: 0.35rem;
+  padding: 0.4rem;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-accent);
+  border-radius: 8px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  animation: toolbar-in 0.15s ease;
+}
+
+@keyframes toolbar-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.edit-toolbar button {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 0.35rem 0.7rem;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.edit-toolbar .btn-save {
+  background: rgba(52, 211, 153, 0.15);
+  color: var(--green-accent);
+  border-color: rgba(52, 211, 153, 0.3);
+}
+.edit-toolbar .btn-save:hover { background: rgba(52, 211, 153, 0.25); }
+
+.edit-toolbar .btn-cancel {
+  background: rgba(148, 163, 184, 0.1);
+  color: var(--text-secondary);
+  border-color: rgba(148, 163, 184, 0.2);
+}
+.edit-toolbar .btn-cancel:hover { background: rgba(148, 163, 184, 0.2); }
+
+.edit-toolbar .btn-delete {
+  background: rgba(251, 113, 133, 0.1);
+  color: var(--rose-accent);
+  border-color: rgba(251, 113, 133, 0.2);
+}
+.edit-toolbar .btn-delete:hover { background: rgba(251, 113, 133, 0.2); }
+
+.edit-toolbar .btn-restore {
+  background: rgba(59, 130, 246, 0.15);
+  color: var(--blue-light);
+  border-color: rgba(59, 130, 246, 0.3);
+}
+.edit-toolbar .btn-restore:hover { background: rgba(59, 130, 246, 0.25); }
+
+/* Save flash */
+@keyframes save-flash {
+  0% { outline-color: var(--green-accent); }
+  100% { outline-color: transparent; }
+}
+[data-block-id].just-saved {
+  animation: save-flash 0.8s ease;
+}
+
+/* Changes panel trigger */
+.changes-trigger {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  z-index: 998;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.05em;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  border: 1px solid var(--border-mid);
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+}
+
+.changes-trigger:hover {
+  border-color: var(--border-accent);
+  color: var(--text-primary);
+}
+
+.changes-trigger.has-changes {
+  border-color: rgba(59, 130, 246, 0.4);
+  color: var(--blue-light);
+}
+
+/* Changes panel */
+.changes-panel {
+  position: fixed;
+  bottom: 4rem;
+  right: 1.5rem;
+  z-index: 997;
+  width: 360px;
+  max-height: 60vh;
+  background: var(--bg-card);
+  border: 1px solid var(--border-accent);
+  border-radius: 12px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.6);
+  display: none;
+  flex-direction: column;
+  overflow: hidden;
+  animation: panel-in 0.2s ease;
+}
+
+.changes-panel.open { display: flex; }
+
+@keyframes panel-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.changes-panel-header {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.changes-panel-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.changes-panel-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.changes-panel-actions button {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.55rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-show-deleted {
+  background: rgba(251, 113, 133, 0.08);
+  color: var(--text-muted);
+  border-color: rgba(251, 113, 133, 0.15);
+}
+.btn-show-deleted:hover, .btn-show-deleted.active {
+  background: rgba(251, 113, 133, 0.15);
+  color: var(--rose-accent);
+  border-color: rgba(251, 113, 133, 0.3);
+}
+
+.changes-panel-body {
+  overflow-y: auto;
+  padding: 0.5rem;
+  flex: 1;
+}
+
+.changes-panel-empty {
+  padding: 2rem 1rem;
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.change-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.6rem;
+  border-radius: 6px;
+  margin-bottom: 0.25rem;
+  transition: background 0.15s;
+}
+
+.change-item:hover {
+  background: rgba(99, 140, 255, 0.05);
+}
+
+.change-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.5rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 0.15rem 0.35rem;
+  border-radius: 3px;
+  flex-shrink: 0;
+  font-weight: 600;
+}
+
+.change-badge.edited {
+  background: rgba(59, 130, 246, 0.12);
+  color: var(--blue-light);
+}
+
+.change-badge.deleted-badge {
+  background: rgba(251, 113, 133, 0.12);
+  color: var(--rose-accent);
+}
+
+.change-label {
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.change-label:hover {
+  color: var(--text-primary);
+}
+
+.change-reset {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.5rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 0.2rem 0.4rem;
+  border-radius: 3px;
+  border: 1px solid rgba(251, 191, 36, 0.2);
+  background: rgba(251, 191, 36, 0.08);
+  color: var(--amber-accent);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.15s;
+}
+
+.change-reset:hover {
+  background: rgba(251, 191, 36, 0.18);
+}
+
+/* ═══════════════════ END INLINE EDIT STYLES ═══════════════════ */
+
 /* ─── Responsive ─── */
 @media (max-width: 900px) {
   .hero h1 { font-size: 2.4rem; }
@@ -1198,6 +1543,8 @@ p {
     border-color: #ddd;
     break-inside: avoid;
   }
+  [data-block-id] { outline: none !important; cursor: default; }
+  .edit-toolbar, .changes-trigger, .changes-panel, .edit-status { display: none !important; }
 }
 </style>
 </head>
@@ -1207,7 +1554,10 @@ p {
 <nav class="doc-nav">
   <div class="nav-inner">
     <div class="nav-brand">Data<sup>#</sup>3 &nbsp;&middot;&nbsp; <span>Agentic AI Practice</span></div>
-    <div class="nav-status">Strategic Proposal</div>
+    <div style="display:flex;align-items:center;">
+      <div class="nav-status">Strategic Proposal</div>
+      <span class="edit-status" id="editStatus"></span>
+    </div>
   </div>
 </nav>
 
@@ -1215,27 +1565,27 @@ p {
 
 <!-- Hero -->
 <header class="hero">
-  <div class="hero-eyebrow">Customer Virtual P&amp;L</div>
-  <h1>One Customer. One View.<br><em>One Decision.</em></h1>
-  <p class="hero-subtitle">
+  <div class="hero-eyebrow" data-block-id="hero-eyebrow">Customer Virtual P&amp;L</div>
+  <h1 data-block-id="hero-h1">One Customer. One View.<br><em>One Decision.</em></h1>
+  <p class="hero-subtitle" data-block-id="hero-p">
     A unified decision surface across all Lines of Business &mdash; eliminating siloed P&amp;Ls, enabling Platinum Account identification, and turning cross-LOB revenue into a single strategic view.
   </p>
   <div class="hero-meta">
     <div class="hero-meta-item">
       <span class="hero-meta-label">Date</span>
-      <span class="hero-meta-value">March 2025</span>
+      <span class="hero-meta-value" data-block-id="hero-meta-1">March 2025</span>
     </div>
     <div class="hero-meta-item">
       <span class="hero-meta-label">Audience</span>
-      <span class="hero-meta-value">Executive Team</span>
+      <span class="hero-meta-value" data-block-id="hero-meta-2">Executive Team</span>
     </div>
     <div class="hero-meta-item">
       <span class="hero-meta-label">Author</span>
-      <span class="hero-meta-value">Adam Rappaport</span>
+      <span class="hero-meta-value" data-block-id="hero-meta-3">Adam Rappaport</span>
     </div>
     <div class="hero-meta-item">
       <span class="hero-meta-label">Status</span>
-      <span class="hero-meta-value text-amber">Proposal</span>
+      <span class="hero-meta-value text-amber" data-block-id="hero-meta-4">Proposal</span>
     </div>
   </div>
 </header>
@@ -1243,44 +1593,44 @@ p {
 <!-- ─── 01 — The Problem We Heard ─── -->
 <div class="section" id="s01">
   <div class="section-num">01 &mdash; Context</div>
-  <h2>The Problem <em>We Heard</em></h2>
-  <p class="section-lead">Conversations across Practice Managers, account teams, and leadership surfaced a consistent pattern: structural silos are preventing Data#3 from seeing &mdash; and serving &mdash; customers as a single company.</p>
+  <h2 data-block-id="s01-h2">The Problem <em>We Heard</em></h2>
+  <p class="section-lead" data-block-id="s01-lead">Conversations across Practice Managers, account teams, and leadership surfaced a consistent pattern: structural silos are preventing Data#3 from seeing &mdash; and serving &mdash; customers as a single company.</p>
 
   <div class="callout">
-    <div class="callout-quote">&ldquo;The current LOB structure is a boa constrictor choking the business to death.&rdquo;</div>
-    <div class="callout-attr"></div>
+    <div class="callout-quote" data-block-id="s01-quote-1">&ldquo;The current LOB structure is a boa constrictor choking the business to death.&rdquo;</div>
+    <div class="callout-attr" data-block-id="s01-attr-1"></div>
   </div>
 
   <div class="callout">
-    <div class="callout-quote">&ldquo;Our customers see two different companies. They shouldn&rsquo;t have to.&rdquo;</div>
-    <div class="callout-attr"></div>
+    <div class="callout-quote" data-block-id="s01-quote-2">&ldquo;Our customers see two different companies. They shouldn&rsquo;t have to.&rdquo;</div>
+    <div class="callout-attr" data-block-id="s01-attr-2"></div>
   </div>
 
   <div class="callout">
-    <div class="callout-quote">&ldquo;This isn&rsquo;t an operationalisation problem. It&rsquo;s that we haven&rsquo;t operationalised anything yet.&rdquo;</div>
-    <div class="callout-attr"></div>
+    <div class="callout-quote" data-block-id="s01-quote-3">&ldquo;This isn&rsquo;t an operationalisation problem. It&rsquo;s that we haven&rsquo;t operationalised anything yet.&rdquo;</div>
+    <div class="callout-attr" data-block-id="s01-attr-3"></div>
   </div>
 
   <div class="cards-grid" style="grid-template-columns: repeat(4, 1fr);">
     <div class="card">
       <div class="card-icon rose">!</div>
-      <h4>Siloed P&amp;Ls</h4>
-      <p>Each LOB optimises for its own margin. No one sees the full customer picture across Business Apps, Services, MXDR, and ProServ.</p>
+      <h4 data-block-id="s01-card-h4-1">Siloed P&amp;Ls</h4>
+      <p data-block-id="s01-card-p-1">Each LOB optimises for its own margin. No one sees the full customer picture across Business Apps, Services, MXDR, and ProServ.</p>
     </div>
     <div class="card">
       <div class="card-icon amber">?</div>
-      <h4>Customer Fragmentation</h4>
-      <p>The same customer has separate relationships, separate forecasts, and separate billing across multiple LOBs.</p>
+      <h4 data-block-id="s01-card-h4-2">Customer Fragmentation</h4>
+      <p data-block-id="s01-card-p-2">The same customer has separate relationships, separate forecasts, and separate billing across multiple LOBs.</p>
     </div>
     <div class="card">
       <div class="card-icon purple">&harr;</div>
-      <h4>Billing &amp; Ops Gaps</h4>
-      <p>Cross-LOB deals require manual workarounds. Kimble PSA handles BA and Services &mdash; but MXDR billing lives elsewhere.</p>
+      <h4 data-block-id="s01-card-h4-3">Billing &amp; Ops Gaps</h4>
+      <p data-block-id="s01-card-p-3">Cross-LOB deals require manual workarounds. Kimble PSA handles BA and Services &mdash; but MXDR billing lives elsewhere.</p>
     </div>
     <div class="card">
       <div class="card-icon">$</div>
-      <h4>Revenue Recognition</h4>
-      <p>Blended margin calculations are impossible when each LOB reports independently. Cross-sell revenue falls through the cracks.</p>
+      <h4 data-block-id="s01-card-h4-4">Revenue Recognition</h4>
+      <p data-block-id="s01-card-p-4">Blended margin calculations are impossible when each LOB reports independently. Cross-sell revenue falls through the cracks.</p>
     </div>
   </div>
 </div>
@@ -1288,44 +1638,44 @@ p {
 <!-- ─── 02 — The Ask ─── -->
 <div class="section" id="s02">
   <div class="section-num">02 &mdash; The Ask</div>
-  <h2>What Leadership <em>Is Asking For</em></h2>
-  <p class="section-lead">A Customer Virtual P&amp;L &mdash; not a new financial system, but an intelligence layer that unifies data across every LOB into a single, actionable customer view.</p>
+  <h2 data-block-id="s02-h2">What Leadership <em>Is Asking For</em></h2>
+  <p class="section-lead" data-block-id="s02-lead">A Customer Virtual P&amp;L &mdash; not a new financial system, but an intelligence layer that unifies data across every LOB into a single, actionable customer view.</p>
 
-  <h3>The Data Flow</h3>
+  <h3 data-block-id="s02-h3-1">The Data Flow</h3>
   <div class="data-flow">
-    <div class="flow-node source">Kimble (BA)</div>
+    <div class="flow-node source" data-block-id="s02-flow-1">Kimble (BA)</div>
     <div class="flow-arrow"></div>
-    <div class="flow-node source">Kimble (SRV)</div>
+    <div class="flow-node source" data-block-id="s02-flow-2">Kimble (SRV)</div>
     <div class="flow-arrow"></div>
-    <div class="flow-node source">CRM</div>
+    <div class="flow-node source" data-block-id="s02-flow-3">CRM</div>
     <div class="flow-arrow"></div>
-    <div class="flow-node source">Finance</div>
+    <div class="flow-node source" data-block-id="s02-flow-4">Finance</div>
     <div class="flow-arrow"></div>
-    <div class="flow-node agent">Virtual PnL Agent</div>
+    <div class="flow-node agent" data-block-id="s02-flow-5">Virtual PnL Agent</div>
     <div class="flow-arrow"></div>
-    <div class="flow-node output">Unified View</div>
+    <div class="flow-node output" data-block-id="s02-flow-6">Unified View</div>
   </div>
 
   <div class="cards-grid" style="grid-template-columns: repeat(2, 1fr);">
     <div class="card">
       <div class="card-icon">%</div>
-      <h4>Blended Margin Visibility</h4>
-      <p>See the true margin across all LOBs for any customer &mdash; not just the fragment each practice reports.</p>
+      <h4 data-block-id="s02-card-h4-1">Blended Margin Visibility</h4>
+      <p data-block-id="s02-card-p-1">See the true margin across all LOBs for any customer &mdash; not just the fragment each practice reports.</p>
     </div>
     <div class="card">
       <div class="card-icon purple">&uarr;</div>
-      <h4>Cross-LOB Forecasting</h4>
-      <p>Unified pipeline view that spots revenue at risk, cross-sell opportunities, and deal dependencies across LOBs.</p>
+      <h4 data-block-id="s02-card-h4-2">Cross-LOB Forecasting</h4>
+      <p data-block-id="s02-card-p-2">Unified pipeline view that spots revenue at risk, cross-sell opportunities, and deal dependencies across LOBs.</p>
     </div>
     <div class="card">
       <div class="card-icon amber">&starf;</div>
-      <h4>Platinum Account Identification</h4>
-      <p>Automatically flag customers who meet Platinum thresholds based on total relationship value &mdash; not just one LOB.</p>
+      <h4 data-block-id="s02-card-h4-3">Platinum Account Identification</h4>
+      <p data-block-id="s02-card-p-3">Automatically flag customers who meet Platinum thresholds based on total relationship value &mdash; not just one LOB.</p>
     </div>
     <div class="card">
       <div class="card-icon green">&check;</div>
-      <h4>Deal Operationalisation</h4>
-      <p>End-to-end visibility from opportunity to delivery to billing &mdash; with cross-LOB coordination built in.</p>
+      <h4 data-block-id="s02-card-h4-4">Deal Operationalisation</h4>
+      <p data-block-id="s02-card-p-4">End-to-end visibility from opportunity to delivery to billing &mdash; with cross-LOB coordination built in.</p>
     </div>
   </div>
 </div>
@@ -1333,133 +1683,133 @@ p {
 <!-- ─── 03 — The Platinum Account Concept ─── -->
 <div class="section" id="s03">
   <div class="section-num">03 &mdash; Platinum Accounts</div>
-  <h2>The Platinum <em>Account Concept</em></h2>
-  <p class="section-lead">Leadership is asking real questions about Platinum Accounts. The concept is simple &mdash; the highest-value customers get a differentiated experience. The problem is: without a unified view, you can&rsquo;t identify them.</p>
+  <h2 data-block-id="s03-h2">The Platinum <em>Account Concept</em></h2>
+  <p class="section-lead" data-block-id="s03-lead">Leadership is asking real questions about Platinum Accounts. The concept is simple &mdash; the highest-value customers get a differentiated experience. The problem is: without a unified view, you can&rsquo;t identify them.</p>
 
   <div class="cards-grid" style="grid-template-columns: repeat(2, 1fr);">
     <div class="card">
       <div class="card-icon amber">&starf;</div>
-      <h4>Threshold Logic</h4>
-      <p>Platinum qualification based on total cross-LOB revenue exceeding $2M annually with engagement across 3+ LOBs and blended margin above 35%.</p>
+      <h4 data-block-id="s03-card-h4-1">Threshold Logic</h4>
+      <p data-block-id="s03-card-p-1">Platinum qualification based on total cross-LOB revenue exceeding $2M annually with engagement across 3+ LOBs and blended margin above 35%.</p>
     </div>
     <div class="card">
       <div class="card-icon green">&check;</div>
-      <h4>Benefits Package</h4>
-      <p>Dedicated account executive, quarterly business reviews, priority escalation paths, early access to new services, and custom SLAs.</p>
+      <h4 data-block-id="s03-card-h4-2">Benefits Package</h4>
+      <p data-block-id="s03-card-p-2">Dedicated account executive, quarterly business reviews, priority escalation paths, early access to new services, and custom SLAs.</p>
     </div>
     <div class="card">
       <div class="card-icon rose">!</div>
-      <h4>Why It Doesn&rsquo;t Exist Yet</h4>
-      <p>No system today can calculate total customer value across LOBs. Each practice sees its own slice. Platinum candidates are invisible.</p>
+      <h4 data-block-id="s03-card-h4-3">Why It Doesn&rsquo;t Exist Yet</h4>
+      <p data-block-id="s03-card-p-3">No system today can calculate total customer value across LOBs. Each practice sees its own slice. Platinum candidates are invisible.</p>
     </div>
     <div class="card">
       <div class="card-icon purple">&rarr;</div>
-      <h4>How Virtual PnL Enables It</h4>
-      <p>The Virtual PnL agent aggregates revenue, margin, and deal count across all LOBs &mdash; making Platinum identification automatic and real-time.</p>
+      <h4 data-block-id="s03-card-h4-4">How Virtual PnL Enables It</h4>
+      <p data-block-id="s03-card-p-4">The Virtual PnL agent aggregates revenue, margin, and deal count across all LOBs &mdash; making Platinum identification automatic and real-time.</p>
     </div>
   </div>
 
   <div class="urgency-callout">
-    <p><strong>Urgency:</strong> Leadership is actively asking questions about Platinum Account criteria. This isn&rsquo;t theoretical &mdash; they want to move on this. The Virtual PnL is the prerequisite.</p>
+    <p data-block-id="s03-urgency"><strong>Urgency:</strong> Leadership is actively asking questions about Platinum Account criteria. This isn&rsquo;t theoretical &mdash; they want to move on this. The Virtual PnL is the prerequisite.</p>
   </div>
 </div>
 
 <!-- ─── 04 — The Agentic AI Solution Architecture ─── -->
 <div class="section" id="s04">
   <div class="section-num">04 &mdash; Architecture</div>
-  <h2>The Agentic AI <em>Solution Architecture</em></h2>
-  <p class="section-lead">A four-layer architecture that sits on top of existing systems &mdash; no rip-and-replace. Agents harmonise data, calculate the Virtual PnL, and surface decisions through familiar Microsoft tools.</p>
+  <h2 data-block-id="s04-h2">The Agentic AI <em>Solution Architecture</em></h2>
+  <p class="section-lead" data-block-id="s04-lead">A four-layer architecture that sits on top of existing systems &mdash; no rip-and-replace. Agents harmonise data, calculate the Virtual PnL, and surface decisions through familiar Microsoft tools.</p>
 
   <div class="arch-layers">
     <div class="arch-layer l-exp">
       <div class="arch-layer-label">
-        <div class="arch-layer-name">Experience Layer</div>
-        <div class="arch-layer-sub">What users see</div>
+        <div class="arch-layer-name" data-block-id="s04-layer-name-1">Experience Layer</div>
+        <div class="arch-layer-sub" data-block-id="s04-layer-sub-1">What users see</div>
       </div>
       <div class="arch-layer-items">
-        <span class="arch-chip">Customer Dashboard</span>
-        <span class="arch-chip">Platinum Alerts</span>
-        <span class="arch-chip">Deal Assistant</span>
-        <span class="arch-chip">Executive Reports</span>
+        <span class="arch-chip" data-block-id="s04-chip-1">Customer Dashboard</span>
+        <span class="arch-chip" data-block-id="s04-chip-2">Platinum Alerts</span>
+        <span class="arch-chip" data-block-id="s04-chip-3">Deal Assistant</span>
+        <span class="arch-chip" data-block-id="s04-chip-4">Executive Reports</span>
       </div>
     </div>
     <div class="arch-layer l-orch">
       <div class="arch-layer-label">
-        <div class="arch-layer-name">Orchestration Layer</div>
-        <div class="arch-layer-sub">Copilot Studio</div>
+        <div class="arch-layer-name" data-block-id="s04-layer-name-2">Orchestration Layer</div>
+        <div class="arch-layer-sub" data-block-id="s04-layer-sub-2">Copilot Studio</div>
       </div>
       <div class="arch-layer-items">
-        <span class="arch-chip">Multi-Agent Coordination</span>
-        <span class="arch-chip">Workflow Triggers</span>
-        <span class="arch-chip">Human-in-the-Loop</span>
+        <span class="arch-chip" data-block-id="s04-chip-5">Multi-Agent Coordination</span>
+        <span class="arch-chip" data-block-id="s04-chip-6">Workflow Triggers</span>
+        <span class="arch-chip" data-block-id="s04-chip-7">Human-in-the-Loop</span>
       </div>
     </div>
     <div class="arch-layer l-intel">
       <div class="arch-layer-label">
-        <div class="arch-layer-name">Intelligence Layer</div>
-        <div class="arch-layer-sub">Microsoft Foundry</div>
+        <div class="arch-layer-name" data-block-id="s04-layer-name-3">Intelligence Layer</div>
+        <div class="arch-layer-sub" data-block-id="s04-layer-sub-3">Microsoft Foundry</div>
       </div>
       <div class="arch-layer-items">
-        <span class="arch-chip">PnL Calculation</span>
-        <span class="arch-chip">Platinum Scoring</span>
-        <span class="arch-chip">Forecast Modelling</span>
-        <span class="arch-chip">Anomaly Detection</span>
+        <span class="arch-chip" data-block-id="s04-chip-8">PnL Calculation</span>
+        <span class="arch-chip" data-block-id="s04-chip-9">Platinum Scoring</span>
+        <span class="arch-chip" data-block-id="s04-chip-10">Forecast Modelling</span>
+        <span class="arch-chip" data-block-id="s04-chip-11">Anomaly Detection</span>
       </div>
     </div>
     <div class="arch-layer l-data">
       <div class="arch-layer-label">
-        <div class="arch-layer-name">Data Layer</div>
-        <div class="arch-layer-sub">Connectors</div>
+        <div class="arch-layer-name" data-block-id="s04-layer-name-4">Data Layer</div>
+        <div class="arch-layer-sub" data-block-id="s04-layer-sub-4">Connectors</div>
       </div>
       <div class="arch-layer-items">
-        <span class="arch-chip">Kimble PSA</span>
-        <span class="arch-chip">Salesforce CRM</span>
-        <span class="arch-chip">Finance Systems</span>
-        <span class="arch-chip">MXDR Billing</span>
-        <span class="arch-chip">Microsoft Fabric</span>
+        <span class="arch-chip" data-block-id="s04-chip-12">Kimble PSA</span>
+        <span class="arch-chip" data-block-id="s04-chip-13">Salesforce CRM</span>
+        <span class="arch-chip" data-block-id="s04-chip-14">Finance Systems</span>
+        <span class="arch-chip" data-block-id="s04-chip-15">MXDR Billing</span>
+        <span class="arch-chip" data-block-id="s04-chip-16">Microsoft Fabric</span>
       </div>
     </div>
   </div>
 
-  <p style="font-size:0.85rem; color:var(--text-muted); text-align:center; margin-top:1rem;">This is what the Agentic AI practice delivers &mdash; the intelligence layer that turns fragmented data into unified decisions.</p>
+  <p data-block-id="s04-note" style="font-size:0.85rem; color:var(--text-muted); text-align:center; margin-top:1rem;">This is what the Agentic AI practice delivers &mdash; the intelligence layer that turns fragmented data into unified decisions.</p>
 </div>
 
 <!-- ─── 05 — The Agent Roster ─── -->
 <div class="section" id="s05">
   <div class="section-num">05 &mdash; Agents</div>
-  <h2>The Agent <em>Roster</em></h2>
-  <p class="section-lead">Six specialised agents, each with a defined role, working together through the orchestration layer to deliver the Customer Virtual PnL.</p>
+  <h2 data-block-id="s05-h2">The Agent <em>Roster</em></h2>
+  <p class="section-lead" data-block-id="s05-lead">Six specialised agents, each with a defined role, working together through the orchestration layer to deliver the Customer Virtual PnL.</p>
 
   <div class="agent-grid">
     <div class="agent-card">
       <div class="agent-num">Agent 01</div>
-      <h4>Data Harmonization</h4>
-      <p>Ingests and normalises data from Kimble, Salesforce, Finance, and MXDR billing. Resolves entity matching across systems &mdash; ensuring "Acme Corp" in Kimble is the same as "ACME Corporation" in CRM.</p>
+      <h4 data-block-id="s05-agent-h4-1">Data Harmonization</h4>
+      <p data-block-id="s05-agent-p-1">Ingests and normalises data from Kimble, Salesforce, Finance, and MXDR billing. Resolves entity matching across systems &mdash; ensuring "Acme Corp" in Kimble is the same as "ACME Corporation" in CRM.</p>
     </div>
     <div class="agent-card">
       <div class="agent-num">Agent 02</div>
-      <h4>Virtual PnL Calculator</h4>
-      <p>Aggregates revenue, cost, and margin across all LOBs for each customer. Computes blended margin, weighted revenue, and total relationship value in real-time.</p>
+      <h4 data-block-id="s05-agent-h4-2">Virtual PnL Calculator</h4>
+      <p data-block-id="s05-agent-p-2">Aggregates revenue, cost, and margin across all LOBs for each customer. Computes blended margin, weighted revenue, and total relationship value in real-time.</p>
     </div>
     <div class="agent-card">
       <div class="agent-num">Agent 03</div>
-      <h4>Platinum Qualification</h4>
-      <p>Evaluates customers against Platinum thresholds: total revenue, LOB breadth, margin quality, and growth trajectory. Flags new qualifiers and at-risk downgrades.</p>
+      <h4 data-block-id="s05-agent-h4-3">Platinum Qualification</h4>
+      <p data-block-id="s05-agent-p-3">Evaluates customers against Platinum thresholds: total revenue, LOB breadth, margin quality, and growth trajectory. Flags new qualifiers and at-risk downgrades.</p>
     </div>
     <div class="agent-card">
       <div class="agent-num">Agent 04</div>
-      <h4>Deal Orchestration</h4>
-      <p>Monitors cross-LOB deal dependencies. If a BA deal is at risk, alerts the MXDR team if their revenue is coupled. Coordinates billing and delivery across practices.</p>
+      <h4 data-block-id="s05-agent-h4-4">Deal Orchestration</h4>
+      <p data-block-id="s05-agent-p-4">Monitors cross-LOB deal dependencies. If a BA deal is at risk, alerts the MXDR team if their revenue is coupled. Coordinates billing and delivery across practices.</p>
     </div>
     <div class="agent-card">
       <div class="agent-num">Agent 05</div>
-      <h4>Forecasting</h4>
-      <p>Builds unified customer-level forecasts combining pipeline data from every LOB. Identifies revenue concentration risk and models scenarios for churn, expansion, and cross-sell.</p>
+      <h4 data-block-id="s05-agent-h4-5">Forecasting</h4>
+      <p data-block-id="s05-agent-p-5">Builds unified customer-level forecasts combining pipeline data from every LOB. Identifies revenue concentration risk and models scenarios for churn, expansion, and cross-sell.</p>
     </div>
     <div class="agent-card">
       <div class="agent-num">Agent 06</div>
-      <h4>Revenue Recognition</h4>
-      <p>Tracks revenue recognition status across LOBs. Ensures cross-LOB deals are correctly attributed, margin is reported at the customer level, and no revenue falls between the cracks.</p>
+      <h4 data-block-id="s05-agent-h4-6">Revenue Recognition</h4>
+      <p data-block-id="s05-agent-p-6">Tracks revenue recognition status across LOBs. Ensures cross-LOB deals are correctly attributed, margin is reported at the customer level, and no revenue falls between the cracks.</p>
     </div>
   </div>
 </div>
@@ -1467,14 +1817,14 @@ p {
 <!-- ─── 06 — Interactive Simulator ─── -->
 <div class="section" id="s06">
   <div class="section-num">06 &mdash; Interactive</div>
-  <h2>Customer Virtual PnL <em>Simulator</em></h2>
-  <p class="section-lead">See what a unified customer view looks like. Adjust assumptions, switch between presets, and toggle between Unified and Siloed views to feel the difference.</p>
+  <h2 data-block-id="s06-h2">Customer Virtual PnL <em>Simulator</em></h2>
+  <p class="section-lead" data-block-id="s06-lead">See what a unified customer view looks like. Adjust assumptions, switch between presets, and toggle between Unified and Siloed views to feel the difference.</p>
 
   <div class="sim-container">
     <div class="sim-header">
       <div>
-        <div class="sim-title">Live Simulator</div>
-        <div class="sim-customer">Acme Corporation</div>
+        <div class="sim-title" data-block-id="s06-sim-title">Live Simulator</div>
+        <div class="sim-customer" data-block-id="s06-sim-customer">Acme Corporation</div>
       </div>
       <div class="sim-toggle" id="viewToggle">
         <button class="active" data-view="unified">Unified</button>
@@ -1580,13 +1930,13 @@ p {
         </div>
 
         <div class="siloed-warning">
-          <p>No total view. No blended margin. No Platinum identification.</p>
-          <span>Each LOB sees only its own fragment &mdash; this is today&rsquo;s reality.</span>
+          <p data-block-id="s06-silo-warning">No total view. No blended margin. No Platinum identification.</p>
+          <span data-block-id="s06-silo-warning-sub">Each LOB sees only its own fragment &mdash; this is today&rsquo;s reality.</span>
         </div>
 
         <div class="sim-rec empty" id="recPanelSiloed">
           <div class="sim-rec-label">Agent Recommendation</div>
-          <p class="sim-rec-text">No recommendation available. Without a unified view, the system cannot assess cross-LOB impact or identify strategic opportunities.</p>
+          <p class="sim-rec-text" data-block-id="s06-silo-rec">No recommendation available. Without a unified view, the system cannot assess cross-LOB impact or identify strategic opportunities.</p>
         </div>
       </div>
     </div>
@@ -1596,76 +1946,76 @@ p {
 <!-- ─── 07 — Technology Platform ─── -->
 <div class="section" id="s07">
   <div class="section-num">07 &mdash; Technology</div>
-  <h2>Technology <em>Platform</em></h2>
-  <p class="section-lead">Built entirely on the Microsoft stack Data#3 already sells and supports. Not a rip-and-replace &mdash; an intelligence layer on top.</p>
+  <h2 data-block-id="s07-h2">Technology <em>Platform</em></h2>
+  <p class="section-lead" data-block-id="s07-lead">Built entirely on the Microsoft stack Data#3 already sells and supports. Not a rip-and-replace &mdash; an intelligence layer on top.</p>
 
   <div class="tech-grid">
     <div class="tech-card">
-      <h4>Copilot Studio</h4>
-      <div class="tech-role">Orchestration</div>
-      <p>Multi-agent coordination, workflow triggers, human-in-the-loop approvals. The control plane that routes work between agents and surfaces results to users.</p>
+      <h4 data-block-id="s07-tech-h4-1">Copilot Studio</h4>
+      <div class="tech-role" data-block-id="s07-tech-role-1">Orchestration</div>
+      <p data-block-id="s07-tech-p-1">Multi-agent coordination, workflow triggers, human-in-the-loop approvals. The control plane that routes work between agents and surfaces results to users.</p>
     </div>
     <div class="tech-card">
-      <h4>Microsoft Foundry</h4>
-      <div class="tech-role">Agent Factory</div>
-      <p>Where the six agents are built, trained, and deployed. Each agent has its own tools, data access, and decision logic &mdash; all governed centrally.</p>
+      <h4 data-block-id="s07-tech-h4-2">Microsoft Foundry</h4>
+      <div class="tech-role" data-block-id="s07-tech-role-2">Agent Factory</div>
+      <p data-block-id="s07-tech-p-2">Where the six agents are built, trained, and deployed. Each agent has its own tools, data access, and decision logic &mdash; all governed centrally.</p>
     </div>
     <div class="tech-card">
-      <h4>Microsoft Fabric</h4>
-      <div class="tech-role">Data Unification</div>
-      <p>The data lakehouse that ingests from Kimble, Salesforce, Finance, and MXDR billing. Single source of truth for all agent calculations.</p>
+      <h4 data-block-id="s07-tech-h4-3">Microsoft Fabric</h4>
+      <div class="tech-role" data-block-id="s07-tech-role-3">Data Unification</div>
+      <p data-block-id="s07-tech-p-3">The data lakehouse that ingests from Kimble, Salesforce, Finance, and MXDR billing. Single source of truth for all agent calculations.</p>
     </div>
     <div class="tech-card">
-      <h4>Kimble PSA</h4>
-      <div class="tech-role">Stays As-Is</div>
-      <p>No changes to Kimble. The agents read from it &mdash; they don&rsquo;t replace it. Practice Managers keep their existing workflows. The intelligence sits alongside.</p>
+      <h4 data-block-id="s07-tech-h4-4">Kimble PSA</h4>
+      <div class="tech-role" data-block-id="s07-tech-role-4">Stays As-Is</div>
+      <p data-block-id="s07-tech-p-4">No changes to Kimble. The agents read from it &mdash; they don&rsquo;t replace it. Practice Managers keep their existing workflows. The intelligence sits alongside.</p>
     </div>
   </div>
 
   <div class="key-message">
-    <p>Not a rip-and-replace. <em>An intelligence layer on top.</em></p>
+    <p data-block-id="s07-key-msg">Not a rip-and-replace. <em>An intelligence layer on top.</em></p>
   </div>
 
-  <p style="font-size:0.85rem; color:var(--text-muted); text-align:center;">This follows the same decision-intelligence pattern &mdash; transparent logic, no black-box ML, sliders-to-recommendations.</p>
+  <p data-block-id="s07-note" style="font-size:0.85rem; color:var(--text-muted); text-align:center;">This follows the same decision-intelligence pattern &mdash; transparent logic, no black-box ML, sliders-to-recommendations.</p>
 </div>
 
 <!-- ─── 08 — Delivery Roadmap ─── -->
 <div class="section" id="s08">
   <div class="section-num">08 &mdash; Roadmap</div>
-  <h2>Delivery <em>Roadmap</em></h2>
-  <p class="section-lead">A phased approach that delivers value incrementally. The pilot proves the concept with 5 real Platinum candidates before scaling.</p>
+  <h2 data-block-id="s08-h2">Delivery <em>Roadmap</em></h2>
+  <p class="section-lead" data-block-id="s08-lead">A phased approach that delivers value incrementally. The pilot proves the concept with 5 real Platinum candidates before scaling.</p>
 
   <div class="pipeline">
     <div class="pipeline-track">
       <div class="pipeline-phase">
         <div class="phase-num">Phase 01</div>
-        <div class="phase-name">Discovery &amp; Data Audit</div>
-        <div class="phase-duration">3&ndash;4 weeks</div>
-        <div class="phase-desc">Map all data sources across Kimble, CRM, Finance, MXDR billing. Identify entity matching challenges. Define Platinum threshold criteria with leadership.</div>
+        <div class="phase-name" data-block-id="s08-phase-name-1">Discovery &amp; Data Audit</div>
+        <div class="phase-duration" data-block-id="s08-phase-dur-1">3&ndash;4 weeks</div>
+        <div class="phase-desc" data-block-id="s08-phase-desc-1">Map all data sources across Kimble, CRM, Finance, MXDR billing. Identify entity matching challenges. Define Platinum threshold criteria with leadership.</div>
       </div>
       <div class="pipeline-phase">
         <div class="phase-num">Phase 02</div>
-        <div class="phase-name">Foundation Build</div>
-        <div class="phase-duration">4&ndash;6 weeks</div>
-        <div class="phase-desc">Stand up Fabric data lakehouse. Build Data Harmonization and Virtual PnL Calculator agents. Establish entity resolution pipeline.</div>
+        <div class="phase-name" data-block-id="s08-phase-name-2">Foundation Build</div>
+        <div class="phase-duration" data-block-id="s08-phase-dur-2">4&ndash;6 weeks</div>
+        <div class="phase-desc" data-block-id="s08-phase-desc-2">Stand up Fabric data lakehouse. Build Data Harmonization and Virtual PnL Calculator agents. Establish entity resolution pipeline.</div>
       </div>
       <div class="pipeline-phase">
         <div class="phase-num">Phase 03</div>
-        <div class="phase-name">Virtual PnL Pilot</div>
-        <div class="phase-duration">4&ndash;6 weeks</div>
-        <div class="phase-desc">Run with 5 Platinum candidates. Validate calculations against manual P&amp;Ls. Refine thresholds. Build executive dashboard.</div>
+        <div class="phase-name" data-block-id="s08-phase-name-3">Virtual PnL Pilot</div>
+        <div class="phase-duration" data-block-id="s08-phase-dur-3">4&ndash;6 weeks</div>
+        <div class="phase-desc" data-block-id="s08-phase-desc-3">Run with 5 Platinum candidates. Validate calculations against manual P&amp;Ls. Refine thresholds. Build executive dashboard.</div>
       </div>
       <div class="pipeline-phase">
         <div class="phase-num">Phase 04</div>
-        <div class="phase-name">Agent Expansion</div>
-        <div class="phase-duration">6&ndash;8 weeks</div>
-        <div class="phase-desc">Deploy Platinum Qualification, Deal Orchestration, and Forecasting agents. Integrate Copilot Studio orchestration. Roll to 25+ customers.</div>
+        <div class="phase-name" data-block-id="s08-phase-name-4">Agent Expansion</div>
+        <div class="phase-duration" data-block-id="s08-phase-dur-4">6&ndash;8 weeks</div>
+        <div class="phase-desc" data-block-id="s08-phase-desc-4">Deploy Platinum Qualification, Deal Orchestration, and Forecasting agents. Integrate Copilot Studio orchestration. Roll to 25+ customers.</div>
       </div>
       <div class="pipeline-phase">
         <div class="phase-num">Phase 05</div>
-        <div class="phase-name">Operationalise</div>
-        <div class="phase-duration">Ongoing</div>
-        <div class="phase-desc">Revenue Recognition agent. Full customer base rollout. Governance framework. PM incentive alignment. Continuous improvement flywheel.</div>
+        <div class="phase-name" data-block-id="s08-phase-name-5">Operationalise</div>
+        <div class="phase-duration" data-block-id="s08-phase-dur-5">Ongoing</div>
+        <div class="phase-desc" data-block-id="s08-phase-desc-5">Revenue Recognition agent. Full customer base rollout. Governance framework. PM incentive alignment. Continuous improvement flywheel.</div>
       </div>
     </div>
   </div>
@@ -1674,25 +2024,25 @@ p {
 <!-- ─── 09 — The Operationalisation Answer ─── -->
 <div class="section" id="s09">
   <div class="section-num">09 &mdash; Operationalisation</div>
-  <h2>The Operationalisation <em>Answer</em></h2>
-  <p class="section-lead">The challenge is direct: &ldquo;This isn&rsquo;t an operationalisation problem &mdash; it&rsquo;s that we haven&rsquo;t operationalised anything yet.&rdquo; Here&rsquo;s how the Virtual PnL changes that.</p>
+  <h2 data-block-id="s09-h2">The Operationalisation <em>Answer</em></h2>
+  <p class="section-lead" data-block-id="s09-lead">The challenge is direct: &ldquo;This isn&rsquo;t an operationalisation problem &mdash; it&rsquo;s that we haven&rsquo;t operationalised anything yet.&rdquo; Here&rsquo;s how the Virtual PnL changes that.</p>
 
   <div class="gov-grid">
     <div class="gov-card">
-      <h4>Governance Framework</h4>
-      <p>Clear ownership model: each agent has a designated Practice Manager as business owner. Quarterly reviews against defined KPIs. Escalation paths for cross-LOB disputes.</p>
+      <h4 data-block-id="s09-gov-h4-1">Governance Framework</h4>
+      <p data-block-id="s09-gov-p-1">Clear ownership model: each agent has a designated Practice Manager as business owner. Quarterly reviews against defined KPIs. Escalation paths for cross-LOB disputes.</p>
     </div>
     <div class="gov-card">
-      <h4>PM Incentive Alignment</h4>
-      <p>Introduce cross-LOB incentive metrics alongside existing LOB targets. PMs rewarded for customer-level outcomes, not just practice-level margin. Virtual PnL provides the measurement layer.</p>
+      <h4 data-block-id="s09-gov-h4-2">PM Incentive Alignment</h4>
+      <p data-block-id="s09-gov-p-2">Introduce cross-LOB incentive metrics alongside existing LOB targets. PMs rewarded for customer-level outcomes, not just practice-level margin. Virtual PnL provides the measurement layer.</p>
     </div>
     <div class="gov-card">
-      <h4>Change Management</h4>
-      <p>Phased rollout starting with 5 pilot accounts. Champions in each LOB. Fortnightly show-and-tell sessions. The dashboard sells itself once PMs see their customers in full.</p>
+      <h4 data-block-id="s09-gov-h4-3">Change Management</h4>
+      <p data-block-id="s09-gov-p-3">Phased rollout starting with 5 pilot accounts. Champions in each LOB. Fortnightly show-and-tell sessions. The dashboard sells itself once PMs see their customers in full.</p>
     </div>
     <div class="gov-card">
-      <h4>Measurable KPIs</h4>
-      <p>Cross-LOB deal count (+30% target Y1). Platinum account identification rate. Blended margin improvement. Time-to-quote for cross-LOB opportunities. PM adoption rate.</p>
+      <h4 data-block-id="s09-gov-h4-4">Measurable KPIs</h4>
+      <p data-block-id="s09-gov-p-4">Cross-LOB deal count (+30% target Y1). Platinum account identification rate. Blended margin improvement. Time-to-quote for cross-LOB opportunities. PM adoption rate.</p>
     </div>
   </div>
 
@@ -1701,27 +2051,27 @@ p {
 <!-- ─── 10 — Next Steps ─── -->
 <div class="section" id="s10">
   <div class="section-num">10 &mdash; Next Steps</div>
-  <h2>Next <em>Steps</em></h2>
-  <p class="section-lead">Three concrete actions to move from proposal to pilot.</p>
+  <h2 data-block-id="s10-h2">Next <em>Steps</em></h2>
+  <p class="section-lead" data-block-id="s10-lead">Three concrete actions to move from proposal to pilot.</p>
 
   <ul class="steps-list">
     <li>
       <span class="step-num">1</span>
-      <div>
+      <div data-block-id="s10-step-1">
         <strong style="color:var(--text-bright);">Schedule Virtual PnL Workshop</strong><br>
         Half-day session with Graham Robinson and key Practice Managers. Walk through the architecture, define Platinum criteria, and align on pilot scope. Target: within 2 weeks.
       </div>
     </li>
     <li>
       <span class="step-num">2</span>
-      <div>
+      <div data-block-id="s10-step-2">
         <strong style="color:var(--text-bright);">Commission Kimble Data Audit</strong><br>
         Map entity structures across Kimble BA, Kimble Services, CRM, and Finance. Identify the top 50 customers by total relationship value. Quantify data quality gaps. Target: 3&ndash;4 weeks.
       </div>
     </li>
     <li>
       <span class="step-num">3</span>
-      <div>
+      <div data-block-id="s10-step-3">
         <strong style="color:var(--text-bright);">Stand Up Decision-Intelligence Pilot</strong><br>
         Build a working Virtual PnL for 5 real customers. Transparent logic, no black-box ML, real data. Target: 8&ndash;10 weeks end-to-end.
       </div>
@@ -1729,14 +2079,14 @@ p {
   </ul>
 
   <div class="key-message">
-    <p>The question isn&rsquo;t whether Data#3 needs a unified customer view.<br><em>It&rsquo;s how quickly we can build one.</em></p>
+    <p data-block-id="s10-key-msg">The question isn&rsquo;t whether Data#3 needs a unified customer view.<br><em>It&rsquo;s how quickly we can build one.</em></p>
   </div>
 </div>
 
 <!-- Footer -->
 <footer class="doc-footer">
-  <div class="footer-brand">Data<sup>#</sup>3 &nbsp;&middot;&nbsp; <span>Agentic AI Practice</span> &nbsp;&middot;&nbsp; Adam Rappaport</div>
-  <div class="footer-conf">Internal &mdash; Strategic</div>
+  <div class="footer-brand" data-block-id="footer-brand">Data<sup>#</sup>3 &nbsp;&middot;&nbsp; <span>Agentic AI Practice</span> &nbsp;&middot;&nbsp; Adam Rappaport</div>
+  <div class="footer-conf" data-block-id="footer-conf">Internal &mdash; Strategic</div>
 </footer>
 
 </div><!-- /page-wrapper -->
@@ -1966,6 +2316,358 @@ p {
 
   // Initial calculation
   calculate();
+})();
+</script>
+
+<!-- Changes Panel -->
+<button class="changes-trigger" id="changesTrigger">No Changes</button>
+<div class="changes-panel" id="changesPanel">
+  <div class="changes-panel-header">
+    <span class="changes-panel-title">Edit History</span>
+    <div class="changes-panel-actions">
+      <button class="btn-show-deleted" id="showDeletedBtn">Show Deleted</button>
+    </div>
+  </div>
+  <div class="changes-panel-body" id="changesList"></div>
+</div>
+
+<!-- ═══════════════════ INLINE EDIT SCRIPT ═══════════════════ -->
+<script>
+(function() {
+  const PAGE_ID = 'customer-virtual-pnl';
+  const API = '/api/page-edits';
+
+  // Snapshot original HTML for every editable block (for reset)
+  const originals = {};
+  document.querySelectorAll('[data-block-id]').forEach(function(el) {
+    originals[el.getAttribute('data-block-id')] = el.innerHTML;
+  });
+
+  let editsMap = {};
+  let activeBlock = null;
+  let originalContent = '';
+  let toolbar = null;
+
+  // ─── Status Indicator ───
+  const statusEl = document.getElementById('editStatus');
+
+  function showStatus(type, text) {
+    statusEl.className = 'edit-status ' + type;
+    statusEl.textContent = text;
+    if (type === 'saved') {
+      setTimeout(function() { statusEl.className = 'edit-status'; }, 2000);
+    }
+  }
+
+  // ─── Load Edits from DB ───
+  async function loadEdits() {
+    try {
+      var res = await fetch(API + '?page_id=' + encodeURIComponent(PAGE_ID));
+      if (!res.ok) return;
+      var data = await res.json();
+      editsMap = data.edits || {};
+      applyEdits();
+      renderChangesPanel();
+    } catch (e) {
+      console.error('Failed to load edits:', e);
+    }
+  }
+
+  function applyEdits() {
+    for (var blockId in editsMap) {
+      var edit = editsMap[blockId];
+      var el = document.querySelector('[data-block-id="' + blockId + '"]');
+      if (!el) continue;
+      if (edit.content !== null && edit.content !== undefined) {
+        el.innerHTML = edit.content;
+      }
+      if (edit.deleted) {
+        el.classList.add('deleted');
+      } else {
+        el.classList.remove('deleted');
+      }
+    }
+  }
+
+  // ─── Changes Panel ───
+  function getChangeCounts() {
+    var edited = 0, deleted = 0;
+    for (var k in editsMap) {
+      if (editsMap[k].deleted) deleted++; else edited++;
+    }
+    return { edited: edited, deleted: deleted, total: edited + deleted };
+  }
+
+  function renderChangesPanel() {
+    var counts = getChangeCounts();
+    var trigger = document.getElementById('changesTrigger');
+    var parts = [];
+    if (counts.edited) parts.push(counts.edited + ' edited');
+    if (counts.deleted) parts.push(counts.deleted + ' deleted');
+    trigger.textContent = counts.total > 0 ? 'Changes (' + parts.join(', ') + ')' : 'No Changes';
+    trigger.classList.toggle('has-changes', counts.total > 0);
+    var sdBtn = document.getElementById('showDeletedBtn');
+    sdBtn.textContent = counts.deleted > 0 ? 'Show Deleted (' + counts.deleted + ')' : 'Show Deleted';
+    var list = document.getElementById('changesList');
+    if (counts.total === 0) {
+      list.innerHTML = '<div class="changes-panel-empty">No changes yet.<br>Click any text to edit it.</div>';
+      return;
+    }
+    var html = '';
+    var entries = Object.keys(editsMap).sort();
+    for (var i = 0; i < entries.length; i++) {
+      var bid = entries[i];
+      var edit = editsMap[bid];
+      var isDel = edit.deleted;
+      var badgeClass = isDel ? 'deleted-badge' : 'edited';
+      var badgeText = isDel ? 'Del' : 'Edit';
+      var el = document.querySelector('[data-block-id="' + bid + '"]');
+      var label = bid;
+      if (el) {
+        var text = el.textContent.trim();
+        label = text.length > 40 ? text.substring(0, 40) + '...' : (text || bid);
+      }
+      html += '<div class="change-item">' +
+        '<span class="change-badge ' + badgeClass + '">' + badgeText + '</span>' +
+        '<span class="change-label" data-goto="' + bid + '" title="' + bid + '">' + label.replace(/</g, '&lt;') + '</span>' +
+        '<button class="change-reset" data-reset="' + bid + '">Reset</button>' +
+        '</div>';
+    }
+    list.innerHTML = html;
+  }
+
+  // ─── Save Edit to DB ───
+  async function saveEdit(blockId, content, deleted) {
+    showStatus('saving', 'Saving...');
+    try {
+      var res = await fetch(API, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ page_id: PAGE_ID, block_id: blockId, content: content, deleted: deleted })
+      });
+      if (!res.ok) throw new Error('Save failed');
+      showStatus('saved', 'Saved');
+      editsMap[blockId] = { content: content, deleted: deleted, updated_at: new Date().toISOString() };
+      renderChangesPanel();
+    } catch (e) {
+      showStatus('error', 'Error saving');
+      console.error('Save failed:', e);
+    }
+  }
+
+  // ─── Reset Block to Original ───
+  async function resetBlock(blockId) {
+    showStatus('saving', 'Resetting...');
+    try {
+      var res = await fetch(API, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ page_id: PAGE_ID, block_id: blockId })
+      });
+      if (!res.ok) throw new Error('Reset failed');
+      showStatus('saved', 'Reset to original');
+      delete editsMap[blockId];
+      var el = document.querySelector('[data-block-id="' + blockId + '"]');
+      if (el && originals[blockId] !== undefined) {
+        el.innerHTML = originals[blockId];
+        el.classList.remove('deleted');
+      }
+      renderChangesPanel();
+    } catch (e) {
+      showStatus('error', 'Reset failed');
+      console.error('Reset failed:', e);
+    }
+  }
+
+  // ─── Create / Position Toolbar ───
+  function createToolbar() {
+    if (toolbar) toolbar.remove();
+    toolbar = document.createElement('div');
+    toolbar.className = 'edit-toolbar';
+    document.body.appendChild(toolbar);
+    return toolbar;
+  }
+
+  function positionToolbar(el) {
+    if (!toolbar) return;
+    var rect = el.getBoundingClientRect();
+    var toolbarHeight = 40;
+    var top = rect.top - toolbarHeight - 8;
+    var left = rect.left;
+    if (rect.top < toolbarHeight + 20) {
+      top = rect.bottom + 8;
+    }
+    var maxLeft = window.innerWidth - 340;
+    if (left > maxLeft) left = maxLeft;
+    if (left < 8) left = 8;
+    toolbar.style.top = top + 'px';
+    toolbar.style.left = left + 'px';
+  }
+
+  // ─── Enter Edit Mode ───
+  function enterEdit(el) {
+    if (activeBlock) cancelEdit();
+    activeBlock = el;
+    originalContent = el.innerHTML;
+    el.classList.add('editing');
+    el.setAttribute('contenteditable', 'true');
+    el.focus();
+
+    var blockId = el.getAttribute('data-block-id');
+    var isDeleted = el.classList.contains('deleted');
+    var hasBeenEdited = blockId in editsMap;
+    var tb = createToolbar();
+
+    if (isDeleted) {
+      tb.innerHTML =
+        '<button class="btn-restore" onclick="window._editRestore()">Restore</button>' +
+        '<button class="btn-cancel" onclick="window._editCancel()">Cancel</button>' +
+        '<button class="btn-delete" style="background:rgba(251,191,36,0.1);color:var(--amber-accent);border-color:rgba(251,191,36,0.2)" onclick="window._editReset()">Reset to Original</button>';
+    } else {
+      var buttons =
+        '<button class="btn-save" onclick="window._editSave()">Save</button>' +
+        '<button class="btn-cancel" onclick="window._editCancel()">Cancel</button>' +
+        '<button class="btn-delete" onclick="window._editDelete()">Delete</button>';
+      if (hasBeenEdited) {
+        buttons += '<button class="btn-delete" style="background:rgba(251,191,36,0.1);color:var(--amber-accent);border-color:rgba(251,191,36,0.2)" onclick="window._editReset()">Reset</button>';
+      }
+      tb.innerHTML = buttons;
+    }
+    positionToolbar(el);
+  }
+
+  // ─── Cancel Edit ───
+  function cancelEdit() {
+    if (!activeBlock) return;
+    activeBlock.innerHTML = originalContent;
+    activeBlock.classList.remove('editing');
+    activeBlock.removeAttribute('contenteditable');
+    activeBlock = null;
+    originalContent = '';
+    if (toolbar) { toolbar.remove(); toolbar = null; }
+  }
+
+  // ─── Save Edit ───
+  async function doSave() {
+    if (!activeBlock) return;
+    var blockId = activeBlock.getAttribute('data-block-id');
+    var content = activeBlock.innerHTML;
+    activeBlock.classList.remove('editing');
+    activeBlock.removeAttribute('contenteditable');
+    activeBlock.classList.add('just-saved');
+    setTimeout(function() { var el = document.querySelector('[data-block-id="' + blockId + '"]'); if (el) el.classList.remove('just-saved'); }, 800);
+    if (toolbar) { toolbar.remove(); toolbar = null; }
+    activeBlock = null;
+    originalContent = '';
+    await saveEdit(blockId, content, false);
+  }
+
+  // ─── Delete Block ───
+  async function doDelete() {
+    if (!activeBlock) return;
+    var blockId = activeBlock.getAttribute('data-block-id');
+    var content = activeBlock.innerHTML;
+    activeBlock.classList.remove('editing');
+    activeBlock.removeAttribute('contenteditable');
+    activeBlock.classList.add('deleted');
+    if (toolbar) { toolbar.remove(); toolbar = null; }
+    activeBlock = null;
+    originalContent = '';
+    await saveEdit(blockId, content, true);
+  }
+
+  // ─── Restore Block ───
+  async function doRestore() {
+    if (!activeBlock) return;
+    var blockId = activeBlock.getAttribute('data-block-id');
+    var content = activeBlock.innerHTML;
+    activeBlock.classList.remove('editing', 'deleted');
+    activeBlock.removeAttribute('contenteditable');
+    if (toolbar) { toolbar.remove(); toolbar = null; }
+    activeBlock = null;
+    originalContent = '';
+    await saveEdit(blockId, content, false);
+  }
+
+  // ─── Reset from Toolbar ───
+  async function doReset() {
+    if (!activeBlock) return;
+    var blockId = activeBlock.getAttribute('data-block-id');
+    activeBlock.classList.remove('editing');
+    activeBlock.removeAttribute('contenteditable');
+    if (toolbar) { toolbar.remove(); toolbar = null; }
+    activeBlock = null;
+    originalContent = '';
+    await resetBlock(blockId);
+  }
+
+  // ─── Expose to global ───
+  window._editSave = doSave;
+  window._editCancel = cancelEdit;
+  window._editDelete = doDelete;
+  window._editRestore = doRestore;
+  window._editReset = doReset;
+
+  // ─── Click Handler ───
+  document.addEventListener('click', function(e) {
+    if (e.target.closest('.changes-trigger')) {
+      document.getElementById('changesPanel').classList.toggle('open');
+      return;
+    }
+    if (e.target.closest('.changes-panel')) {
+      if (e.target.id === 'showDeletedBtn' || e.target.closest('#showDeletedBtn')) {
+        document.body.classList.toggle('show-deleted');
+        document.getElementById('showDeletedBtn').classList.toggle('active');
+        return;
+      }
+      var resetBtn = e.target.closest('[data-reset]');
+      if (resetBtn) {
+        if (activeBlock) cancelEdit();
+        resetBlock(resetBtn.getAttribute('data-reset'));
+        return;
+      }
+      var gotoLabel = e.target.closest('[data-goto]');
+      if (gotoLabel) {
+        var bid = gotoLabel.getAttribute('data-goto');
+        var target = document.querySelector('[data-block-id="' + bid + '"]');
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          target.classList.add('just-saved');
+          setTimeout(function() { target.classList.remove('just-saved'); }, 1000);
+        }
+        return;
+      }
+      return;
+    }
+
+    var block = e.target.closest('[data-block-id]');
+    if (activeBlock && !block) {
+      if (e.target.closest('.edit-toolbar')) return;
+      cancelEdit();
+      return;
+    }
+    if (block && block !== activeBlock) {
+      document.getElementById('changesPanel').classList.remove('open');
+      enterEdit(block);
+    }
+  });
+
+  // ─── Keyboard Shortcuts ───
+  document.addEventListener('keydown', function(e) {
+    if (!activeBlock) return;
+    if (e.key === 'Escape') { e.preventDefault(); cancelEdit(); }
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); doSave(); }
+  });
+
+  // ─── Reposition on scroll/resize ───
+  function onReposition() {
+    if (activeBlock && toolbar) positionToolbar(activeBlock);
+  }
+  window.addEventListener('scroll', onReposition, { passive: true });
+  window.addEventListener('resize', onReposition, { passive: true });
+
+  // ─── Init ───
+  loadEdits();
 })();
 </script>
 

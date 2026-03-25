@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Power Automate Personalised Email Agent | Data#3</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap');
+
+*{box-sizing:border-box;margin:0;padding:0}
+:root {
+  --bg:#060913; --panel:#0f162d; --card:#151d37; --line:rgba(99,140,255,.2);
+  --text:#e8ecf4; --muted:#94a3b8; --blue:#60a5fa; --green:#34d399; --amber:#fbbf24; --rose:#fb7185;
+}
+body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text); line-height:1.65; }
+.page { max-width:1040px; margin:0 auto; padding:0 1.25rem 3rem; }
+.doc-nav { position:sticky; top:0; background:rgba(6,9,19,.9); backdrop-filter:blur(10px); border-bottom:1px solid var(--line); z-index:20; margin:0 -1.25rem; padding:.8rem 1.25rem; }
+.nav-inner{ max-width:1040px; margin:0 auto; display:flex; justify-content:space-between; align-items:center; }
+.nav-brand{font:500 .72rem 'JetBrains Mono',monospace; letter-spacing:.12em; text-transform:uppercase; color:var(--muted)}
+.nav-status{font:500 .72rem 'JetBrains Mono',monospace; letter-spacing:.08em; text-transform:uppercase; color:var(--amber)}
+.hero{padding:2.4rem 0 1.6rem}
+.eyebrow{font:500 .7rem 'JetBrains Mono',monospace; text-transform:uppercase; letter-spacing:.2em; color:var(--blue); margin-bottom:1rem}
+h1{font:400 3.1rem 'Instrument Serif',serif; line-height:1.08; margin-bottom:.8rem}
+h1 em{font-style:italic; color:var(--blue)}
+.lead{font-size:1.07rem; color:var(--muted); max-width:760px}
+.section{margin:1.2rem 0; background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:1.1rem}
+.section h2{font:400 1.8rem 'Instrument Serif',serif; margin-bottom:.5rem}
+.section h3{font-size:1.05rem; margin:.7rem 0 .35rem}
+.grid{display:grid; gap:.8rem; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); margin-top:.6rem}
+.card{background:var(--card); border:1px solid var(--line); border-radius:10px; padding:.8rem}
+.card h4{font-size:.95rem; margin-bottom:.3rem}
+p,li{color:#c5d0e6}
+ul{padding-left:1.1rem}
+.small{font-size:.87rem; color:var(--muted)}
+.pill{display:inline-block; padding:.22rem .5rem; font:.68rem 'JetBrains Mono',monospace; border:1px solid var(--line); border-radius:999px; color:var(--muted); margin-right:.4rem; margin-bottom:.45rem}
+.footer{margin-top:1rem; text-align:center; color:var(--muted); font-size:.85rem}
+
+[data-block-id]{cursor:pointer;outline:2px solid transparent;outline-offset:2px;transition:.15s}
+[data-block-id]:hover{outline-color:rgba(96,165,250,.4)}
+[data-block-id].editing{outline-color:rgba(96,165,250,.9);background:rgba(96,165,250,.08);cursor:text}
+[data-block-id].deleted{opacity:.35;text-decoration:line-through}
+body.show-deleted [data-block-id].deleted{display:block!important}
+
+.edit-toolbar{position:fixed;z-index:1000;display:flex;gap:.35rem;background:#0b1122;border:1px solid var(--line);border-radius:8px;padding:.35rem;box-shadow:0 4px 20px rgba(0,0,0,.4)}
+.edit-toolbar button{border:1px solid var(--line);background:var(--card);color:var(--text);border-radius:6px;padding:.28rem .55rem;font-size:.78rem;cursor:pointer}
+.edit-toolbar .btn-save{border-color:rgba(52,211,153,.45);color:var(--green)}
+.edit-toolbar .btn-delete{border-color:rgba(251,113,133,.45);color:var(--rose)}
+.changes-trigger{position:fixed;right:16px;bottom:16px;z-index:500;background:#0b1122;border:1px solid var(--line);color:var(--text);border-radius:999px;padding:.45rem .8rem;cursor:pointer;font-size:.78rem}
+.changes-panel{position:fixed;right:16px;bottom:56px;width:min(450px,92vw);max-height:62vh;display:none;flex-direction:column;z-index:600;background:#0b1122;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.changes-panel.open{display:flex}
+.changes-panel-header{display:flex;justify-content:space-between;align-items:center;padding:.65rem .8rem;border-bottom:1px solid var(--line)}
+.changes-panel-body{padding:.7rem;overflow:auto}
+.change-row{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:.55rem;margin-bottom:.5rem;font-size:.8rem}
+.change-row .meta{color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:.68rem;margin-bottom:.3rem}
+.changes-panel-actions button{margin-left:.35rem;border:1px solid var(--line);background:var(--card);color:var(--text);border-radius:6px;padding:.2rem .4rem;cursor:pointer}
+
+@media print { [data-block-id]{outline:none!important;cursor:default} .edit-toolbar,.changes-trigger,.changes-panel{display:none!important} }
+</style>
+</head>
+<body>
+<div class="page">
+  <nav class="doc-nav">
+    <div class="nav-inner">
+      <div class="nav-brand">Data#3 · Agent <span style="color:var(--blue)">Blueprint</span></div>
+      <div class="nav-status">Draft / Editable</div>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <div class="eyebrow" data-block-id="hero-eyebrow">Power Automate Email Agent</div>
+    <h1 data-block-id="hero-title">Personalised Outreach Drafts<br><em>with human approval</em></h1>
+    <p class="lead" data-block-id="hero-lead">Standalone guide for building a practical flow that scans your Outlook “Customer” folders, extracts first name + email, creates personalised draft emails with your supplied content, and lets you test on yourself before wider rollout.</p>
+  </header>
+
+  <section class="section">
+    <h2 data-block-id="s1-title">1) Use Case Definition</h2>
+    <p data-block-id="s1-p1">Goal: generate draft emails (not auto-send) so you can review each one before release.</p>
+    <div class="grid">
+      <div class="card"><h4 data-block-id="s1-card1-h">Input</h4><p data-block-id="s1-card1-p">Outlook “Customer” folder + sub-folders, customer contact card metadata, campaign template body and subject rules.</p></div>
+      <div class="card"><h4 data-block-id="s1-card2-h">Output</h4><p data-block-id="s1-card2-p">Personalised draft in Outlook with first-name intro and customised subject line.</p></div>
+      <div class="card"><h4 data-block-id="s1-card3-h">Control</h4><p data-block-id="s1-card3-p">Human-in-the-loop approval gate and test-mode switch for self-only validation.</p></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2 data-block-id="s2-title">2) Recommended Flow Architecture</h2>
+    <span class="pill" data-block-id="s2-pill1">Trigger: Manual / Scheduled</span>
+    <span class="pill" data-block-id="s2-pill2">Connector: Office 365 Outlook</span>
+    <span class="pill" data-block-id="s2-pill3">Optional: AI Builder / Copilot prompt</span>
+    <ol style="margin-top:.6rem; padding-left:1.15rem;">
+      <li data-block-id="s2-step1">Load approved campaign content + variables (offer, CTA, signature).</li>
+      <li data-block-id="s2-step2">List messages/contacts under “Customer” root and iterate sub-folders.</li>
+      <li data-block-id="s2-step3">Extract recipient first name + email (fallback to parsing display name).</li>
+      <li data-block-id="s2-step4">Compose subject and body from template with token replacement.</li>
+      <li data-block-id="s2-step5">If test mode = true, rewrite recipient to your own email address.</li>
+      <li data-block-id="s2-step6">Create draft message in Outlook, tag category “Agent-Draft-Pending”.</li>
+      <li data-block-id="s2-step7">Send approval summary to you (Teams or email) with draft count.</li>
+    </ol>
+  </section>
+
+  <section class="section">
+    <h2 data-block-id="s3-title">3) Data Rules & Personalisation Logic</h2>
+    <div class="grid">
+      <div class="card"><h4 data-block-id="s3-h1">First name logic</h4><p data-block-id="s3-p1">Use givenName when available. Else split displayName by spaces and take token 1. If blank, fallback to “Hi there”.</p></div>
+      <div class="card"><h4 data-block-id="s3-h2">Subject logic</h4><p data-block-id="s3-p2">Pattern: “&lt;FirstName&gt;, quick note on &lt;topic&gt;”. Keep under 65 chars where possible.</p></div>
+      <div class="card"><h4 data-block-id="s3-h3">Body logic</h4><p data-block-id="s3-p3">Template blocks: greeting, 2–3 lines of value, CTA, sign-off. Keep plain-English tone.</p></div>
+      <div class="card"><h4 data-block-id="s3-h4">Dedup logic</h4><p data-block-id="s3-p4">Do not draft more than one email per recipient per campaign run; hash recipient+campaign ID.</p></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2 data-block-id="s4-title">4) Safety, Governance, and Testing</h2>
+    <h3 data-block-id="s4-h1">Test-first controls</h3>
+    <ul>
+      <li data-block-id="s4-l1">Boolean variable <strong>test_mode</strong> defaults to true in dev and UAT.</li>
+      <li data-block-id="s4-l2">When true, all drafts route to your own inbox with original recipient in body metadata.</li>
+      <li data-block-id="s4-l3">Approval required before any run with <strong>test_mode=false</strong>.</li>
+    </ul>
+    <h3 data-block-id="s4-h2">Operational controls</h3>
+    <ul>
+      <li data-block-id="s4-l4">Cap run volume (example: 25 drafts/run) to reduce accidental blast radius.</li>
+      <li data-block-id="s4-l5">Store run log (recipient, timestamp, campaign id, draft id, operator).</li>
+      <li data-block-id="s4-l6">Add kill switch variable to halt processing immediately.</li>
+    </ul>
+  </section>
+
+  <section class="section">
+    <h2 data-block-id="s5-title">5) 30-Minute Working Session Agenda</h2>
+    <ol style="padding-left:1.15rem">
+      <li data-block-id="s5-step1">Confirm mailbox/folder shape and contact data quality (5 min).</li>
+      <li data-block-id="s5-step2">Build minimum viable flow live (10 min).</li>
+      <li data-block-id="s5-step3">Add personalisation + test mode + approval branch (10 min).</li>
+      <li data-block-id="s5-step4">Run live test to self, review drafts, define next hardening actions (5 min).</li>
+    </ol>
+    <p class="small" data-block-id="s5-note">Outcome: working, review-first drafting agent you can iterate safely.</p>
+  </section>
+
+  <section class="section">
+    <h2 data-block-id="s6-title">6) Editable Notes / Change Requests</h2>
+    <p data-block-id="s6-p1">This page supports click-to-edit blocks, Save/Cancel/Delete/Restore, and persisted history via <code>/api/page-edits</code>, matching the workflow you requested (“editable + accept changes” style).</p>
+  </section>
+
+  <div class="footer" data-block-id="footer">Data#3 · Draft implementation notes for Power Automate personalised email agent.</div>
+</div>
+
+<button class="changes-trigger" id="changesTrigger">Changes</button>
+<div class="changes-panel" id="changesPanel">
+  <div class="changes-panel-header">
+    <strong>Edit History</strong>
+    <div class="changes-panel-actions">
+      <button id="toggleDeleted">Show Deleted</button>
+      <button id="resetAll">Reset</button>
+      <button id="closeChanges">Close</button>
+    </div>
+  </div>
+  <div class="changes-panel-body" id="changesList"></div>
+</div>
+
+<script>
+(function(){
+  var API='/api/page-edits';
+  var pageKey=(location.pathname.split('/').pop()||'index').replace(/\.html?$/,'');
+  var originals={}, changes={}, activeBlock=null, toolbar=null, showDeleted=false;
+
+  document.querySelectorAll('[data-block-id]').forEach(function(el){ originals[el.getAttribute('data-block-id')]=el.innerHTML; });
+
+  function escapeHtml(str){ return (str||'').replace(/[&<>"]/g,function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
+
+  function renderChanges(){
+    var list=document.getElementById('changesList');
+    var keys=Object.keys(changes);
+    if(!keys.length){ list.innerHTML='<div class="small">No changes yet. Click any text to edit.</div>'; return; }
+    list.innerHTML=keys.map(function(k){
+      var c=changes[k];
+      return '<div class="change-row"><div class="meta">'+escapeHtml(k)+(c.deleted?' · deleted':'')+'</div><div>'+escapeHtml((c.new||'').replace(/<[^>]+>/g,' ').slice(0,170)||'(empty)')+'</div></div>';
+    }).join('');
+  }
+
+  function applyChange(blockId, value, deleted){
+    var el=document.querySelector('[data-block-id="'+blockId+'"]'); if(!el) return;
+    el.innerHTML=value;
+    el.classList.toggle('deleted', !!deleted);
+  }
+
+  function setActive(el){
+    if(activeBlock===el) return;
+    clearActive();
+    activeBlock=el; el.classList.add('editing'); el.contentEditable='true'; el.focus();
+    var r=el.getBoundingClientRect();
+    toolbar=document.createElement('div'); toolbar.className='edit-toolbar';
+    var deleted=el.classList.contains('deleted');
+    toolbar.innerHTML= deleted
+      ? '<button class="btn-restore">Restore</button><button class="btn-cancel">Close</button>'
+      : '<button class="btn-save">Save</button><button class="btn-cancel">Cancel</button><button class="btn-delete">Delete</button>';
+    document.body.appendChild(toolbar);
+    toolbar.style.top=(window.scrollY + r.top - 42) + 'px';
+    toolbar.style.left=(window.scrollX + Math.max(8, r.left)) + 'px';
+
+    toolbar.querySelector('.btn-cancel').onclick=function(){ cancelEdit(); };
+    if(toolbar.querySelector('.btn-save')) toolbar.querySelector('.btn-save').onclick=function(){ saveEdit(); };
+    if(toolbar.querySelector('.btn-delete')) toolbar.querySelector('.btn-delete').onclick=function(){ deleteEdit(); };
+    if(toolbar.querySelector('.btn-restore')) toolbar.querySelector('.btn-restore').onclick=function(){ restoreEdit(); };
+  }
+
+  function clearActive(){
+    if(activeBlock){ activeBlock.classList.remove('editing'); activeBlock.contentEditable='false'; }
+    activeBlock=null; if(toolbar){toolbar.remove(); toolbar=null;}
+  }
+
+  async function persist(blockId){
+    var c=changes[blockId];
+    await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({page:pageKey,blockId:blockId,newValue:c.new,deleted:!!c.deleted})});
+  }
+
+  async function load(){
+    try {
+      var res=await fetch(API+'?page='+encodeURIComponent(pageKey));
+      var data=await res.json();
+      (data.edits||[]).forEach(function(e){
+        changes[e.block_id]={new:e.new_value,old:originals[e.block_id]||'',deleted:e.deleted};
+        applyChange(e.block_id,e.new_value,e.deleted);
+      });
+      renderChanges();
+    } catch(e){ console.warn('Could not load edits',e); }
+  }
+
+  async function saveEdit(){
+    if(!activeBlock) return;
+    var id=activeBlock.getAttribute('data-block-id');
+    changes[id]={old:originals[id]||'',new:activeBlock.innerHTML,deleted:false};
+    await persist(id); clearActive(); renderChanges();
+  }
+
+  function cancelEdit(){ if(!activeBlock) return; var id=activeBlock.getAttribute('data-block-id'); activeBlock.innerHTML=(changes[id]?changes[id].new:originals[id])||''; clearActive(); }
+  async function deleteEdit(){ if(!activeBlock) return; var id=activeBlock.getAttribute('data-block-id'); activeBlock.classList.add('deleted'); changes[id]={old:originals[id]||'',new:activeBlock.innerHTML,deleted:true}; await persist(id); clearActive(); renderChanges(); }
+  async function restoreEdit(){ if(!activeBlock) return; var id=activeBlock.getAttribute('data-block-id'); activeBlock.classList.remove('deleted'); changes[id]={old:originals[id]||'',new:activeBlock.innerHTML,deleted:false}; await persist(id); clearActive(); renderChanges(); }
+
+  document.addEventListener('click',function(e){
+    if(e.target.closest('.edit-toolbar') || e.target.closest('.changes-panel') || e.target.id==='changesTrigger') return;
+    var block=e.target.closest('[data-block-id]');
+    if(block){ setActive(block); return; }
+    clearActive();
+  });
+
+  document.getElementById('changesTrigger').onclick=function(){ document.getElementById('changesPanel').classList.toggle('open'); };
+  document.getElementById('closeChanges').onclick=function(){ document.getElementById('changesPanel').classList.remove('open'); };
+  document.getElementById('toggleDeleted').onclick=function(){ showDeleted=!showDeleted; document.body.classList.toggle('show-deleted', showDeleted); this.textContent=showDeleted?'Hide Deleted':'Show Deleted'; };
+  document.getElementById('resetAll').onclick=async function(){
+    var keys=Object.keys(changes);
+    for (var i=0;i<keys.length;i++) {
+      var id=keys[i];
+      applyChange(id, originals[id]||'', false);
+      changes[id]={old:originals[id]||'',new:originals[id]||'',deleted:false};
+      await persist(id);
+      delete changes[id];
+    }
+    renderChanges();
+  };
+
+  load();
+})();
+</script>
+</body>
+</html>

@@ -332,11 +332,6 @@ export default function Home() {
       <div className={styles.container}>
         <header className={styles.header}>
           <a href="https://www.data3.com" className={styles.logo} target="_blank">Data<sup>#</sup>3</a>
-          <div className={styles.navPills}>
-            <a href="/links" className={styles.badge}>All Pages</a>
-            <a href="/aitop10.html" className={styles.badge}>AI Security Report</a>
-            <a href="/customer-pnl" className={styles.badge}>Customer PnL</a>
-          </div>
         </header>
         <main className={styles.main}>
           <div className={styles.closedCard}>
@@ -355,11 +350,6 @@ export default function Home() {
     <div className={styles.container}>
       <header className={styles.header}>
         <a href="https://www.data3.com" className={styles.logo} target="_blank">Data<sup>#</sup>3</a>
-        <div className={styles.navPills}>
-          <a href="/links" className={styles.badge}>All Pages</a>
-          <a href="/aitop10.html" className={styles.badge}>AI Security Report</a>
-          <a href="/examcp" className={styles.badge}>Exa MCP</a>
-        </div>
       </header>
 
       <main className={styles.main}>

@@ -158,7 +158,9 @@ export default function Home() {
 
   useEffect(() => {
     if (lensImages.length > 0) {
-      setTimeout(() => lensEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100)
+      setTimeout(() => {
+        lensEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      }, 150)
     }
   }, [lensImages])
 
@@ -513,7 +515,11 @@ export default function Home() {
             )}
 
             {lensImages.map((img, i) => (
-              <div key={img.id} className={styles.lensCard}>
+              <div
+                key={img.id}
+                className={styles.lensCard}
+                ref={i === lensImages.length - 1 ? lensEndRef : undefined}
+              >
                 <img
                   src={img.src}
                   alt=""
@@ -524,13 +530,11 @@ export default function Home() {
             ))}
 
             {generatingImage && (
-              <div className={styles.lensCardGenerating}>
+              <div className={styles.lensCardGenerating} ref={lensImages.length === 0 ? lensEndRef : undefined}>
                 <div className={styles.lensDiffuse}></div>
                 <span>Generating...</span>
               </div>
             )}
-
-            <div ref={lensEndRef} />
           </div>
         </div>
       </main>

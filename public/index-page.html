@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Site Index | d3smbmxdr</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0a0e17;
+      color: #c8d6e5;
+      min-height: 100vh;
+      padding: 2rem 1rem;
+    }
+
+    .container {
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 0.25rem;
+    }
+
+    .subtitle {
+      color: #636e7b;
+      font-size: 0.95rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .section-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: #4a90d9;
+      margin-bottom: 0.75rem;
+      padding-left: 0.25rem;
+    }
+
+    .card-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .card {
+      display: block;
+      background: #121926;
+      border: 1px solid #1e293b;
+      border-radius: 10px;
+      padding: 1.25rem 1.5rem;
+      text-decoration: none;
+      color: inherit;
+      transition: border-color 0.2s, background 0.2s, transform 0.15s;
+    }
+
+    .card:hover {
+      border-color: #4a90d9;
+      background: #151d2e;
+      transform: translateY(-1px);
+    }
+
+    .card-title {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: #e2e8f0;
+      margin-bottom: 0.3rem;
+    }
+
+    .card-path {
+      font-size: 0.75rem;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      color: #4a90d9;
+      margin-bottom: 0.5rem;
+    }
+
+    .card-desc {
+      font-size: 0.85rem;
+      color: #7a8a9e;
+      line-height: 1.45;
+    }
+
+    .badge {
+      display: inline-block;
+      font-size: 0.6rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+      margin-left: 0.5rem;
+      vertical-align: middle;
+      position: relative;
+      top: -1px;
+    }
+
+    .badge-app { background: #1e3a5f; color: #60a5fa; }
+    .badge-tool { background: #1e3b2e; color: #4ade80; }
+    .badge-doc { background: #3b2e1e; color: #fbbf24; }
+    .badge-api { background: #2e1e3b; color: #c084fc; }
+
+    footer {
+      text-align: center;
+      color: #3a4555;
+      font-size: 0.75rem;
+      padding-top: 1rem;
+      border-top: 1px solid #1e293b;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Site Index</h1>
+    <p class="subtitle">Everything built and hosted on this site.</p>
+
+    <div class="section-label">Apps</div>
+    <div class="card-list">
+      <a class="card" href="/" target="_blank">
+        <div class="card-title">D3QA &mdash; Security Advisor Chatbot <span class="badge badge-app">App</span></div>
+        <div class="card-path">/</div>
+        <div class="card-desc">AI-powered sales qualification chatbot for Data#3's SMB MXDR offering. Conversational security assessment that guides prospects from discovery through to a tailored recommendation, with dynamic image generation and lead capture.</div>
+      </a>
+
+      <a class="card" href="/leads" target="_blank">
+        <div class="card-title">Leads Dashboard <span class="badge badge-app">App</span></div>
+        <div class="card-path">/leads</div>
+        <div class="card-desc">Internal lead management dashboard. View, filter, and manage all prospects captured by the chatbot &mdash; with scoring, status tracking, and contact actions.</div>
+      </a>
+
+      <a class="card" href="/test-image" target="_blank">
+        <div class="card-title">Image Generation Workshop <span class="badge badge-tool">Tool</span></div>
+        <div class="card-path">/test-image</div>
+        <div class="card-desc">Schnell Master Template tool for crafting and testing AI image generation prompts across 8 scene zones. Editable payloads, generation history, and real-time preview.</div>
+      </a>
+    </div>
+
+    <div class="section-label">Standalone Pages</div>
+    <div class="card-list">
+      <a class="card" href="/aitop10.html" target="_blank">
+        <div class="card-title">AI Security Top 10 <span class="badge badge-doc">Doc</span></div>
+        <div class="card-path">/aitop10.html</div>
+        <div class="card-desc">Top 10 Enterprise AI Applications &mdash; Data Security Assessment report. Interactive breakdown of AI use-cases and their security implications.</div>
+      </a>
+
+      <a class="card" href="/customer-pnl" target="_blank">
+        <div class="card-title">Customer Virtual P&L <span class="badge badge-tool">Tool</span></div>
+        <div class="card-path">/customer-pnl</div>
+        <div class="card-desc">One Customer, One View, One Decision. A virtual profit-and-loss dashboard that consolidates customer financials into a single actionable view.</div>
+      </a>
+
+      <a class="card" href="/agentic-resourcing.html" target="_blank">
+        <div class="card-title">Agentic AI Resourcing Model <span class="badge badge-doc">Doc</span></div>
+        <div class="card-path">/agentic-resourcing.html</div>
+        <div class="card-desc">Business case and delivery model for the Agentic AI Practice. Covers resourcing, team structure, and go-to-market strategy with inline editing.</div>
+      </a>
+
+      <a class="card" href="/pitch-deck.html" target="_blank">
+        <div class="card-title">SMB MXDR Pitch Deck <span class="badge badge-doc">Doc</span></div>
+        <div class="card-path">/pitch-deck.html</div>
+        <div class="card-desc">Sales presentation toolkit for the SMB Managed Extended Detection &amp; Response offering.</div>
+      </a>
+
+      <a class="card" href="/examcp" target="_blank">
+        <div class="card-title">ExamCP &mdash; Copy Box <span class="badge badge-tool">Tool</span></div>
+        <div class="card-path">/examcp</div>
+        <div class="card-desc">Quick-access copy box utility with Data#3 branding. Grab-and-go text snippets.</div>
+      </a>
+    </div>
+
+    <div class="section-label">APIs</div>
+    <div class="card-list">
+      <a class="card" href="/api/chat" target="_blank">
+        <div class="card-title">Chat API <span class="badge badge-api">API</span></div>
+        <div class="card-path">/api/chat</div>
+        <div class="card-desc">POST endpoint &mdash; powers the D3QA chatbot via Google Gemini 2.0-flash. Handles conversation history and saves lead data to Neon Postgres.</div>
+      </a>
+
+      <a class="card" href="/api/leads" target="_blank">
+        <div class="card-title">Leads API <span class="badge badge-api">API</span></div>
+        <div class="card-path">/api/leads</div>
+        <div class="card-desc">GET/PATCH endpoint &mdash; fetches and updates lead records, status, assignments, and notes.</div>
+      </a>
+
+      <a class="card" href="/api/image" target="_blank">
+        <div class="card-title">Image Generation API <span class="badge badge-api">API</span></div>
+        <div class="card-path">/api/image</div>
+        <div class="card-desc">POST endpoint &mdash; generates contextual images via FLUX.1-schnell (Together.ai / Replicate fallback). Returns base64 PNG.</div>
+      </a>
+
+      <a class="card" href="/api/page-edits" target="_blank">
+        <div class="card-title">Page Edits API <span class="badge badge-api">API</span></div>
+        <div class="card-path">/api/page-edits</div>
+        <div class="card-desc">GET/PUT/DELETE endpoint &mdash; content versioning system for inline-editable pages. Tracks block-level edits with timestamps.</div>
+      </a>
+    </div>
+
+    <footer>d3smbmxdr &mdash; built by Mentis</footer>
+  </div>
+</body>
+</html>

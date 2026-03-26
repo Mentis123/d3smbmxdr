@@ -151,6 +151,7 @@ export default function Home() {
   const [lensImages, setLensImages] = useState([])
   const messagesEndRef = useRef(null)
   const lensEndRef = useRef(null)
+  const inputRef = useRef(null)
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -322,6 +323,7 @@ export default function Home() {
     }
 
     setLoading(false)
+    setTimeout(() => inputRef.current?.focus(), 50)
   }
 
   const handleKeyDown = (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage() } }
@@ -491,7 +493,7 @@ export default function Home() {
           )}
 
           <div className={styles.inputArea}>
-            <textarea value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={handleKeyDown} placeholder="Type your message..." rows="1" disabled={loading} />
+            <textarea ref={inputRef} value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={handleKeyDown} placeholder="Type your message..." rows="1" disabled={loading} />
             <button onClick={() => sendMessage()} disabled={loading || !input.trim()}>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
             </button>

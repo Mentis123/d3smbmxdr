@@ -339,7 +339,7 @@ export default function Home() {
             <div className={styles.closedIcon}>&#10003;</div>
             <h2>Thanks for chatting!</h2>
             <p>Our team will be in touch soon.</p>
-            <a href="https://www.data3.com/services/managed-services/managed-security-services/" target="_blank" className={styles.ctaPrimary}>Learn More About MXDR &rarr;</a>
+            <a href="https://www.data3.com/services/managed-services/managed-security-services/#form-modal" target="_blank" className={styles.ctaPrimary}>Learn More About MXDR &rarr;</a>
           </div>
         </main>
         <footer className={styles.footer}><p>Data<sup>#</sup>3 Limited | Australia's leading technology solutions provider</p></footer>
@@ -486,7 +486,7 @@ export default function Home() {
           {showRecommendation && !showLeadCapture && (
             <div className={styles.ctaBox}>
               <a href="https://www.data3.com/wp-content/uploads/2024/07/Data3-Managed-Extended-Detection-Response-Service-Brief.pdf" target="_blank" className={styles.ctaLink}>MXDR Data Sheet</a>
-              <a href="https://www.data3.com/services/managed-services/managed-security-services/" target="_blank" className={styles.ctaPrimary}>Talk to Our Team &rarr;</a>
+              <a href="https://www.data3.com/services/managed-services/managed-security-services/#form-modal" target="_blank" className={styles.ctaPrimary}>Talk to Our Team &rarr;</a>
               <button onClick={() => setShowLeadCapture(true)} className={styles.ctaClose}>Email me details</button>
               <button onClick={handleClose} className={styles.ctaClose}>Close</button>
             </div>

@@ -12,7 +12,7 @@ const nextConfig = {
         destination: '/customer-virtual-pnl.html',
       },
       {
-        source: '/index',
+        source: '/site-index',
         destination: '/index-page.html',
       },
     ]

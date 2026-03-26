@@ -11,7 +11,7 @@ const IMAGE_NEGATIVE = `NEGATIVE PROMPT: photorealistic face, uncanny valley, hu
 
 const SYSTEM_PROMPT = `You are a friendly, knowledgeable security advisor for Data#3, Australia's leading technology solutions provider. Your role is to have a natural conversation with SMB prospects to understand their security needs and guide them toward the right MXDR solution.
 
-IMPORTANT BRANDING: 
+IMPORTANT BRANDING:
 - Write "Data#3" exactly like that - the # is PART of the name, not a hashtag
 - NEVER write "#Data#3" or "#Data3" - no hashtag before the name
 - NEVER write "Data 3" or "Data3" without the #
@@ -24,7 +24,7 @@ You are NOT a calculator or a form. You're having a genuine conversation. Ask qu
 As the conversation progresses, indicate transitions between stages by including a stage marker at the START of your response:
 
 [STAGE: discovery] - Getting to know them (industry, size, basics)
-[STAGE: assessment] - Understanding their security situation  
+[STAGE: assessment] - Understanding their security situation
 [STAGE: deep-dive] - Exploring specific needs and gaps
 [STAGE: recommendation] - Making your MXDR recommendation
 
@@ -50,7 +50,7 @@ Knowing you're a medical clinic with 40 staff helps me understand your situation
 
 WHEN to generate images (use your judgment):
 - When the conversation reaches a natural visual moment (they've shared something meaningful)
-- When transitioning to a new stage  
+- When transitioning to a new stage
 - When discussing something that benefits from visualization
 - When you're about to make a recommendation
 
@@ -129,6 +129,13 @@ const SAMPLE_SCENARIOS = [
   { label: "Retail Business", message: "Small retail business, 15 staff, we have a few POS systems and handle customer payment data." }
 ]
 
+const STAGES = [
+  { key: 'discovery', label: 'Getting to Know You', icon: '01' },
+  { key: 'assessment', label: 'Security Assessment', icon: '02' },
+  { key: 'deep-dive', label: 'Deep Dive', icon: '03' },
+  { key: 'recommendation', label: 'Recommendation', icon: '04' },
+]
+
 export default function Home() {
   const [messages, setMessages] = useState([])
   const [input, setInput] = useState('')
@@ -141,6 +148,9 @@ export default function Home() {
   const [leadEmail, setLeadEmail] = useState('')
   const [leadPhone, setLeadPhone] = useState('')
   const [chatClosed, setChatClosed] = useState(false)
+  const [lensImage, setLensImage] = useState(null)
+  const [lensVisible, setLensVisible] = useState(false)
+  const [lensCaption, setLensCaption] = useState('')
   const messagesEndRef = useRef(null)
 
   useEffect(() => {
@@ -157,21 +167,26 @@ export default function Home() {
         context_cue: "cybersecurity AI guardian",
         emotion: "trustworthy and vigilant"
       }
-      
+
       try {
         const imageUrl = await generateImage(avatarPayload)
         setAdvisorAvatar(imageUrl)
+        // Show avatar as first lens image
+        if (imageUrl) {
+          setLensImage(imageUrl)
+          setLensCaption('Your AI Security Advisor')
+          setTimeout(() => setLensVisible(true), 100)
+        }
       } catch (e) {
         console.error('Avatar generation failed:', e)
       }
       setAvatarLoading(false)
-      
-      // Show greeting after avatar loads (or fails)
+
       setMessages([
         { role: 'bot', content: "Hi! I'm your AI security advisor. I'm here to help you figure out if managed security is right for your business.\n\nMind if I ask a few quick questions about your organization?" }
       ])
     }
-    
+
     generateAdvisorAvatar()
   }, [])
 
@@ -188,7 +203,7 @@ export default function Home() {
 
   const generateImage = async (payload) => {
     const prompt = `${IMAGE_SYSTEM}\n\nSCENE PAYLOAD:\n${JSON.stringify(payload, null, 2)}\n\n${IMAGE_RULES}\n\n${IMAGE_NEGATIVE}`
-    
+
     try {
       const res = await fetch('/api/image', {
         method: 'POST',
@@ -204,57 +219,54 @@ export default function Home() {
   }
 
   const [currentStage, setCurrentStage] = useState('discovery')
-  
-  const STAGE_INFO = {
-    discovery: { label: 'Getting to Know You', icon: '👋' },
-    assessment: { label: 'Security Assessment', icon: '🔍' },
-    'deep-dive': { label: 'Deep Dive', icon: '📊' },
-    recommendation: { label: 'Your Recommendation', icon: '✨' }
+
+  const showInLens = (imageUrl, caption) => {
+    setLensVisible(false)
+    setTimeout(() => {
+      setLensImage(imageUrl)
+      setLensCaption(caption || '')
+      setTimeout(() => setLensVisible(true), 50)
+    }, 300)
   }
 
   const parseAndProcessResponse = async (text) => {
     let processedText = text
-    
-    // Check for stage marker
+
     const stageMatch = text.match(/\[STAGE:\s*(\w+(?:-\w+)?)\s*\]/i)
     if (stageMatch) {
       const newStage = stageMatch[1].toLowerCase()
-      if (STAGE_INFO[newStage]) {
+      const stageObj = STAGES.find(s => s.key === newStage)
+      if (stageObj) {
         setCurrentStage(newStage)
       }
       processedText = processedText.replace(stageMatch[0], '').trim()
     }
-    
-    // Check for image tag - now handling text BEFORE and AFTER the image
+
     const imageMatch = processedText.match(/\[IMAGE:\s*(\{[\s\S]*?\})\s*\]/i)
-    
+
     if (imageMatch) {
       try {
         const payload = JSON.parse(imageMatch[1])
         const imageIndex = processedText.indexOf(imageMatch[0])
         const textBefore = processedText.substring(0, imageIndex).trim()
         const textAfter = processedText.substring(imageIndex + imageMatch[0].length).trim()
-        
-        // Add text BEFORE image first (acknowledgment)
+
         if (textBefore) {
           setMessages(prev => [...prev, { role: 'bot', content: textBefore }])
         }
-        
-        // Generate image (visual break)
+
         setGeneratingImage(true)
         const imageUrl = await generateImage(payload)
         setGeneratingImage(false)
-        
+
         if (imageUrl) {
-          setMessages(prev => [...prev, { role: 'image', content: imageUrl, payload }])
+          showInLens(imageUrl, payload.scene_goal || 'Generated for you')
         }
-        
-        // Add text AFTER image (forward-looking question)
+
         if (textAfter) {
           setMessages(prev => [...prev, { role: 'bot', content: textAfter }])
         }
       } catch (e) {
-        // If JSON parse fails, just show the text
         setMessages(prev => [...prev, { role: 'bot', content: processedText }])
       }
     } else {
@@ -263,7 +275,7 @@ export default function Home() {
   }
 
   const extractLeadData = () => {
-    const transcript = messages.map(m => m.role === 'image' ? '[image]' : `${m.role}: ${m.content}`).join('\n')
+    const transcript = messages.map(m => `${m.role}: ${m.content}`).join('\n')
     let industry = null, employees = null
     const industryMatches = transcript.match(/(?:medical|healthcare|accounting|manufacturing|retail|finance|legal|construction|education)/gi)
     if (industryMatches) industry = industryMatches[0]
@@ -300,7 +312,6 @@ export default function Home() {
         body: JSON.stringify({
           systemPrompt: SYSTEM_PROMPT,
           messages: [...messages, { role: 'user', content: messageText }]
-            .filter(m => m.role !== 'image')
             .map(m => ({ role: m.role === 'bot' ? 'assistant' : m.role, content: m.content }))
         })
       })
@@ -322,17 +333,17 @@ export default function Home() {
         <header className={styles.header}>
           <a href="https://www.data3.com" className={styles.logo} target="_blank">Data<sup>#</sup>3</a>
           <div className={styles.navPills}>
+            <a href="/links" className={styles.badge}>All Pages</a>
             <a href="/aitop10.html" className={styles.badge}>AI Security Report</a>
             <a href="/customer-pnl" className={styles.badge}>Customer PnL</a>
-            <a href="/examcp" className={styles.badge}>Exa MCP</a>
           </div>
         </header>
         <main className={styles.main}>
-          <div className={styles.chatContainer} style={{ textAlign: 'center', padding: '3rem' }}>
-            <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>✅</div>
-            <h2 style={{ marginBottom: '1rem', color: 'var(--text-primary)' }}>Thanks for chatting!</h2>
-            <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>Our team will be in touch soon.</p>
-            <a href="https://www.data3.com/services/managed-services/managed-security-services/" target="_blank" className={styles.ctaPrimary} style={{ display: 'inline-block' }}>Learn More About MXDR →</a>
+          <div className={styles.closedCard}>
+            <div className={styles.closedIcon}>&#10003;</div>
+            <h2>Thanks for chatting!</h2>
+            <p>Our team will be in touch soon.</p>
+            <a href="https://www.data3.com/services/managed-services/managed-security-services/" target="_blank" className={styles.ctaPrimary}>Learn More About MXDR &rarr;</a>
           </div>
         </main>
         <footer className={styles.footer}><p>Data<sup>#</sup>3 Limited | Australia's leading technology solutions provider</p></footer>
@@ -345,13 +356,15 @@ export default function Home() {
       <header className={styles.header}>
         <a href="https://www.data3.com" className={styles.logo} target="_blank">Data<sup>#</sup>3</a>
         <div className={styles.navPills}>
+          <a href="/links" className={styles.badge}>All Pages</a>
           <a href="/aitop10.html" className={styles.badge}>AI Security Report</a>
           <a href="/examcp" className={styles.badge}>Exa MCP</a>
         </div>
       </header>
 
       <main className={styles.main}>
-        <div className={styles.chatContainer}>
+        {/* LEFT: Chat panel */}
+        <div className={styles.chatPanel}>
           <div className={styles.chatHeader}>
             <div className={styles.avatarContainer}>
               {avatarLoading ? (
@@ -361,29 +374,26 @@ export default function Home() {
               ) : advisorAvatar ? (
                 <img src={advisorAvatar} alt="AI Advisor" className={styles.advisorAvatar} />
               ) : (
-                <div className={styles.avatar}>🛡️</div>
+                <div className={styles.avatar}>&#x1f6e1;&#xfe0f;</div>
               )}
-              <span className={styles.aiTag}>✨ AI</span>
+              <span className={styles.aiTag}>AI</span>
             </div>
             <div>
               <h1>D3QA</h1>
               <p>Your Data<sup>#</sup>3 Qualifying Agent</p>
             </div>
-            <div className={styles.stageIndicator}>
-              <span className={styles.stageIcon}>{STAGE_INFO[currentStage]?.icon}</span>
-              <span className={styles.stageLabel}>{STAGE_INFO[currentStage]?.label}</span>
-            </div>
-            <button 
-              className={styles.resetBtn} 
+            <button
+              className={styles.resetBtn}
               onClick={() => {
                 if (window.confirm('Start a new conversation? Your current chat will be cleared.')) {
                   setMessages([])
                   setCurrentStage('discovery')
                   setShowRecommendation(false)
                   setShowLeadCapture(false)
+                  setLensImage(null)
+                  setLensVisible(false)
                   setAdvisorAvatar(null)
                   setAvatarLoading(true)
-                  // Regenerate avatar
                   const generateNewAvatar = async () => {
                     const avatarPayload = {
                       scene_goal: "Professional AI security advisor avatar on dark background",
@@ -395,6 +405,9 @@ export default function Home() {
                     try {
                       const imageUrl = await generateImage(avatarPayload)
                       setAdvisorAvatar(imageUrl)
+                      if (imageUrl) {
+                        showInLens(imageUrl, 'Your AI Security Advisor')
+                      }
                     } catch (e) {}
                     setAvatarLoading(false)
                     setMessages([
@@ -406,76 +419,55 @@ export default function Home() {
               }}
               title="Start new conversation"
             >
-              ↻
+              &#8635;
             </button>
           </div>
 
-          <div className={styles.messages}>
-            {/* Hero Avatar as first chat element - just the image, no text */}
-            {messages.length <= 1 && (
-              <div className={`${styles.message} ${styles.bot} ${styles.heroMessage}`}>
-                <div className={styles.heroAvatarWrap}>
-                  {avatarLoading ? (
-                    <div className={styles.heroAvatarLoading}>
-                      <div className={styles.heroSpinner}></div>
-                    </div>
-                  ) : advisorAvatar ? (
-                    <>
-                      <img src={advisorAvatar} alt="D3QA" className={styles.heroAvatar} />
-                      <div className={styles.heroAvatarGlow}></div>
-                    </>
-                  ) : (
-                    <div className={styles.heroAvatarFallback}>🛡️</div>
-                  )}
-                </div>
+          {/* Stage progress */}
+          <div className={styles.stageTrack}>
+            {STAGES.map((s, i) => (
+              <div
+                key={s.key}
+                className={`${styles.stageStep} ${s.key === currentStage ? styles.stageActive : ''} ${STAGES.findIndex(st => st.key === currentStage) > i ? styles.stageDone : ''}`}
+              >
+                <span className={styles.stepNum}>{s.icon}</span>
+                <span className={styles.stepLabel}>{s.label}</span>
               </div>
-            )}
-            
-            {messages.map((msg, i) => (
-              msg.role === 'image' ? (
-                <div key={i} className={styles.imageMessage}>
-                  <img src={msg.content} alt="Security illustration" className={styles.generatedImage} />
-                  <span className={styles.imageAiTag}>✨ Generated for you</span>
-                </div>
-              ) : (
-                <div key={i} className={`${styles.message} ${styles[msg.role]}`}>
-                  {msg.role === 'bot' && (
-                    <div className={styles.msgAvatarWrap}>
-                      {advisorAvatar ? (
-                        <img src={advisorAvatar} alt="" className={styles.msgAvatarImg} />
-                      ) : (
-                        <div className={styles.msgAvatar}>🛡️</div>
-                      )}
-                    </div>
-                  )}
-                  <div className={styles.bubble}>
-                    {msg.content.split('\n').map((line, j) => <p key={j}>{line || '\u00A0'}</p>)}
-                  </div>
-                  {msg.role === 'user' && <div className={styles.msgAvatar}>👤</div>}
-                </div>
-              )
             ))}
-            
+          </div>
+
+          <div className={styles.messages}>
+            {messages.map((msg, i) => (
+              <div key={i} className={`${styles.message} ${styles[msg.role]}`}>
+                {msg.role === 'bot' && (
+                  <div className={styles.msgAvatarWrap}>
+                    {advisorAvatar ? (
+                      <img src={advisorAvatar} alt="" className={styles.msgAvatarImg} />
+                    ) : (
+                      <div className={styles.msgAvatar}>&#x1f6e1;&#xfe0f;</div>
+                    )}
+                  </div>
+                )}
+                <div className={styles.bubble}>
+                  {msg.content.split('\n').map((line, j) => <p key={j}>{line || '\u00A0'}</p>)}
+                </div>
+                {msg.role === 'user' && <div className={styles.msgAvatar}>&#128100;</div>}
+              </div>
+            ))}
+
             {loading && (
               <div className={`${styles.message} ${styles.bot}`}>
                 <div className={styles.msgAvatarWrap}>
                   {advisorAvatar ? (
                     <img src={advisorAvatar} alt="" className={styles.msgAvatarImg} />
                   ) : (
-                    <div className={styles.msgAvatar}>🛡️</div>
+                    <div className={styles.msgAvatar}>&#x1f6e1;&#xfe0f;</div>
                   )}
                 </div>
                 <div className={styles.bubble}><div className={styles.typing}><span></span><span></span><span></span></div></div>
               </div>
             )}
-            
-            {generatingImage && (
-              <div className={styles.imageLoading}>
-                <div className={styles.imageSpinner}></div>
-                <span>Generating visual...</span>
-              </div>
-            )}
-            
+
             <div ref={messagesEndRef} />
           </div>
 
@@ -492,21 +484,21 @@ export default function Home() {
 
           {showLeadCapture && (
             <div className={styles.leadCapture}>
-              <h3>📧 Get your personalized security brief</h3>
+              <h3>Get your personalized security brief</h3>
               <form onSubmit={handleLeadSubmit} className={styles.leadForm}>
                 <input type="email" placeholder="Your email" value={leadEmail} onChange={(e) => setLeadEmail(e.target.value)} className={styles.leadInput} />
                 <input type="tel" placeholder="Phone (optional)" value={leadPhone} onChange={(e) => setLeadPhone(e.target.value)} className={styles.leadInput} />
-                <button type="submit" className={styles.leadSubmit}>Send My Brief →</button>
+                <button type="submit" className={styles.leadSubmit}>Send My Brief &rarr;</button>
               </form>
             </div>
           )}
 
           {showRecommendation && !showLeadCapture && (
             <div className={styles.ctaBox}>
-              <a href="https://www.data3.com/wp-content/uploads/2024/07/Data3-Managed-Extended-Detection-Response-Service-Brief.pdf" target="_blank" className={styles.ctaLink}>📄 MXDR Data Sheet</a>
-              <a href="https://www.data3.com/services/managed-services/managed-security-services/" target="_blank" className={styles.ctaPrimary}>Talk to Our Team →</a>
-              <button onClick={() => setShowLeadCapture(true)} className={styles.ctaClose}>📧 Email me details</button>
-              <button onClick={handleClose} className={styles.ctaClose}>✕ Close</button>
+              <a href="https://www.data3.com/wp-content/uploads/2024/07/Data3-Managed-Extended-Detection-Response-Service-Brief.pdf" target="_blank" className={styles.ctaLink}>MXDR Data Sheet</a>
+              <a href="https://www.data3.com/services/managed-services/managed-security-services/" target="_blank" className={styles.ctaPrimary}>Talk to Our Team &rarr;</a>
+              <button onClick={() => setShowLeadCapture(true)} className={styles.ctaClose}>Email me details</button>
+              <button onClick={handleClose} className={styles.ctaClose}>Close</button>
             </div>
           )}
 
@@ -516,6 +508,40 @@ export default function Home() {
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
             </button>
           </div>
+        </div>
+
+        {/* RIGHT: Image Lens panel */}
+        <div className={styles.lensPanel}>
+          <div className={styles.lensLabel}>Conversation Lens</div>
+          <div className={styles.lensFrame}>
+            {lensImage ? (
+              <img
+                src={lensImage}
+                alt={lensCaption}
+                className={`${styles.lensImage} ${lensVisible ? styles.lensVisible : ''}`}
+              />
+            ) : (
+              <div className={styles.lensEmpty}>
+                {avatarLoading ? (
+                  <>
+                    <div className={styles.lensSpinner}></div>
+                    <span>Generating advisor...</span>
+                  </>
+                ) : (
+                  <span>Visuals will appear here as the conversation progresses</span>
+                )}
+              </div>
+            )}
+            {generatingImage && (
+              <div className={styles.lensGenerating}>
+                <div className={styles.lensDiffuse}></div>
+                <span>Generating visual...</span>
+              </div>
+            )}
+          </div>
+          {lensCaption && lensImage && (
+            <div className={styles.lensCaption}>{lensCaption}</div>
+          )}
         </div>
       </main>
 

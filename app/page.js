@@ -502,7 +502,6 @@ export default function Home() {
 
         {/* RIGHT: Image Lens panel */}
         <div className={styles.lensPanel}>
-          <div className={styles.lensLabel}>Conversation Lens</div>
           <div className={styles.lensFrame}>
             {lensImage ? (
               <img
@@ -529,9 +528,6 @@ export default function Home() {
               </div>
             )}
           </div>
-          {lensCaption && lensImage && (
-            <div className={styles.lensCaption}>{lensCaption}</div>
-          )}
         </div>
       </main>
 

@@ -89,7 +89,7 @@ body.show-deleted [data-block-id].deleted{display:block!important}
     <span class="pill" data-block-id="s2-pill3">Optional: AI Builder / Copilot prompt</span>
     <ol style="margin-top:.6rem; padding-left:1.15rem;">
       <li data-block-id="s2-step1">Load approved campaign content + variables (offer, CTA, signature).</li>
-      <li data-block-id="s2-step2">List messages/contacts under “Customer” root and iterate sub-folders.</li>
+      <li data-block-id="s2-step2">List messages/contacts under “Customer” root and iterate sub-folders. <strong>Note to Codex:</strong> investigate possibility of using Dataverse contact sync via Exchange server-side sync to use Contacts as a means to discover email recipients instead, which may be more reliable than inspecting Outlook folders.</li>
       <li data-block-id="s2-step3">Extract recipient first name + email (fallback to parsing display name).</li>
       <li data-block-id="s2-step4">Compose subject and body from template with token replacement.</li>
       <li data-block-id="s2-step5">If test mode = true, rewrite recipient to your own email address.</li>
@@ -209,16 +209,19 @@ body.show-deleted [data-block-id].deleted{display:block!important}
 
   async function persist(blockId){
     var c=changes[blockId];
-    await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({page:pageKey,blockId:blockId,newValue:c.new,deleted:!!c.deleted})});
+    await fetch(API,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({page_id:pageKey,block_id:blockId,content:c.new,deleted:!!c.deleted})});
   }
 
   async function load(){
     try {
-      var res=await fetch(API+'?page='+encodeURIComponent(pageKey));
+      var res=await fetch(API+'?page_id='+encodeURIComponent(pageKey));
       var data=await res.json();
-      (data.edits||[]).forEach(function(e){
-        changes[e.block_id]={new:e.new_value,old:originals[e.block_id]||'',deleted:e.deleted};
-        applyChange(e.block_id,e.new_value,e.deleted);
+      var persistedEdits = data.edits || {};
+      Object.keys(persistedEdits).forEach(function(blockId){
+        var e = persistedEdits[blockId] || {};
+        var value = e.content !== undefined && e.content !== null ? e.content : (originals[blockId] || '');
+        changes[blockId]={new:value,old:originals[blockId]||'',deleted:!!e.deleted};
+        applyChange(blockId,value,!!e.deleted);
       });
       renderChanges();
     } catch(e){ console.warn('Could not load edits',e); }

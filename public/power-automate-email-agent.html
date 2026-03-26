@@ -69,14 +69,14 @@ body.show-deleted [data-block-id].deleted{display:block!important}
   <header class="hero">
     <div class="eyebrow" data-block-id="hero-eyebrow">Power Automate Email Agent</div>
     <h1 data-block-id="hero-title">Personalised Outreach Drafts<br><em>with human approval</em></h1>
-    <p class="lead" data-block-id="hero-lead">Standalone guide for building a practical flow that scans your Outlook “Customer” folders, extracts first name + email, creates personalised draft emails with your supplied content, and lets you test on yourself before wider rollout.</p>
+    <p class="lead" data-block-id="hero-lead">Standalone guide for building a practical flow that prioritises Dataverse Contacts (synced via Exchange server-side sync) for recipient discovery, falls back to Outlook “Customer” folders when needed, creates personalised draft emails with your supplied content, and keeps a safe test-first rollout path.</p>
   </header>
 
   <section class="section">
     <h2 data-block-id="s1-title">1) Use Case Definition</h2>
     <p data-block-id="s1-p1">Goal: generate draft emails (not auto-send) so you can review each one before release.</p>
     <div class="grid">
-      <div class="card"><h4 data-block-id="s1-card1-h">Input</h4><p data-block-id="s1-card1-p">Outlook “Customer” folder + sub-folders, customer contact card metadata, campaign template body and subject rules.</p></div>
+      <div class="card"><h4 data-block-id="s1-card1-h">Input</h4><p data-block-id="s1-card1-p">Primary: Dataverse Contacts synced from Exchange server-side sync. Fallback: Outlook “Customer” folder + sub-folders. Plus campaign template body and subject rules.</p></div>
       <div class="card"><h4 data-block-id="s1-card2-h">Output</h4><p data-block-id="s1-card2-p">Personalised draft in Outlook with first-name intro and customised subject line.</p></div>
       <div class="card"><h4 data-block-id="s1-card3-h">Control</h4><p data-block-id="s1-card3-p">Human-in-the-loop approval gate and test-mode switch for self-only validation.</p></div>
     </div>
@@ -85,16 +85,16 @@ body.show-deleted [data-block-id].deleted{display:block!important}
   <section class="section">
     <h2 data-block-id="s2-title">2) Recommended Flow Architecture</h2>
     <span class="pill" data-block-id="s2-pill1">Trigger: Manual / Scheduled</span>
-    <span class="pill" data-block-id="s2-pill2">Connector: Office 365 Outlook</span>
+    <span class="pill" data-block-id="s2-pill2">Connectors: Dataverse + Office 365 Outlook</span>
     <span class="pill" data-block-id="s2-pill3">Optional: AI Builder / Copilot prompt</span>
     <ol style="margin-top:.6rem; padding-left:1.15rem;">
       <li data-block-id="s2-step1">Load approved campaign content + variables (offer, CTA, signature).</li>
-      <li data-block-id="s2-step2">List messages/contacts under “Customer” root and iterate sub-folders. <strong>Note to Codex:</strong> investigate possibility of using Dataverse contact sync via Exchange server-side sync to use Contacts as a means to discover email recipients instead, which may be more reliable than inspecting Outlook folders.</li>
-      <li data-block-id="s2-step3">Extract recipient first name + email (fallback to parsing display name).</li>
+      <li data-block-id="s2-step2">Build recipient source priority: first query Dataverse Contacts synced via Exchange server-side sync; if contact is missing or stale, then inspect Outlook “Customer” folders as fallback.</li>
+      <li data-block-id="s2-step3">Extract recipient first name + email from the chosen source, then normalise and validate before drafting (fallback to display-name parsing only when needed).</li>
       <li data-block-id="s2-step4">Compose subject and body from template with token replacement.</li>
       <li data-block-id="s2-step5">If test mode = true, rewrite recipient to your own email address.</li>
       <li data-block-id="s2-step6">Create draft message in Outlook, tag category “Agent-Draft-Pending”.</li>
-      <li data-block-id="s2-step7">Send approval summary to you (Teams or email) with draft count.</li>
+      <li data-block-id="s2-step7">Send approval summary to you (Teams or email) with draft count and source quality metrics (Dataverse hits vs Outlook fallback hits).</li>
     </ol>
   </section>
 
@@ -104,7 +104,7 @@ body.show-deleted [data-block-id].deleted{display:block!important}
       <div class="card"><h4 data-block-id="s3-h1">First name logic</h4><p data-block-id="s3-p1">Use givenName when available. Else split displayName by spaces and take token 1. If blank, fallback to “Hi there”.</p></div>
       <div class="card"><h4 data-block-id="s3-h2">Subject logic</h4><p data-block-id="s3-p2">Pattern: “&lt;FirstName&gt;, quick note on &lt;topic&gt;”. Keep under 65 chars where possible.</p></div>
       <div class="card"><h4 data-block-id="s3-h3">Body logic</h4><p data-block-id="s3-p3">Template blocks: greeting, 2–3 lines of value, CTA, sign-off. Keep plain-English tone.</p></div>
-      <div class="card"><h4 data-block-id="s3-h4">Dedup logic</h4><p data-block-id="s3-p4">Do not draft more than one email per recipient per campaign run; hash recipient+campaign ID.</p></div>
+      <div class="card"><h4 data-block-id="s3-h4">Dedup + source confidence</h4><p data-block-id="s3-p4">Do not draft more than one email per recipient per campaign run; hash recipient+campaign ID and keep source tag (Dataverse or Outlook fallback) for audit.</p></div>
     </div>
   </section>
 
@@ -119,7 +119,7 @@ body.show-deleted [data-block-id].deleted{display:block!important}
     <h3 data-block-id="s4-h2">Operational controls</h3>
     <ul>
       <li data-block-id="s4-l4">Cap run volume (example: 25 drafts/run) to reduce accidental blast radius.</li>
-      <li data-block-id="s4-l5">Store run log (recipient, timestamp, campaign id, draft id, operator).</li>
+      <li data-block-id="s4-l5">Store run log (recipient, source used, timestamp, campaign id, draft id, operator) to track Dataverse reliability over time.</li>
       <li data-block-id="s4-l6">Add kill switch variable to halt processing immediately.</li>
     </ul>
   </section>
@@ -127,8 +127,8 @@ body.show-deleted [data-block-id].deleted{display:block!important}
   <section class="section">
     <h2 data-block-id="s5-title">5) 30-Minute Working Session Agenda</h2>
     <ol style="padding-left:1.15rem">
-      <li data-block-id="s5-step1">Confirm mailbox/folder shape and contact data quality (5 min).</li>
-      <li data-block-id="s5-step2">Build minimum viable flow live (10 min).</li>
+      <li data-block-id="s5-step1">Confirm Dataverse↔Exchange server-side sync status, then review mailbox/folder fallback shape and contact quality (5 min).</li>
+      <li data-block-id="s5-step2">Build minimum viable flow live with Dataverse-first lookup and Outlook-folder fallback branch (10 min).</li>
       <li data-block-id="s5-step3">Add personalisation + test mode + approval branch (10 min).</li>
       <li data-block-id="s5-step4">Run live test to self, review drafts, define next hardening actions (5 min).</li>
     </ol>

@@ -148,14 +148,19 @@ export default function Home() {
   const [leadEmail, setLeadEmail] = useState('')
   const [leadPhone, setLeadPhone] = useState('')
   const [chatClosed, setChatClosed] = useState(false)
-  const [lensImage, setLensImage] = useState(null)
-  const [lensVisible, setLensVisible] = useState(false)
-  const [lensCaption, setLensCaption] = useState('')
+  const [lensImages, setLensImages] = useState([])
   const messagesEndRef = useRef(null)
+  const lensEndRef = useRef(null)
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
+
+  useEffect(() => {
+    if (lensImages.length > 0) {
+      setTimeout(() => lensEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100)
+    }
+  }, [lensImages])
 
   // Generate AI advisor avatar on load
   useEffect(() => {
@@ -171,11 +176,8 @@ export default function Home() {
       try {
         const imageUrl = await generateImage(avatarPayload)
         setAdvisorAvatar(imageUrl)
-        // Show avatar as first lens image
         if (imageUrl) {
-          setLensImage(imageUrl)
-          setLensCaption('Your AI Security Advisor')
-          setTimeout(() => setLensVisible(true), 100)
+          setLensImages([{ src: imageUrl, id: Date.now() }])
         }
       } catch (e) {
         console.error('Avatar generation failed:', e)
@@ -220,13 +222,8 @@ export default function Home() {
 
   const [currentStage, setCurrentStage] = useState('discovery')
 
-  const showInLens = (imageUrl, caption) => {
-    setLensVisible(false)
-    setTimeout(() => {
-      setLensImage(imageUrl)
-      setLensCaption(caption || '')
-      setTimeout(() => setLensVisible(true), 50)
-    }, 300)
+  const addToLens = (imageUrl) => {
+    setLensImages(prev => [...prev, { src: imageUrl, id: Date.now() }])
   }
 
   const parseAndProcessResponse = async (text) => {
@@ -260,7 +257,7 @@ export default function Home() {
         setGeneratingImage(false)
 
         if (imageUrl) {
-          showInLens(imageUrl, payload.scene_goal || 'Generated for you')
+          addToLens(imageUrl)
         }
 
         if (textAfter) {
@@ -380,8 +377,7 @@ export default function Home() {
                   setCurrentStage('discovery')
                   setShowRecommendation(false)
                   setShowLeadCapture(false)
-                  setLensImage(null)
-                  setLensVisible(false)
+                  setLensImages([])
                   setAdvisorAvatar(null)
                   setAvatarLoading(true)
                   const generateNewAvatar = async () => {
@@ -396,7 +392,7 @@ export default function Home() {
                       const imageUrl = await generateImage(avatarPayload)
                       setAdvisorAvatar(imageUrl)
                       if (imageUrl) {
-                        showInLens(imageUrl, 'Your AI Security Advisor')
+                        setLensImages([{ src: imageUrl, id: Date.now() }])
                       }
                     } catch (e) {}
                     setAvatarLoading(false)
@@ -500,16 +496,10 @@ export default function Home() {
           </div>
         </div>
 
-        {/* RIGHT: Image Lens panel */}
+        {/* RIGHT: Image timeline panel */}
         <div className={styles.lensPanel}>
-          <div className={styles.lensFrame}>
-            {lensImage ? (
-              <img
-                src={lensImage}
-                alt={lensCaption}
-                className={`${styles.lensImage} ${lensVisible ? styles.lensVisible : ''}`}
-              />
-            ) : (
+          <div className={styles.lensScroll}>
+            {lensImages.length === 0 && !generatingImage && (
               <div className={styles.lensEmpty}>
                 {avatarLoading ? (
                   <>
@@ -521,12 +511,26 @@ export default function Home() {
                 )}
               </div>
             )}
+
+            {lensImages.map((img, i) => (
+              <div key={img.id} className={styles.lensCard}>
+                <img
+                  src={img.src}
+                  alt=""
+                  className={styles.lensImage}
+                />
+                {i < lensImages.length - 1 && <div className={styles.lensConnector}></div>}
+              </div>
+            ))}
+
             {generatingImage && (
-              <div className={styles.lensGenerating}>
+              <div className={styles.lensCardGenerating}>
                 <div className={styles.lensDiffuse}></div>
-                <span>Generating visual...</span>
+                <span>Generating...</span>
               </div>
             )}
+
+            <div ref={lensEndRef} />
           </div>
         </div>
       </main>

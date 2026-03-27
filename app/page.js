@@ -485,8 +485,8 @@ export default function Home() {
 
           {showRecommendation && !showLeadCapture && (
             <div className={styles.ctaBox}>
-              <a href="https://www.data3.com/wp-content/uploads/2024/07/Data3-Managed-Extended-Detection-Response-Service-Brief.pdf" target="_blank" className={styles.ctaLink}>MXDR Data Sheet</a>
-              <a href="https://www.data3.com/services/managed-services/managed-security-services/#form-modal" target="_blank" className={styles.ctaPrimary}>Talk to Our Team &rarr;</a>
+              <button onClick={async () => { await saveLead(); window.open('/leads', '_blank'); }} className={styles.ctaPrimary}>Talk to Our Team &rarr;</button>
+              <a href="https://www.data3.com/services/managed-services/managed-security-services/" target="_blank" className={styles.ctaLink}>MXDR Data Sheet</a>
               <button onClick={() => setShowLeadCapture(true)} className={styles.ctaClose}>Email me details</button>
               <button onClick={handleClose} className={styles.ctaClose}>Close</button>
             </div>

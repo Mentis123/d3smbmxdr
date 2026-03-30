@@ -222,11 +222,8 @@ export default function Home() {
     }
   }, [messages])
 
-  useEffect(() => {
-    if (isMobile && (generatingImage || lensImages.length > 0)) {
-      setMobilePanel('visuals')
-    }
-  }, [generatingImage, lensImages.length, isMobile])
+  // Don't auto-switch to visuals on mobile - let the user choose when to look
+  // The badge count on the Visuals tab tells them new images are available
 
   const generateImage = async (payload) => {
     const prompt = `${IMAGE_SYSTEM}\n\nSCENE PAYLOAD:\n${JSON.stringify(payload, null, 2)}\n\n${IMAGE_RULES}\n\n${IMAGE_NEGATIVE}`

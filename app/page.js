@@ -149,6 +149,8 @@ export default function Home() {
   const [leadPhone, setLeadPhone] = useState('')
   const [chatClosed, setChatClosed] = useState(false)
   const [lensImages, setLensImages] = useState([])
+  const [isMobile, setIsMobile] = useState(false)
+  const [mobilePanel, setMobilePanel] = useState('chat')
   const messagesEndRef = useRef(null)
   const lensEndRef = useRef(null)
   const inputRef = useRef(null)
@@ -164,6 +166,20 @@ export default function Home() {
       }, 150)
     }
   }, [lensImages])
+
+  useEffect(() => {
+    const syncViewportState = () => {
+      const mobile = window.innerWidth <= 900
+      setIsMobile(mobile)
+      if (!mobile) {
+        setMobilePanel('chat')
+      }
+    }
+
+    syncViewportState()
+    window.addEventListener('resize', syncViewportState)
+    return () => window.removeEventListener('resize', syncViewportState)
+  }, [])
 
   // Generate AI advisor avatar on load
   useEffect(() => {
@@ -205,6 +221,12 @@ export default function Home() {
       setShowRecommendation(true)
     }
   }, [messages])
+
+  useEffect(() => {
+    if (isMobile && (generatingImage || lensImages.length > 0)) {
+      setMobilePanel('visuals')
+    }
+  }, [generatingImage, lensImages.length, isMobile])
 
   const generateImage = async (payload) => {
     const prompt = `${IMAGE_SYSTEM}\n\nSCENE PAYLOAD:\n${JSON.stringify(payload, null, 2)}\n\n${IMAGE_RULES}\n\n${IMAGE_NEGATIVE}`
@@ -354,8 +376,25 @@ export default function Home() {
       </header>
 
       <main className={styles.main}>
+        {isMobile && (
+          <div className={styles.mobilePanelSwitch}>
+            <button
+              className={`${styles.mobilePanelBtn} ${mobilePanel === 'chat' ? styles.mobilePanelBtnActive : ''}`}
+              onClick={() => setMobilePanel('chat')}
+            >
+              Chat
+            </button>
+            <button
+              className={`${styles.mobilePanelBtn} ${mobilePanel === 'visuals' ? styles.mobilePanelBtnActive : ''}`}
+              onClick={() => setMobilePanel('visuals')}
+            >
+              Visuals {lensImages.length > 0 ? `(${lensImages.length})` : ''}
+            </button>
+          </div>
+        )}
+
         {/* LEFT: Chat panel */}
-        <div className={styles.chatPanel}>
+        <div className={`${styles.chatPanel} ${isMobile && mobilePanel !== 'chat' ? styles.mobileHidden : ''}`}>
           <div className={styles.chatHeader}>
             <div className={styles.avatarContainer}>
               {avatarLoading ? (
@@ -373,6 +412,14 @@ export default function Home() {
               <h1>D3QA</h1>
               <p>Your Data<sup>#</sup>3 Qualifying Agent</p>
             </div>
+            {isMobile && (
+              <button
+                className={styles.mobileJumpBtn}
+                onClick={() => setMobilePanel('visuals')}
+              >
+                View visuals
+              </button>
+            )}
             <button
               className={styles.resetBtn}
               onClick={() => {
@@ -501,7 +548,7 @@ export default function Home() {
         </div>
 
         {/* RIGHT: Image timeline panel */}
-        <div className={styles.lensPanel}>
+        <div className={`${styles.lensPanel} ${isMobile && mobilePanel !== 'visuals' ? styles.mobileHidden : ''}`}>
           <div className={styles.lensScroll}>
             {lensImages.length === 0 && !generatingImage && (
               <div className={styles.lensEmpty}>

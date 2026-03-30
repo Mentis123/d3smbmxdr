@@ -149,10 +149,8 @@ export default function Home() {
   const [leadPhone, setLeadPhone] = useState('')
   const [chatClosed, setChatClosed] = useState(false)
   const [lensImages, setLensImages] = useState([])
-  const [isMobile, setIsMobile] = useState(false)
-  const [mobilePanel, setMobilePanel] = useState('chat')
   const messagesEndRef = useRef(null)
-  const lensEndRef = useRef(null)
+  const carouselRef = useRef(null)
   const inputRef = useRef(null)
 
   useEffect(() => {
@@ -160,26 +158,12 @@ export default function Home() {
   }, [messages])
 
   useEffect(() => {
-    if (lensImages.length > 0) {
+    if (lensImages.length > 0 && carouselRef.current) {
       setTimeout(() => {
-        lensEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        carouselRef.current.scrollTo({ left: carouselRef.current.scrollWidth, behavior: 'smooth' })
       }, 150)
     }
   }, [lensImages])
-
-  useEffect(() => {
-    const syncViewportState = () => {
-      const mobile = window.innerWidth <= 900
-      setIsMobile(mobile)
-      if (!mobile) {
-        setMobilePanel('chat')
-      }
-    }
-
-    syncViewportState()
-    window.addEventListener('resize', syncViewportState)
-    return () => window.removeEventListener('resize', syncViewportState)
-  }, [])
 
   // Generate AI advisor avatar on load
   useEffect(() => {
@@ -373,25 +357,7 @@ export default function Home() {
       </header>
 
       <main className={styles.main}>
-        {isMobile && (
-          <div className={styles.mobilePanelSwitch}>
-            <button
-              className={`${styles.mobilePanelBtn} ${mobilePanel === 'chat' ? styles.mobilePanelBtnActive : ''}`}
-              onClick={() => setMobilePanel('chat')}
-            >
-              Chat
-            </button>
-            <button
-              className={`${styles.mobilePanelBtn} ${mobilePanel === 'visuals' ? styles.mobilePanelBtnActive : ''}`}
-              onClick={() => setMobilePanel('visuals')}
-            >
-              Visuals {lensImages.length > 0 ? `(${lensImages.length})` : ''}
-            </button>
-          </div>
-        )}
-
-        {/* LEFT: Chat panel */}
-        <div className={`${styles.chatPanel} ${isMobile && mobilePanel !== 'chat' ? styles.mobileHidden : ''}`}>
+        <div className={styles.chatPanel}>
           <div className={styles.chatHeader}>
             <div className={styles.avatarContainer}>
               {avatarLoading ? (
@@ -409,14 +375,6 @@ export default function Home() {
               <h1>D3QA</h1>
               <p>Your Data<sup>#</sup>3 Qualifying Agent</p>
             </div>
-            {isMobile && (
-              <button
-                className={styles.mobileJumpBtn}
-                onClick={() => setMobilePanel('visuals')}
-              >
-                View visuals
-              </button>
-            )}
             <button
               className={styles.resetBtn}
               onClick={() => {
@@ -536,51 +494,30 @@ export default function Home() {
             </div>
           )}
 
+          {/* Image Carousel */}
+          {(lensImages.length > 0 || generatingImage) && (
+            <div className={styles.carousel}>
+              <div className={styles.carouselTrack} ref={carouselRef}>
+                {lensImages.map((img) => (
+                  <div key={img.id} className={styles.carouselItem}>
+                    <img src={img.src} alt="" className={styles.carouselImage} />
+                  </div>
+                ))}
+                {generatingImage && (
+                  <div className={styles.carouselItemGenerating}>
+                    <div className={styles.lensDiffuse}></div>
+                    <span>Generating...</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
           <div className={styles.inputArea}>
             <textarea ref={inputRef} value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={handleKeyDown} placeholder="Type your message..." rows="1" disabled={loading} />
             <button onClick={() => sendMessage()} disabled={loading || !input.trim()}>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
             </button>
-          </div>
-        </div>
-
-        {/* RIGHT: Image timeline panel */}
-        <div className={`${styles.lensPanel} ${isMobile && mobilePanel !== 'visuals' ? styles.mobileHidden : ''}`}>
-          <div className={styles.lensScroll}>
-            {lensImages.length === 0 && !generatingImage && (
-              <div className={styles.lensEmpty}>
-                {avatarLoading ? (
-                  <>
-                    <div className={styles.lensSpinner}></div>
-                    <span>Generating advisor...</span>
-                  </>
-                ) : (
-                  <span>Visuals will appear here as the conversation progresses</span>
-                )}
-              </div>
-            )}
-
-            {lensImages.map((img, i) => (
-              <div
-                key={img.id}
-                className={styles.lensCard}
-                ref={i === lensImages.length - 1 ? lensEndRef : undefined}
-              >
-                <img
-                  src={img.src}
-                  alt=""
-                  className={styles.lensImage}
-                />
-                {i < lensImages.length - 1 && <div className={styles.lensConnector}></div>}
-              </div>
-            ))}
-
-            {generatingImage && (
-              <div className={styles.lensCardGenerating} ref={lensImages.length === 0 ? lensEndRef : undefined}>
-                <div className={styles.lensDiffuse}></div>
-                <span>Generating...</span>
-              </div>
-            )}
           </div>
         </div>
       </main>

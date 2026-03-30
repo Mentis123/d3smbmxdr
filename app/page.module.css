@@ -49,14 +49,11 @@
 
 .navPills { display: flex; gap: 0.5rem; align-items: center; }
 
-/* Main - two column layout */
+/* Main - single column */
 .main {
   flex: 1;
   display: flex;
-  align-items: stretch;
-  align-content: stretch;
-  flex-wrap: nowrap;
-  gap: 0;
+  flex-direction: column;
   min-height: 0;
   background:
     radial-gradient(ellipse at 20% 0%, rgba(0, 102, 204, 0.08) 0%, transparent 50%),
@@ -64,22 +61,13 @@
     var(--bg-primary);
 }
 
-/* Left: Chat panel - takes most of the width */
+/* Chat panel - full width */
 .chatPanel {
   flex: 1;
   display: flex;
   flex-direction: column;
   min-width: 0;
-  border-right: 1px solid var(--border-default);
   max-height: calc(100vh - 90px);
-}
-
-.mobileHidden {
-  display: none;
-}
-
-.mobilePanelSwitch {
-  display: none;
 }
 
 /* Chat Header */
@@ -259,10 +247,6 @@
   transition: all 0.2s ease;
   margin-left: auto;
   flex-shrink: 0;
-}
-
-.mobileJumpBtn {
-  display: none;
 }
 
 .resetBtn:hover {
@@ -575,118 +559,79 @@
 .inputArea button svg { width: 17px; height: 17px; }
 
 /* ========================================
-   RIGHT: Image Timeline Panel
+   Bottom: Image Carousel
    ======================================== */
-.lensPanel {
-  width: 380px;
+.carousel {
   flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  max-height: calc(100vh - 90px);
+  border-top: 1px solid var(--border-default);
+  background: var(--bg-secondary);
+  padding: 0.5rem 0;
 }
 
-.lensScroll {
-  flex: 1;
-  overflow-y: auto;
-  padding: 1.25rem;
+.carouselTrack {
   display: flex;
-  flex-direction: column;
-  gap: 0;
-  scrollbar-width: thin;
-  scrollbar-color: var(--border-default) transparent;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding: 0.25rem 1rem;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
 }
 
-.lensScroll::-webkit-scrollbar { width: 5px; }
-.lensScroll::-webkit-scrollbar-track { background: transparent; }
-.lensScroll::-webkit-scrollbar-thumb { background: var(--border-default); border-radius: 3px; }
+.carouselTrack::-webkit-scrollbar { display: none; }
 
-.lensCard {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  animation: lensCardIn 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+.carouselItem {
+  flex-shrink: 0;
+  scroll-snap-align: center;
+  animation: carouselIn 0.5s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-@keyframes lensCardIn {
+@keyframes carouselIn {
   from {
     opacity: 0;
-    filter: blur(16px);
-    transform: scale(0.92);
+    transform: scale(0.9);
   }
   to {
     opacity: 1;
-    filter: blur(0);
     transform: scale(1);
   }
 }
 
-.lensImage {
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  object-fit: contain;
-  border-radius: 14px;
+.carouselImage {
+  height: 80px;
+  width: 80px;
+  object-fit: cover;
+  border-radius: 10px;
   border: 1px solid var(--border-default);
-  background: var(--bg-secondary);
-  box-shadow:
-    0 4px 20px rgba(0, 0, 0, 0.3),
-    0 0 0 1px rgba(0, 163, 224, 0.08);
-  transition: box-shadow 0.3s ease, border-color 0.3s ease;
+  background: var(--bg-tertiary);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  transition: border-color 0.2s ease, transform 0.2s ease;
+  cursor: pointer;
 }
 
-.lensImage:hover {
-  border-color: rgba(0, 163, 224, 0.3);
-  box-shadow:
-    0 6px 28px rgba(0, 0, 0, 0.4),
-    0 0 0 1px rgba(0, 163, 224, 0.15),
-    0 0 24px rgba(0, 163, 224, 0.06);
+.carouselImage:hover {
+  border-color: var(--accent-cyan);
+  transform: scale(1.05);
 }
 
-.lensConnector {
-  width: 1px;
-  height: 24px;
-  background: linear-gradient(to bottom, var(--border-default), transparent);
+.carouselItemGenerating {
   flex-shrink: 0;
-}
-
-.lensCardGenerating {
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  border-radius: 14px;
+  height: 80px;
+  width: 80px;
+  border-radius: 10px;
   border: 1px dashed rgba(0, 163, 224, 0.3);
-  background: var(--bg-secondary);
+  background: var(--bg-tertiary);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.75rem;
+  gap: 0.35rem;
   position: relative;
   overflow: hidden;
   color: var(--accent-cyan);
-  font-size: 0.78rem;
+  font-size: 0.6rem;
   font-weight: 500;
-  animation: lensCardIn 0.4s ease-out;
-}
-
-.lensEmpty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.75rem;
-  text-align: center;
-  padding: 3rem 2rem;
-  color: var(--text-muted);
-  font-size: 0.8rem;
-  min-height: 200px;
-}
-
-.lensSpinner {
-  width: 28px;
-  height: 28px;
-  border: 2px solid rgba(0, 163, 224, 0.2);
-  border-top-color: var(--d3-cyan);
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
+  animation: carouselIn 0.4s ease-out;
 }
 
 .lensDiffuse {
@@ -766,64 +711,12 @@
   }
 
   .main {
-    flex-direction: column;
     min-height: calc(100dvh - 46px);
     padding-bottom: env(safe-area-inset-bottom);
   }
 
-  /* Sleek pill-style panel switcher */
-  .mobilePanelSwitch {
-    display: flex;
-    gap: 0;
-    padding: 0.5rem 1rem;
-    background: var(--bg-secondary);
-    border-bottom: 1px solid var(--border-default);
-  }
-
-  .mobilePanelBtn {
-    flex: 1;
-    border: none;
-    background: transparent;
-    color: var(--text-muted);
-    border-radius: 0;
-    padding: 0.4rem 0.5rem;
-    font-size: 0.78rem;
-    font-weight: 600;
-    cursor: pointer;
-    font-family: inherit;
-    transition: all 0.25s ease;
-    position: relative;
-  }
-
-  .mobilePanelBtn::after {
-    content: '';
-    position: absolute;
-    bottom: -0.5rem;
-    left: 20%;
-    right: 20%;
-    height: 2px;
-    background: transparent;
-    border-radius: 1px;
-    transition: all 0.25s ease;
-  }
-
-  .mobilePanelBtnActive {
-    color: var(--accent-cyan);
-  }
-
-  .mobilePanelBtnActive::after {
-    background: var(--accent-cyan);
-    left: 10%;
-    right: 10%;
-  }
-
   .chatPanel {
-    border-right: none;
-    border-bottom: none;
-    max-height: none;
-    flex: 1;
-    height: auto;
-    min-height: 0;
+    max-height: calc(100dvh - 46px);
   }
 
   /* Compact chat header */
@@ -864,22 +757,7 @@
     padding: 1px 4px;
   }
 
-  .mobileJumpBtn {
-    display: inline-flex;
-    margin-left: auto;
-    border: 1px solid rgba(0, 163, 224, 0.3);
-    background: rgba(0, 163, 224, 0.08);
-    color: var(--accent-cyan);
-    border-radius: 6px;
-    padding: 0.3rem 0.5rem;
-    font-size: 0.65rem;
-    cursor: pointer;
-    font-weight: 600;
-    font-family: inherit;
-    white-space: nowrap;
-  }
-
-  /* Compact stage progress - horizontal scrollable pills */
+  /* Compact stage progress */
   .stageTrack {
     gap: 0;
     padding: 0 0.25rem;
@@ -908,47 +786,27 @@
     font-size: 0.62rem;
   }
 
-  /* Image panel - compact grid layout instead of huge images */
-  .lensPanel {
-    width: 100%;
-    max-height: none;
-    min-height: 0;
-    flex: 1;
-    border-top: 1px solid var(--border-default);
+  /* Carousel compact */
+  .carouselImage {
+    height: 64px;
+    width: 64px;
+    border-radius: 8px;
   }
 
-  .lensScroll {
-    padding: 0.75rem;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0.5rem;
-    align-content: start;
+  .carouselItemGenerating {
+    height: 64px;
+    width: 64px;
+    border-radius: 8px;
+    font-size: 0.55rem;
   }
 
-  .lensCard {
-    animation: lensCardIn 0.4s ease-out;
+  .carousel {
+    padding: 0.35rem 0;
   }
 
-  .lensImage {
-    border-radius: 10px;
-    aspect-ratio: 1 / 1;
-  }
-
-  .lensConnector {
-    display: none;
-  }
-
-  .lensCardGenerating {
-    aspect-ratio: 1 / 1;
-    border-radius: 10px;
-    font-size: 0.7rem;
-  }
-
-  .lensEmpty {
-    grid-column: 1 / -1;
-    padding: 2rem 1rem;
-    min-height: 120px;
-    font-size: 0.75rem;
+  .carouselTrack {
+    padding: 0.2rem 0.75rem;
+    gap: 0.4rem;
   }
 
   /* Messages - tighter spacing */

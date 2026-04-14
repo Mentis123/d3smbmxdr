@@ -176,8 +176,41 @@
 
   /* WHY AGENTIC AI */
   .why-grid{
-    display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px;
+    display:grid;grid-template-columns:repeat(4,1fr);gap:20px;
     margin-top:40px;
+  }
+  /* TIER GRID (5 service tiers) */
+  .tier-grid{
+    display:grid;grid-template-columns:repeat(5,1fr);gap:16px;
+    margin-top:40px;
+  }
+  .tier-card{
+    background:var(--navy-3);
+    border:1px solid var(--rule-2);
+    border-radius:12px;
+    padding:24px 20px 26px;
+    transition:all .2s;
+    display:flex;flex-direction:column;
+    position:relative;
+  }
+  .tier-card:hover{border-color:var(--cyan);transform:translateY(-3px)}
+  .tier-card .tier-num{
+    font-size:11px;font-weight:800;letter-spacing:.12em;
+    color:var(--cyan);text-transform:uppercase;margin-bottom:10px;
+  }
+  .tier-card h3{
+    font-size:16px;color:#fff;margin:0 0 4px;
+    font-weight:700;letter-spacing:-.005em;line-height:1.25;
+  }
+  .tier-card .verb{
+    font-size:12px;color:var(--cyan);font-weight:600;
+    letter-spacing:.02em;margin-bottom:12px;
+  }
+  .tier-card p{font-size:12.5px;color:var(--ink-3);line-height:1.55;margin:0 0 14px}
+  .tier-card .meta{
+    margin-top:auto;padding-top:12px;
+    border-top:1px solid var(--rule);
+    font-size:11px;color:var(--ink-4);letter-spacing:.02em;
   }
   .why-card{
     background:var(--navy-3);
@@ -430,12 +463,15 @@
     .why-d3{grid-template-columns:1fr}
     .gov-block{grid-template-columns:1fr;gap:32px}
     .gov-block .gov-img{order:-1;max-width:380px;margin:0 auto}
+    .why-grid{grid-template-columns:repeat(2,1fr)}
+    .tier-grid{grid-template-columns:repeat(2,1fr)}
   }
   @media (max-width:780px){
     .pg-nav ul.main{display:none}
     .pg-hero .wrap{grid-template-columns:1fr;gap:48px;padding:64px 24px}
     .pg-hero .hex-img{max-width:340px;margin:0 auto}
     .why-grid{grid-template-columns:1fr}
+    .tier-grid{grid-template-columns:1fr}
     .lifecycle-grid{grid-template-columns:1fr}
     .eto-parent{grid-template-columns:1fr}
     .outcomes{grid-template-columns:1fr;gap:24px}
@@ -451,7 +487,7 @@
 <body>
 
 <!-- A/B comparison banner -->
-<div class="ab-banner">VERSION B · Marketing V2 content load <a href="a.html">← see Version A</a></div>
+<div class="ab-banner">VERSION B · V3 sectioned landing page <a href="a.html">← see Version A</a></div>
 
 <!-- ============ NAV ============ -->
 <nav class="pg-nav">
@@ -486,7 +522,7 @@
     <div>
       <div class="eyebrow">AI Practice · Microsoft</div>
       <h1>Agentic AI.<br><span class="accent">Turn ambition into business advantage.</span></h1>
-      <p class="sub">Built on Microsoft innovation, brought to life by <span class="d3">Data<sup>#</sup>3</span>. Whether you're just starting out or ready to scale, we move you from experimentation and uncertainty to secure, confident enterprise-wide deployment of agentic AI.</p>
+      <p class="sub">Built on Microsoft innovation. Brought to life through the <span class="d3">Data<sup>#</sup>3</span> AI Factory — our capability-led operating model for enterprise AI, powered by dedicated squads of AI specialists who run with you, sprint by sprint.</p>
       <button class="btn-cyan">Contact us
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
       </button>
@@ -530,6 +566,11 @@
         <h3>Build self-driving processes</h3>
         <p>Scale productivity across the enterprise with end-to-end workflows that orchestrate themselves under your governance.</p>
       </div>
+      <div class="why-card">
+        <div class="icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 5-5"/></svg></div>
+        <h3>Move beyond pilot sprawl</h3>
+        <p>Turn AI ambition into operating capability. Replace one-off proofs of concept with a structured path to production agents at enterprise scale.</p>
+      </div>
     </div>
   </div>
 </section>
@@ -537,9 +578,9 @@
 <!-- ============ AI SERVICES LIFECYCLE ============ -->
 <section class="module alt">
   <div class="wrap">
-    <div class="eyebrow">Process · A guided, repeatable journey</div>
-    <h2>Our AI services lifecycle</h2>
-    <p class="lead"><span class="d3">Data<sup>#</sup>3</span> follows a proven, iterative methodology focused on delivering business outcomes. Phases are not linear — activities flow between stages and loops between discovery, prototyping and design are common (and expected). You can enter at any phase based on where you are in your AI journey.</p>
+    <div class="eyebrow">Our delivery model · Envision · Transform · Operate</div>
+    <h2>The AI Factory follows the ETO framework</h2>
+    <p class="lead">The <span class="d3">Data<sup>#</sup>3</span> AI Factory follows an Envision–Transform–Operate framework — the lifecycle for enterprise AI services at <span class="d3">Data<sup>#</sup>3</span>. Five delivery stages parented under three executive-level phases. ETO is iterative, not linear: you can enter at any phase based on your AI maturity, and each phase is delivered by a dedicated squad on a sprint cadence.</p>
 
     <div class="lifecycle-wrap">
       <div class="eto-parent">
@@ -588,7 +629,7 @@
   <div class="wrap">
     <div class="eyebrow">Outcomes</div>
     <h2>What to expect</h2>
-    <p class="lead">Every engagement with the <span class="d3">Data<sup>#</sup>3</span> AI Practice is shaped to deliver tangible deliverables your business can act on — not just slideware.</p>
+    <p class="lead">Every engagement with the <span class="d3">Data<sup>#</sup>3</span> AI Factory is shaped to deliver tangible business outcomes — not just slideware. Outcomes scale with squad capacity, not statements of work.</p>
     <div class="outcomes">
       <img class="checks" src="final-assets/graphic-checks-column.jpg" alt="">
       <ul>
@@ -598,13 +639,60 @@
         <li>Embedded governance, security controls and responsible AI frameworks</li>
         <li>Business case, ROI modelling and total-cost-of-ownership analysis</li>
         <li>Adoption plan, AI fluency training and change management support</li>
+        <li>A dedicated <span class="d3">Data<sup>#</sup>3</span> squad on a rolling commit — capacity that scales with your ambition</li>
       </ul>
     </div>
   </div>
 </section>
 
-<!-- ============ FOUR CORE PILLARS ============ -->
+<!-- ============ FIVE-TIER SERVICES CATALOGUE ============ -->
 <section class="module alt">
+  <div class="wrap">
+    <div class="eyebrow">The AI Factory catalogue</div>
+    <h2>Five service tiers. One operating model. One squad.</h2>
+    <p class="lead">The <span class="d3">Data<sup>#</sup>3</span> AI Factory delivers capability-as-a-service across five tiers — from a single sprint to a fully managed AI capability. Each tier maps to where you are in your AI journey, and you can graduate between tiers as your maturity grows. The same dedicated squad delivers your first 2-week Lean Sprint and your hundredth production agent.</p>
+    <div class="tier-grid">
+      <div class="tier-card">
+        <div class="tier-num">Tier 1</div>
+        <h3>Lean Sprint</h3>
+        <div class="verb">Try it</div>
+        <p>The minimum viable engagement: three 2-week sprints to prove an agent or AI use case end-to-end. Best for organisations testing capability-as-a-service without long commitment.</p>
+        <div class="meta">Fixed-price · single engagement</div>
+      </div>
+      <div class="tier-card">
+        <div class="tier-num">Tier 2</div>
+        <h3>Multi Agent Strategy</h3>
+        <div class="verb">Architect it</div>
+        <p>Strategic engagement (4–8 weeks) for customers building multi-agent ecosystems — agent-of-agents architectures, orchestration design and target-state roadmap.</p>
+        <div class="meta">Often precedes Scaled Sprint or Scalable Foundation</div>
+      </div>
+      <div class="tier-card">
+        <div class="tier-num">Tier 3</div>
+        <h3>Scaled Sprint</h3>
+        <div class="verb">Scale it</div>
+        <p>A 6–12 week multi-sprint engagement (3–6 sprints of 10 days each) that takes a proven use case to production-grade agents with observability, integrations and handover.</p>
+        <div class="meta">Multi-sprint · production-ready</div>
+      </div>
+      <div class="tier-card">
+        <div class="tier-num">Tier 4</div>
+        <h3>Governance</h3>
+        <div class="verb">De-risk it</div>
+        <p>Discrete advisory engagements (2–6 weeks) covering AI/agent governance, guardrails, risk register, policy library and control mapping.</p>
+        <div class="meta">Pairs with CPS 230 obligations from 1 July 2026</div>
+      </div>
+      <div class="tier-card">
+        <div class="tier-num">Tier 5</div>
+        <h3>Scalable Foundation</h3>
+        <div class="verb">Trust it</div>
+        <p>The fully managed AI capability. <span class="d3">Data<sup>#</sup>3</span> runs your agent ecosystem on a rolling commit. Persistent named squad, recurring monthly subscription against committed capacity.</p>
+        <div class="meta">6-month minimum, growing to multi-year</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FOUR CORE PILLARS ============ -->
+<section class="module">
   <div class="wrap">
     <div class="eyebrow">Built right</div>
     <h2>AI agents built on four core pillars</h2>
@@ -635,7 +723,7 @@
 </section>
 
 <!-- ============ AGENTIC FOUNDATION BLOCK ============ -->
-<section class="module">
+<section class="module alt">
   <div class="wrap">
     <div class="eyebrow">The Agentic Foundation</div>
     <h2>Five layers, one production-ready stack</h2>
@@ -661,11 +749,11 @@
 </section>
 
 <!-- ============ SOLUTIONS / PRODUCTS ============ -->
-<section class="module alt">
+<section class="module">
   <div class="wrap">
     <div class="eyebrow">Solutions &amp; products</div>
-    <h2>Microsoft's agentic AI ecosystem</h2>
-    <p class="lead">For intelligent agents that can plan, reason and act across business processes, <span class="d3">Data<sup>#</sup>3</span> chooses the Microsoft platform. This ecosystem enables your teams to create pre-built agents, fully custom solutions, and everything in between — all within a secure, governed environment.</p>
+    <h2>The Microsoft platform foundations the AI Factory runs on</h2>
+    <p class="lead"><span class="d3">Data<sup>#</sup>3</span> chooses the Microsoft platform for agentic AI because it gives your teams the breadth to create pre-built agents, fully custom solutions, and everything in between — all within a secure, governed environment. These three products are the platform foundations the AI Factory runs every engagement on.</p>
     <div class="solutions">
       <div class="sol-card">
         <h3>Copilot Studio</h3>
@@ -699,7 +787,7 @@
 </section>
 
 <!-- ============ WHY DATA#3 ============ -->
-<section class="module">
+<section class="module alt">
   <div class="wrap">
     <div class="eyebrow">Why Data#3</div>
     <h2>We lead by example</h2>
@@ -715,36 +803,43 @@
       <div class="why-row">
         <div class="num">2</div>
         <div>
-          <h4>Deep expertise beyond technical delivery</h4>
-          <p>Our team includes business analysts, strategists, functional specialists, trainers and change managers — ensuring agentic AI delivers measurable outcomes.</p>
+          <h4>Capability you can subscribe to</h4>
+          <p>With the AI Factory, you don't buy projects — you commit to a dedicated <span class="d3">Data<sup>#</sup>3</span> squad on a rolling sprint cadence. Outcomes scale with capacity, not statements of work.</p>
         </div>
       </div>
       <div class="why-row">
         <div class="num">3</div>
         <div>
-          <h4>Industry-leading Microsoft expertise</h4>
-          <p>As Microsoft's 2025 Australia Partner of the Year and Modern Work Partner of the Year, we have direct access to the latest agentic AI innovations and engineering insights.</p>
+          <h4>Deep expertise beyond technical delivery</h4>
+          <p>Our squads include business analysts, strategists, functional specialists, trainers and change managers — ensuring agentic AI delivers measurable business outcomes, not slideware.</p>
         </div>
       </div>
       <div class="why-row">
         <div class="num">4</div>
         <div>
-          <h4>A broad technology ecosystem</h4>
-          <p>We draw on a wide portfolio of Microsoft and <span class="d3">Data<sup>#</sup>3</span> IP — tailoring solutions to your organisation's complexity, environment and goals.</p>
+          <h4>Industry-leading Microsoft expertise</h4>
+          <p>As Microsoft's 2025 Australia Partner of the Year and Modern Work Partner of the Year, we have direct access to the latest agentic AI innovations, frameworks and engineering insights. 150+ Copilot projects delivered.</p>
         </div>
       </div>
       <div class="why-row">
         <div class="num">5</div>
+        <div>
+          <h4>A broad technology ecosystem</h4>
+          <p>We draw on a wide portfolio of Microsoft and <span class="d3">Data<sup>#</sup>3</span> IP — including the Agentic Foundation, our five-layer reference stack spanning Azure landing zone, Microsoft Fabric, Microsoft Foundry, Agent 365 and the agent layer itself.</p>
+        </div>
+      </div>
+      <div class="why-row">
+        <div class="num">6</div>
         <div>
           <h4>Trusted vendor with an AI-native mentality</h4>
           <p>The confidence of a vendor already embedded in your environment, paired with cutting-edge capabilities, faster innovation and start-up responsiveness.</p>
         </div>
       </div>
       <div class="why-row">
-        <div class="num">6</div>
+        <div class="num">7</div>
         <div>
           <h4>Security and compliance built from the ground up</h4>
-          <p>Agentic AI introduces new governance considerations. Our enterprise security and transformation experience ensures your agents operate safely at scale.</p>
+          <p>Agentic AI introduces new governance considerations — agent permissions, data access, lifecycle management and compliance. Our enterprise security and transformation experience ensures your agents operate safely, responsibly and at scale, with governance baked in from day one — not bolted on at the end.</p>
         </div>
       </div>
     </div>

@@ -291,17 +291,17 @@
     display:grid;grid-template-columns:1fr 1fr;gap:18px 36px;
   }
   .outcomes ul li{
-    display:flex;gap:16px;align-items:flex-start;
+    position:relative;
+    padding-left:40px;
     font-size:16px;color:var(--ink-2);line-height:1.55;
-    padding-left:0;
   }
   .outcomes ul li::before{
-    content:"";width:24px;height:24px;flex:0 0 24px;
+    content:"";position:absolute;left:0;top:2px;
+    width:24px;height:24px;
     border-radius:50%;background:var(--cyan);
     background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230a1530' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='20 6 9 17 4 12'/></svg>");
     background-size:14px;background-repeat:no-repeat;background-position:center;
     box-shadow:0 0 0 4px rgba(77,210,240,.12);
-    margin-top:1px;
   }
 
   /* PILLARS GRID */

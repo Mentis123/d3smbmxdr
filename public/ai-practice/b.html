@@ -230,13 +230,13 @@
   .why-card h3{font-size:17px;color:#fff;margin:0 0 8px;font-weight:700;letter-spacing:-.005em}
   .why-card p{font-size:14px;color:var(--ink-3);margin:0;line-height:1.6}
 
-  /* LIFECYCLE 5-STEP */
+  /* LIFECYCLE — 3 ETO phases × 2 sub-phases each */
   .lifecycle-wrap{margin-top:48px}
-  .eto-parent{
-    display:grid;grid-template-columns:repeat(3,1fr);gap:14px;
-    margin-bottom:8px;
+  .lifecycle-3up{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:18px;
   }
-  .eto-parent .phase{
+  .eto-section{display:flex;flex-direction:column;gap:10px}
+  .eto-section .phase-label{
     text-align:center;padding:14px;
     border-radius:8px;font-weight:800;
     font-size:14px;letter-spacing:.1em;text-transform:uppercase;
@@ -244,41 +244,40 @@
     border:1px solid rgba(77,210,240,.3);
     color:var(--cyan);
   }
-  .lifecycle-grid{
-    display:grid;grid-template-columns:repeat(5,1fr);gap:10px;
-  }
+  .stage-pair{display:grid;grid-template-columns:1fr 1fr;gap:10px}
   .stage{
     background:var(--navy-3);
     border:1px solid var(--rule-2);
     border-radius:10px;
-    padding:24px 18px 24px;
+    padding:22px 16px 22px;
     position:relative;
+    display:flex;flex-direction:column;
   }
   .stage .img{
-    width:100%;height:120px;
+    width:100%;height:90px;
     border-radius:6px;overflow:hidden;
     background:var(--navy-1);
-    margin-bottom:16px;display:grid;place-items:center;
+    margin-bottom:14px;display:grid;place-items:center;
   }
   .stage .img img{
-    height:120px;width:auto;display:block;
+    height:90px;width:auto;display:block;
     -webkit-mask-image:radial-gradient(ellipse at center,#000 60%,transparent 95%);
     mask-image:radial-gradient(ellipse at center,#000 60%,transparent 95%);
   }
   .stage .num{
-    position:absolute;top:14px;right:14px;
-    width:26px;height:26px;border-radius:50%;
+    position:absolute;top:12px;right:12px;
+    width:24px;height:24px;border-radius:50%;
     border:1.5px solid var(--cyan);color:var(--cyan);
     display:grid;place-items:center;
-    font-size:12px;font-weight:800;
+    font-size:11px;font-weight:800;
   }
   .stage h3{
-    font-size:14px;color:#fff;margin:0 0 8px;
+    font-size:13.5px;color:#fff;margin:0 0 6px;
     font-weight:700;line-height:1.25;letter-spacing:-.005em;
   }
   .stage p{
-    font-size:12px;color:var(--ink-3);
-    margin:0;line-height:1.55;
+    font-size:11.5px;color:var(--ink-3);
+    margin:0;line-height:1.5;
   }
 
   /* OUTCOMES LIST */
@@ -468,7 +467,7 @@
   @media (max-width:1080px){
     .pg-stats .wrap{grid-template-columns:repeat(2,1fr);gap:24px}
     .stat:last-child{grid-column:1/-1}
-    .lifecycle-grid{grid-template-columns:repeat(2,1fr)}
+    .lifecycle-3up{grid-template-columns:1fr;gap:24px}
     .pillars{grid-template-columns:repeat(2,1fr)}
     .solutions{grid-template-columns:1fr}
     .why-d3{grid-template-columns:1fr}
@@ -483,8 +482,7 @@
     .pg-hero .hex-img{max-width:340px;margin:0 auto}
     .why-grid{grid-template-columns:1fr}
     .tier-grid{grid-template-columns:1fr}
-    .lifecycle-grid{grid-template-columns:1fr}
-    .eto-parent{grid-template-columns:1fr}
+    .stage-pair{grid-template-columns:1fr}
     .outcomes ul{grid-template-columns:1fr;gap:18px}
     .pillars{grid-template-columns:1fr}
     .module{padding:64px 24px}
@@ -590,44 +588,60 @@
   <div class="wrap">
     <div class="eyebrow">Our delivery model · Envision · Transform · Operate</div>
     <h2>The AI Factory follows the ETO framework</h2>
-    <p class="lead">The <span class="d3">Data<sup>#</sup>3</span> AI Factory follows an Envision–Transform–Operate framework — the lifecycle for enterprise AI services at <span class="d3">Data<sup>#</sup>3</span>. Five delivery stages parented under three executive-level phases. ETO is iterative, not linear: you can enter at any phase based on your AI maturity, and each phase is delivered by a dedicated squad on a sprint cadence.</p>
+    <p class="lead">The <span class="d3">Data<sup>#</sup>3</span> AI Factory follows an Envision–Transform–Operate framework — the lifecycle for enterprise AI services at <span class="d3">Data<sup>#</sup>3</span>. <strong>Six operational phases parented under three executive-level phases</strong> — two phases under each of Envision, Transform and Operate. ETO is iterative, not linear: you can enter at any phase based on your AI maturity, and each phase is delivered by a dedicated squad on a sprint cadence.</p>
 
     <div class="lifecycle-wrap">
-      <div class="eto-parent">
-        <div class="phase">Envision</div>
-        <div class="phase">Transform</div>
-        <div class="phase">Operate</div>
-      </div>
-      <div class="lifecycle-grid">
-        <div class="stage">
-          <div class="num">1</div>
-          <div class="img"><img src="final-assets/graphic-icon-envision.jpg" alt=""></div>
-          <h3>Envision the opportunity</h3>
-          <p>Align leadership around an AI strategy, assess readiness, identify and prioritise high-value use cases, and build a business case backed by a clear roadmap.</p>
+      <div class="lifecycle-3up">
+        <div class="eto-section">
+          <div class="phase-label">Envision</div>
+          <div class="stage-pair">
+            <div class="stage">
+              <div class="num">01</div>
+              <div class="img"><img src="final-assets/graphic-icon-envision.jpg" alt=""></div>
+              <h3>Discover &amp; Envision</h3>
+              <p>AI strategy and roadmap, readiness assessment, use-case ideation and value hypothesis. Indicative ROI ±50%.</p>
+            </div>
+            <div class="stage">
+              <div class="num">02</div>
+              <div class="img"><img src="final-assets/graphic-icon-envision.jpg" alt=""></div>
+              <h3>Prototype &amp; Validate</h3>
+              <p>PoC + PoV. Experiment, tune, validate solution options and refine the business case. Refined ROI ±25%.</p>
+            </div>
+          </div>
         </div>
-        <div class="stage">
-          <div class="num">2</div>
-          <div class="img"><img src="final-assets/graphic-icon-envision.jpg" alt=""></div>
-          <h3>Prove the value</h3>
-          <p>Design and validate AI agents through rapid prototyping. Demonstrate feasibility, value and ROI before committing to full-scale production.</p>
+        <div class="eto-section">
+          <div class="phase-label">Transform</div>
+          <div class="stage-pair">
+            <div class="stage">
+              <div class="num">03</div>
+              <div class="img"><img src="final-assets/graphic-icon-transform.jpg" alt=""></div>
+              <h3>Solution Design</h3>
+              <p>Architect the production solution. Governance, security &amp; compliance consulting, operating-model and process design. Refined ROI ±10%.</p>
+            </div>
+            <div class="stage">
+              <div class="num">04</div>
+              <div class="img"><img src="final-assets/graphic-icon-transform.jpg" alt=""></div>
+              <h3>Build &amp; Deploy</h3>
+              <p>Production development, RAG and knowledge integration, multi-agent orchestration, security hardening and testing through to go-live.</p>
+            </div>
+          </div>
         </div>
-        <div class="stage">
-          <div class="num">3</div>
-          <div class="img"><img src="final-assets/graphic-icon-transform.jpg" alt=""></div>
-          <h3>Build and launch agents</h3>
-          <p>Deploy production-grade agents integrated across Microsoft 365, Dynamics 365, Azure AI and your enterprise systems — performant, secure and ready to scale.</p>
-        </div>
-        <div class="stage">
-          <div class="num">4</div>
-          <div class="img"><img src="final-assets/graphic-icon-operate.jpg" alt=""></div>
-          <h3>Operate with trust</h3>
-          <p>Embed governance, security controls, responsible AI frameworks and lifecycle management so your agents stay safe, compliant and aligned with policy.</p>
-        </div>
-        <div class="stage">
-          <div class="num">5</div>
-          <div class="img"><img src="final-assets/graphic-icon-operate.jpg" alt=""></div>
-          <h3>Adopt, scale &amp; optimise</h3>
-          <p>Drive AI fluency through training and change management. Continuously optimise performance and expand to new use cases across the organisation.</p>
+        <div class="eto-section">
+          <div class="phase-label">Operate</div>
+          <div class="stage-pair">
+            <div class="stage">
+              <div class="num">05</div>
+              <div class="img"><img src="final-assets/graphic-icon-operate.jpg" alt=""></div>
+              <h3>Adopt &amp; Scale</h3>
+              <p>Change management, user training, champion network development and continuous backlog capture as adoption scales.</p>
+            </div>
+            <div class="stage">
+              <div class="num">06</div>
+              <div class="img"><img src="final-assets/graphic-icon-operate.jpg" alt=""></div>
+              <h3>Operate &amp; Optimise</h3>
+              <p>Manage agents and platforms, tune for performance, run security and compliance audits, and feed the innovation pipeline.</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>

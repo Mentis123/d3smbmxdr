@@ -1,0 +1,538 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI Practice Infographic — Nano Banana Pro prompt kit</title>
+<style>
+  :root{
+    --bg:#0a0420; --bg2:#140a35; --card:#1a0f3e; --card2:#231555;
+    --ink:#f4f1ff; --ink2:#b6a9e6; --ink3:#837aa8;
+    --cyan:#00e0ff; --magenta:#ff3ba7; --line:#2e1f5c;
+    --ok:#4ade80;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif}
+  body{background:radial-gradient(ellipse at top,#1d0d4a 0%,#0a0420 55%) no-repeat fixed}
+  header{padding:42px 32px 18px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#1d0d4a 0%,#12072e 100%)}
+  header h1{margin:0 0 6px;font-size:28px;letter-spacing:-.01em}
+  header p{margin:0;color:var(--ink2);font-size:14px}
+  header .meta{margin-top:10px;font-size:12px;color:var(--ink3)}
+  nav{position:sticky;top:0;z-index:10;background:rgba(10,4,32,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:10px 24px;display:flex;gap:8px;flex-wrap:wrap;font-size:12px}
+  nav a{color:var(--ink2);text-decoration:none;padding:6px 10px;border-radius:6px;border:1px solid transparent}
+  nav a:hover{color:var(--cyan);border-color:var(--line);background:#12072e}
+  main{max-width:960px;margin:0 auto;padding:28px 24px 80px}
+  section{margin:32px 0;padding:24px;background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:0 1px 0 rgba(255,255,255,.03) inset}
+  section h2{margin:0 0 4px;font-size:20px;color:var(--ink);letter-spacing:-.005em}
+  section h2 .tag{font-size:11px;color:var(--cyan);margin-left:8px;font-weight:500;letter-spacing:.05em;text-transform:uppercase;vertical-align:middle}
+  section .subtitle{margin:0 0 18px;color:var(--ink2);font-size:13px}
+  .instructions ol{padding-left:22px;margin:10px 0}
+  .instructions li{margin:8px 0;color:var(--ink2)}
+  .instructions li strong{color:var(--ink)}
+  .instructions code{background:#0a0420;padding:2px 6px;border-radius:4px;font-size:12px;color:var(--cyan);border:1px solid var(--line)}
+  .note{padding:14px;background:#0e0630;border:1px solid var(--line);border-left:3px solid var(--magenta);border-radius:8px;margin:14px 0;color:var(--ink2);font-size:13px}
+  .note strong{color:var(--ink)}
+
+  .panel{display:grid;grid-template-columns:240px 1fr;gap:20px}
+  @media (max-width:720px){.panel{grid-template-columns:1fr}}
+  .panel .ref{background:#0a0420;border:1px solid var(--line);border-radius:10px;overflow:hidden;position:relative}
+  .panel .ref img{width:100%;display:block}
+  .panel .ref .caption{position:absolute;bottom:0;left:0;right:0;padding:6px 10px;background:linear-gradient(180deg,transparent,rgba(0,0,0,.85));font-size:11px;color:var(--ink2);letter-spacing:.02em}
+  .panel .body h3{margin:0 0 8px;font-size:16px;color:var(--ink)}
+  .panel .body .meta{color:var(--ink3);font-size:12px;margin-bottom:10px}
+  .panel .body .vault{color:var(--ink2);font-size:12px;margin-bottom:12px}
+  .panel .body .vault b{color:var(--cyan);font-weight:500}
+  .promptbox{position:relative;background:#05031a;border:1px solid var(--line);border-radius:10px;padding:14px 14px 14px;font:12.5px/1.55 "SF Mono","JetBrains Mono",Consolas,monospace;color:#d9d1ff;white-space:pre-wrap;word-break:break-word;max-height:420px;overflow:auto}
+  .textbox{position:relative;background:#0d0828;border:1px solid var(--line);border-left:3px solid var(--cyan);border-radius:10px;padding:14px 16px;font:13.5px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;color:#ece6ff;white-space:pre-wrap;word-break:break-word;margin-top:16px}
+  .textbox::before{content:"Figma body copy";display:block;font:11px/1 "SF Mono",Consolas,monospace;color:var(--cyan);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px}
+  .promptbox::-webkit-scrollbar{width:8px}
+  .promptbox::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px}
+  .copyrow{display:flex;justify-content:space-between;align-items:center;margin-top:10px;gap:10px;flex-wrap:wrap}
+  .copyrow .hint{font-size:11px;color:var(--ink3)}
+  button.copy{background:linear-gradient(180deg,#3a1f8a,#1e0f56);color:var(--ink);border:1px solid #5a38c8;padding:8px 16px;border-radius:8px;font-size:12px;cursor:pointer;font-weight:600;letter-spacing:.02em;transition:all .15s}
+  button.copy:hover{background:linear-gradient(180deg,#4a2ba8,#2e1877);border-color:var(--cyan);box-shadow:0 0 0 3px rgba(0,224,255,.12)}
+  button.copy.ok{background:linear-gradient(180deg,#166534,#0b3d1d);border-color:var(--ok);color:#d6ffe4}
+  .bible{border-color:#4a2ba8;background:linear-gradient(180deg,#1f1048,#150930)}
+  .bible h2 .tag{color:var(--magenta)}
+  .warn{color:var(--magenta)}
+  .stitch table{width:100%;border-collapse:collapse;margin-top:10px;font-size:12.5px}
+  .stitch th,.stitch td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);color:var(--ink2)}
+  .stitch th{color:var(--ink);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.05em}
+  .stitch td:first-child{color:var(--cyan);font-family:monospace}
+  footer{text-align:center;color:var(--ink3);font-size:11px;padding:28px;border-top:1px solid var(--line);margin-top:40px}
+</style>
+</head>
+<body>
+<header>
+  <h1>AI Practice Infographic — NBP prompt kit</h1>
+  <p>Reference chops + Nano Banana Pro prompts, grounded in the d3brain AI Factory vault.</p>
+  <div class="meta">Source: Data_007_Infographic.jpg (745×4474) · Target: single-column infographic, stitched from 8 × 9:16 NBP panels · Content: Mark's ETO framework + AI Squads + AAF stack + 5-service catalogue</div>
+</header>
+
+<nav>
+  <a href="#instructions">Instructions</a>
+  <a href="#bible">Style bible</a>
+  <a href="#p1">1 Hero</a>
+  <a href="#p2">2 Outcomes</a>
+  <a href="#p3">3 ETO journey</a>
+  <a href="#p4">4 Tier 1</a>
+  <a href="#p5">5 Tier 2</a>
+  <a href="#p6">6 Tier 3</a>
+  <a href="#p7">7 Five services</a>
+  <a href="#p8">8 CTA</a>
+  <a href="#stitch">Stitch</a>
+</nav>
+
+<main>
+
+<section class="instructions" id="instructions">
+  <h2>How to use this kit <span class="tag">Read first</span></h2>
+  <p class="subtitle">One-pass NBP generation will NOT produce a coherent 745×4474 infographic. Build it in tiles, then stitch.</p>
+  <ol>
+    <li><strong>Start with the style bible.</strong> Copy the bible prompt, run it once in Nano Banana Pro at 9:16. Pick the variant with the strongest gradient + isometric glass feel. <em>This becomes your style anchor for every subsequent panel.</em></li>
+    <li><strong>Upload the style anchor + the matching reference chop</strong> (<code>refs/0X_*.jpg</code>) as image inputs when running each panel prompt. NBP's multi-image conditioning is how you hold consistency across all 8 tiles.</li>
+    <li><strong>Generate panels 1 through 8 in order.</strong> For each: use the panel's prompt, attach <b>(a)</b> your Pass-1 style anchor and <b>(b)</b> the corresponding ref chop. Generate 4 variants per panel; keep the one that best matches the anchor.</li>
+    <li><strong>NBP renders the titles, you overlay the body copy.</strong> Each prompt asks NBP for real headlines, sub-heads and short labels — things it renders well. Body paragraphs are NOT rendered by NBP at all; instead each prompt reserves clean, empty negative space on the background so you can overlay Figma type onto a consistent, seamless gradient.</li>
+    <li><strong>Stitch in Figma.</strong> Drop panels into a 745-wide artboard, overlap 40–60px per seam, blend with gradient masks so background transitions are seamless. See the <a href="#stitch">stitch table</a> for target heights.</li>
+    <li><strong>Final pass:</strong> type overlay → export → QA on mobile → upload to the AI Practice SharePoint + dashboard.</li>
+  </ol>
+  <div class="note"><strong>Content grounding:</strong> The copy is pulled from the d3brain vault — Mark Pattie's <em>Envision → Transform → Operate</em> framework, the AI Squads MVS model, the AAF five-layer stack, and the five-service catalogue (Lean Sprint, Scaled Sprint, Scalable Foundation, Governance, Multi Agent Strategy). If Mark, Suzanne, or Scott redline these, update panels 3–7 and re-run.</div>
+  <div class="note warn"><strong>Guardrails:</strong> Do NOT reference Brisbane Catholic Education. Do NOT use projection numbers as realised numbers (see <code>feedback_poc_vs_case_study.md</code>). The "150+ Copilot Projects" and "#1 ANZ MS Partner of the Year 2025" creds are the only hard numbers approved for external use.</div>
+</section>
+
+<section class="bible" id="bible">
+  <h2>Style bible — run this FIRST <span class="tag">Pass 1</span></h2>
+  <p class="subtitle">Generate this once at 9:16. The result becomes the visual anchor you feed into every subsequent panel.</p>
+  <div class="promptbox" id="prompt-bible">Editorial tech infographic panel, 9:16 portrait aspect ratio, single clean composition with generous negative space.
+
+BACKGROUND: Rich deep-space gradient from violet (#1d0d4a) at the top through indigo (#140a35) to near-black (#0a0420) at the bottom. Across the top 20% of the frame, soft flowing ribbons of cyan and magenta light drift horizontally like an aurora, suggesting data streams. Subtle bokeh particles and faint hex-grid overlay at 5% opacity. No stars.
+
+FOREGROUND HERO OBJECT: A floating isometric glass hexagon, rendered in translucent frosted cyan glass with glowing neon-edge rims. Inside the hexagon: a luminous three-dimensional neural node — a central glowing orb with six radiating circuit traces that terminate in smaller satellite nodes. The whole object casts a soft cyan bloom onto the background. Light magenta rim-lighting on the right edge for chromatic contrast.
+
+TYPOGRAPHY: No text at all in this anchor frame — leave the upper third clean. This image is a STYLE REFERENCE, not a finished panel, so keep typography out of it.
+
+STYLE TOKENS: Futuristic, Microsoft-aligned enterprise tech aesthetic, cinematic depth, subtle chromatic aberration on bright edges, high production value, editorial quality. NOT cartoonish, NOT cyberpunk, NOT dark-fantasy. Clean, premium, corporate-futurist.
+
+Palette anchors: #1d0d4a, #0a0420, #00e0ff, #ff3ba7, #f4f1ff.
+
+Aspect ratio: 9:16 portrait. Resolution: as high as available.</div>
+  <div class="copyrow">
+    <span class="hint">Use this output as an image input for every panel below.</span>
+    <button class="copy" data-target="prompt-bible">Copy style bible</button>
+  </div>
+</section>
+
+<!-- PANEL 1 -->
+<section id="p1">
+  <h2>Panel 1 — Hero <span class="tag">9:16 · ~820px of final</span></h2>
+  <p class="subtitle">Shield-equivalent hero with headline and intro paragraph.</p>
+  <div class="panel">
+    <div class="ref">
+      <img src="refs/01_hero.jpg" alt="Hero reference">
+      <div class="caption">refs/01_hero.jpg</div>
+    </div>
+    <div class="body">
+      <div class="vault">Vault sources: <b>ai-factory.md</b>, <b>envision-transform-operate.md</b></div>
+      <div class="promptbox" id="prompt-1">Use the attached style-anchor image as the absolute reference for palette, lighting and isometric treatment. Match the deep-purple gradient and neon glow exactly.
+
+COMPOSITION (9:16 portrait):
+- Top 15%: upper-right corner, render the wordmark "Data#3" as crisp pure-white sans-serif text (small, corner-placement).
+- Upper third: large floating isometric hexagon containing a glowing neural-core — cyan frosted glass, neon edges, six radiating circuit traces terminating in satellite nodes. Magenta rim-light on the right edge. Soft cyan bloom.
+- Middle third: large rounded-rectangle glass card, deep-violet translucent fill with subtle inner glow and a thin cyan border. Render the HEADLINE inside the card, top-centred, as real white sans-serif text across TWO lines:
+    "Unlock AI capability,"
+    "without the complexity"
+- Below the headline (inside the same card): leave completely clean empty negative space — just the smooth deep-violet card fill with soft inner glow. NO text, NO placeholder bars, NO lines, NO icons, NO decoration. This empty area is reserved for body copy overlay in post.
+- Bottom 10%: soft fade to background with drifting bokeh particles.
+
+CRITICAL: the only rendered text in this frame is the "Data#3" wordmark and the two-line headline. Everything else is pure visual — do NOT invent any body paragraphs, placeholder lines, lorem ipsum, bars, or dashes. Cinematic, editorial, futuristic tech feel. 9:16 portrait aspect ratio.</div>
+      <div class="copyrow">
+        <span class="hint">Attach: style anchor + refs/01_hero.jpg</span>
+        <button class="copy" data-target="prompt-1">Copy prompt 1</button>
+      </div>
+      <div class="textbox" id="text-1">Unlock AI capability,
+without the complexity
+
+AI is moving faster than most organisations can absorb. Models, agents and governance demands are compounding — and pilot sprawl is quietly becoming the biggest blocker to value. Teams are shipping proofs-of-concept that never reach production, and the gap between ambition and impact is widening.
+
+It doesn't have to be this way. With Data#3's AI Factory, your organisation gets a structured, capability-led delivery model and a dedicated squad of Microsoft AI experts ready to envision, transform and operate AI at enterprise scale.</div>
+      <div class="copyrow">
+        <span class="hint">Paste into Figma on the typography pass</span>
+        <button class="copy" data-target="text-1">Copy Figma text</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PANEL 2 -->
+<section id="p2">
+  <h2>Panel 2 — Business outcomes <span class="tag">9:16 · ~680px</span></h2>
+  <p class="subtitle">Five checkmark outcomes + isometric illustration.</p>
+  <div class="panel">
+    <div class="ref">
+      <img src="refs/02_outcomes.jpg" alt="Outcomes reference">
+      <div class="caption">refs/02_outcomes.jpg</div>
+    </div>
+    <div class="body">
+      <div class="vault">Vault sources: <b>ai-factory.md</b> (business case), <b>capability-as-a-service.md</b></div>
+      <div class="promptbox" id="prompt-2">Use the attached style-anchor image as the absolute reference for palette, lighting and isometric treatment.
+
+COMPOSITION (9:16 portrait):
+- Top 25%: render the HEADLINE as real white sans-serif text, left-aligned, two lines:
+    "Your business outcomes"
+    "are our focus"
+  Nothing else in this band. No subtitle, no decoration.
+- Middle 50% LEFT SIDE (60% width): five vertically stacked glowing cyan circular checkmark icons, evenly spaced, each icon about 32px diameter with a soft cyan bloom and a thin neon-rim. To the right of each checkmark icon, leave completely clean empty negative space — just the smooth deep-violet background. NO placeholder bars, NO lines, NO dashes, NO text of any kind. This empty area is reserved for body copy overlay in post.
+- Middle 50% RIGHT SIDE (40% width): a floating isometric 3D illustration — a translucent cyan glass pedestal / stacked cube, on top of which sits an open laptop rendered in the same frosted glass style. The laptop's screen glows with a softly luminous humanoid Copilot avatar silhouette and a small abstract bar-chart motif. Neon cyan edges, soft magenta accent light on the right.
+- Bottom 10%: clean fade into background with drifting bokeh particles.
+
+CRITICAL: the ONLY rendered text in this frame is the two-line headline. Do NOT render the checklist items, do NOT invent body copy, do NOT add placeholder bars or lines or "lorem ipsum". Just the icons + clean negative space beside them. Same deep-violet gradient background and bokeh particles as the style anchor. No logos. 9:16 portrait aspect ratio.</div>
+      <div class="copyrow">
+        <span class="hint">Attach: style anchor + refs/02_outcomes.jpg</span>
+        <button class="copy" data-target="prompt-2">Copy prompt 2</button>
+      </div>
+      <div class="textbox" id="text-2">Your business outcomes
+are our focus
+
+We partner with you to deliver AI capability that:
+
+✓  Accelerates measurable productivity gains
+✓  Strengthens governance and AI risk posture
+✓  Reduces pilot sprawl and shadow AI
+✓  Scales proven use cases into production
+✓  Unlocks sustained value, sprint by sprint</div>
+      <div class="copyrow">
+        <span class="hint">Paste into Figma on the typography pass</span>
+        <button class="copy" data-target="text-2">Copy Figma text</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PANEL 3 -->
+<section id="p3">
+  <h2>Panel 3 — ETO journey <span class="tag">9:16 · ~940px</span></h2>
+  <p class="subtitle">Three-phase Envision → Transform → Operate lifecycle (Mark Pattie's framework).</p>
+  <div class="panel">
+    <div class="ref">
+      <img src="refs/03_process_4step.jpg" alt="Process reference (4 cards)">
+      <div class="caption">refs/03_process_4step.jpg (ref has 4 cards, we render 3)</div>
+    </div>
+    <div class="body">
+      <div class="vault">Vault source: <b>envision-transform-operate.md</b> — Mark Pattie's framework. DO NOT rename these phases.</div>
+      <div class="promptbox" id="prompt-3">Use the attached style-anchor image as the absolute reference for palette, lighting and visual treatment.
+
+IMPORTANT: the reference chop shows FOUR stacked cards. Render only THREE larger cards in the same visual style — more vertical breathing room between them.
+
+COMPOSITION (9:16 portrait):
+- Top 15%: render the HEADLINE as real white sans-serif text, centred, two lines:
+    "From envisioning to operating,"
+    "we're with you at every stage"
+- Middle 75%: three vertically stacked rounded-rectangle glass cards, evenly spaced with generous vertical gaps. On the left of all three cards, a single glowing cyan-to-magenta vertical connector line links them in sequence.
+  CARD 1 layout: glowing isometric icon on the left (a glass magnifying lens over a compass rose), and to the right of the icon render the sub-headline "Envision" as real bold white sans-serif text, large. To the right and below the "Envision" label, leave the card interior completely clean — smooth deep-violet translucent fill with subtle inner glow and a thin cyan border. NO body copy, NO bars, NO lines, NO decoration.
+  CARD 2 layout: glowing isometric icon on the left (a glass gear meshing with a circuit board), sub-headline "Transform" rendered as real bold white sans-serif text. Rest of card interior: clean empty negative space.
+  CARD 3 layout: glowing isometric icon on the left (a glass infinity loop wrapping a small server), sub-headline "Operate" rendered as real bold white sans-serif text. Rest of card interior: clean empty negative space.
+- Bottom 10%: fade to background
+
+CRITICAL: the ONLY rendered text in the whole frame is the headline plus the three card labels "Envision", "Transform", "Operate". Do NOT invent body paragraphs, do NOT add placeholder bars or lines, do NOT add stage numbers or step counts. The card interiors below each label must be completely clean negative space for body copy overlay. Same deep-violet gradient and drifting bokeh as style anchor. 9:16 portrait.</div>
+      <div class="copyrow">
+        <span class="hint">Attach: style anchor + refs/03_process_4step.jpg</span>
+        <button class="copy" data-target="prompt-3">Copy prompt 3</button>
+      </div>
+      <div class="textbox" id="text-3">From envisioning to operating,
+we're with you at every stage
+
+ENVISION
+We validate where AI creates measurable value. Our squads run strategy, readiness assessment, use-case ideation and PoCs with ROI confidence tightening as we go — so you commit to build with clarity, not hope.
+
+TRANSFORM
+We design, build and deploy production-ready agents on Microsoft's AI stack. Security, compliance and governance are baked into every sprint — not bolted on at the end.
+
+OPERATE
+We run your AI capability as a managed service. Change, training, managed AI ops and a continuous innovation pipeline keep your investment compounding, sprint after sprint.</div>
+      <div class="copyrow">
+        <span class="hint">Paste into Figma on the typography pass</span>
+        <button class="copy" data-target="text-3">Copy Figma text</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PANEL 4 -->
+<section id="p4">
+  <h2>Panel 4 — Tier 1: The Approach <span class="tag">9:16 · ~540px</span></h2>
+  <p class="subtitle">Capability-as-a-service delivery model + isometric illustration.</p>
+  <div class="panel">
+    <div class="ref">
+      <img src="refs/04_tier1_approach.jpg" alt="Tier 1 reference">
+      <div class="caption">refs/04_tier1_approach.jpg</div>
+    </div>
+    <div class="body">
+      <div class="vault">Vault source: <b>capability-as-a-service.md</b>, <b>ai-factory.md</b> (hand-back plan + shared responsibility)</div>
+      <div class="promptbox" id="prompt-4">Use the attached style-anchor image as the absolute reference for palette and treatment.
+
+COMPOSITION (9:16 portrait):
+- Top 15%: render the section header "A capability that scales with you" as real white sans-serif text, centred across the full width, followed by a thin cyan underline directly beneath it.
+- Left 55% (middle 70% of frame): a tall rounded glass card, deep-violet translucent fill with thin cyan border and subtle inner glow. Inside the card:
+  - At the top-left of the card, a large circled numeral "1" rendered in cyan neon as real text
+  - Immediately to the right of the numeral, the sub-headline "The approach" rendered as real bold white sans-serif text
+  - Everything below the label: completely clean empty negative space — smooth card fill only. NO body copy, NO placeholder bars, NO lines, NO icons, NO lorem ipsum, NO decoration. Reserved for body copy overlay in post.
+- Right 45% (middle): a floating isometric illustration — a translucent cyan frosted-glass shield with a large glowing neon checkmark inside it, sitting on a cyan grid-pattern platform. A second smaller shield hovers behind it at reduced opacity for depth. Faint magenta rim-glow on the right edge.
+- Bottom 15%: fade to background with drifting bokeh.
+
+CRITICAL: the ONLY rendered text is the section header, the numeral "1", and the label "The approach". Do NOT invent body paragraphs or add placeholder bars. Same deep-violet gradient. No logos. 9:16 portrait.</div>
+      <div class="copyrow">
+        <span class="hint">Attach: style anchor + refs/04_tier1_approach.jpg</span>
+        <button class="copy" data-target="prompt-4">Copy prompt 4</button>
+      </div>
+      <div class="textbox" id="text-4">A capability that scales with you
+
+1  The approach
+
+The AI Factory replaces piecemeal project scoping with a managed AI service. You get a dedicated Data#3 squad running on a sprint cadence, sized to your AI maturity — from a 3 to 4 week Lean Sprint that proves a single use case, all the way to a fully managed AI capability on a 6-month minimum rolling commit.
+
+You own product direction, SME input and sign-off. We own delivery, capacity, quality and the path to production.</div>
+      <div class="copyrow">
+        <span class="hint">Paste into Figma on the typography pass</span>
+        <button class="copy" data-target="text-4">Copy Figma text</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PANEL 5 -->
+<section id="p5">
+  <h2>Panel 5 — Tier 2: The People <span class="tag">9:16 · ~560px</span></h2>
+  <p class="subtitle">AI Squads / Minimum Viable Squad (MVS) + isometric illustration.</p>
+  <div class="panel">
+    <div class="ref">
+      <img src="refs/05_tier2_people.jpg" alt="Tier 2 reference">
+      <div class="caption">refs/05_tier2_people.jpg</div>
+    </div>
+    <div class="body">
+      <div class="vault">Vault source: <b>ai-squads.md</b>, <b>agent-raci.md</b>. MVS = Engagement Lead + Solution Architect + AI Engineer + Functional Consultant.</div>
+      <div class="promptbox" id="prompt-5">Use the attached style-anchor image as the absolute reference.
+
+COMPOSITION (9:16 portrait):
+- Left 45% (vertically centred): a floating isometric illustration — two stylised glowing humanoid silhouettes rendered as soft cyan light-figures (NOT cartoon characters, NOT realistic people — think frosted-glass translucent figures made of light) standing in front of a large translucent glass dashboard screen that shows abstract bar-charts and node-graphs. A third figure in the background at lower opacity. All figures rendered in the same frosted-cyan-glass style as the rest of the infographic. Soft magenta floor reflection.
+- Right 55% (vertically centred): a tall rounded glass card, deep-violet translucent fill with thin cyan border. Inside the card:
+  - At the top-left of the card, a large circled numeral "2" rendered in magenta neon as real text
+  - Immediately to the right of the numeral, the sub-headline "The people" rendered as real bold white sans-serif text
+  - Below the label, render THREE small glowing cyan checkmark icons stacked vertically down the left edge of the card's lower half, evenly spaced. To the right of each checkmark: completely clean empty negative space. NO text beside the checkmarks, NO placeholder bars, NO lines, NO lorem ipsum.
+  - Any card area not occupied by the numeral, label, or the three checkmark icons must be clean negative space — smooth card fill only.
+
+CRITICAL: the ONLY rendered text is the numeral "2" and the label "The people". Do NOT render any list items, do NOT add placeholder bars, do NOT invent role titles. Same deep-violet gradient and bokeh particles. No logos, no recognisable faces. 9:16 portrait.</div>
+      <div class="copyrow">
+        <span class="hint">Attach: style anchor + refs/05_tier2_people.jpg</span>
+        <button class="copy" data-target="prompt-5">Copy prompt 5</button>
+      </div>
+      <div class="textbox" id="text-5">2  The people
+
+Every engagement ships with a Minimum Viable Squad — Engagement Lead, Solution Architect, AI Engineer and Functional Consultant — drawn from Australia's #1 Microsoft partner and backed by 150+ Copilot projects.
+
+As your engagement scales, the squad flexes:
+
+✓  QA Lead for production-grade delivery
+✓  Change Lead for adoption at pace
+✓  AI Strategy Lead for portfolio shaping</div>
+      <div class="copyrow">
+        <span class="hint">Paste into Figma on the typography pass</span>
+        <button class="copy" data-target="text-5">Copy Figma text</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PANEL 6 -->
+<section id="p6">
+  <h2>Panel 6 — Tier 3: The Structure <span class="tag">9:16 · ~480px</span></h2>
+  <p class="subtitle">The AAF five-layer stack + isometric server illustration.</p>
+  <div class="panel">
+    <div class="ref">
+      <img src="refs/06_tier3_structure.jpg" alt="Tier 3 reference">
+      <div class="caption">refs/06_tier3_structure.jpg</div>
+    </div>
+    <div class="body">
+      <div class="vault">Vault source: <b>aaf.md</b> — five-layer stack: Azure LZ · Fabric · Foundry · Agent 365 · Agent Layer.</div>
+      <div class="promptbox" id="prompt-6">Use the attached style-anchor image as the absolute reference.
+
+COMPOSITION (9:16 portrait):
+- Left 55% (vertically centred): a tall rounded glass card, deep-violet translucent fill with thin cyan border and subtle inner glow. Inside the card:
+  - At the top-left, a large circled numeral "3" rendered in cyan neon as real text
+  - Immediately to the right of the numeral, the sub-headline "The structure" rendered as real bold white sans-serif text
+  - Everything below the label: completely clean empty negative space — smooth card fill only. NO body copy, NO placeholder bars, NO lines, NO icons, NO lorem ipsum, NO layer labels. Reserved for body copy overlay in post.
+- Right 45% (vertically centred): a floating isometric illustration — a stacked 3D server tower made of FIVE horizontally layered translucent frosted-cyan glass slabs, each layer glowing slightly brighter than the one below it. The top layer has a small glowing agent-node avatar hovering just above it (a luminous orb with radiating circuit traces). Tiny cyan particles drift upward between the layers suggesting data flow. Soft magenta rim light on the right edge.
+
+CRITICAL: the ONLY rendered text is the numeral "3" and the label "The structure". Do NOT label the server layers, do NOT add body copy, do NOT add placeholder bars. Same deep-violet gradient. No logos. 9:16 portrait.</div>
+      <div class="copyrow">
+        <span class="hint">Attach: style anchor + refs/06_tier3_structure.jpg</span>
+        <button class="copy" data-target="prompt-6">Copy prompt 6</button>
+      </div>
+      <div class="textbox" id="text-6">3  The structure
+
+The Agentic Foundation is Data#3's five-layer reference stack — Azure landing zone, Fabric data grounding, Foundry orchestration, Agent 365 governance and the agent layer itself.
+
+Every sprint lands on the same foundation, so your first pilot and your hundredth agent share the same guardrails, the same telemetry and the same path to production.</div>
+      <div class="copyrow">
+        <span class="hint">Paste into Figma on the typography pass</span>
+        <button class="copy" data-target="text-6">Copy Figma text</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PANEL 7 -->
+<section id="p7">
+  <h2>Panel 7 — Five services <span class="tag">9:16 · ~560px</span></h2>
+  <p class="subtitle">The five-service catalogue as five steps.</p>
+  <div class="panel">
+    <div class="ref">
+      <img src="refs/07_five_steps.jpg" alt="Five steps reference">
+      <div class="caption">refs/07_five_steps.jpg</div>
+    </div>
+    <div class="body">
+      <div class="vault">Vault source: <b>services-catalogue.md</b> — 5 services: Lean Sprint · Multi Agent Strategy · Scaled Sprint · Governance · Scalable Foundation.</div>
+      <div class="promptbox" id="prompt-7">Use the attached style-anchor image as the absolute reference.
+
+COMPOSITION (9:16 portrait):
+- Top 20%: render the HEADLINE as real white sans-serif text, centred, two lines:
+    "Capability-as-a-service"
+    "in five tiers"
+- Middle 65%: a horizontal row of FIVE small rounded glass cards side-by-side, same height, equal spacing. Each card is a tall narrow rectangle with deep-violet translucent fill and thin cyan border. Per card from top to bottom:
+  - TOP of card: a distinct glowing isometric icon rendered in frosted cyan glass (Card 1: a small rocket; Card 2: a blueprint grid; Card 3: a stack of documents with an upward arrow; Card 4: a small shield with a checkmark; Card 5: an infinity loop wrapped around a cloud)
+  - Directly below the icon: a thin cyan divider line
+  - Below the divider: render a small bold white sans-serif label as real text, unique per card: "Step 1", "Step 2", "Step 3", "Step 4", "Step 5"
+  - Everything below the "Step N" label: completely clean empty negative space — smooth card fill only. NO service names, NO body copy, NO placeholder bars, NO lines, NO descriptions. Reserved for body copy overlay in post.
+- Bottom 15%: a thin cyan connecting line runs horizontally beneath all five cards with a small glowing node at each card's base. Drifting bokeh particles.
+
+CRITICAL: the ONLY rendered text is the two-line headline and the five labels "Step 1"…"Step 5". Do NOT render service names like "Lean Sprint" or "Scaled Sprint" — those will be overlaid in Figma. Do NOT add placeholder bars. Same deep-violet gradient and bokeh. 9:16 portrait.</div>
+      <div class="copyrow">
+        <span class="hint">Attach: style anchor + refs/07_five_steps.jpg</span>
+        <button class="copy" data-target="prompt-7">Copy prompt 7</button>
+      </div>
+      <div class="textbox" id="text-7">Capability-as-a-service
+in five tiers
+
+Step 1  ·  Try it
+Lean Sprint
+3–4 weeks to validate one AI use case end-to-end. Explicitly exploratory.
+
+Step 2  ·  Architect it
+Multi Agent Strategy
+4–6 weeks. Target-state architecture and roadmap for your agent ecosystem.
+
+Step 3  ·  Scale it
+Scaled Sprint
+6–12 weeks (3–6 sprints) to productionise proven use cases.
+
+Step 4  ·  De-risk it
+Governance
+4–8 weeks. AI/agent guardrails embedded across every tier.
+
+Step 5  ·  Trust it
+Scalable Foundation
+6-month minimum rolling commit. We run your AI capability.</div>
+      <div class="copyrow">
+        <span class="hint">Paste into Figma on the typography pass</span>
+        <button class="copy" data-target="text-7">Copy Figma text</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PANEL 8 -->
+<section id="p8">
+  <h2>Panel 8 — CTA + footer <span class="tag">9:16 · ~494px</span></h2>
+  <p class="subtitle">Call to action + Data#3 | Microsoft lockup.</p>
+  <div class="panel">
+    <div class="ref">
+      <img src="refs/08_cta_footer.jpg" alt="CTA reference">
+      <div class="caption">refs/08_cta_footer.jpg</div>
+    </div>
+    <div class="body">
+      <div class="vault">Vault source: <b>dave-gold-pitch-outline.md</b>. Contact routing goes to AI Specialist driver (interim) until Mark returns.</div>
+      <div class="promptbox" id="prompt-8">Use the attached style-anchor image as the absolute reference.
+
+COMPOSITION (9:16 portrait):
+- Full-panel large rounded glass card with a slightly brighter deep-violet fill and a thick cyan-to-magenta gradient border.
+- Top 45% of the card: render the HEADLINE as real white sans-serif text, centred, large, two lines:
+    "Are you ready to scale"
+    "AI capability?"
+- Middle 30% of the card: completely clean empty negative space — smooth card fill only. NO sub-line text, NO placeholder bars, NO lines, NO decoration. Reserved for a single contact sub-line overlay in post.
+- Bottom 25% of the card: render the wordmark "Data#3" as real crisp white sans-serif text, left of centre, followed by a thin vertical white divider line. To the right of the divider, leave clean empty space for the Microsoft logo to be overlaid in Figma. NO other text.
+- Around the card: drifting cyan and magenta bokeh particles, slightly denser than previous panels for a celebratory "end of journey" feel.
+
+CRITICAL: the ONLY rendered text is the two-line headline and the "Data#3" wordmark. Do NOT invent contact details, URLs, phone numbers, email addresses or call-to-action sub-lines. Same deep-violet gradient background. 9:16 portrait.</div>
+      <div class="copyrow">
+        <span class="hint">Attach: style anchor + refs/08_cta_footer.jpg</span>
+        <button class="copy" data-target="prompt-8">Copy prompt 8</button>
+      </div>
+      <div class="textbox" id="text-8">Are you ready to scale
+AI capability?
+
+Contact a Data#3 AI Specialist today
+
+Data#3  |  Microsoft</div>
+      <div class="copyrow">
+        <span class="hint">Paste into Figma on the typography pass</span>
+        <button class="copy" data-target="text-8">Copy Figma text</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="stitch" id="stitch">
+  <h2>Stitch plan <span class="tag">Pass 3</span></h2>
+  <p class="subtitle">After generating all 8 panels, composite them in Figma at 745 × ~4474 px.</p>
+  <table>
+    <thead><tr><th>Panel</th><th>Content</th><th>Target height</th><th>Overlap into next</th></tr></thead>
+    <tbody>
+      <tr><td>01_hero</td><td>Hero + headline</td><td>820 px</td><td>−60 px</td></tr>
+      <tr><td>02_outcomes</td><td>5 outcomes + laptop</td><td>680 px</td><td>−60 px</td></tr>
+      <tr><td>03_process</td><td>ETO 3-phase journey</td><td>940 px</td><td>−80 px</td></tr>
+      <tr><td>04_tier1</td><td>The approach</td><td>540 px</td><td>−40 px</td></tr>
+      <tr><td>05_tier2</td><td>The people</td><td>560 px</td><td>−40 px</td></tr>
+      <tr><td>06_tier3</td><td>The structure</td><td>480 px</td><td>−60 px</td></tr>
+      <tr><td>07_five</td><td>5 services</td><td>560 px</td><td>−40 px</td></tr>
+      <tr><td>08_cta</td><td>CTA + footer</td><td>494 px</td><td>—</td></tr>
+    </tbody>
+  </table>
+  <div class="note">
+    <strong>Seam technique:</strong> Mask each panel's top and bottom 40px with a vertical linear gradient (alpha 0→1 / 1→0). Drop panels on top of one another with −40 to −80px overlap. The deep-violet background will blend invisibly because the gradient is nearly identical across tiles.
+  </div>
+  <div class="note">
+    <strong>Typography pass (Figma):</strong> Overlay headings with Segoe UI Semibold (or Inter Semibold) 28–32pt white. Body paragraphs 13pt at 80% white. Stage/tier numbers 36pt cyan (#00e0ff). Match the Data#3 brand line-height of 1.4.
+  </div>
+  <div class="note warn">
+    <strong>QA checklist:</strong> ✅ ETO phase names unchanged · ✅ No BCE reference · ✅ Only "150+ Copilot Projects" + "#1 ANZ MS Partner of the Year 2025" as hard numbers · ✅ Microsoft co-brand placement approved by Richard before publish · ✅ Mobile legibility tested at 375px width.
+  </div>
+</section>
+
+</main>
+
+<footer>From the Mind of Mentis · generated for d3brain AI Factory workstream · refs stored at <code>./refs/</code></footer>
+
+<script>
+document.querySelectorAll('button.copy').forEach(btn=>{
+  btn.addEventListener('click', async ()=>{
+    const target = document.getElementById(btn.dataset.target);
+    if(!target) return;
+    const text = target.innerText;
+    try{
+      await navigator.clipboard.writeText(text);
+      const orig = btn.textContent;
+      btn.textContent = '✓ Copied';
+      btn.classList.add('ok');
+      setTimeout(()=>{btn.textContent = orig; btn.classList.remove('ok');}, 1600);
+    }catch(e){
+      // fallback
+      const ta = document.createElement('textarea');
+      ta.value = text; document.body.appendChild(ta); ta.select();
+      document.execCommand('copy'); document.body.removeChild(ta);
+      btn.textContent = '✓ Copied'; btn.classList.add('ok');
+      setTimeout(()=>{btn.textContent='Copy'; btn.classList.remove('ok');}, 1600);
+    }
+  });
+});
+</script>
+</body>
+</html>

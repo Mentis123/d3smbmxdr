@@ -340,7 +340,7 @@
     padding:42px 44px;
   }
   .layer-grid{
-    display:grid;grid-template-columns:1fr 380px;gap:48px;align-items:center;
+    display:grid;grid-template-columns:1fr 420px;gap:56px;align-items:center;
     margin-top:28px;
   }
   .gov-block h3{
@@ -349,25 +349,30 @@
   }
   .gov-block p{font-size:14.5px;line-height:1.7;color:var(--ink-2);margin:0 0 22px}
   .layer-stack{
-    display:flex;flex-direction:column;gap:10px;
+    display:flex;flex-direction:column;gap:12px;
   }
   .layer-row{
-    padding:14px 18px;
+    padding:18px 22px;
     background:rgba(77,210,240,.06);
     border:1px solid rgba(77,210,240,.22);
-    border-radius:8px;
+    border-radius:10px;
     transition:all .15s;
+    border-left:3px solid var(--cyan);
   }
   .layer-row:hover{
     background:rgba(77,210,240,.1);
     border-color:rgba(77,210,240,.4);
+    border-left-color:var(--cyan-2);
     transform:translateX(4px);
   }
   .layer-row .layer-name{
-    font-size:14.5px;font-weight:700;color:#fff;letter-spacing:-.005em;
+    display:block;
+    font-size:16px;font-weight:700;color:#fff;letter-spacing:-.005em;
+    margin-bottom:4px;
   }
   .layer-row .layer-desc{
-    font-size:12.5px;color:var(--ink-3);margin-left:8px;
+    display:block;
+    font-size:13.5px;color:var(--ink-2);line-height:1.55;
   }
   .gov-block .gov-img{
     border-radius:10px;overflow:hidden;
@@ -752,19 +757,24 @@
       <div class="layer-grid">
         <div class="layer-stack">
           <div class="layer-row">
-            <span class="layer-name">Agent layer</span><span class="layer-desc">— scoped, permissioned, observable</span>
+            <span class="layer-name">Agent layer</span>
+            <span class="layer-desc">The agents themselves — scoped, permissioned and observable. Continuously evaluated against policy and telemetry, with confidence-based escalation built in.</span>
           </div>
           <div class="layer-row">
-            <span class="layer-name">Agent 365</span><span class="layer-desc">— governance &amp; identity propagation</span>
+            <span class="layer-name">Agent 365</span>
+            <span class="layer-desc">Governance, identity propagation and lifecycle management for every agent in production. Defined action scopes and full audit trails across every interaction.</span>
           </div>
           <div class="layer-row">
-            <span class="layer-name">Microsoft Foundry</span><span class="layer-desc">— orchestration &amp; control plane</span>
+            <span class="layer-name">Microsoft Foundry</span>
+            <span class="layer-desc">The orchestration and control plane for AI models, agents and workflows. Unified governance of models, data and prompts across the organisation.</span>
           </div>
           <div class="layer-row">
-            <span class="layer-name">Microsoft Fabric</span><span class="layer-desc">— unified data backbone</span>
+            <span class="layer-name">Microsoft Fabric</span>
+            <span class="layer-desc">The unified data backbone that grounds agents in trusted, authoritative data. Source-attributed retrieval and hallucination prevention out of the box.</span>
           </div>
           <div class="layer-row">
-            <span class="layer-name">Azure landing zone</span><span class="layer-desc">— secure cloud foundations</span>
+            <span class="layer-name">Azure landing zone</span>
+            <span class="layer-desc">Secure, compliant cloud foundations purpose-built for AI workloads. The hardened base that every layer above inherits its security posture from.</span>
           </div>
         </div>
         <div class="gov-img">

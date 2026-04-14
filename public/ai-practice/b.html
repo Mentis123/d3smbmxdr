@@ -342,7 +342,10 @@
     border:1px solid var(--rule-2);
     border-radius:14px;
     padding:42px 44px;
+  }
+  .layer-grid{
     display:grid;grid-template-columns:1fr 380px;gap:48px;align-items:center;
+    margin-top:28px;
   }
   .gov-block h3{
     font-size:24px;color:#fff;margin:0 0 14px;
@@ -350,11 +353,10 @@
   }
   .gov-block p{font-size:14.5px;line-height:1.7;color:var(--ink-2);margin:0 0 22px}
   .layer-stack{
-    display:flex;flex-direction:column;gap:10px;margin-top:22px;
+    display:flex;flex-direction:column;gap:10px;
   }
   .layer-row{
-    display:flex;align-items:center;gap:14px;
-    padding:12px 16px;
+    padding:14px 18px;
     background:rgba(77,210,240,.06);
     border:1px solid rgba(77,210,240,.22);
     border-radius:8px;
@@ -365,20 +367,11 @@
     border-color:rgba(77,210,240,.4);
     transform:translateX(4px);
   }
-  .layer-row .layer-num{
-    width:26px;height:26px;flex:0 0 26px;
-    border-radius:50%;
-    background:rgba(77,210,240,.15);
-    border:1px solid rgba(77,210,240,.4);
-    color:var(--cyan);
-    display:grid;place-items:center;
-    font-size:11px;font-weight:800;letter-spacing:.02em;
-  }
   .layer-row .layer-name{
-    font-size:14px;font-weight:700;color:#fff;letter-spacing:-.005em;
+    font-size:14.5px;font-weight:700;color:#fff;letter-spacing:-.005em;
   }
   .layer-row .layer-desc{
-    font-size:12.5px;color:var(--ink-3);margin-left:6px;
+    font-size:12.5px;color:var(--ink-3);margin-left:8px;
   }
   .gov-block .gov-img{
     border-radius:10px;overflow:hidden;
@@ -479,8 +472,8 @@
     .pillars{grid-template-columns:repeat(2,1fr)}
     .solutions{grid-template-columns:1fr}
     .why-d3{grid-template-columns:1fr}
-    .gov-block{grid-template-columns:1fr;gap:32px}
-    .gov-block .gov-img{order:-1;max-width:380px;margin:0 auto}
+    .layer-grid{grid-template-columns:1fr;gap:32px}
+    .layer-grid .gov-img{order:-1;max-width:380px;margin:0 auto}
     .why-grid{grid-template-columns:repeat(2,1fr)}
     .tier-grid{grid-template-columns:repeat(2,1fr)}
   }
@@ -746,34 +739,29 @@
     <p class="lead">The Agentic Foundation is <span class="d3">Data<sup>#</sup>3</span>'s canonical five-layer reference stack on Microsoft AI. Every sprint lands on the same foundation, so your first pilot and your hundredth agent share the same guardrails, the same telemetry and the same path to production.</p>
 
     <div class="gov-block">
-      <div>
-        <h3>The five layers</h3>
-        <p>Security, compliance and governance are baked into every layer — not bolted on at the end. Each layer is independently hardened and continuously evaluated.</p>
+      <h3>The AI Factory Stack</h3>
+      <p>Security, compliance and governance are baked into every layer — not bolted on at the end. Each layer is independently hardened and continuously evaluated.</p>
+      <div class="layer-grid">
         <div class="layer-stack">
           <div class="layer-row">
-            <div class="layer-num">5</div>
-            <div><span class="layer-name">Agent layer</span><span class="layer-desc">— scoped, permissioned, observable</span></div>
+            <span class="layer-name">Agent layer</span><span class="layer-desc">— scoped, permissioned, observable</span>
           </div>
           <div class="layer-row">
-            <div class="layer-num">4</div>
-            <div><span class="layer-name">Agent 365</span><span class="layer-desc">— governance &amp; identity propagation</span></div>
+            <span class="layer-name">Agent 365</span><span class="layer-desc">— governance &amp; identity propagation</span>
           </div>
           <div class="layer-row">
-            <div class="layer-num">3</div>
-            <div><span class="layer-name">Microsoft Foundry</span><span class="layer-desc">— orchestration &amp; control plane</span></div>
+            <span class="layer-name">Microsoft Foundry</span><span class="layer-desc">— orchestration &amp; control plane</span>
           </div>
           <div class="layer-row">
-            <div class="layer-num">2</div>
-            <div><span class="layer-name">Microsoft Fabric</span><span class="layer-desc">— unified data backbone</span></div>
+            <span class="layer-name">Microsoft Fabric</span><span class="layer-desc">— unified data backbone</span>
           </div>
           <div class="layer-row">
-            <div class="layer-num">1</div>
-            <div><span class="layer-name">Azure landing zone</span><span class="layer-desc">— secure cloud foundations</span></div>
+            <span class="layer-name">Azure landing zone</span><span class="layer-desc">— secure cloud foundations</span>
           </div>
         </div>
-      </div>
-      <div class="gov-img">
-        <img src="final-assets/graphic-server-stack.jpg" alt="">
+        <div class="gov-img">
+          <img src="final-assets/graphic-server-stack.jpg" alt="">
+        </div>
       </div>
     </div>
   </div>

@@ -233,51 +233,48 @@
   /* LIFECYCLE — 3 ETO phases × 2 sub-phases each */
   .lifecycle-wrap{margin-top:48px}
   .lifecycle-3up{
-    display:grid;grid-template-columns:repeat(3,1fr);gap:18px;
+    display:grid;grid-template-columns:repeat(3,1fr);gap:24px;
   }
-  .eto-section{display:flex;flex-direction:column;gap:10px}
+  .eto-section{display:flex;flex-direction:column;align-items:center;gap:14px}
+  .eto-section .eto-icon{
+    width:140px;height:140px;
+    display:block;
+    -webkit-mask-image:radial-gradient(ellipse at center,#000 58%,transparent 92%);
+    mask-image:radial-gradient(ellipse at center,#000 58%,transparent 92%);
+    filter:drop-shadow(0 0 24px rgba(77,210,240,.25));
+  }
   .eto-section .phase-label{
-    text-align:center;padding:14px;
+    text-align:center;padding:12px 28px;
     border-radius:8px;font-weight:800;
-    font-size:14px;letter-spacing:.1em;text-transform:uppercase;
+    font-size:15px;letter-spacing:.14em;text-transform:uppercase;
     background:linear-gradient(135deg,rgba(77,210,240,.15),rgba(77,210,240,.05));
     border:1px solid rgba(77,210,240,.3);
     color:var(--cyan);
+    align-self:center;
   }
-  .stage-pair{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .stage-pair{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%}
   .stage{
     background:var(--navy-3);
     border:1px solid var(--rule-2);
     border-radius:10px;
-    padding:22px 16px 22px;
+    padding:22px 18px 22px;
     position:relative;
     display:flex;flex-direction:column;
   }
-  .stage .img{
-    width:100%;height:90px;
-    border-radius:6px;overflow:hidden;
-    background:var(--navy-1);
-    margin-bottom:14px;display:grid;place-items:center;
-  }
-  .stage .img img{
-    height:90px;width:auto;display:block;
-    -webkit-mask-image:radial-gradient(ellipse at center,#000 60%,transparent 95%);
-    mask-image:radial-gradient(ellipse at center,#000 60%,transparent 95%);
-  }
   .stage .num{
-    position:absolute;top:12px;right:12px;
-    width:24px;height:24px;border-radius:50%;
+    position:absolute;top:14px;right:14px;
+    width:26px;height:26px;border-radius:50%;
     border:1.5px solid var(--cyan);color:var(--cyan);
     display:grid;place-items:center;
     font-size:11px;font-weight:800;
   }
   .stage h3{
-    font-size:13.5px;color:#fff;margin:0 0 6px;
+    font-size:14.5px;color:#fff;margin:0 0 8px;padding-right:32px;
     font-weight:700;line-height:1.25;letter-spacing:-.005em;
   }
   .stage p{
-    font-size:11.5px;color:var(--ink-3);
-    margin:0;line-height:1.5;
+    font-size:12.5px;color:var(--ink-3);
+    margin:0;line-height:1.55;
   }
 
   /* OUTCOMES LIST */
@@ -593,51 +590,48 @@
     <div class="lifecycle-wrap">
       <div class="lifecycle-3up">
         <div class="eto-section">
+          <img class="eto-icon" src="final-assets/graphic-icon-envision.jpg" alt="">
           <div class="phase-label">Envision</div>
           <div class="stage-pair">
             <div class="stage">
               <div class="num">01</div>
-              <div class="img"><img src="final-assets/graphic-icon-envision.jpg" alt=""></div>
               <h3>Discover &amp; Envision</h3>
               <p>AI strategy and roadmap, readiness assessment, use-case ideation and value hypothesis. Indicative ROI ±50%.</p>
             </div>
             <div class="stage">
               <div class="num">02</div>
-              <div class="img"><img src="final-assets/graphic-icon-envision.jpg" alt=""></div>
               <h3>Prototype &amp; Validate</h3>
               <p>PoC + PoV. Experiment, tune, validate solution options and refine the business case. Refined ROI ±25%.</p>
             </div>
           </div>
         </div>
         <div class="eto-section">
+          <img class="eto-icon" src="final-assets/graphic-icon-transform.jpg" alt="">
           <div class="phase-label">Transform</div>
           <div class="stage-pair">
             <div class="stage">
               <div class="num">03</div>
-              <div class="img"><img src="final-assets/graphic-icon-transform.jpg" alt=""></div>
               <h3>Solution Design</h3>
               <p>Architect the production solution. Governance, security &amp; compliance consulting, operating-model and process design. Refined ROI ±10%.</p>
             </div>
             <div class="stage">
               <div class="num">04</div>
-              <div class="img"><img src="final-assets/graphic-icon-transform.jpg" alt=""></div>
               <h3>Build &amp; Deploy</h3>
               <p>Production development, RAG and knowledge integration, multi-agent orchestration, security hardening and testing through to go-live.</p>
             </div>
           </div>
         </div>
         <div class="eto-section">
+          <img class="eto-icon" src="final-assets/graphic-icon-operate.jpg" alt="">
           <div class="phase-label">Operate</div>
           <div class="stage-pair">
             <div class="stage">
               <div class="num">05</div>
-              <div class="img"><img src="final-assets/graphic-icon-operate.jpg" alt=""></div>
               <h3>Adopt &amp; Scale</h3>
               <p>Change management, user training, champion network development and continuous backlog capture as adoption scales.</p>
             </div>
             <div class="stage">
               <div class="num">06</div>
-              <div class="img"><img src="final-assets/graphic-icon-operate.jpg" alt=""></div>
               <h3>Operate &amp; Optimise</h3>
               <p>Manage agents and platforms, tune for performance, run security and compliance audits, and feed the innovation pipeline.</p>
             </div>

@@ -1,0 +1,797 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI Factory — Squad Economics · Data#3</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy-0:#050d1f;
+    --navy-1:#0a1530;
+    --navy-2:#0f1f3d;
+    --navy-3:#142847;
+    --navy-4:#1a3358;
+    --navy-5:#234680;
+    --logo-bg:#1f4f9c;
+    --cyan:#4dd2f0;
+    --cyan-2:#7fdef5;
+    --cyan-3:#2bb5d8;
+    --magenta:#ff66c4;
+    --good:#5eead4;
+    --warn:#fbbf24;
+    --bad:#f87171;
+    --ink:#ffffff;
+    --ink-2:#c8d4e6;
+    --ink-3:#8fa3c0;
+    --ink-4:#5d7193;
+    --rule:rgba(255,255,255,.08);
+    --rule-2:rgba(255,255,255,.12);
+  }
+  *{box-sizing:border-box}
+  html,body{
+    margin:0;padding:0;
+    background:var(--navy-1);
+    color:var(--ink);
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    font-size:15px;line-height:1.55;
+  }
+  a{color:inherit;text-decoration:none}
+
+  .d3{display:inline}
+  .d3 sup{font-size:.62em;font-weight:800;position:relative;top:-.5em;margin:0 .05em 0 .04em;line-height:0}
+
+  .pg-breadcrumb{background:var(--navy-2);border-bottom:1px solid var(--rule)}
+  .pg-breadcrumb .wrap{max-width:1200px;margin:0 auto;padding:14px 32px;font-size:12.5px;color:var(--ink-3)}
+  .pg-breadcrumb a{color:var(--ink-3);transition:color .15s}
+  .pg-breadcrumb a:hover{color:var(--cyan)}
+  .pg-breadcrumb .sep{margin:0 10px;opacity:.5}
+  .pg-breadcrumb .here{color:var(--ink-2)}
+
+  .wrap{max-width:1200px;margin:0 auto;padding:40px 32px 80px}
+
+  header.page-hero{margin-bottom:28px}
+  header.page-hero .eyebrow{
+    display:inline-block;font-size:11px;font-weight:700;
+    letter-spacing:.18em;text-transform:uppercase;
+    color:var(--cyan);margin-bottom:10px;
+  }
+  header.page-hero h1{
+    font-size:40px;font-weight:800;line-height:1.1;margin:0 0 14px;
+    letter-spacing:-.02em;
+    background:linear-gradient(90deg,var(--ink) 0%,var(--cyan-2) 60%,var(--cyan) 100%);
+    -webkit-background-clip:text;background-clip:text;
+    -webkit-text-fill-color:transparent;color:transparent;
+  }
+  header.page-hero p.lede{
+    font-size:16px;color:var(--ink-2);max-width:820px;margin:0;
+  }
+  header.page-hero p.lede b{color:var(--cyan-2);font-weight:600}
+
+  .vocab{
+    display:flex;gap:12px;flex-wrap:wrap;margin-top:18px;
+  }
+  .vocab .chip{
+    background:var(--navy-3);border:1px solid var(--rule-2);
+    padding:10px 16px;border-radius:8px;font-size:12.5px;color:var(--ink-2);
+  }
+  .vocab .chip b{color:var(--cyan);font-weight:700;letter-spacing:.02em}
+
+  .panel{
+    background:var(--navy-2);
+    border:1px solid var(--rule-2);
+    border-radius:12px;
+    padding:22px 26px;
+    margin-bottom:20px;
+    box-shadow:0 4px 24px rgba(0,0,0,.2);
+  }
+  .panel h2{
+    font-size:11px;text-transform:uppercase;letter-spacing:.18em;
+    color:var(--cyan);margin:0 0 16px;font-weight:700;
+  }
+
+  .grid{display:grid;gap:16px}
+  .grid-inputs{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+  .grid-kpis{grid-template-columns:repeat(auto-fit,minmax(210px,1fr))}
+
+  .input-row{display:flex;flex-direction:column;gap:6px}
+  .input-row label{
+    font-size:12px;color:var(--ink-3);
+    display:flex;justify-content:space-between;
+  }
+  .input-row label .val{
+    color:var(--cyan);font-weight:700;
+    font-variant-numeric:tabular-nums;
+  }
+  .input-row input[type="range"]{
+    width:100%;accent-color:var(--cyan);cursor:pointer;
+  }
+
+  .kpi{
+    background:var(--navy-3);
+    border:1px solid var(--rule-2);
+    border-radius:10px;
+    padding:16px 18px;
+  }
+  .kpi-label{
+    font-size:10.5px;text-transform:uppercase;letter-spacing:.14em;
+    color:var(--ink-3);margin-bottom:8px;font-weight:600;
+  }
+  .kpi-value{
+    font-size:28px;font-weight:800;color:var(--ink);
+    font-variant-numeric:tabular-nums;letter-spacing:-.02em;line-height:1.1;
+  }
+  .kpi-sub{font-size:12px;color:var(--ink-3);margin-top:4px}
+  .kpi.good .kpi-value{color:var(--good)}
+  .kpi.warn .kpi-value{color:var(--warn)}
+  .kpi.bad  .kpi-value{color:var(--bad)}
+
+  table{width:100%;border-collapse:collapse;font-size:13.5px}
+  th,td{padding:10px 12px;text-align:right;border-bottom:1px solid var(--rule)}
+  th:first-child,td:first-child{text-align:left}
+  th{
+    color:var(--ink-3);font-weight:600;
+    font-size:10.5px;text-transform:uppercase;letter-spacing:.12em;
+  }
+  td.num{font-variant-numeric:tabular-nums}
+  .muted{color:var(--ink-3)}
+
+  .chart{width:100%;height:230px}
+
+  details{
+    background:var(--navy-3);border:1px solid var(--rule-2);
+    border-radius:10px;padding:14px 18px;margin-bottom:20px;
+  }
+  details summary{
+    cursor:pointer;color:var(--cyan);font-weight:700;
+    font-size:11px;text-transform:uppercase;letter-spacing:.14em;
+  }
+  details[open] summary{margin-bottom:12px}
+  details ul{color:var(--ink-2);font-size:13.5px;padding-left:20px;margin:0}
+  details li{margin-bottom:6px}
+  details b{color:var(--ink);font-weight:600}
+
+  .footer-note{
+    text-align:center;color:var(--ink-4);font-size:11px;
+    margin-top:36px;letter-spacing:.02em;
+  }
+  .footer-note a{color:var(--ink-3);text-decoration:underline}
+
+  /* ============ LIVE KPI STRIP — sticky on scroll ============ */
+  .live-strip{
+    position:sticky;top:0;z-index:40;
+    background:rgba(10,21,48,.88);
+    backdrop-filter:blur(14px);
+    -webkit-backdrop-filter:blur(14px);
+    border-bottom:1px solid var(--rule-2);
+    margin:0 -32px 20px;
+    padding:14px 32px;
+  }
+  .live-strip-inner{
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:14px;
+    max-width:1200px;margin:0 auto;
+  }
+  .live-kpi{
+    display:flex;flex-direction:column;gap:2px;
+    padding:6px 14px;
+    border-left:2px solid var(--cyan);
+  }
+  .live-kpi .lk-label{
+    font-size:9.5px;color:var(--ink-3);
+    text-transform:uppercase;letter-spacing:.12em;font-weight:600;
+  }
+  .live-kpi .lk-value{
+    font-size:18px;font-weight:800;color:var(--ink);
+    font-variant-numeric:tabular-nums;letter-spacing:-.02em;
+    transition:color .25s;
+  }
+  .live-kpi.pos .lk-value{color:var(--good)}
+  .live-kpi.neg .lk-value{color:var(--bad)}
+  .live-kpi.accent{border-left-color:var(--magenta)}
+  .live-kpi.accent .lk-label{color:var(--magenta)}
+
+  /* ============ TWO-COLUMN LAYOUT ============ */
+  .layout{
+    display:grid;
+    grid-template-columns:360px 1fr;
+    gap:24px;
+    align-items:start;
+  }
+  .sticky-inputs{
+    position:sticky;top:86px;
+    max-height:calc(100vh - 110px);
+    overflow-y:auto;
+    overflow-x:hidden;
+    scrollbar-width:thin;
+    scrollbar-color:var(--navy-4) transparent;
+  }
+  .sticky-inputs::-webkit-scrollbar{width:6px}
+  .sticky-inputs::-webkit-scrollbar-thumb{background:var(--navy-4);border-radius:3px}
+  .sticky-inputs .grid-inputs{grid-template-columns:1fr}
+  .outputs{min-width:0}
+
+  /* ============ WATERFALL (div bars, CSS transitions) ============ */
+  .wf-wrap{
+    display:grid;
+    grid-template-columns:1.6fr 1fr;
+    gap:22px;
+    align-items:center;
+  }
+  .waterfall{
+    display:flex;align-items:flex-end;justify-content:space-around;
+    gap:14px;height:240px;padding:14px 8px 8px;
+    background:linear-gradient(180deg,transparent,rgba(255,255,255,.02));
+    border-radius:10px;
+    position:relative;
+  }
+  .waterfall::before{
+    content:"";position:absolute;left:0;right:0;bottom:28px;
+    border-top:1px dashed rgba(255,255,255,.1);
+  }
+  .wf-col{
+    flex:1;height:100%;
+    display:flex;flex-direction:column;justify-content:flex-end;
+    align-items:center;gap:6px;
+    position:relative;
+  }
+  .wf-bar{
+    width:100%;max-width:90px;
+    border-radius:6px 6px 0 0;
+    transition:height .45s cubic-bezier(.22,.9,.3,1), background .3s;
+    position:relative;
+    box-shadow:0 4px 20px rgba(0,0,0,.25);
+    min-height:2px;
+  }
+  .wf-bar.rev{background:linear-gradient(180deg,#7fdef5,#2bb5d8)}
+  .wf-bar.cost{background:linear-gradient(180deg,#fca5a5,#dc2626)}
+  .wf-bar.gp{background:linear-gradient(180deg,#86efac,#10b981)}
+  .wf-bar .wf-bar-val{
+    position:absolute;top:-22px;left:50%;transform:translateX(-50%);
+    font-size:12px;font-weight:800;color:var(--ink);
+    font-variant-numeric:tabular-nums;white-space:nowrap;
+  }
+  .wf-label{
+    font-size:10.5px;color:var(--ink-3);
+    text-transform:uppercase;letter-spacing:.12em;font-weight:600;
+    text-align:center;
+  }
+
+  /* ============ GAUGE (SVG donut, animated) ============ */
+  .gauge-wrap{
+    display:flex;flex-direction:column;align-items:center;gap:10px;
+  }
+  .gauge{width:190px;height:190px;position:relative}
+  .gauge svg{width:100%;height:100%;transform:rotate(-90deg)}
+  .gauge-track{fill:none;stroke:var(--navy-4);stroke-width:14}
+  .gauge-fill{
+    fill:none;stroke:url(#gaugeGrad);stroke-width:14;
+    stroke-linecap:round;
+    transition:stroke-dashoffset .6s cubic-bezier(.22,.9,.3,1);
+    filter:drop-shadow(0 0 8px rgba(77,210,240,.4));
+  }
+  .gauge-center{
+    position:absolute;inset:0;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:2px;pointer-events:none;
+  }
+  .gauge-center .g-val{
+    font-size:34px;font-weight:800;color:var(--ink);
+    font-variant-numeric:tabular-nums;letter-spacing:-.02em;line-height:1;
+  }
+  .gauge-center .g-lbl{
+    font-size:10px;color:var(--ink-3);
+    text-transform:uppercase;letter-spacing:.14em;font-weight:600;
+  }
+  .gauge-caption{
+    font-size:11px;color:var(--ink-3);text-align:center;max-width:180px;line-height:1.4;
+  }
+
+  /* Smooth value transitions on big KPIs */
+  .kpi-value{transition:color .25s}
+
+  @media (max-width:960px){
+    .layout{grid-template-columns:1fr}
+    .sticky-inputs{position:static;max-height:none;overflow:visible}
+    .sticky-inputs .grid-inputs{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+    .live-strip-inner{grid-template-columns:repeat(2,1fr);gap:10px}
+    .live-kpi:nth-child(5){grid-column:span 2}
+    .wf-wrap{grid-template-columns:1fr}
+  }
+
+  @media (max-width:720px){
+    .wrap{padding:28px 20px 60px}
+    header.page-hero h1{font-size:30px}
+    .kpi-value{font-size:24px}
+    .live-strip{margin:0 -20px 16px;padding:12px 20px}
+    .live-kpi .lk-value{font-size:15px}
+    .waterfall{height:200px}
+    .gauge{width:160px;height:160px}
+    .gauge-center .g-val{font-size:28px}
+  }
+</style>
+</head>
+<body>
+
+<nav class="pg-breadcrumb">
+  <div class="wrap" style="padding:14px 32px">
+    <a href="/links">Index</a>
+    <span class="sep">›</span>
+    <a href="/ai-practice/b.html">AI Practice</a>
+    <span class="sep">›</span>
+    <span class="here">Squad Economics</span>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <header class="page-hero">
+    <div class="eyebrow">AI Factory · Financial Model · v0.1</div>
+    <h1>Squad Economics</h1>
+    <p class="lede">
+      Interactive unit-economics model for <span class="d3">Data<sup>#</sup>3</span> AI squads.
+      A <b>Squad</b> is the delivery team. A <b>Sprint</b> is the unit of sale. The
+      <b>Factory Pod</b> is one of the capabilities you can buy — delivered by a Squad over a number of Sprints.
+      Drag the sliders and watch the numbers move.
+    </p>
+    <div class="vocab">
+      <div class="chip"><b>SQUAD</b> · 2 core @ 50% + 4 specialist @ 25% = 2.0 FTE of blended capability</div>
+      <div class="chip"><b>SPRINT</b> · 10 business days · 20 person-days delivered</div>
+      <div class="chip"><b>FACTORY POD</b> · a packaged capability the squad builds for the customer</div>
+    </div>
+  </header>
+
+  <details>
+    <summary>Assumptions &amp; model notes</summary>
+    <ul>
+      <li><b>Squad shape:</b> 2 core roles @ 50% + 4 specialist roles @ 25% = <b>2.0 FTE of effort</b>, covering 6 role archetypes (AI Engagement Lead, Solution Architect, AI Engineer, Functional Consultant + Change Lead / QA Lead / AI Strategy Lead specialists)</li>
+      <li><b>Sprint unit of sale:</b> 10 business days (2 weeks). Each sprint delivers <b>20 person-days</b> of blended capability. Factory Pods and other offerings are priced as a number of sprints.</li>
+      <li><b>Daily sell rate:</b> $2,400 (Principal Consultant, $300/hr × 8). Blended across core &amp; specialist for simplicity — split out per role in v0.2 if needed.</li>
+      <li><b>Daily loaded cost:</b> fully burdened — salary + super + leave + training + overhead + bench allocation. Default $1,200/day (~$264k/yr per FTE assuming 220 working days) ≈ 50% of sell rate. This is a <b>placeholder</b> — tune with real <span class="d3">Data<sup>#</sup>3</span> burden rates.</li>
+      <li><b>Sprints per year per squad:</b> 22 realistic out of 26 theoretical. Gap absorbs leave, training, sales support, deal gaps.</li>
+      <li><b>Specialist sharing:</b> specialists work 25% on this squad and 75% on other squads / pre-sales / other programs. In the multi-squad view, the same 4-specialist pool can serve up to 4 squads before additional hiring kicks in — this is the scale-economics story.</li>
+      <li><b>Not modelled (yet):</b> sales &amp; marketing cost, tooling / platform costs, AI infrastructure pass-through, delivery risk / rework, pre-sales discovery effort, ramp-up time for new hires, partner margin pass-through.</li>
+    </ul>
+  </details>
+
+  <div class="live-strip">
+    <div class="live-strip-inner">
+      <div class="live-kpi">
+        <div class="lk-label">Sprint revenue</div>
+        <div class="lk-value" id="lkSprintRev">$48k</div>
+      </div>
+      <div class="live-kpi pos" id="lkSprintGpKpi">
+        <div class="lk-label">Sprint GP</div>
+        <div class="lk-value" id="lkSprintGp">$24k</div>
+      </div>
+      <div class="live-kpi">
+        <div class="lk-label">Annual revenue</div>
+        <div class="lk-value" id="lkAnnualRev">$1.06M</div>
+      </div>
+      <div class="live-kpi pos" id="lkAnnualGpKpi">
+        <div class="lk-label">Annual GP</div>
+        <div class="lk-value" id="lkAnnualGp">$528k</div>
+      </div>
+      <div class="live-kpi accent">
+        <div class="lk-label">Break-even</div>
+        <div class="lk-value" id="lkBe">11 sprints</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="layout">
+  <aside class="sticky-inputs">
+  <div class="panel">
+    <h2>Inputs — drag to adjust</h2>
+    <div class="grid grid-inputs">
+      <div class="input-row">
+        <label>Daily sell rate <span class="val" id="sellVal">$2,400</span></label>
+        <input type="range" id="sellRate" min="1800" max="3500" step="100" value="2400">
+      </div>
+      <div class="input-row">
+        <label>Daily loaded cost <span class="val" id="costVal">$1,200</span></label>
+        <input type="range" id="costRate" min="800" max="1800" step="50" value="1200">
+      </div>
+      <div class="input-row">
+        <label>Core roles / squad <span class="val" id="coreVal">2</span></label>
+        <input type="range" id="coreCount" min="1" max="4" step="1" value="2">
+      </div>
+      <div class="input-row">
+        <label>Core allocation <span class="val" id="coreAllocVal">50%</span></label>
+        <input type="range" id="coreAlloc" min="25" max="100" step="5" value="50">
+      </div>
+      <div class="input-row">
+        <label>Specialist roles / squad <span class="val" id="specVal">4</span></label>
+        <input type="range" id="specCount" min="0" max="6" step="1" value="4">
+      </div>
+      <div class="input-row">
+        <label>Specialist allocation <span class="val" id="specAllocVal">25%</span></label>
+        <input type="range" id="specAlloc" min="10" max="50" step="5" value="25">
+      </div>
+      <div class="input-row">
+        <label>Sprints / year / squad <span class="val" id="sprintsVal">22</span></label>
+        <input type="range" id="sprintsYr" min="12" max="26" step="1" value="22">
+      </div>
+      <div class="input-row">
+        <label>Number of squads <span class="val" id="podsVal">1</span></label>
+        <input type="range" id="podCount" min="1" max="6" step="1" value="1">
+      </div>
+    </div>
+  </div>
+  </aside>
+
+  <main class="outputs">
+
+  <div class="panel">
+    <h2>Revenue composition &amp; margin</h2>
+    <div class="wf-wrap">
+      <div class="waterfall">
+        <div class="wf-col">
+          <div class="wf-bar rev" id="wfBarRev" style="height:100%">
+            <div class="wf-bar-val" id="wfRevVal">$48k</div>
+          </div>
+          <div class="wf-label">Revenue</div>
+        </div>
+        <div class="wf-col">
+          <div class="wf-bar cost" id="wfBarCost" style="height:50%">
+            <div class="wf-bar-val" id="wfCostVal">$24k</div>
+          </div>
+          <div class="wf-label">Cost</div>
+        </div>
+        <div class="wf-col">
+          <div class="wf-bar gp" id="wfBarGp" style="height:50%">
+            <div class="wf-bar-val" id="wfGpVal">$24k</div>
+          </div>
+          <div class="wf-label">Gross Profit</div>
+        </div>
+      </div>
+      <div class="gauge-wrap">
+        <div class="gauge">
+          <svg viewBox="0 0 200 200">
+            <defs>
+              <linearGradient id="gaugeGrad" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#4dd2f0"/>
+                <stop offset="100%" stop-color="#5eead4"/>
+              </linearGradient>
+            </defs>
+            <circle class="gauge-track" cx="100" cy="100" r="82"/>
+            <circle class="gauge-fill" id="gaugeFill" cx="100" cy="100" r="82"
+                    stroke-dasharray="515.22" stroke-dashoffset="257.61"/>
+          </svg>
+          <div class="gauge-center">
+            <div class="g-val" id="gaugeVal">50%</div>
+            <div class="g-lbl">GP Margin</div>
+          </div>
+        </div>
+        <div class="gauge-caption" id="gaugeCaption">Every sprint generates 50¢ of profit on every dollar of revenue</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Per-sprint unit economics</h2>
+    <div class="grid grid-kpis">
+      <div class="kpi">
+        <div class="kpi-label">Effort delivered</div>
+        <div class="kpi-value" id="effortDays">20</div>
+        <div class="kpi-sub">person-days per sprint</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Sprint revenue</div>
+        <div class="kpi-value" id="sprintRev">$48,000</div>
+        <div class="kpi-sub" id="sprintRevSub">at $2,400/day</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Sprint cost</div>
+        <div class="kpi-value" id="sprintCost">$24,000</div>
+        <div class="kpi-sub" id="sprintCostSub">at $1,200/day loaded</div>
+      </div>
+      <div class="kpi" id="sprintGpKpi">
+        <div class="kpi-label">Sprint gross profit</div>
+        <div class="kpi-value" id="sprintGp">$24,000</div>
+        <div class="kpi-sub" id="sprintGpSub">50.0% margin</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Annual P&amp;L — single squad</h2>
+    <table>
+      <thead>
+        <tr><th>Line</th><th>Per sprint</th><th>× sprints/yr</th><th>Annual</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Revenue</td><td class="num" id="pnlRevSprint">$48,000</td><td class="num" id="pnlSprintCount">22</td><td class="num" id="pnlRevAnnual">$1,056,000</td></tr>
+        <tr><td>Delivery cost</td><td class="num" id="pnlCostSprint">$24,000</td><td class="num" id="pnlSprintCount2">22</td><td class="num" id="pnlCostAnnual">$528,000</td></tr>
+        <tr style="font-weight:700"><td>Gross profit</td><td class="num" id="pnlGpSprint">$24,000</td><td class="num"></td><td class="num" id="pnlGpAnnual">$528,000</td></tr>
+        <tr><td class="muted">GP margin</td><td class="num muted" colspan="3" id="pnlGpMargin">50.0%</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="panel">
+    <h2>Break-even analysis</h2>
+    <div class="grid grid-kpis">
+      <div class="kpi">
+        <div class="kpi-label">Break-even sprints</div>
+        <div class="kpi-value" id="beSprints">11</div>
+        <div class="kpi-sub">to cover squad cost</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Upside beyond break-even</div>
+        <div class="kpi-value" id="beBuffer">+11</div>
+        <div class="kpi-sub" id="beBufferSub">sprints of margin per squad</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Break-even utilisation</div>
+        <div class="kpi-value" id="beUtil">50%</div>
+        <div class="kpi-sub">of realistic capacity</div>
+      </div>
+    </div>
+    <div style="margin-top:16px">
+      <svg class="chart" id="beChart" viewBox="0 0 800 230" preserveAspectRatio="none"></svg>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Scaling — multi-squad view</h2>
+    <table>
+      <thead>
+        <tr><th>Squads</th><th>Total headcount</th><th>Annual revenue</th><th>Annual cost</th><th>Annual GP</th><th>GP%</th></tr>
+      </thead>
+      <tbody id="scaleBody"></tbody>
+    </table>
+    <div class="kpi-sub" style="margin-top:12px">Specialist pool is shared across squads up to 4. Above that, additional specialists are hired pro-rata. The sweet spot is where specialist bench is fully absorbed — usually around squad #3–#4.</div>
+  </div>
+
+  <div class="panel">
+    <h2>Sensitivity — what moves annual GP most</h2>
+    <table>
+      <thead>
+        <tr><th>Driver</th><th>−10%</th><th>Base</th><th>+10%</th><th>Swing</th></tr>
+      </thead>
+      <tbody id="sensBody"></tbody>
+    </table>
+  </div>
+
+  </main>
+  </div><!-- /.layout -->
+
+  <div class="footer-note">
+    Model v0.1 · placeholder burden rates · refine with <span class="d3">Data<sup>#</sup>3</span> internal numbers before committing to exec pitches · <a href="/links">back to index</a>
+  </div>
+
+</div>
+
+<script>
+const fmt = n => (n < 0 ? '−$' : '$') + Math.abs(Math.round(n)).toLocaleString('en-AU');
+const fmtK = n => {
+  const absN = Math.abs(n);
+  if (absN >= 1e6) return (n < 0 ? '−$' : '$') + (absN/1e6).toFixed(2) + 'M';
+  return (n < 0 ? '−$' : '$') + Math.round(absN/1000).toLocaleString('en-AU') + 'k';
+};
+const fmtPct = n => (n*100).toFixed(1) + '%';
+function $(id){ return document.getElementById(id); }
+
+function compute(){
+  const sellRate  = +$('sellRate').value;
+  const costRate  = +$('costRate').value;
+  const coreCount = +$('coreCount').value;
+  const coreAlloc = +$('coreAlloc').value / 100;
+  const specCount = +$('specCount').value;
+  const specAlloc = +$('specAlloc').value / 100;
+  const sprintsYr = +$('sprintsYr').value;
+  const podCount  = +$('podCount').value;
+  const sprintDays = 10;
+
+  const coreDays = coreCount * coreAlloc * sprintDays;
+  const specDays = specCount * specAlloc * sprintDays;
+  const effortDays = coreDays + specDays;
+
+  const sprintRev  = effortDays * sellRate;
+  const sprintCost = effortDays * costRate;
+  const sprintGp   = sprintRev - sprintCost;
+  const sprintGpPct = sprintRev ? sprintGp / sprintRev : 0;
+
+  const annualRev  = sprintRev * sprintsYr;
+  const annualCost = sprintCost * sprintsYr;
+  const annualGp   = annualRev - annualCost;
+
+  const beSprints = sprintRev > sprintCost ? Math.ceil(annualCost / sprintRev) : Infinity;
+  const beBuffer  = isFinite(beSprints) ? sprintsYr - beSprints : -sprintsYr;
+  const beUtil    = isFinite(beSprints) ? beSprints / sprintsYr : NaN;
+
+  $('sellVal').textContent = fmt(sellRate) + '/day';
+  $('costVal').textContent = fmt(costRate) + '/day';
+  $('coreVal').textContent = coreCount;
+  $('coreAllocVal').textContent = (coreAlloc*100) + '%';
+  $('specVal').textContent = specCount;
+  $('specAllocVal').textContent = (specAlloc*100) + '%';
+  $('sprintsVal').textContent = sprintsYr;
+  $('podsVal').textContent = podCount;
+
+  $('effortDays').textContent = (effortDays % 1 === 0) ? effortDays : effortDays.toFixed(1);
+  $('sprintRev').textContent = fmt(sprintRev);
+  $('sprintRevSub').textContent = 'at ' + fmt(sellRate) + '/day';
+  $('sprintCost').textContent = fmt(sprintCost);
+  $('sprintCostSub').textContent = 'at ' + fmt(costRate) + '/day loaded';
+  $('sprintGp').textContent = fmt(sprintGp);
+  $('sprintGpSub').textContent = fmtPct(sprintGpPct) + ' margin';
+  const gpKpi = $('sprintGpKpi');
+  gpKpi.className = 'kpi ' + (sprintGpPct >= 0.4 ? 'good' : sprintGpPct >= 0.2 ? 'warn' : 'bad');
+
+  $('pnlRevSprint').textContent = fmt(sprintRev);
+  $('pnlSprintCount').textContent = sprintsYr;
+  $('pnlSprintCount2').textContent = sprintsYr;
+  $('pnlRevAnnual').textContent = fmt(annualRev);
+  $('pnlCostSprint').textContent = fmt(sprintCost);
+  $('pnlCostAnnual').textContent = fmt(annualCost);
+  $('pnlGpSprint').textContent = fmt(sprintGp);
+  $('pnlGpAnnual').textContent = fmt(annualGp);
+  $('pnlGpMargin').textContent = fmtPct(sprintGpPct);
+
+  $('beSprints').textContent = isFinite(beSprints) ? beSprints : '∞';
+  $('beBuffer').textContent = (beBuffer >= 0 ? '+' : '') + beBuffer;
+  $('beBufferSub').textContent = isFinite(beSprints)
+    ? (beBuffer >= 0 ? 'sprints of margin per squad' : 'sprints short of break-even')
+    : 'rate ≤ cost — unprofitable';
+  $('beUtil').textContent = isFinite(beUtil) ? fmtPct(beUtil) : 'N/A';
+
+  // Live KPI strip (sticky top)
+  $('lkSprintRev').textContent = fmtK(sprintRev);
+  $('lkSprintGp').textContent  = fmtK(sprintGp);
+  $('lkAnnualRev').textContent = fmtK(annualRev);
+  $('lkAnnualGp').textContent  = fmtK(annualGp);
+  $('lkBe').textContent = isFinite(beSprints) ? (beSprints + ' sprints') : '∞';
+  $('lkSprintGpKpi').className = 'live-kpi ' + (sprintGp >= 0 ? 'pos' : 'neg');
+  $('lkAnnualGpKpi').className = 'live-kpi ' + (annualGp >= 0 ? 'pos' : 'neg');
+
+  // Waterfall bars — heights relative to revenue
+  const maxV = Math.max(sprintRev, 1);
+  const costH = Math.max(0, Math.min(100, (sprintCost / maxV) * 100));
+  const gpH   = Math.max(0, Math.min(100, (sprintGp   / maxV) * 100));
+  $('wfBarRev').style.height = '100%';
+  $('wfBarCost').style.height = costH + '%';
+  $('wfBarGp').style.height = gpH + '%';
+  if (sprintGp < 0) {
+    $('wfBarGp').style.background = 'linear-gradient(180deg,#fca5a5,#dc2626)';
+  } else {
+    $('wfBarGp').style.background = 'linear-gradient(180deg,#86efac,#10b981)';
+  }
+  $('wfRevVal').textContent  = fmtK(sprintRev);
+  $('wfCostVal').textContent = fmtK(sprintCost);
+  $('wfGpVal').textContent   = fmtK(sprintGp);
+
+  // Gauge (donut) — GP margin
+  const circ = 2 * Math.PI * 82; // r=82
+  const pctClamped = Math.max(0, Math.min(1, sprintGpPct));
+  const offset = circ * (1 - pctClamped);
+  $('gaugeFill').setAttribute('stroke-dasharray', circ.toFixed(2));
+  $('gaugeFill').setAttribute('stroke-dashoffset', offset.toFixed(2));
+  $('gaugeVal').textContent = fmtPct(sprintGpPct);
+  $('gaugeVal').style.color = sprintGpPct >= 0.4 ? 'var(--good)'
+                            : sprintGpPct >= 0.2 ? 'var(--warn)'
+                            : 'var(--bad)';
+  const cents = Math.round(sprintGpPct * 100);
+  $('gaugeCaption').textContent = sprintGpPct >= 0
+    ? `Every sprint generates ${cents}¢ of profit on every dollar of revenue`
+    : `Every sprint loses ${Math.abs(cents)}¢ on every dollar of revenue`;
+
+  drawBeChart(sprintRev, sprintCost, sprintsYr, beSprints);
+  drawScaleTable(coreCount, coreAlloc, specCount, specAlloc, sprintsYr, sellRate, costRate, sprintDays);
+  drawSensitivity(sellRate, costRate, sprintsYr, effortDays, annualGp);
+}
+
+function drawBeChart(sprintRev, sprintCost, maxSprints, beSprints){
+  const svg = $('beChart');
+  const W = 800, H = 230, P = 36;
+  const maxY = Math.max(sprintRev, sprintCost) * maxSprints || 1;
+  const x = i => P + (W - 2*P) * i / maxSprints;
+  const y = v => H - P - (H - 2*P) * v / maxY;
+
+  let parts = [];
+  for (let g = 1; g <= 4; g++){
+    const gy = P + (H - 2*P) * g / 5;
+    parts.push(`<line x1="${P}" y1="${gy}" x2="${W-P}" y2="${gy}" stroke="rgba(255,255,255,.06)" stroke-dasharray="2,4"/>`);
+  }
+  parts.push(`<line x1="${P}" y1="${H-P}" x2="${W-P}" y2="${H-P}" stroke="rgba(255,255,255,.15)"/>`);
+  parts.push(`<line x1="${P}" y1="${P}" x2="${P}" y2="${H-P}" stroke="rgba(255,255,255,.15)"/>`);
+
+  let revPath = `M ${x(0)} ${y(0)}`;
+  for (let i = 1; i <= maxSprints; i++) revPath += ` L ${x(i)} ${y(sprintRev*i)}`;
+  parts.push(`<path d="${revPath}" stroke="#5eead4" stroke-width="2.5" fill="none"/>`);
+
+  let costPath = `M ${x(0)} ${y(0)}`;
+  for (let i = 1; i <= maxSprints; i++) costPath += ` L ${x(i)} ${y(sprintCost*i)}`;
+  parts.push(`<path d="${costPath}" stroke="#f87171" stroke-width="2.5" fill="none"/>`);
+
+  if (isFinite(beSprints) && beSprints <= maxSprints){
+    parts.push(`<line x1="${x(beSprints)}" y1="${P}" x2="${x(beSprints)}" y2="${H-P}" stroke="#4dd2f0" stroke-width="1.5" stroke-dasharray="5,4"/>`);
+    parts.push(`<circle cx="${x(beSprints)}" cy="${y(sprintRev*beSprints)}" r="4.5" fill="#4dd2f0"/>`);
+    parts.push(`<text x="${x(beSprints)+8}" y="${P+14}" fill="#4dd2f0" font-size="11" font-weight="700" font-family="Inter,sans-serif">Break-even: ${beSprints} sprints</text>`);
+  }
+
+  parts.push(`<text x="${W-P-4}" y="${y(sprintRev*maxSprints)-8}" text-anchor="end" fill="#5eead4" font-size="11" font-weight="700" font-family="Inter,sans-serif">Revenue</text>`);
+  parts.push(`<text x="${W-P-4}" y="${y(sprintCost*maxSprints)-8}" text-anchor="end" fill="#f87171" font-size="11" font-weight="700" font-family="Inter,sans-serif">Cost</text>`);
+  parts.push(`<text x="${P}" y="${H-12}" fill="#8fa3c0" font-size="10" font-family="Inter,sans-serif">0</text>`);
+  parts.push(`<text x="${W-P}" y="${H-12}" text-anchor="end" fill="#8fa3c0" font-size="10" font-family="Inter,sans-serif">${maxSprints} sprints/yr</text>`);
+
+  svg.innerHTML = parts.join('');
+}
+
+function drawScaleTable(coreCount, coreAlloc, specCount, specAlloc, sprintsYr, sellRate, costRate, sprintDays){
+  const tbody = $('scaleBody');
+  tbody.innerHTML = '';
+  const workingDays = 220;
+
+  for (let squads = 1; squads <= 6; squads++){
+    const coreHC = coreCount * squads;
+    const specHC = squads <= 4 ? specCount : Math.ceil(specCount * squads / 4);
+    const totalHC = coreHC + specHC;
+
+    const effortDays = (coreCount * coreAlloc + specCount * specAlloc) * sprintDays;
+    const sprintRev = effortDays * sellRate;
+    const totalRev = sprintRev * sprintsYr * squads;
+
+    const coreAnnualCostPerSquad = coreCount * coreAlloc * workingDays * costRate;
+    const specPoolCost = specHC * workingDays * costRate;
+    const totalCost = (coreAnnualCostPerSquad * squads) + specPoolCost;
+
+    const gp = totalRev - totalCost;
+    const gpPct = totalRev ? gp / totalRev : 0;
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><b>${squads}</b></td>
+      <td class="num">${totalHC}</td>
+      <td class="num">${fmtK(totalRev)}</td>
+      <td class="num">${fmtK(totalCost)}</td>
+      <td class="num" style="color:${gp>=0?'var(--good)':'var(--bad)'};font-weight:700">${fmtK(gp)}</td>
+      <td class="num">${fmtPct(gpPct)}</td>
+    `;
+    tbody.appendChild(tr);
+  }
+}
+
+function drawSensitivity(sellRate, costRate, sprintsYr, effortDays, baseGp){
+  const tbody = $('sensBody');
+  tbody.innerHTML = '';
+
+  const scenarios = [
+    { name:'Daily sell rate',      lo:(effortDays*(sellRate*0.9) - effortDays*costRate) * sprintsYr,
+                                   hi:(effortDays*(sellRate*1.1) - effortDays*costRate) * sprintsYr },
+    { name:'Daily loaded cost',    lo:(effortDays*sellRate - effortDays*(costRate*1.1)) * sprintsYr,
+                                   hi:(effortDays*sellRate - effortDays*(costRate*0.9)) * sprintsYr },
+    { name:'Sprints per year',     lo:(effortDays*sellRate - effortDays*costRate) * (sprintsYr*0.9),
+                                   hi:(effortDays*sellRate - effortDays*costRate) * (sprintsYr*1.1) },
+    { name:'Effort days / sprint', lo:((effortDays*0.9)*sellRate - (effortDays*0.9)*costRate) * sprintsYr,
+                                   hi:((effortDays*1.1)*sellRate - (effortDays*1.1)*costRate) * sprintsYr },
+  ];
+
+  scenarios
+    .map(s => ({...s, swing: Math.abs(s.hi - s.lo)}))
+    .sort((a,b) => b.swing - a.swing)
+    .forEach(s => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${s.name}</td>
+        <td class="num" style="color:var(--bad)">${fmtK(s.lo)}</td>
+        <td class="num"><b>${fmtK(baseGp)}</b></td>
+        <td class="num" style="color:var(--good)">${fmtK(s.hi)}</td>
+        <td class="num muted">${fmtK(s.swing)}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+}
+
+document.querySelectorAll('input[type="range"]').forEach(el => {
+  el.addEventListener('input', compute);
+});
+compute();
+</script>
+</body>
+</html>

@@ -665,28 +665,29 @@
            With forward clockwise flow P1→P2→P3→P4, pivot-back goes P2→P1 or P4→P3. -->
 
       <!-- P2 → P1 pivot (revisit strategy after PoC) — arc curving UP inside bottom row -->
-      <path d="M 252 358 Q 340 300 428 358" class="pivot-arc" marker-end="url(#pivotHead)"/>
-      <text x="340" y="320" class="pivot-lbl" text-anchor="middle">Pivot · PoC revisits strategy</text>
+      <path d="M 254 359 Q 340 288 426 359" class="pivot-arc" marker-end="url(#pivotHead)"/>
+      <text x="340" y="310" class="pivot-lbl" text-anchor="middle">Pivot · PoC revisits strategy</text>
 
       <!-- P4 → P3 pivot (build reveals design gap) — arc curving DOWN inside top row -->
-      <path d="M 428 82 Q 340 140 252 82" class="pivot-arc" marker-end="url(#pivotHead)"/>
-      <text x="340" y="128" class="pivot-lbl" text-anchor="middle">Pivot · build reveals design gap</text>
+      <path d="M 426 81 Q 340 152 254 81" class="pivot-arc" marker-end="url(#pivotHead)"/>
+      <text x="340" y="132" class="pivot-lbl" text-anchor="middle">Pivot · build reveals design gap</text>
 
-      <!-- ========= X-LINES through the centre forming the infinity crossing =========
-           Line A: P4 Build → GO-LIVE → P5 Adopt (forward handoff, solid gradient)
-           Line B: P6 Operate → Next cycle → P1 Discover (return loop, dashed amber)
-           Coords are at phase-circle edges (r=44 offset toward target) so the lines
-           visually terminate at the ring edge, not inside the circle.               -->
+      <!-- ========= INFINITY X via curved arcs on the ellipse perimeters =========
+           Line A (forward): P4 → left-ellipse UR arc → crossover → right-ellipse LL arc → P5
+           Line B (return):  P6 → right-ellipse UL arc → crossover → left-ellipse LR arc → P1
+           Each "line" is a <path> with two consecutive A (arc) commands using the same
+           radii as the base ellipses (rx=260, ry=160), so the curves visibly ride the
+           natural infinity shape instead of cutting across the interior as chords.   -->
 
-      <!-- Line A: forward handoff (solid gradient Purple→Cyan→Mint) -->
-      <line x1="506" y1="116" x2="824" y2="344"
-            class="handoff-line" marker-end="url(#flowHeadMint)"/>
-      <text x="760" y="282" class="handoff-lbl" text-anchor="middle">GO-LIVE</text>
+      <!-- Line A: forward handoff (solid gradient purple → cyan → mint) -->
+      <path d="M 470 81 A 260 160 0 0 1 600 220 A 260 160 0 0 0 860 380"
+            class="handoff-line"/>
+      <text x="565" y="145" class="handoff-lbl" text-anchor="middle">GO-LIVE</text>
 
-      <!-- Line B: return / next cycle (dashed amber) -->
-      <line x1="824" y1="96" x2="506" y2="324"
-            class="return-line" marker-end="url(#pivotHead)"/>
-      <text x="560" y="268" class="return-lbl" text-anchor="middle">Operate → Discover · next cycle</text>
+      <!-- Line B: return / next cycle (dashed amber, riding the other diagonal) -->
+      <path d="M 860 60 A 260 160 0 0 0 600 220 A 260 160 0 0 1 470 359"
+            class="return-line"/>
+      <text x="676" y="95" class="return-lbl" text-anchor="middle">Operate → Discover · next cycle</text>
 
       <!-- =========== PHASE NODES (new positions) ===========
            Left loop CLOCKWISE:
@@ -698,32 +699,32 @@
              P5 Adopt     — bottom       (860, 370)
              P6 Operate   — top          (860, 70)
       -->
-      <g class="phase-node env" transform="translate(470, 350)">
+      <g class="phase-node env" transform="translate(470, 359)">
         <circle r="44"/>
         <text class="ph-num" text-anchor="middle" dy="-2">1</text>
         <text class="ph-lbl" text-anchor="middle" dy="18">DISCOVER</text>
       </g>
-      <g class="phase-node env" transform="translate(210, 350)">
+      <g class="phase-node env" transform="translate(210, 359)">
         <circle r="44"/>
         <text class="ph-num" text-anchor="middle" dy="-2">2</text>
         <text class="ph-lbl" text-anchor="middle" dy="18">PROTOTYPE</text>
       </g>
-      <g class="phase-node tra" transform="translate(210, 90)">
+      <g class="phase-node tra" transform="translate(210, 81)">
         <circle r="44"/>
         <text class="ph-num" text-anchor="middle" dy="-2">3</text>
         <text class="ph-lbl" text-anchor="middle" dy="18">DESIGN</text>
       </g>
-      <g class="phase-node tra" transform="translate(470, 90)">
+      <g class="phase-node tra" transform="translate(470, 81)">
         <circle r="44"/>
         <text class="ph-num" text-anchor="middle" dy="-2">4</text>
         <text class="ph-lbl" text-anchor="middle" dy="18">BUILD</text>
       </g>
-      <g class="phase-node ope" transform="translate(860, 370)">
+      <g class="phase-node ope" transform="translate(860, 380)">
         <circle r="44"/>
         <text class="ph-num" text-anchor="middle" dy="-2">5</text>
         <text class="ph-lbl" text-anchor="middle" dy="18">ADOPT</text>
       </g>
-      <g class="phase-node ope" transform="translate(860, 70)">
+      <g class="phase-node ope" transform="translate(860, 60)">
         <circle r="44"/>
         <text class="ph-num" text-anchor="middle" dy="-2">6</text>
         <text class="ph-lbl" text-anchor="middle" dy="18">OPERATE</text>

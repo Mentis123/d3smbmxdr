@@ -35,6 +35,7 @@
     --mode-public:#4dd2f0;
     --mode-private:#fbbf24;
     --mode-hybrid:#c084fc;
+    --mode-all:#5eead4;
 
     /* Layer colours — subtle gradient top-to-bottom */
     --layer-7:#7fdef5;
@@ -147,6 +148,13 @@
   .mode-btn[data-mode="public"]    .dot{background:var(--mode-public)}
   .mode-btn[data-mode="private"]   .dot{background:var(--mode-private)}
   .mode-btn[data-mode="hybrid"]    .dot{background:var(--mode-hybrid)}
+  .mode-btn[data-mode="all"]       .dot{
+    background:conic-gradient(
+      var(--mode-public)   0deg 120deg,
+      var(--mode-private)  120deg 240deg,
+      var(--mode-hybrid)   240deg 360deg
+    );
+  }
   .mode-btn .mode-sub{
     font-size:10.5px;color:var(--ink-4);margin-left:6px;font-weight:500;
   }
@@ -157,6 +165,7 @@
   body[data-mode="public"]  .mode-btn[data-mode="public"] {border-color:var(--mode-public); background:var(--navy-4); box-shadow:0 0 0 3px rgba(77,210,240,.18)}
   body[data-mode="private"] .mode-btn[data-mode="private"]{border-color:var(--mode-private);background:var(--navy-4); box-shadow:0 0 0 3px rgba(251,191,36,.18)}
   body[data-mode="hybrid"]  .mode-btn[data-mode="hybrid"] {border-color:var(--mode-hybrid); background:var(--navy-4); box-shadow:0 0 0 3px rgba(192,132,252,.18)}
+  body[data-mode="all"]     .mode-btn[data-mode="all"]    {border-color:var(--mode-all);    background:var(--navy-4); box-shadow:0 0 0 3px rgba(94,234,212,.18)}
 
   .mode-description{
     margin-top:10px;font-size:12.5px;color:var(--ink-3);
@@ -177,6 +186,7 @@
   body[data-mode="public"]  .stack-wrap{box-shadow:0 0 0 1px rgba(77,210,240,.25), 0 0 60px rgba(77,210,240,.12)}
   body[data-mode="private"] .stack-wrap{box-shadow:0 0 0 1px rgba(251,191,36,.25), 0 0 60px rgba(251,191,36,.12)}
   body[data-mode="hybrid"]  .stack-wrap{box-shadow:0 0 0 1px rgba(192,132,252,.25), 0 0 60px rgba(192,132,252,.12)}
+  body[data-mode="all"]     .stack-wrap{box-shadow:0 0 0 1px rgba(94,234,212,.22), 0 0 60px rgba(94,234,212,.10)}
 
   .stack-head{
     display:flex;justify-content:space-between;align-items:flex-end;
@@ -217,9 +227,12 @@
     border-radius:10px;
     padding:14px 20px 14px 18px;
     display:grid;
-    grid-template-columns:44px 1fr 2fr auto;
+    grid-template-columns:44px minmax(160px,1.1fr) minmax(0,2.6fr) auto;
     gap:18px;align-items:center;
     transition:background .3s, border-color .3s, transform .2s;
+  }
+  body[data-mode="all"] .layer-card{
+    grid-template-columns:44px minmax(160px,1fr) minmax(0,3.2fr) auto;
   }
   .layer-card:hover{background:var(--navy-4);transform:translateX(2px)}
   .layer-card[data-layer="7"]{border-left-color:var(--layer-7)}
@@ -270,6 +283,16 @@
   body[data-mode="public"]  .comp-pill{border-color:rgba(77,210,240,.3); background:rgba(77,210,240,.08); color:var(--cyan-2)}
   body[data-mode="private"] .comp-pill{border-color:rgba(251,191,36,.3); background:rgba(251,191,36,.08); color:#fde68a}
   body[data-mode="hybrid"]  .comp-pill{border-color:rgba(192,132,252,.3);background:rgba(192,132,252,.08); color:#e9d5ff}
+
+  /* ALL MODE — per-pill colouring so each component self-identifies its mode */
+  body[data-mode="all"] .comp-pill.m-public  {border-color:rgba(77,210,240,.35); background:rgba(77,210,240,.10); color:var(--cyan-2)}
+  body[data-mode="all"] .comp-pill.m-private {border-color:rgba(251,191,36,.35); background:rgba(251,191,36,.10); color:#fde68a}
+  body[data-mode="all"] .comp-pill.m-hybrid  {border-color:rgba(192,132,252,.35);background:rgba(192,132,252,.10);color:#e9d5ff}
+  body[data-mode="all"] .comp-pill{
+    border-left-width:3px;
+    padding:5px 12px 5px 10px;
+    font-size:11px;
+  }
 
   .layer-proto{
     display:flex;flex-direction:column;align-items:flex-end;gap:3px;
@@ -539,7 +562,7 @@
   }
 </style>
 </head>
-<body data-mode="public">
+<body data-mode="all">
 
 <nav class="pg-breadcrumb">
   <div class="wrap" style="padding:14px 32px">
@@ -574,6 +597,9 @@
   <div class="mode-toggle-wrap">
     <div class="mode-toggle">
       <div class="mode-toggle-label">Consumption mode</div>
+      <button class="mode-btn" data-mode="all">
+        <span class="dot"></span>All<span class="mode-sub">show everything</span>
+      </button>
       <button class="mode-btn" data-mode="public">
         <span class="dot"></span>Public<span class="mode-sub">Azure default</span>
       </button>
@@ -585,7 +611,7 @@
       </button>
     </div>
     <div class="mode-description" id="modeDesc">
-      <b>Public</b> — Microsoft-first, fastest time-to-value, per-token billing. The default path for 80% of the pipeline. Azure Landing Zone, Foundry Agent Service, Fabric + OneLake. Microsoft 365 Copilot at the top, AKS at the bottom.
+      <b>All modes</b> — every layer shows all six components across Public, Private and Hybrid, colour-coded by mode. This is the full bill of materials view. Click a specific mode above to isolate just that path.
     </div>
   </div>
 
@@ -706,17 +732,17 @@
   <div class="crosslinks">
     <h2>See also — the rest of the AI Factory story</h2>
     <div class="cl-grid">
-      <a class="cl-card" href="/ai-practice/lifecycle.html">
+      <a class="cl-card" href="/ai-practice/lifecycle.html" target="_blank" rel="noopener">
         <div class="cl-eb">Delivery shape</div>
         <div class="cl-title">AI Service Lifecycle</div>
         <div class="cl-desc">Six operational phases under three executive ones. What happens when, and which squads run each phase.</div>
       </a>
-      <a class="cl-card" href="/ai-practice/squads.html">
+      <a class="cl-card" href="/ai-practice/squads.html" target="_blank" rel="noopener">
         <div class="cl-eb">Commercial shape</div>
         <div class="cl-title">Squad Economics</div>
         <div class="cl-desc">The interactive unit-economics model. What a sprint costs, what a squad delivers, how break-even and scaling actually look.</div>
       </a>
-      <a class="cl-card" href="/ai-practice/b.html">
+      <a class="cl-card" href="/ai-practice/b.html" target="_blank" rel="noopener">
         <div class="cl-eb">Narrative shape</div>
         <div class="cl-title">AI Factory landing page</div>
         <div class="cl-desc">The sectioned story: why agentic AI, how we deliver, what we build on. The customer-facing narrative version.</div>
@@ -813,6 +839,7 @@
   ];
 
   const MODE_DESC = {
+    all:     '<b>All modes</b> — every layer shows all six components across Public, Private and Hybrid, colour-coded by mode. This is the full bill of materials view. Click a specific mode above to isolate just that path.',
     public:  '<b>Public</b> — Microsoft-first, fastest time-to-value, per-token billing. The default path for 80% of the pipeline. Azure Landing Zone, Foundry Agent Service, Fabric + OneLake. Microsoft 365 Copilot at the top, AKS at the bottom.',
     private: '<b>Private</b> — regulated lighthouse customers. NVIDIA NIM containers on OpenShift AI at NextDC. Customer-owned identity, customer-owned keys, fully isolated network, sovereign data perimeter. Granite / Llama / Mistral models. This is how Defence, healthcare, critical infrastructure and intelligence work looks.',
     hybrid:  '<b>Hybrid &amp; Edge</b> — disconnected, bandwidth-constrained, or field-deployed. Azure Arc reaches an edge K3s cluster running NIM Edge containers and on-device Phi-3. MCP bridges let edge agents call cloud tools when they are online. Same seven layers, compressed runtime.'
@@ -820,22 +847,37 @@
 
   function renderStack(mode){
     const stack = document.getElementById('layerStack');
-    stack.innerHTML = LAYERS.map(L => `
-      <div class="layer-card" data-layer="${L.n}" data-layer-id="${L.id}">
-        <div class="layer-num">${L.n}</div>
-        <div class="layer-name-col">
-          <div class="layer-name">${L.name}</div>
-          <div class="layer-role">${L.role}</div>
+    stack.innerHTML = LAYERS.map(L => {
+      let pillsHtml;
+      if (mode === 'all') {
+        const allPills = [
+          ...L.components.public.map(c  => ({c, m:'public'})),
+          ...L.components.private.map(c => ({c, m:'private'})),
+          ...L.components.hybrid.map(c  => ({c, m:'hybrid'}))
+        ];
+        pillsHtml = allPills.map(p =>
+          `<span class="comp-pill m-${p.m}" title="${p.m}">${p.c}</span>`
+        ).join('');
+      } else {
+        pillsHtml = L.components[mode].map(c =>
+          `<span class="comp-pill m-${mode}">${c}</span>`
+        ).join('');
+      }
+      return `
+        <div class="layer-card" data-layer="${L.n}" data-layer-id="${L.id}">
+          <div class="layer-num">${L.n}</div>
+          <div class="layer-name-col">
+            <div class="layer-name">${L.name}</div>
+            <div class="layer-role">${L.role}</div>
+          </div>
+          <div class="layer-components">${pillsHtml}</div>
+          <div class="layer-proto">
+            <span class="proto-lbl">Open seam</span>
+            <span class="proto-tag">${L.protocol}</span>
+          </div>
         </div>
-        <div class="layer-components">
-          ${L.components[mode].map(c => `<span class="comp-pill">${c}</span>`).join('')}
-        </div>
-        <div class="layer-proto">
-          <span class="proto-lbl">Open seam</span>
-          <span class="proto-tag">${L.protocol}</span>
-        </div>
-      </div>
-    `).join('');
+      `;
+    }).join('');
   }
 
   function renderMatrix(){
@@ -863,9 +905,9 @@
     btn.addEventListener('click', () => setMode(btn.dataset.mode));
   });
 
-  // Init
+  // Init — default to "all" so the full bill of materials is visible up front
   renderMatrix();
-  setMode('public');
+  setMode('all');
 </script>
 </body>
 </html>

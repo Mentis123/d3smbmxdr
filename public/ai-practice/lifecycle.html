@@ -166,16 +166,41 @@
     opacity:.78;
     fill:none;
   }
-  .loop-hero .pivot-arc.sweep{
-    stroke-width:2.25;
-    stroke-dasharray:9 5;
-    opacity:.55;
-  }
   .loop-hero .flow-arrow{
     stroke:none;
   }
   .loop-hero .flow-arrow.cyan{ fill:var(--cyan); }
   .loop-hero .flow-arrow.mint{ fill:var(--mint); }
+  .loop-hero .handoff-line{
+    stroke:url(#handoffGrad);
+    stroke-width:3.5;
+    fill:none;
+    opacity:.95;
+  }
+  .loop-hero .return-line{
+    stroke:var(--amber);
+    stroke-width:2.25;
+    stroke-dasharray:9 5;
+    opacity:.72;
+    fill:none;
+  }
+  .loop-hero .handoff-lbl{
+    font-family:'Inter',sans-serif;
+    font-size:13px;
+    font-weight:900;
+    fill:var(--cyan-2);
+    letter-spacing:.14em;
+    text-transform:uppercase;
+  }
+  .loop-hero .return-lbl{
+    font-family:'Inter',sans-serif;
+    font-size:10.5px;
+    font-weight:700;
+    fill:var(--amber);
+    letter-spacing:.06em;
+    font-style:italic;
+    opacity:.9;
+  }
   .loop-hero .pivot-lbl{
     fill:var(--amber);
     font-size:10px;
@@ -595,6 +620,11 @@
                 markerWidth="6" markerHeight="6" orient="auto">
           <path d="M 0 0 L 10 5 L 0 10 z" fill="#fbbf24" opacity=".95"/>
         </marker>
+        <linearGradient id="handoffGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%"  stop-color="#c084fc"/>
+          <stop offset="50%" stop-color="#4dd2f0"/>
+          <stop offset="100%" stop-color="#5eead4"/>
+        </linearGradient>
       </defs>
 
       <!-- Managed-service band behind right loop -->
@@ -642,14 +672,21 @@
       <path d="M 428 82 Q 340 140 252 82" class="pivot-arc" marker-end="url(#pivotHead)"/>
       <text x="340" y="128" class="pivot-lbl" text-anchor="middle">Pivot · build reveals design gap</text>
 
-      <!-- P6 → next cycle (Operate feeds back into Discover = P1). Cubic bezier
-           sweeping from P6 (top of right loop) up and across, then back down to P1. -->
-      <path d="M 818 45 C 680 5, 250 5, 500 305" class="pivot-arc sweep" marker-end="url(#pivotHead)"/>
-      <text x="500" y="20" class="pivot-lbl sweep-lbl" text-anchor="middle">Operate feeds the next cycle back into Discover</text>
+      <!-- ========= X-LINES through the centre forming the infinity crossing =========
+           Line A: P4 Build → GO-LIVE → P5 Adopt (forward handoff, solid gradient)
+           Line B: P6 Operate → Next cycle → P1 Discover (return loop, dashed amber)
+           Coords are at phase-circle edges (r=44 offset toward target) so the lines
+           visually terminate at the ring edge, not inside the circle.               -->
 
-      <!-- Crossover "GO-LIVE" marker -->
-      <circle cx="600" cy="220" r="28" class="crossover-dot"/>
-      <text x="600" y="224" class="crossover-lbl" text-anchor="middle">GO-LIVE</text>
+      <!-- Line A: forward handoff (solid gradient Purple→Cyan→Mint) -->
+      <line x1="506" y1="116" x2="824" y2="344"
+            class="handoff-line" marker-end="url(#flowHeadMint)"/>
+      <text x="760" y="282" class="handoff-lbl" text-anchor="middle">GO-LIVE</text>
+
+      <!-- Line B: return / next cycle (dashed amber) -->
+      <line x1="824" y1="96" x2="506" y2="324"
+            class="return-line" marker-end="url(#pivotHead)"/>
+      <text x="560" y="268" class="return-lbl" text-anchor="middle">Operate → Discover · next cycle</text>
 
       <!-- =========== PHASE NODES (new positions) ===========
            Left loop CLOCKWISE:

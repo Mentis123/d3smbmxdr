@@ -9,29 +9,61 @@
 
   :root {
     --d3-red: #E60028;
-    --d3-red-dark: #B80020;
-    --ink: #0F1115;
-    --ink-2: #3A3F48;
-    --ink-3: #6B7280;
-    --bg: #FAFAF6;
-    --card: #FFFFFF;
-    --line: #E6E3D9;
-    --chip: #F2F0E8;
+    --d3-red-dim: #B00020;
+    --d3-red-wash: rgba(230, 0, 40, 0.10);
 
-    --envision: #1E4B8E;
-    --transform: #6B5820;
-    --operate: #7A1F2E;
+    --bg: #0A0B0E;
+    --surface: #12141A;
+    --surface-2: #181B23;
+    --line: #23262F;
+    --line-soft: #1A1D25;
+
+    --ink: #F2F1EB;
+    --ink-2: #B0AEA5;
+    --ink-3: #6B6963;
+
+    --envision: #4A88E6;
+    --transform: #D8B962;
+    --operate: #E85D78;
+
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+    --sans: -apple-system, "SF Pro Display", "Inter", "Segoe UI", system-ui, sans-serif;
   }
 
-  html { scroll-behavior: smooth; }
+  html { scroll-behavior: smooth; background: var(--bg); }
 
   body {
-    font-family: -apple-system, "SF Pro Display", "Inter", "Segoe UI", system-ui, sans-serif;
+    font-family: var(--sans);
     background: var(--bg);
     color: var(--ink);
     line-height: 1.55;
     font-size: 15px;
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: "ss01", "ss02", "cv11", "kern";
+    font-variant-numeric: tabular-nums;
+    position: relative;
+    min-height: 100vh;
+  }
+
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 100;
+    opacity: 0.035;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml;utf8,<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  }
+
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 99;
+    background: linear-gradient(180deg, rgba(230, 0, 40, 0.018) 0%, transparent 38%);
   }
 
   .d3 { font-weight: 800; letter-spacing: -0.01em; }
@@ -43,10 +75,19 @@
     margin: 0 1px;
   }
 
+  ::selection { background: var(--d3-red); color: #fff; }
+
+  a:focus-visible {
+    outline: 2px solid var(--d3-red);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
   .page {
-    max-width: 1280px;
+    max-width: 1240px;
     margin: 0 auto;
-    padding: 44px 56px 80px;
+    padding: 36px 48px 72px;
+    position: relative;
   }
 
   /* Masthead */
@@ -54,100 +95,156 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding-bottom: 18px;
+    padding-bottom: 16px;
     border-bottom: 1px solid var(--line);
-    margin-bottom: 40px;
+    margin-bottom: 48px;
   }
-  .brand { display: flex; align-items: center; gap: 18px; font-size: 20px; }
-  .rule { width: 32px; height: 1px; background: var(--ink-3); }
+  .brand { display: flex; align-items: center; gap: 16px; font-size: 18px; }
+  .rule { width: 28px; height: 1px; background: var(--ink-3); }
   .kicker {
-    font-size: 11px;
-    letter-spacing: 0.18em;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.14em;
     text-transform: uppercase;
     color: var(--ink-3);
-    font-weight: 600;
+    font-weight: 500;
   }
   .crosslink a {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
     color: var(--ink-2);
     text-decoration: none;
-    font-size: 13px;
+    font-size: 11px;
     font-weight: 500;
-    padding: 8px 14px;
+    padding: 9px 14px;
     border: 1px solid var(--line);
-    border-radius: 100px;
-    transition: all 0.2s;
+    border-radius: 2px;
+    transition: all 0.25s ease;
+    font-family: var(--mono);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
   }
-  .crosslink a:hover { border-color: var(--d3-red); color: var(--d3-red); }
+  .crosslink a:hover {
+    border-color: var(--d3-red);
+    color: var(--ink);
+    background: var(--d3-red-wash);
+  }
 
   /* Hero */
-  .hero { margin-bottom: 48px; max-width: 960px; }
+  .hero { margin-bottom: 56px; max-width: 1000px; }
   .hero-tag {
-    display: inline-block;
-    font-size: 11px;
-    letter-spacing: 0.2em;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.22em;
     text-transform: uppercase;
     color: var(--d3-red);
-    font-weight: 700;
-    margin-bottom: 18px;
-    padding: 6px 12px;
-    background: rgba(230, 0, 40, 0.08);
-    border-radius: 4px;
+    font-weight: 600;
+    margin-bottom: 28px;
+  }
+  .hero-tag::before {
+    content: "";
+    width: 28px;
+    height: 1px;
+    background: var(--d3-red);
   }
   .hero h1 {
-    font-size: 64px;
+    font-size: clamp(42px, 6.2vw, 78px);
     line-height: 0.98;
     font-weight: 800;
-    letter-spacing: -0.035em;
-    margin-bottom: 18px;
+    letter-spacing: -0.038em;
+    margin-bottom: 22px;
+    color: var(--ink);
   }
-  .hero h1 span { color: var(--d3-red); }
+  .hero h1 .neg {
+    position: relative;
+    color: var(--d3-red);
+    display: inline-block;
+  }
+  .hero h1 .neg::after {
+    content: "";
+    position: absolute;
+    left: -0.04em;
+    right: -0.04em;
+    top: 54%;
+    height: 5px;
+    background: var(--d3-red);
+    transform: scaleX(0);
+    transform-origin: left;
+    animation: strike 1s 0.55s cubic-bezier(0.77, 0, 0.175, 1) forwards;
+  }
+  @keyframes strike { to { transform: scaleX(1); } }
+
   .hero .sub {
     font-size: 20px;
     font-weight: 500;
-    color: var(--ink-2);
-    margin-bottom: 14px;
-    letter-spacing: -0.01em;
+    color: var(--ink);
+    margin-bottom: 16px;
+    letter-spacing: -0.015em;
+    max-width: 760px;
   }
   .hero .promise {
-    font-size: 16px;
-    color: var(--ink-3);
+    font-size: 15px;
+    color: var(--ink-2);
     max-width: 760px;
-    line-height: 1.6;
+    line-height: 1.65;
   }
 
   /* Node graph centrepiece */
   .graph-wrap {
-    background: var(--card);
+    background: var(--surface);
     border: 1px solid var(--line);
-    border-radius: 12px;
-    padding: 32px 28px 24px;
-    margin-bottom: 48px;
+    border-radius: 4px;
+    padding: 44px 28px 28px;
+    margin-bottom: 56px;
     position: relative;
+  }
+  .graph-wrap::before {
+    content: "";
+    position: absolute;
+    top: -1px; left: 24px;
+    width: 64px;
+    height: 2px;
+    background: var(--d3-red);
   }
   .graph-wrap .label {
     position: absolute;
-    top: 16px;
-    left: 20px;
+    top: 14px;
+    left: 24px;
+    font-family: var(--mono);
     font-size: 10px;
-    letter-spacing: 0.2em;
+    letter-spacing: 0.18em;
     text-transform: uppercase;
     color: var(--ink-3);
-    font-weight: 600;
+    font-weight: 500;
   }
-  .graph-svg { width: 100%; height: auto; display: block; max-width: 1200px; margin: 12px auto 0; }
+  .graph-svg { width: 100%; height: auto; display: block; max-width: 1200px; margin: 16px auto 0; }
 
   .graph-legend {
     display: flex;
-    gap: 28px;
+    gap: 32px;
     justify-content: center;
-    margin-top: 20px;
-    padding-top: 20px;
+    margin-top: 24px;
+    padding-top: 22px;
     border-top: 1px solid var(--line);
     flex-wrap: wrap;
+    font-family: var(--mono);
   }
-  .leg-item { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--ink-2); }
+  .leg-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 10px;
+    color: var(--ink-2);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
   .leg-line {
-    width: 30px;
+    width: 28px;
     height: 2px;
     background: var(--d3-red);
   }
@@ -156,221 +253,285 @@
     border-top: 2px dashed var(--d3-red);
   }
   .leg-dot {
-    width: 12px;
-    height: 12px;
+    width: 10px;
+    height: 10px;
     border-radius: 50%;
     background: var(--envision);
   }
   .leg-dot.t { background: var(--transform); }
   .leg-dot.o { background: var(--operate); }
 
+  /* Section heading */
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 28px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--line);
+    position: relative;
+  }
+  .section-head::before {
+    content: "";
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 64px;
+    height: 1px;
+    background: var(--d3-red);
+  }
+  .section-head h2 {
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -0.028em;
+    color: var(--ink);
+  }
+  .section-head .meta {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    font-weight: 500;
+  }
+
   /* ETO buckets */
   .eto {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 16px;
-    margin-bottom: 48px;
-  }
-  .bucket {
-    background: var(--card);
+    gap: 1px;
+    margin-bottom: 56px;
+    background: var(--line);
     border: 1px solid var(--line);
-    border-radius: 10px;
-    padding: 26px 24px;
-    position: relative;
+    border-radius: 4px;
     overflow: hidden;
   }
+  .bucket {
+    background: var(--surface);
+    padding: 30px 26px 32px;
+    position: relative;
+    transition: background 0.25s ease;
+  }
+  .bucket:hover { background: var(--surface-2); }
   .bucket::before {
     content: "";
     position: absolute;
     top: 0; left: 0;
-    width: 4px; height: 100%;
+    width: 3px; height: 100%;
   }
   .bucket.envision::before { background: var(--envision); }
   .bucket.transform::before { background: var(--transform); }
   .bucket.operate::before { background: var(--operate); }
 
   .bucket-name {
-    font-size: 11px;
+    font-family: var(--mono);
+    font-size: 10px;
     letter-spacing: 0.18em;
     text-transform: uppercase;
-    font-weight: 700;
-    margin-bottom: 8px;
+    font-weight: 600;
+    margin-bottom: 16px;
   }
   .bucket.envision .bucket-name { color: var(--envision); }
   .bucket.transform .bucket-name { color: var(--transform); }
   .bucket.operate .bucket-name { color: var(--operate); }
 
   .bucket h3 {
-    font-size: 24px;
+    font-size: 22px;
     font-weight: 800;
     letter-spacing: -0.025em;
-    margin-bottom: 10px;
+    margin-bottom: 16px;
+    color: var(--ink);
   }
   .bucket .dur {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--ink-2);
-    margin-bottom: 12px;
-  }
-  .bucket .dur .weeks { color: var(--d3-red); font-weight: 800; }
-  .bucket .phases {
-    font-size: 12px;
-    color: var(--ink-3);
-    border-top: 1px solid var(--line);
-    padding-top: 12px;
-  }
-
-  /* Section heading */
-  .section-head {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    margin-bottom: 22px;
-    padding-bottom: 12px;
-    border-bottom: 1px solid var(--line);
-  }
-  .section-head h2 {
-    font-size: 28px;
-    font-weight: 800;
-    letter-spacing: -0.025em;
-  }
-  .section-head .meta {
-    font-size: 11px;
-    letter-spacing: 0.18em;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.14em;
     text-transform: uppercase;
     color: var(--ink-3);
-    font-weight: 600;
+    margin-bottom: 16px;
+    font-weight: 500;
+  }
+  .bucket .dur .weeks {
+    color: var(--d3-red);
+    font-weight: 700;
+    font-size: 18px;
+    letter-spacing: -0.015em;
+    text-transform: none;
+    margin-left: 4px;
+  }
+  .bucket .phases {
+    font-size: 13px;
+    color: var(--ink-2);
+    border-top: 1px solid var(--line);
+    padding-top: 16px;
+    line-height: 1.6;
   }
 
   /* Archetypes */
   .archetypes {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 16px;
-    margin-bottom: 48px;
+    gap: 1px;
+    margin-bottom: 56px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    overflow: hidden;
   }
   .arch {
-    background: var(--card);
-    border: 1px solid var(--line);
-    border-radius: 10px;
-    padding: 26px 24px;
+    background: var(--surface);
+    padding: 30px 26px 32px;
+    position: relative;
+    transition: background 0.25s ease;
   }
+  .arch:hover { background: var(--surface-2); }
   .arch-num {
-    font-size: 36px;
+    font-family: var(--mono);
+    font-size: 52px;
     font-weight: 800;
     color: var(--d3-red);
-    letter-spacing: -0.03em;
+    letter-spacing: -0.04em;
     line-height: 1;
-    margin-bottom: 10px;
+    margin-bottom: 18px;
   }
   .arch h3 {
-    font-size: 20px;
+    font-size: 22px;
     font-weight: 800;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.022em;
     margin-bottom: 8px;
+    color: var(--ink);
   }
   .arch .entry {
-    font-size: 11px;
+    font-family: var(--mono);
+    font-size: 10px;
     color: var(--d3-red);
-    font-weight: 700;
+    font-weight: 600;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    margin-bottom: 10px;
+    margin-bottom: 14px;
   }
   .arch p {
+    font-size: 13px;
+    color: var(--ink-2);
+    line-height: 1.6;
+  }
+
+  /* ROI ladder */
+  .roi {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 36px 32px 32px;
+    margin-bottom: 56px;
+  }
+  .roi > p {
+    font-size: 14px;
+    color: var(--ink-2);
+    max-width: 720px;
+    line-height: 1.65;
+  }
+  .roi-steps {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    margin-top: 28px;
+    background: var(--line);
+    border: 1px solid var(--line);
+  }
+  .roi-step {
+    padding: 28px 24px 26px;
+    background: var(--surface-2);
+    text-align: left;
+    position: relative;
+    overflow: hidden;
+  }
+  .roi-step::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 2px;
+    background: var(--d3-red);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .roi-step:hover::before { transform: scaleX(1); }
+  .roi-step .pct {
+    font-size: 48px;
+    font-weight: 800;
+    color: var(--d3-red);
+    letter-spacing: -0.035em;
+    line-height: 1;
+    margin-bottom: 16px;
+  }
+  .roi-step .when {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+  .roi-step .what {
     font-size: 13px;
     color: var(--ink-2);
     line-height: 1.55;
   }
 
-  /* ROI ladder */
-  .roi {
-    background: var(--card);
-    border: 1px solid var(--line);
-    border-radius: 10px;
-    padding: 32px 28px;
-    margin-bottom: 48px;
-  }
-  .roi-steps {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-    margin-top: 18px;
-  }
-  .roi-step {
-    padding: 20px;
-    background: var(--bg);
-    border-radius: 8px;
-    text-align: center;
-    position: relative;
-  }
-  .roi-step .pct {
-    font-size: 36px;
-    font-weight: 800;
-    color: var(--d3-red);
-    letter-spacing: -0.03em;
-    line-height: 1;
-  }
-  .roi-step .when {
-    font-size: 11px;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--ink-3);
-    margin-top: 8px;
-    font-weight: 700;
-  }
-  .roi-step .what {
-    font-size: 13px;
-    color: var(--ink-2);
-    margin-top: 6px;
-  }
-
-  /* Min engagement callout */
+  /* Minimum engagement callout */
   .minimum {
-    background: var(--ink);
-    color: #EDECE5;
-    border-radius: 12px;
-    padding: 36px 40px;
-    margin-bottom: 40px;
-    display: flex;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 48px 44px;
+    margin-bottom: 48px;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 48px;
     align-items: center;
-    gap: 40px;
+    position: relative;
+    overflow: hidden;
+  }
+  .minimum::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; bottom: 0;
+    width: 3px;
+    background: var(--d3-red);
   }
   .minimum .big-num {
-    font-size: 96px;
+    font-size: 148px;
     font-weight: 900;
-    letter-spacing: -0.05em;
+    letter-spacing: -0.06em;
     color: var(--d3-red);
-    line-height: 0.9;
-    flex-shrink: 0;
+    line-height: 0.85;
+    font-variant-numeric: tabular-nums;
+    display: flex;
+    flex-direction: column;
   }
-  .minimum .big-num sub {
-    font-size: 16px;
-    color: #9B9A93;
+  .minimum .big-num .unit {
+    display: block;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink-3);
     font-weight: 500;
-    letter-spacing: 0;
-    margin-left: 6px;
-    vertical-align: baseline;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    margin-top: 10px;
   }
   .minimum .text h2 {
-    font-size: 28px;
+    font-size: 32px;
     font-weight: 800;
-    letter-spacing: -0.025em;
-    margin-bottom: 10px;
+    letter-spacing: -0.028em;
+    margin-bottom: 14px;
+    color: var(--ink);
   }
   .minimum .text p {
     font-size: 14px;
-    color: #9B9A93;
-    max-width: 540px;
-    line-height: 1.6;
-  }
-  .minimum cite {
-    display: block;
-    font-size: 11px;
-    font-style: normal;
-    color: #6B7280;
-    margin-top: 10px;
-    letter-spacing: 0.05em;
+    color: var(--ink-2);
+    max-width: 560px;
+    line-height: 1.65;
   }
 
   /* Footer */
@@ -378,35 +539,74 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding-top: 24px;
+    padding-top: 28px;
     border-top: 1px solid var(--line);
-    font-size: 11px;
+    font-family: var(--mono);
+    font-size: 10px;
     color: var(--ink-3);
-    letter-spacing: 0.05em;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
   }
+  .footer .stamp { display: flex; align-items: center; gap: 14px; }
+  .footer .stamp .d3-wordmark { font-family: var(--sans); letter-spacing: -0.01em; text-transform: none; font-size: 14px; color: var(--ink-2); font-weight: 800; }
+  .footer .stamp .d3-wordmark sup { font-size: 0.55em; vertical-align: super; color: var(--d3-red); margin: 0 1px; }
   .footer .crosslink-big {
-    font-size: 14px;
+    font-family: var(--mono);
+    font-size: 11px;
     font-weight: 600;
     color: var(--d3-red);
     text-decoration: none;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
   }
-  .footer .crosslink-big:hover { text-decoration: underline; }
+  .footer .crosslink-big:hover { color: var(--ink); }
+  .footer .crosslink-big::before {
+    content: "←";
+    transition: transform 0.25s ease;
+  }
+  .footer .crosslink-big:hover::before { transform: translateX(-4px); }
 
-  /* Node graph hover */
-  .phase-node { cursor: pointer; transition: transform 0.2s; }
-  .phase-node:hover { transform: scale(1.03); transform-origin: center; }
+  /* Phase node hover */
+  .phase-node { cursor: default; transition: opacity 0.2s; }
+  .phase-node:hover { opacity: 0.92; }
+
+  /* Page load reveal */
+  .hero, .graph-wrap, .section-head, .eto, .archetypes, .roi, .minimum, .footer {
+    animation: rise 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  .hero { animation-delay: 0.05s; }
+  .graph-wrap { animation-delay: 0.15s; }
+  .eto { animation-delay: 0.22s; }
+  .archetypes { animation-delay: 0.28s; }
+  .roi { animation-delay: 0.34s; }
+  .minimum { animation-delay: 0.4s; }
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(14px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+    .hero h1 .neg::after { transform: scaleX(1); }
+  }
 
   @media (max-width: 900px) {
-    .page { padding: 32px 24px 60px; }
-    .hero h1 { font-size: 44px; }
+    .page { padding: 28px 20px 60px; }
+    .hero h1 { font-size: 40px; }
     .eto, .archetypes, .roi-steps { grid-template-columns: 1fr; }
-    .minimum { flex-direction: column; gap: 20px; text-align: center; }
-    .minimum .big-num { font-size: 72px; }
+    .minimum { grid-template-columns: 1fr; gap: 24px; padding: 36px 28px; }
+    .minimum .big-num { font-size: 104px; }
+    .footer { flex-direction: column; gap: 16px; align-items: flex-start; }
   }
-  @media print { body { background: white; } .crosslink, .footer .crosslink-big { display: none; } }
+
+  @media print {
+    body { background: white; color: black; }
+    body::before, body::after { display: none; }
+    .crosslink, .footer .crosslink-big { display: none; }
+    .bucket, .arch, .roi, .minimum, .graph-wrap { background: white; border-color: #ccc; }
+  }
 </style>
 </head>
 <body>
@@ -415,14 +615,14 @@
       <div class="brand">
         <span class="d3">Data<sup>#</sup>3</span>
         <span class="rule"></span>
-        <span class="kicker">AI Practice · Portfolio View · 02 of 02</span>
+        <span class="kicker">AI Practice · Portfolio View · 02 / 02</span>
       </div>
       <div class="crosslink"><a href="c.html">← AI Portability</a></div>
     </header>
 
     <section class="hero">
       <span class="hero-tag">Portfolio Artefact B</span>
-      <h1>Our methodology is <span>not a waterfall</span>.</h1>
+      <h1>Our methodology is not a <span class="neg">waterfall</span>.</h1>
       <p class="sub">Six phases. Iteration loops. Multiple entry points. One squad.</p>
       <p class="promise">The AI Service Lifecycle is deliberately non-linear. Customers enter where they are, phases feed back into each other, and value is measured against a sharpening ROI ladder — not against the completion of a stage gate.</p>
     </section>
@@ -440,17 +640,17 @@
         </defs>
 
         <!-- ETO bucket backgrounds -->
-        <rect x="40" y="40" width="360" height="480" rx="16" fill="#1E4B8E" opacity="0.045"/>
-        <rect x="420" y="40" width="360" height="480" rx="16" fill="#6B5820" opacity="0.06"/>
-        <rect x="800" y="40" width="360" height="480" rx="16" fill="#7A1F2E" opacity="0.05"/>
+        <rect x="40" y="40" width="360" height="480" rx="6" fill="#4A88E6" opacity="0.07"/>
+        <rect x="420" y="40" width="360" height="480" rx="6" fill="#D8B962" opacity="0.06"/>
+        <rect x="800" y="40" width="360" height="480" rx="6" fill="#E85D78" opacity="0.06"/>
 
-        <text x="220" y="68" text-anchor="middle" font-size="11" letter-spacing="2" fill="#1E4B8E" font-weight="700">ENVISION</text>
-        <text x="600" y="68" text-anchor="middle" font-size="11" letter-spacing="2" fill="#6B5820" font-weight="700">TRANSFORM</text>
-        <text x="980" y="68" text-anchor="middle" font-size="11" letter-spacing="2" fill="#7A1F2E" font-weight="700">OPERATE</text>
+        <text x="220" y="68" text-anchor="middle" font-size="11" letter-spacing="2" fill="#4A88E6" font-weight="700">ENVISION</text>
+        <text x="600" y="68" text-anchor="middle" font-size="11" letter-spacing="2" fill="#D8B962" font-weight="700">TRANSFORM</text>
+        <text x="980" y="68" text-anchor="middle" font-size="11" letter-spacing="2" fill="#E85D78" font-weight="700">OPERATE</text>
 
-        <text x="220" y="86" text-anchor="middle" font-size="10" fill="#6B7280">3 weeks min</text>
-        <text x="600" y="86" text-anchor="middle" font-size="10" fill="#6B7280">6 weeks min</text>
-        <text x="980" y="86" text-anchor="middle" font-size="10" fill="#6B7280">6 weeks min</text>
+        <text x="220" y="86" text-anchor="middle" font-size="10" fill="#6B6963">3 weeks min</text>
+        <text x="600" y="86" text-anchor="middle" font-size="10" fill="#6B6963">6 weeks min</text>
+        <text x="980" y="86" text-anchor="middle" font-size="10" fill="#6B6963">6 weeks min</text>
 
         <!-- Forward edges (solid) -->
         <path d="M 220 220 Q 290 220 290 260 Q 290 300 220 300" stroke="#E60028" stroke-width="2" fill="none" marker-end="url(#arrow-d)"/>
@@ -468,73 +668,73 @@
         <!-- Phase nodes -->
         <!-- Phase 1: Strategy & Roadmap -->
         <g class="phase-node">
-          <circle cx="140" cy="220" r="52" fill="white" stroke="#1E4B8E" stroke-width="2.5"/>
-          <text x="140" y="208" text-anchor="middle" font-size="10" fill="#6B7280" font-weight="700">PHASE 01</text>
-          <text x="140" y="226" text-anchor="middle" font-size="13" fill="#0F1115" font-weight="800">Strategy &amp;</text>
-          <text x="140" y="242" text-anchor="middle" font-size="13" fill="#0F1115" font-weight="800">Roadmap</text>
+          <circle cx="140" cy="220" r="52" fill="#181B23" stroke="#4A88E6" stroke-width="2.5"/>
+          <text x="140" y="208" text-anchor="middle" font-size="10" fill="#6B6963" font-weight="700">PHASE 01</text>
+          <text x="140" y="226" text-anchor="middle" font-size="13" fill="#F2F1EB" font-weight="800">Strategy &amp;</text>
+          <text x="140" y="242" text-anchor="middle" font-size="13" fill="#F2F1EB" font-weight="800">Roadmap</text>
         </g>
-        <text x="140" y="300" text-anchor="middle" font-size="10" fill="#3A3F48">Indicative case · vision</text>
+        <text x="140" y="300" text-anchor="middle" font-size="10" fill="#B0AEA5">Indicative case · vision</text>
 
         <!-- Phase 2: Ideate & Prove Value -->
         <g class="phase-node">
-          <circle cx="300" cy="220" r="52" fill="white" stroke="#1E4B8E" stroke-width="2.5"/>
-          <text x="300" y="208" text-anchor="middle" font-size="10" fill="#6B7280" font-weight="700">PHASE 02</text>
-          <text x="300" y="226" text-anchor="middle" font-size="13" fill="#0F1115" font-weight="800">Ideate &amp;</text>
-          <text x="300" y="242" text-anchor="middle" font-size="13" fill="#0F1115" font-weight="800">Prove Value</text>
+          <circle cx="300" cy="220" r="52" fill="#181B23" stroke="#4A88E6" stroke-width="2.5"/>
+          <text x="300" y="208" text-anchor="middle" font-size="10" fill="#6B6963" font-weight="700">PHASE 02</text>
+          <text x="300" y="226" text-anchor="middle" font-size="13" fill="#F2F1EB" font-weight="800">Ideate &amp;</text>
+          <text x="300" y="242" text-anchor="middle" font-size="13" fill="#F2F1EB" font-weight="800">Prove Value</text>
         </g>
-        <text x="300" y="300" text-anchor="middle" font-size="10" fill="#3A3F48">15 use cases · PoV</text>
+        <text x="300" y="300" text-anchor="middle" font-size="10" fill="#B0AEA5">15 use cases · PoV</text>
 
         <!-- Phase 3: Solution Design -->
         <g class="phase-node">
-          <circle cx="520" cy="220" r="52" fill="white" stroke="#6B5820" stroke-width="2.5"/>
-          <text x="520" y="208" text-anchor="middle" font-size="10" fill="#6B7280" font-weight="700">PHASE 03</text>
-          <text x="520" y="226" text-anchor="middle" font-size="13" fill="#0F1115" font-weight="800">Solution</text>
-          <text x="520" y="242" text-anchor="middle" font-size="13" fill="#0F1115" font-weight="800">Design</text>
+          <circle cx="520" cy="220" r="52" fill="#181B23" stroke="#D8B962" stroke-width="2.5"/>
+          <text x="520" y="208" text-anchor="middle" font-size="10" fill="#6B6963" font-weight="700">PHASE 03</text>
+          <text x="520" y="226" text-anchor="middle" font-size="13" fill="#F2F1EB" font-weight="800">Solution</text>
+          <text x="520" y="242" text-anchor="middle" font-size="13" fill="#F2F1EB" font-weight="800">Design</text>
         </g>
-        <text x="520" y="300" text-anchor="middle" font-size="10" fill="#3A3F48">Architecture · data · change</text>
+        <text x="520" y="300" text-anchor="middle" font-size="10" fill="#B0AEA5">Architecture · data · change</text>
 
         <!-- Phase 4: Build & Deploy -->
         <g class="phase-node">
-          <circle cx="680" cy="220" r="52" fill="white" stroke="#6B5820" stroke-width="2.5"/>
-          <text x="680" y="208" text-anchor="middle" font-size="10" fill="#6B7280" font-weight="700">PHASE 04</text>
-          <text x="680" y="226" text-anchor="middle" font-size="13" fill="#0F1115" font-weight="800">Build &amp;</text>
-          <text x="680" y="242" text-anchor="middle" font-size="13" fill="#0F1115" font-weight="800">Deploy</text>
+          <circle cx="680" cy="220" r="52" fill="#181B23" stroke="#D8B962" stroke-width="2.5"/>
+          <text x="680" y="208" text-anchor="middle" font-size="10" fill="#6B6963" font-weight="700">PHASE 04</text>
+          <text x="680" y="226" text-anchor="middle" font-size="13" fill="#F2F1EB" font-weight="800">Build &amp;</text>
+          <text x="680" y="242" text-anchor="middle" font-size="13" fill="#F2F1EB" font-weight="800">Deploy</text>
         </g>
-        <text x="680" y="300" text-anchor="middle" font-size="10" fill="#3A3F48">Platform · 1-2 use cases</text>
+        <text x="680" y="300" text-anchor="middle" font-size="10" fill="#B0AEA5">Platform · 1-2 use cases</text>
 
         <!-- Phase 5: Adopt & Scale -->
         <g class="phase-node">
-          <circle cx="900" cy="220" r="52" fill="white" stroke="#7A1F2E" stroke-width="2.5"/>
-          <text x="900" y="208" text-anchor="middle" font-size="10" fill="#6B7280" font-weight="700">PHASE 05</text>
-          <text x="900" y="226" text-anchor="middle" font-size="13" fill="#0F1115" font-weight="800">Adopt &amp;</text>
-          <text x="900" y="242" text-anchor="middle" font-size="13" fill="#0F1115" font-weight="800">Scale</text>
+          <circle cx="900" cy="220" r="52" fill="#181B23" stroke="#E85D78" stroke-width="2.5"/>
+          <text x="900" y="208" text-anchor="middle" font-size="10" fill="#6B6963" font-weight="700">PHASE 05</text>
+          <text x="900" y="226" text-anchor="middle" font-size="13" fill="#F2F1EB" font-weight="800">Adopt &amp;</text>
+          <text x="900" y="242" text-anchor="middle" font-size="13" fill="#F2F1EB" font-weight="800">Scale</text>
         </g>
-        <text x="900" y="300" text-anchor="middle" font-size="10" fill="#3A3F48">Rollout · change · training</text>
+        <text x="900" y="300" text-anchor="middle" font-size="10" fill="#B0AEA5">Rollout · change · training</text>
 
         <!-- Phase 6: Operate & Optimise -->
         <g class="phase-node">
-          <circle cx="1060" cy="220" r="52" fill="white" stroke="#7A1F2E" stroke-width="2.5"/>
-          <text x="1060" y="208" text-anchor="middle" font-size="10" fill="#6B7280" font-weight="700">PHASE 06</text>
-          <text x="1060" y="226" text-anchor="middle" font-size="13" fill="#0F1115" font-weight="800">Operate &amp;</text>
-          <text x="1060" y="242" text-anchor="middle" font-size="13" fill="#0F1115" font-weight="800">Optimise</text>
+          <circle cx="1060" cy="220" r="52" fill="#181B23" stroke="#E85D78" stroke-width="2.5"/>
+          <text x="1060" y="208" text-anchor="middle" font-size="10" fill="#6B6963" font-weight="700">PHASE 06</text>
+          <text x="1060" y="226" text-anchor="middle" font-size="13" fill="#F2F1EB" font-weight="800">Operate &amp;</text>
+          <text x="1060" y="242" text-anchor="middle" font-size="13" fill="#F2F1EB" font-weight="800">Optimise</text>
         </g>
-        <text x="1060" y="300" text-anchor="middle" font-size="10" fill="#3A3F48">MLOps · ROI · telemetry</text>
+        <text x="1060" y="300" text-anchor="middle" font-size="10" fill="#B0AEA5">MLOps · ROI · telemetry</text>
 
         <!-- Entry point markers -->
         <g>
           <circle cx="140" cy="490" r="18" fill="#E60028"/>
           <text x="140" y="495" text-anchor="middle" font-size="11" fill="white" font-weight="800">S</text>
-          <text x="140" y="528" text-anchor="middle" font-size="10" fill="#3A3F48">Starter enters</text>
+          <text x="140" y="528" text-anchor="middle" font-size="10" fill="#B0AEA5">Starter enters</text>
         </g>
         <g>
           <circle cx="600" cy="490" r="18" fill="#E60028"/>
           <text x="600" y="495" text-anchor="middle" font-size="11" fill="white" font-weight="800">B</text>
-          <text x="600" y="528" text-anchor="middle" font-size="10" fill="#3A3F48">Builder enters</text>
+          <text x="600" y="528" text-anchor="middle" font-size="10" fill="#B0AEA5">Builder enters</text>
         </g>
         <g>
           <circle cx="1060" cy="490" r="18" fill="#E60028"/>
           <text x="1060" y="495" text-anchor="middle" font-size="11" fill="white" font-weight="800">X</text>
-          <text x="1060" y="528" text-anchor="middle" font-size="10" fill="#3A3F48">Sustainer enters</text>
+          <text x="1060" y="528" text-anchor="middle" font-size="10" fill="#B0AEA5">Sustainer enters</text>
         </g>
       </svg>
 
@@ -549,7 +749,7 @@
 
     <div class="section-head">
       <h2>Three buckets, six phases</h2>
-      <span class="meta">Minimum durations · Alenka-verified</span>
+      <span class="meta">Minimum durations</span>
     </div>
 
     <section class="eto">
@@ -605,7 +805,7 @@
     </div>
 
     <section class="roi">
-      <p style="font-size: 14px; color: var(--ink-2); max-width: 700px;">Every phase adds confidence to the business case. We don't promise the final number on day one — we promise a narrowing band as the work compounds.</p>
+      <p>Every phase adds confidence to the business case. We don't promise the final number on day one — we promise a narrowing band as the work compounds.</p>
       <div class="roi-steps">
         <div class="roi-step">
           <div class="pct">±50%</div>
@@ -626,17 +826,22 @@
     </section>
 
     <section class="minimum">
-      <div class="big-num">15<sub>weeks</sub></div>
+      <div class="big-num">
+        15
+        <span class="unit">Weeks minimum</span>
+      </div>
       <div class="text">
         <h2>Minimum engagement.</h2>
         <p>Three weeks envision plus six weeks transform plus six weeks operate. Under that, the squad can't spin up, the ROI can't land, and the customer can't realise value. We trade scope for dollars, never dollars for dollars.</p>
-        <cite>— Matt Gooden &amp; Alenka, 14 April 2026</cite>
       </div>
     </section>
 
     <footer class="footer">
-      <div>Data<sup style="font-size: 0.6em; vertical-align: super; color: var(--d3-red); font-weight: 800;">#</sup>3 &nbsp;·&nbsp; AI Practice Portfolio &nbsp;·&nbsp; Internal Draft for Dave Gold pitch</div>
-      <a class="crosslink-big" href="c.html">← Run it anywhere — AI Portability</a>
+      <div class="stamp">
+        <span class="d3-wordmark">Data<sup>#</sup>3</span>
+        <span>AI Practice Portfolio · Internal Draft</span>
+      </div>
+      <a class="crosslink-big" href="c.html">AI Portability</a>
     </footer>
   </div>
 </body>

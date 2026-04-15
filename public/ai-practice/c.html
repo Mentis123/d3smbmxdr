@@ -9,26 +9,59 @@
 
   :root {
     --d3-red: #E60028;
-    --d3-red-dark: #B80020;
-    --ink: #0F1115;
-    --ink-2: #3A3F48;
-    --ink-3: #6B7280;
-    --bg: #FAFAF6;
-    --card: #FFFFFF;
-    --line: #E6E3D9;
-    --chip: #F2F0E8;
-    --warn: #8B6B00;
+    --d3-red-dim: #B00020;
+    --d3-red-wash: rgba(230, 0, 40, 0.10);
+
+    --bg: #0A0B0E;
+    --surface: #12141A;
+    --surface-2: #181B23;
+    --line: #23262F;
+    --line-soft: #1A1D25;
+
+    --ink: #F2F1EB;
+    --ink-2: #B0AEA5;
+    --ink-3: #6B6963;
+
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+    --sans: -apple-system, "SF Pro Display", "Inter", "Segoe UI", system-ui, sans-serif;
   }
 
-  html { scroll-behavior: smooth; }
+  html { scroll-behavior: smooth; background: var(--bg); }
 
   body {
-    font-family: -apple-system, "SF Pro Display", "Inter", "Segoe UI", system-ui, sans-serif;
+    font-family: var(--sans);
     background: var(--bg);
     color: var(--ink);
     line-height: 1.55;
     font-size: 15px;
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: "ss01", "ss02", "cv11", "kern";
+    font-variant-numeric: tabular-nums;
+    position: relative;
+    min-height: 100vh;
+  }
+
+  /* Subtle film grain */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 100;
+    opacity: 0.035;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml;utf8,<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  }
+
+  /* Ambient red wash at the top */
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 99;
+    background: linear-gradient(180deg, rgba(230, 0, 40, 0.018) 0%, transparent 38%);
   }
 
   .d3 { font-weight: 800; letter-spacing: -0.01em; }
@@ -40,10 +73,19 @@
     margin: 0 1px;
   }
 
+  ::selection { background: var(--d3-red); color: #fff; }
+
+  a:focus-visible {
+    outline: 2px solid var(--d3-red);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
   .page {
-    max-width: 1280px;
+    max-width: 1240px;
     margin: 0 auto;
-    padding: 44px 56px 80px;
+    padding: 36px 48px 72px;
+    position: relative;
   }
 
   /* Masthead */
@@ -51,345 +93,378 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding-bottom: 18px;
+    padding-bottom: 16px;
     border-bottom: 1px solid var(--line);
-    margin-bottom: 40px;
+    margin-bottom: 48px;
   }
-  .brand { display: flex; align-items: center; gap: 18px; font-size: 20px; }
-  .rule { width: 32px; height: 1px; background: var(--ink-3); }
+  .brand { display: flex; align-items: center; gap: 16px; font-size: 18px; }
+  .rule { width: 28px; height: 1px; background: var(--ink-3); }
   .kicker {
-    font-size: 11px;
-    letter-spacing: 0.18em;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.14em;
     text-transform: uppercase;
     color: var(--ink-3);
-    font-weight: 600;
+    font-weight: 500;
   }
   .crosslink a {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
     color: var(--ink-2);
     text-decoration: none;
-    font-size: 13px;
+    font-size: 11px;
     font-weight: 500;
-    padding: 8px 14px;
+    padding: 9px 14px;
     border: 1px solid var(--line);
-    border-radius: 100px;
-    transition: all 0.2s;
+    border-radius: 2px;
+    transition: all 0.25s ease;
+    font-family: var(--mono);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
   }
-  .crosslink a:hover { border-color: var(--d3-red); color: var(--d3-red); }
+  .crosslink a:hover {
+    border-color: var(--d3-red);
+    color: var(--ink);
+    background: var(--d3-red-wash);
+  }
 
   /* Hero */
-  .hero { margin-bottom: 56px; max-width: 900px; }
+  .hero { margin-bottom: 64px; max-width: 960px; position: relative; }
   .hero-tag {
-    display: inline-block;
-    font-size: 11px;
-    letter-spacing: 0.2em;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.22em;
     text-transform: uppercase;
     color: var(--d3-red);
-    font-weight: 700;
-    margin-bottom: 18px;
-    padding: 6px 12px;
-    background: rgba(230, 0, 40, 0.08);
-    border-radius: 4px;
+    font-weight: 600;
+    margin-bottom: 28px;
+  }
+  .hero-tag::before {
+    content: "";
+    width: 28px;
+    height: 1px;
+    background: var(--d3-red);
   }
   .hero h1 {
-    font-size: 72px;
-    line-height: 0.95;
+    font-size: clamp(48px, 7vw, 88px);
+    line-height: 0.92;
     font-weight: 800;
-    letter-spacing: -0.035em;
-    margin-bottom: 18px;
+    letter-spacing: -0.042em;
+    margin-bottom: 24px;
     color: var(--ink);
   }
-  .hero h1 span { color: var(--d3-red); }
+  .hero h1 em {
+    font-style: normal;
+    color: var(--d3-red);
+    position: relative;
+    display: inline-block;
+  }
+  .hero h1 em::after {
+    content: "";
+    position: absolute;
+    bottom: 0.08em;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--d3-red);
+    transform: scaleX(0);
+    transform-origin: left;
+    animation: underline 1.1s 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  @keyframes underline { to { transform: scaleX(1); } }
+
   .hero .sub {
     font-size: 22px;
     font-weight: 500;
-    color: var(--ink-2);
-    margin-bottom: 14px;
-    letter-spacing: -0.01em;
+    color: var(--ink);
+    margin-bottom: 16px;
+    letter-spacing: -0.015em;
+    max-width: 720px;
   }
   .hero .promise {
-    font-size: 16px;
-    color: var(--ink-3);
+    font-size: 15px;
+    color: var(--ink-2);
     max-width: 680px;
-    line-height: 1.6;
+    line-height: 1.65;
   }
 
-  /* Three planes centrepiece */
+  /* Planes centrepiece */
   .planes-wrap {
-    background: var(--card);
+    background: var(--surface);
     border: 1px solid var(--line);
-    border-radius: 12px;
-    padding: 44px 40px 36px;
-    margin-bottom: 56px;
+    border-radius: 4px;
+    padding: 44px 36px 32px;
+    margin-bottom: 64px;
     position: relative;
+  }
+  .planes-wrap::before {
+    content: "";
+    position: absolute;
+    top: -1px; left: 24px;
+    width: 64px;
+    height: 2px;
+    background: var(--d3-red);
   }
   .planes-wrap .label {
     position: absolute;
-    top: 16px;
-    left: 20px;
+    top: 14px;
+    left: 24px;
+    font-family: var(--mono);
     font-size: 10px;
-    letter-spacing: 0.2em;
+    letter-spacing: 0.18em;
     text-transform: uppercase;
     color: var(--ink-3);
-    font-weight: 600;
-  }
-  .planes-svg { width: 100%; height: auto; display: block; max-width: 1100px; margin: 0 auto; }
-
-  /* Why portability — 4 levers */
-  .levers {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 16px;
-    margin-bottom: 56px;
-  }
-  .lever {
-    background: var(--card);
-    border: 1px solid var(--line);
-    border-radius: 10px;
-    padding: 24px 22px;
-    position: relative;
-    overflow: hidden;
-  }
-  .lever::before {
-    content: "";
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 3px;
-    background: var(--d3-red);
-    transform: scaleX(0.3);
-    transform-origin: left;
-    transition: transform 0.3s;
-  }
-  .lever:hover::before { transform: scaleX(1); }
-  .lever-num {
-    font-size: 11px;
-    color: var(--ink-3);
-    font-weight: 600;
-    letter-spacing: 0.1em;
-    margin-bottom: 10px;
-  }
-  .lever h3 {
-    font-size: 22px;
-    font-weight: 700;
-    letter-spacing: -0.02em;
-    margin-bottom: 10px;
-    color: var(--ink);
-  }
-  .lever p { font-size: 13px; color: var(--ink-2); line-height: 1.55; }
-
-  .quote {
-    grid-column: span 4;
-    margin-top: 8px;
-    padding: 22px 28px;
-    background: var(--ink);
-    color: #EDECE5;
-    border-radius: 10px;
-    font-size: 18px;
     font-weight: 500;
-    letter-spacing: -0.01em;
-    position: relative;
   }
-  .quote::before {
-    content: "";
-    position: absolute;
-    left: 0; top: 20%;
-    width: 3px; height: 60%;
-    background: var(--d3-red);
-  }
-  .quote cite { display: block; font-size: 12px; font-style: normal; color: #9B9A93; margin-top: 8px; font-weight: 400; letter-spacing: 0.08em; text-transform: uppercase; }
+  .planes-svg { width: 100%; height: auto; display: block; max-width: 1100px; margin: 24px auto 0; }
 
   /* Section heading */
   .section-head {
     display: flex;
     align-items: baseline;
     justify-content: space-between;
-    margin-bottom: 22px;
-    padding-bottom: 12px;
+    margin-bottom: 28px;
+    padding-bottom: 14px;
     border-bottom: 1px solid var(--line);
+    position: relative;
+  }
+  .section-head::before {
+    content: "";
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 64px;
+    height: 1px;
+    background: var(--d3-red);
   }
   .section-head h2 {
     font-size: 28px;
     font-weight: 800;
-    letter-spacing: -0.025em;
+    letter-spacing: -0.028em;
+    color: var(--ink);
   }
   .section-head .meta {
-    font-size: 11px;
-    letter-spacing: 0.18em;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.16em;
     text-transform: uppercase;
     color: var(--ink-3);
-    font-weight: 600;
+    font-weight: 500;
   }
+
+  /* 4-lever grid — hairline split */
+  .levers {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    margin-bottom: 64px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .lever {
+    background: var(--surface);
+    padding: 30px 26px 32px;
+    position: relative;
+    transition: background 0.3s ease;
+  }
+  .lever:hover { background: var(--surface-2); }
+  .lever::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px; height: 0;
+    background: var(--d3-red);
+    transition: height 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .lever:hover::before { height: 100%; }
+  .lever-num {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--d3-red);
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    margin-bottom: 22px;
+  }
+  .lever h3 {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.022em;
+    margin-bottom: 14px;
+    color: var(--ink);
+  }
+  .lever p { font-size: 13px; color: var(--ink-2); line-height: 1.6; }
 
   /* Workload fit matrix */
   .matrix {
-    background: var(--card);
+    background: var(--surface);
     border: 1px solid var(--line);
-    border-radius: 10px;
+    border-radius: 4px;
     overflow: hidden;
-    margin-bottom: 56px;
+    margin-bottom: 64px;
   }
   .matrix-row {
     display: grid;
-    grid-template-columns: 2.5fr 1fr 3fr;
-    padding: 18px 24px;
+    grid-template-columns: 2.4fr 1fr 3fr;
+    padding: 18px 26px;
     border-bottom: 1px solid var(--line);
     align-items: center;
-    gap: 20px;
+    gap: 24px;
+    transition: background 0.2s ease;
   }
+  .matrix-row:not(.header):hover { background: var(--surface-2); }
   .matrix-row:last-child { border-bottom: none; }
   .matrix-row.header {
-    background: var(--chip);
+    background: var(--bg);
+    font-family: var(--mono);
     font-size: 10px;
-    letter-spacing: 0.15em;
+    letter-spacing: 0.14em;
     text-transform: uppercase;
     color: var(--ink-3);
-    font-weight: 700;
-    padding: 14px 24px;
+    font-weight: 500;
+    padding: 14px 26px;
   }
   .matrix-row .workload { font-weight: 600; color: var(--ink); font-size: 14px; }
   .matrix-row .plane-badge {
     display: inline-block;
-    font-size: 11px;
+    font-family: var(--mono);
+    font-size: 10px;
     font-weight: 700;
     padding: 5px 11px;
-    border-radius: 100px;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border: 1px solid;
+    border-radius: 2px;
   }
-  .plane-badge.public { background: #EAF1FB; color: #1E4B8E; }
-  .plane-badge.private { background: #F1ECE0; color: #6B5820; }
-  .plane-badge.edge { background: #FCE7EB; color: var(--d3-red-dark); }
-  .matrix-row .why { font-size: 13px; color: var(--ink-2); }
+  .plane-badge.public { color: #6AA7FF; border-color: rgba(106, 167, 255, 0.4); background: rgba(106, 167, 255, 0.07); }
+  .plane-badge.private { color: #D8B962; border-color: rgba(216, 185, 98, 0.4); background: rgba(216, 185, 98, 0.07); }
+  .plane-badge.edge { color: var(--d3-red); border-color: rgba(230, 0, 40, 0.5); background: rgba(230, 0, 40, 0.09); }
+  .matrix-row .why { font-size: 13px; color: var(--ink-2); line-height: 1.55; }
 
   /* Vendor ecosystem */
   .vendors {
-    background: var(--card);
+    background: var(--surface);
     border: 1px solid var(--line);
-    border-radius: 10px;
-    padding: 32px 28px;
-    margin-bottom: 40px;
+    border-radius: 4px;
+    padding: 36px 32px 32px;
+    margin-bottom: 48px;
   }
   .vendors-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
   }
   .vendor-group {
-    padding: 18px 20px;
-    background: var(--bg);
-    border-radius: 8px;
-    border-left: 3px solid var(--d3-red);
+    padding: 26px 24px 28px;
+    background: var(--surface-2);
+    position: relative;
+  }
+  .vendor-group::before {
+    content: "";
+    position: absolute;
+    left: 0; top: 26px; bottom: 28px;
+    width: 2px;
+    background: var(--d3-red);
   }
   .vendor-group .plane-name {
+    font-family: var(--mono);
     font-size: 10px;
-    letter-spacing: 0.18em;
+    letter-spacing: 0.16em;
     text-transform: uppercase;
     color: var(--ink-3);
-    font-weight: 700;
-    margin-bottom: 10px;
+    font-weight: 500;
+    margin-bottom: 14px;
+    padding-left: 12px;
   }
   .vendor-group .anchor {
-    font-size: 18px;
+    font-size: 20px;
     font-weight: 800;
-    letter-spacing: -0.01em;
-    margin-bottom: 4px;
+    letter-spacing: -0.015em;
+    margin-bottom: 8px;
+    padding-left: 12px;
+    color: var(--ink);
   }
   .vendor-group .others {
     font-size: 13px;
     color: var(--ink-2);
+    padding-left: 12px;
+    line-height: 1.5;
   }
   .vendors-caption {
-    margin-top: 24px;
+    margin-top: 28px;
     padding-top: 22px;
     border-top: 1px solid var(--line);
-    font-size: 14px;
-    font-style: italic;
+    font-size: 13px;
     color: var(--ink-2);
     text-align: center;
+    max-width: 720px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.6;
   }
 
   /* CaaS callout */
   .caas {
-    background: linear-gradient(135deg, var(--d3-red) 0%, var(--d3-red-dark) 100%);
-    color: white;
-    border-radius: 12px;
-    padding: 40px 44px;
-    margin-bottom: 40px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 48px 44px;
+    margin-bottom: 48px;
     position: relative;
     overflow: hidden;
   }
   .caas::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; bottom: 0;
+    width: 3px;
+    background: var(--d3-red);
+  }
+  .caas::after {
     content: "CaaS";
     position: absolute;
-    right: 32px; top: 12px;
-    font-size: 140px;
+    right: -12px; top: -30px;
+    font-size: 200px;
     font-weight: 900;
-    opacity: 0.08;
+    color: var(--d3-red);
+    opacity: 0.055;
     letter-spacing: -0.05em;
+    line-height: 1;
+    font-family: var(--sans);
   }
   .caas .tag {
-    font-size: 11px;
-    letter-spacing: 0.2em;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.22em;
     text-transform: uppercase;
-    font-weight: 700;
-    opacity: 0.85;
-    margin-bottom: 14px;
+    font-weight: 600;
+    color: var(--d3-red);
+    margin-bottom: 20px;
+    position: relative;
   }
   .caas h2 {
-    font-size: 32px;
+    font-size: 36px;
     font-weight: 800;
-    letter-spacing: -0.025em;
-    line-height: 1.15;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
     max-width: 720px;
     position: relative;
+    color: var(--ink);
   }
   .caas p {
-    margin-top: 12px;
+    margin-top: 16px;
     font-size: 15px;
-    opacity: 0.9;
+    color: var(--ink-2);
     max-width: 640px;
     position: relative;
-  }
-
-  /* Skills gate */
-  .gate {
-    display: flex;
-    gap: 22px;
-    align-items: flex-start;
-    padding: 24px 28px;
-    background: #FFF8E1;
-    border: 1px solid #F0E2A6;
-    border-left: 4px solid #C89B0E;
-    border-radius: 8px;
-    margin-bottom: 40px;
-  }
-  .gate .icon {
-    font-size: 22px;
-    flex-shrink: 0;
-    color: #8B6B00;
-    font-weight: 900;
-    line-height: 1;
-  }
-  .gate .content { flex: 1; }
-  .gate .content strong {
-    display: block;
-    font-size: 13px;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: #8B6B00;
-    margin-bottom: 6px;
-  }
-  .gate .content p {
-    font-size: 15px;
-    color: var(--ink);
-    font-weight: 500;
-    line-height: 1.5;
-  }
-  .gate cite {
-    display: block;
-    font-size: 11px;
-    font-style: normal;
-    color: #8B6B00;
-    margin-top: 6px;
-    letter-spacing: 0.05em;
+    line-height: 1.65;
   }
 
   /* Footer */
@@ -397,36 +472,73 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding-top: 24px;
+    padding-top: 28px;
     border-top: 1px solid var(--line);
-    font-size: 11px;
+    font-family: var(--mono);
+    font-size: 10px;
     color: var(--ink-3);
-    letter-spacing: 0.05em;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
   }
+  .footer .stamp { display: flex; align-items: center; gap: 14px; }
+  .footer .stamp .d3-wordmark { font-family: var(--sans); letter-spacing: -0.01em; text-transform: none; font-size: 14px; color: var(--ink-2); font-weight: 800; }
+  .footer .stamp .d3-wordmark sup { font-size: 0.55em; vertical-align: super; color: var(--d3-red); margin: 0 1px; }
   .footer .crosslink-big {
-    font-size: 14px;
+    font-family: var(--mono);
+    font-size: 11px;
     font-weight: 600;
     color: var(--d3-red);
     text-decoration: none;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
   }
-  .footer .crosslink-big:hover { text-decoration: underline; }
+  .footer .crosslink-big:hover { color: var(--ink); }
+  .footer .crosslink-big::after {
+    content: "→";
+    transition: transform 0.25s ease;
+  }
+  .footer .crosslink-big:hover::after { transform: translateX(4px); }
+
+  /* Page load reveal */
+  .hero, .planes-wrap, .section-head, .levers, .matrix, .vendors, .caas, .footer {
+    animation: rise 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  .hero { animation-delay: 0.05s; }
+  .planes-wrap { animation-delay: 0.15s; }
+  .levers { animation-delay: 0.22s; }
+  .matrix { animation-delay: 0.28s; }
+  .vendors { animation-delay: 0.34s; }
+  .caas { animation-delay: 0.4s; }
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(14px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+    .hero h1 em::after { transform: scaleX(1); }
+  }
 
   @media (max-width: 900px) {
-    .page { padding: 32px 24px 60px; }
-    .hero h1 { font-size: 48px; }
+    .page { padding: 28px 20px 60px; }
+    .hero h1 { font-size: 44px; }
     .levers { grid-template-columns: repeat(2, 1fr); }
-    .quote { grid-column: span 2; }
     .vendors-grid { grid-template-columns: 1fr; }
-    .matrix-row { grid-template-columns: 1fr; }
+    .matrix-row { grid-template-columns: 1fr; gap: 8px; }
     .matrix-row.header { display: none; }
+    .caas { padding: 36px 28px; }
+    .caas::after { font-size: 140px; top: -16px; }
+    .caas h2 { font-size: 28px; }
+    .footer { flex-direction: column; gap: 16px; align-items: flex-start; }
   }
 
   @media print {
-    body { background: white; }
+    body { background: white; color: black; }
+    body::before, body::after { display: none; }
     .crosslink, .footer .crosslink-big { display: none; }
+    .lever, .matrix, .vendors, .caas, .planes-wrap { background: white; border-color: #ccc; }
   }
 </style>
 </head>
@@ -436,14 +548,14 @@
       <div class="brand">
         <span class="d3">Data<sup>#</sup>3</span>
         <span class="rule"></span>
-        <span class="kicker">AI Practice · Portfolio View · 01 of 02</span>
+        <span class="kicker">AI Practice · Portfolio View · 01 / 02</span>
       </div>
       <div class="crosslink"><a href="d.html">Non-linear Lifecycle →</a></div>
     </header>
 
     <section class="hero">
       <span class="hero-tag">Portfolio Artefact A</span>
-      <h1>AI <span>Portability</span>.</h1>
+      <h1>AI <em>Portability</em>.</h1>
       <p class="sub">Build once. Run anywhere. Move anytime.</p>
       <p class="promise">One AI workload, any plane — public cloud, private data centre, or edge — with portability baked into the architecture, not bolted on. The customer keeps control of where intelligence lives, what it costs, and who can turn it off.</p>
     </section>
@@ -455,44 +567,41 @@
           <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
             <path d="M 0 0 L 10 5 L 0 10 z" fill="#E60028"/>
           </marker>
-          <marker id="arrow-rev" viewBox="0 0 10 10" refX="1" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-            <path d="M 10 0 L 0 5 L 10 10 z" fill="#E60028"/>
-          </marker>
         </defs>
 
         <!-- Horizontal transport layer line -->
-        <line x1="80" y1="340" x2="1020" y2="340" stroke="#E6E3D9" stroke-width="1" stroke-dasharray="3 4"/>
-        <text x="550" y="362" text-anchor="middle" font-size="10" letter-spacing="2" fill="#6B7280" font-weight="600">TRANSPORT LAYER · BUILD ONCE · MOVE ANYTIME</text>
+        <line x1="80" y1="340" x2="1020" y2="340" stroke="#23262F" stroke-width="1" stroke-dasharray="3 4"/>
+        <text x="550" y="362" text-anchor="middle" font-size="10" letter-spacing="2" fill="#6B6963" font-weight="600">TRANSPORT LAYER · BUILD ONCE · MOVE ANYTIME</text>
 
         <!-- Public cloud card -->
         <g>
-          <rect x="60" y="70" width="280" height="220" rx="10" fill="#FAFAF6" stroke="#E6E3D9" stroke-width="1.5"/>
+          <rect x="60" y="70" width="280" height="220" rx="4" fill="#181B23" stroke="#23262F" stroke-width="1.5"/>
           <text x="200" y="108" text-anchor="middle" font-size="11" letter-spacing="2" fill="#E60028" font-weight="700">PUBLIC CLOUD</text>
           <circle cx="200" cy="168" r="38" fill="none" stroke="#E60028" stroke-width="1.5"/>
           <circle cx="200" cy="168" r="24" fill="none" stroke="#E60028" stroke-width="1.5" opacity="0.5"/>
           <circle cx="200" cy="168" r="10" fill="#E60028"/>
-          <text x="200" y="238" text-anchor="middle" font-size="13" fill="#0F1115" font-weight="700">Elastic · Opex</text>
-          <text x="200" y="258" text-anchor="middle" font-size="11" fill="#3A3F48">Fastest time to value</text>
-          <text x="200" y="274" text-anchor="middle" font-size="11" fill="#3A3F48">Training &amp; inference at scale</text>
+          <text x="200" y="238" text-anchor="middle" font-size="13" fill="#F2F1EB" font-weight="700">Elastic · Opex</text>
+          <text x="200" y="258" text-anchor="middle" font-size="11" fill="#B0AEA5">Fastest time to value</text>
+          <text x="200" y="274" text-anchor="middle" font-size="11" fill="#B0AEA5">Training &amp; inference at scale</text>
         </g>
 
         <!-- Private DC card -->
         <g>
-          <rect x="410" y="70" width="280" height="220" rx="10" fill="#FAFAF6" stroke="#E6E3D9" stroke-width="1.5"/>
+          <rect x="410" y="70" width="280" height="220" rx="4" fill="#181B23" stroke="#23262F" stroke-width="1.5"/>
           <text x="550" y="108" text-anchor="middle" font-size="11" letter-spacing="2" fill="#E60028" font-weight="700">PRIVATE DATA CENTRE</text>
           <rect x="520" y="140" width="60" height="60" rx="2" fill="none" stroke="#E60028" stroke-width="1.5"/>
           <rect x="528" y="148" width="44" height="4" fill="#E60028"/>
           <rect x="528" y="156" width="44" height="4" fill="#E60028" opacity="0.6"/>
           <rect x="528" y="164" width="44" height="4" fill="#E60028" opacity="0.4"/>
           <rect x="528" y="178" width="10" height="14" fill="#E60028"/>
-          <text x="550" y="238" text-anchor="middle" font-size="13" fill="#0F1115" font-weight="700">Owned · Predictable</text>
-          <text x="550" y="258" text-anchor="middle" font-size="11" fill="#3A3F48">Data stays put</text>
-          <text x="550" y="274" text-anchor="middle" font-size="11" fill="#3A3F48">Regulated workloads &amp; HPC</text>
+          <text x="550" y="238" text-anchor="middle" font-size="13" fill="#F2F1EB" font-weight="700">Owned · Predictable</text>
+          <text x="550" y="258" text-anchor="middle" font-size="11" fill="#B0AEA5">Data stays put</text>
+          <text x="550" y="274" text-anchor="middle" font-size="11" fill="#B0AEA5">Regulated workloads &amp; HPC</text>
         </g>
 
         <!-- Edge card -->
         <g>
-          <rect x="760" y="70" width="280" height="220" rx="10" fill="#FAFAF6" stroke="#E6E3D9" stroke-width="1.5"/>
+          <rect x="760" y="70" width="280" height="220" rx="4" fill="#181B23" stroke="#23262F" stroke-width="1.5"/>
           <text x="900" y="108" text-anchor="middle" font-size="11" letter-spacing="2" fill="#E60028" font-weight="700">EDGE</text>
           <circle cx="870" cy="170" r="8" fill="#E60028"/>
           <circle cx="900" cy="155" r="8" fill="#E60028"/>
@@ -504,9 +613,9 @@
           <line x1="870" y1="170" x2="885" y2="190" stroke="#E60028" stroke-width="1" opacity="0.5"/>
           <line x1="885" y1="190" x2="915" y2="190" stroke="#E60028" stroke-width="1" opacity="0.5"/>
           <line x1="915" y1="190" x2="930" y2="170" stroke="#E60028" stroke-width="1" opacity="0.5"/>
-          <text x="900" y="238" text-anchor="middle" font-size="13" fill="#0F1115" font-weight="700">Local · Offline-capable</text>
-          <text x="900" y="258" text-anchor="middle" font-size="11" fill="#3A3F48">Latency-critical</text>
-          <text x="900" y="274" text-anchor="middle" font-size="11" fill="#3A3F48">IoT · Manufacturing · Mining</text>
+          <text x="900" y="238" text-anchor="middle" font-size="13" fill="#F2F1EB" font-weight="700">Local · Offline-capable</text>
+          <text x="900" y="258" text-anchor="middle" font-size="11" fill="#B0AEA5">Latency-critical</text>
+          <text x="900" y="274" text-anchor="middle" font-size="11" fill="#B0AEA5">IoT · Manufacturing · Mining</text>
         </g>
 
         <!-- Transport arrows between planes -->
@@ -524,29 +633,25 @@
 
     <section class="levers">
       <div class="lever">
-        <div class="lever-num">01</div>
+        <div class="lever-num">01 / COST</div>
         <h3>Cost</h3>
         <p>Move workloads to where the economics win today. Training in public cloud burst, steady-state inference on owned infrastructure, edge where bandwidth is the tax.</p>
       </div>
       <div class="lever">
-        <div class="lever-num">02</div>
+        <div class="lever-num">02 / SECURITY</div>
         <h3>Security</h3>
         <p>Keep regulated data on the plane your compliance officer can walk to. Move inference to the data, not the other way around.</p>
       </div>
       <div class="lever">
-        <div class="lever-num">03</div>
+        <div class="lever-num">03 / CONTROL</div>
         <h3>Control</h3>
         <p>Own your intelligence. No single vendor can raise the price, throttle the API, or turn it off. Every workload has an exit.</p>
       </div>
       <div class="lever">
-        <div class="lever-num">04</div>
+        <div class="lever-num">04 / SOVEREIGNTY</div>
         <h3>Sovereignty</h3>
         <p>When the data must stay in-country, in-tenant, or in-building — the architecture already knows how to handle it without a rewrite.</p>
       </div>
-      <blockquote class="quote">
-        "We need to be able to build once and have that portability. Part of our source needs to be our architecture and approach and how we deliver this stuff to allow complete flexibility for the customer."
-        <cite>— Matt Gooden, 15 April 2026</cite>
-      </blockquote>
     </section>
 
     <div class="section-head">
@@ -624,18 +729,12 @@
       <p>Our squads deliver AI outcomes across any plane, any vendor, any delivery model. The customer buys the capability; we pick the right tools to land it.</p>
     </section>
 
-    <div class="gate">
-      <div class="icon">!</div>
-      <div class="content">
-        <strong>Skills commitment gate</strong>
-        <p>Every vendor opportunity carries a matching skills and resource commitment. Otherwise we're just a tech reseller.</p>
-        <cite>Matt Gooden, 15 April 2026 — Cisco CAI call</cite>
-      </div>
-    </div>
-
     <footer class="footer">
-      <div>Data<sup style="font-size: 0.6em; vertical-align: super; color: var(--d3-red); font-weight: 800;">#</sup>3 &nbsp;·&nbsp; AI Practice Portfolio &nbsp;·&nbsp; Internal Draft for Dave Gold pitch</div>
-      <a class="crosslink-big" href="d.html">Delivered via our non-linear AI Service Lifecycle &nbsp;→</a>
+      <div class="stamp">
+        <span class="d3-wordmark">Data<sup>#</sup>3</span>
+        <span>AI Practice Portfolio · Internal Draft</span>
+      </div>
+      <a class="crosslink-big" href="d.html">Non-linear AI Service Lifecycle</a>
     </footer>
   </div>
 </body>

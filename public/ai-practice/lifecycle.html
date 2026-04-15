@@ -166,6 +166,16 @@
     opacity:.78;
     fill:none;
   }
+  .loop-hero .pivot-arc.sweep{
+    stroke-width:2.25;
+    stroke-dasharray:9 5;
+    opacity:.55;
+  }
+  .loop-hero .flow-arrow{
+    stroke:none;
+  }
+  .loop-hero .flow-arrow.cyan{ fill:var(--cyan); }
+  .loop-hero .flow-arrow.mint{ fill:var(--mint); }
   .loop-hero .pivot-lbl{
     fill:var(--amber);
     font-size:10px;
@@ -184,6 +194,18 @@
   .loop-hero .eto-lbl.env{ fill:var(--cyan-2); }
   .loop-hero .eto-lbl.tra{ fill:#e9d5ff; }
   .loop-hero .eto-lbl.ope{ fill:var(--mint); }
+  .loop-hero .eto-micro{
+    font-family:'Inter',sans-serif;
+    font-size:9.5px;
+    font-weight:800;
+    letter-spacing:.2em;
+    opacity:.55;
+  }
+  .loop-hero .eto-micro.env{ fill:var(--cyan-2); }
+  .loop-hero .eto-micro.tra{ fill:#e9d5ff; }
+  .loop-hero .eto-micro.ope{ fill:var(--mint); }
+  .loop-hero .eto-micro.ms { fill:var(--ink-3); letter-spacing:.22em; }
+  .loop-hero .sweep-lbl{ opacity:.65; }
   .loop-hero .ms-label{
     font-family:'Inter',sans-serif;
     font-size:11px;
@@ -554,86 +576,117 @@
     <div class="loop-eyebrow">The shape of the lifecycle</div>
     <h2 class="loop-title" id="loopTitle">A continuous loop, not a straight line. Delivery on the left. Managed service on the right.</h2>
 
-    <svg viewBox="0 0 1200 420" xmlns="http://www.w3.org/2000/svg" role="img">
+    <svg viewBox="0 0 1200 440" xmlns="http://www.w3.org/2000/svg" role="img">
       <defs>
         <radialGradient id="msBand" cx="50%" cy="50%" r="60%">
           <stop offset="0%"  stop-color="#5eead4" stop-opacity=".22"/>
           <stop offset="60%" stop-color="#5eead4" stop-opacity=".08"/>
           <stop offset="100%" stop-color="#5eead4" stop-opacity="0"/>
         </radialGradient>
+        <marker id="flowHeadCyan" viewBox="0 0 10 10" refX="5" refY="5"
+                markerWidth="7" markerHeight="7" orient="auto">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="#4dd2f0"/>
+        </marker>
+        <marker id="flowHeadMint" viewBox="0 0 10 10" refX="5" refY="5"
+                markerWidth="7" markerHeight="7" orient="auto">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="#5eead4"/>
+        </marker>
         <marker id="pivotHead" viewBox="0 0 10 10" refX="8" refY="5"
                 markerWidth="6" markerHeight="6" orient="auto">
-          <path d="M 0 0 L 10 5 L 0 10 z" fill="#fbbf24" opacity=".9"/>
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="#fbbf24" opacity=".95"/>
         </marker>
       </defs>
 
       <!-- Managed-service band behind right loop -->
-      <ellipse cx="860" cy="210" rx="320" ry="180" fill="url(#msBand)"/>
+      <ellipse cx="860" cy="220" rx="320" ry="190" fill="url(#msBand)"/>
 
       <!-- Left loop (delivery) -->
-      <path d="M 600 210
-               C 600 40, 80 40, 80 210
-               C 80 380, 600 380, 600 210 Z"
-            class="loop-path loop-left"/>
+      <ellipse cx="340" cy="220" rx="260" ry="160" class="loop-path loop-left"/>
 
       <!-- Right loop (operate / managed service) -->
-      <path d="M 600 210
-               C 600 40, 1120 40, 1120 210
-               C 1120 380, 600 380, 600 210 Z"
-            class="loop-path loop-right"/>
+      <ellipse cx="860" cy="220" rx="260" ry="160" class="loop-path loop-right"/>
 
-      <!-- ETO labels -->
-      <text x="340" y="20"  class="eto-lbl env" text-anchor="middle">ENVISION · TRANSFORM · DELIVERY LOOP</text>
-      <text x="860" y="20"  class="eto-lbl ope" text-anchor="middle">OPERATE · MANAGED-SERVICE LOOP</text>
+      <!-- ETO micro-labels (near the rows they describe) -->
+      <text x="340" y="168" class="eto-micro tra" text-anchor="middle">TRANSFORM</text>
+      <text x="340" y="275" class="eto-micro env" text-anchor="middle">ENVISION</text>
+      <text x="860" y="215" class="eto-micro ope" text-anchor="middle">OPERATE · MANAGED SERVICE</text>
 
-      <!-- Pivot-back arc: Phase 2 → Phase 1 (iteration within Envision) -->
-      <path d="M 165 120 Q 290 165 405 115" class="pivot-arc" marker-end="url(#pivotHead)"/>
-      <text x="285" y="158" class="pivot-lbl" text-anchor="middle">Pivot back · PoC invalidates</text>
+      <!-- ========= LEFT LOOP FORWARD FLOW ARROWS (clockwise: 1→2→3→4) =========
+           Triangle convention: tip-first, then two base points.
+           LEFT arrow at (x,y) : M x y L x+16 y-8 L x+16 y+8 z
+           RIGHT arrow at (x,y): M x y L x-16 y-8 L x-16 y+8 z
+           UP arrow at (x,y)   : M x y L x-8 y+16 L x+8 y+16 z
+           DOWN arrow at (x,y) : M x y L x-8 y-16 L x+8 y-16 z -->
 
-      <!-- Pivot-back arc: Phase 4 → Phase 3 (iteration within Transform) -->
-      <path d="M 405 305 Q 290 260 170 305" class="pivot-arc" marker-end="url(#pivotHead)"/>
-      <text x="285" y="273" class="pivot-lbl" text-anchor="middle">Pivot back · design gap</text>
+      <!-- Bottom of left loop (6 o'clock), flow going LEFT — clockwise between P1 and P2 -->
+      <path d="M 332 380 L 348 372 L 348 388 z" class="flow-arrow cyan"/>
+      <!-- Left edge of left loop (9 o'clock), flow going UP — clockwise between P2 and P3 -->
+      <path d="M 80 212 L 72 228 L 88 228 z" class="flow-arrow cyan"/>
+      <!-- Top of left loop (12 o'clock), flow going RIGHT — clockwise between P3 and P4 -->
+      <path d="M 348 60 L 332 52 L 332 68 z" class="flow-arrow cyan"/>
 
-      <!-- Next-cycle label near crossover (bottom) -->
-      <text x="600" y="398" class="next-cycle-lbl" text-anchor="middle">Next use-case feeds back into Envision</text>
+      <!-- ========= RIGHT LOOP FORWARD FLOW ARROWS (anticlockwise: 5→6) ========= -->
+      <!-- Right edge of right loop (3 o'clock), flow going UP — anticlockwise between P5 and P6 -->
+      <path d="M 1120 212 L 1112 228 L 1128 228 z" class="flow-arrow mint"/>
+
+      <!-- ========= PIVOT-BACK arcs (dashed amber) ========= -->
+      <!-- Pivot inside left loop bottom row: P1 → P2 reverse? No — forward is P1→P2 already.
+           Pivot back means going BACKWARD against flow. E.g. P2→P1 (PoC says strategy wrong, revisit).
+           With forward clockwise flow P1→P2→P3→P4, pivot-back goes P2→P1 or P4→P3. -->
+
+      <!-- P2 → P1 pivot (revisit strategy after PoC) — arc curving UP inside bottom row -->
+      <path d="M 252 358 Q 340 300 428 358" class="pivot-arc" marker-end="url(#pivotHead)"/>
+      <text x="340" y="320" class="pivot-lbl" text-anchor="middle">Pivot · PoC revisits strategy</text>
+
+      <!-- P4 → P3 pivot (build reveals design gap) — arc curving DOWN inside top row -->
+      <path d="M 428 82 Q 340 140 252 82" class="pivot-arc" marker-end="url(#pivotHead)"/>
+      <text x="340" y="128" class="pivot-lbl" text-anchor="middle">Pivot · build reveals design gap</text>
+
+      <!-- P6 → next cycle (Operate feeds back into Discover = P1). Cubic bezier
+           sweeping from P6 (top of right loop) up and across, then back down to P1. -->
+      <path d="M 818 45 C 680 5, 250 5, 500 305" class="pivot-arc sweep" marker-end="url(#pivotHead)"/>
+      <text x="500" y="20" class="pivot-lbl sweep-lbl" text-anchor="middle">Operate feeds the next cycle back into Discover</text>
 
       <!-- Crossover "GO-LIVE" marker -->
-      <circle cx="600" cy="210" r="28" class="crossover-dot"/>
-      <text x="600" y="214" class="crossover-lbl" text-anchor="middle">GO-LIVE</text>
+      <circle cx="600" cy="220" r="28" class="crossover-dot"/>
+      <text x="600" y="224" class="crossover-lbl" text-anchor="middle">GO-LIVE</text>
 
-      <!-- Managed-service band label -->
-      <text x="1100" y="210" class="ms-label" text-anchor="end">
-        <tspan x="1100" dy="-6">MANAGED</tspan>
-        <tspan x="1100" dy="14">SERVICE</tspan>
-      </text>
-
-      <!-- Phase nodes -->
-      <g class="phase-node env" transform="translate(420, 95)">
+      <!-- =========== PHASE NODES (new positions) ===========
+           Left loop CLOCKWISE:
+             P1 Discover  — bottom-right (470, 350)
+             P2 Prototype — bottom-left  (210, 350)
+             P3 Design    — top-left     (210, 90)
+             P4 Build     — top-right    (470, 90)
+           Right loop ANTICLOCKWISE:
+             P5 Adopt     — bottom       (860, 370)
+             P6 Operate   — top          (860, 70)
+      -->
+      <g class="phase-node env" transform="translate(470, 350)">
         <circle r="44"/>
         <text class="ph-num" text-anchor="middle" dy="-2">1</text>
         <text class="ph-lbl" text-anchor="middle" dy="18">DISCOVER</text>
       </g>
-      <g class="phase-node env" transform="translate(150, 95)">
+      <g class="phase-node env" transform="translate(210, 350)">
         <circle r="44"/>
         <text class="ph-num" text-anchor="middle" dy="-2">2</text>
         <text class="ph-lbl" text-anchor="middle" dy="18">PROTOTYPE</text>
       </g>
-      <g class="phase-node tra" transform="translate(150, 325)">
+      <g class="phase-node tra" transform="translate(210, 90)">
         <circle r="44"/>
         <text class="ph-num" text-anchor="middle" dy="-2">3</text>
         <text class="ph-lbl" text-anchor="middle" dy="18">DESIGN</text>
       </g>
-      <g class="phase-node tra" transform="translate(420, 325)">
+      <g class="phase-node tra" transform="translate(470, 90)">
         <circle r="44"/>
         <text class="ph-num" text-anchor="middle" dy="-2">4</text>
         <text class="ph-lbl" text-anchor="middle" dy="18">BUILD</text>
       </g>
-      <g class="phase-node ope" transform="translate(860, 95)">
+      <g class="phase-node ope" transform="translate(860, 370)">
         <circle r="44"/>
         <text class="ph-num" text-anchor="middle" dy="-2">5</text>
         <text class="ph-lbl" text-anchor="middle" dy="18">ADOPT</text>
       </g>
-      <g class="phase-node ope" transform="translate(860, 325)">
+      <g class="phase-node ope" transform="translate(860, 70)">
         <circle r="44"/>
         <text class="ph-num" text-anchor="middle" dy="-2">6</text>
         <text class="ph-lbl" text-anchor="middle" dy="18">OPERATE</text>
@@ -641,9 +694,9 @@
     </svg>
 
     <div class="loop-legend">
-      <div class="li"><span class="swatch solid-cyan"></span>Delivery flow · 1 → 4</div>
-      <div class="li"><span class="swatch solid-mint"></span>Managed-service flow · 5 → 6</div>
-      <div class="li"><span class="swatch dashed-amber"></span>Pivot-back · iteration within a phase</div>
+      <div class="li"><span class="swatch solid-cyan"></span>Delivery flow · clockwise 1 → 2 → 3 → 4 → Go-live</div>
+      <div class="li"><span class="swatch solid-mint"></span>Operate flow · anticlockwise Go-live → 5 → 6</div>
+      <div class="li"><span class="swatch dashed-amber"></span>Pivot-back · iteration &amp; return cycle</div>
     </div>
   </section>
 

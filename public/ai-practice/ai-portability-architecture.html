@@ -1,0 +1,871 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI Portability Architecture · Data#3</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy-0:#050d1f;
+    --navy-1:#0a1530;
+    --navy-2:#0f1f3d;
+    --navy-3:#142847;
+    --navy-4:#1a3358;
+    --navy-5:#234680;
+    --cyan:#4dd2f0;
+    --cyan-2:#7fdef5;
+    --cyan-3:#2bb5d8;
+    --magenta:#ff66c4;
+    --purple:#c084fc;
+    --amber:#fbbf24;
+    --mint:#5eead4;
+    --good:#5eead4;
+    --bad:#f87171;
+    --ink:#ffffff;
+    --ink-2:#c8d4e6;
+    --ink-3:#8fa3c0;
+    --ink-4:#5d7193;
+    --rule:rgba(255,255,255,.08);
+    --rule-2:rgba(255,255,255,.12);
+
+    /* Consumption mode accents */
+    --mode-public:#4dd2f0;
+    --mode-private:#fbbf24;
+    --mode-hybrid:#c084fc;
+
+    /* Layer colours — subtle gradient top-to-bottom */
+    --layer-7:#7fdef5;
+    --layer-6:#4dd2f0;
+    --layer-5:#5eead4;
+    --layer-4:#a78bfa;
+    --layer-3:#c084fc;
+    --layer-2:#f472b6;
+    --layer-1:#fbbf24;
+  }
+  *{box-sizing:border-box}
+  html,body{
+    margin:0;padding:0;
+    background:var(--navy-1);
+    color:var(--ink);
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    font-size:15px;line-height:1.55;
+  }
+  a{color:inherit;text-decoration:none}
+
+  .d3{display:inline}
+  .d3 sup{font-size:.62em;font-weight:800;position:relative;top:-.5em;margin:0 .05em 0 .04em;line-height:0}
+
+  .pg-breadcrumb{background:var(--navy-2);border-bottom:1px solid var(--rule)}
+  .pg-breadcrumb .wrap{max-width:1320px;margin:0 auto;padding:14px 32px;font-size:12.5px;color:var(--ink-3)}
+  .pg-breadcrumb a{color:var(--ink-3);transition:color .15s}
+  .pg-breadcrumb a:hover{color:var(--cyan)}
+  .pg-breadcrumb .sep{margin:0 10px;opacity:.5}
+  .pg-breadcrumb .here{color:var(--ink-2)}
+
+  .wrap{max-width:1320px;margin:0 auto;padding:40px 32px 80px}
+
+  /* ============ HERO ============ */
+  header.page-hero{margin-bottom:30px}
+  header.page-hero .eyebrow{
+    display:inline-block;font-size:11px;font-weight:700;
+    letter-spacing:.18em;text-transform:uppercase;
+    color:var(--cyan);margin-bottom:10px;
+  }
+  header.page-hero h1{
+    font-size:46px;font-weight:800;line-height:1.05;margin:0 0 14px;
+    letter-spacing:-.025em;
+    background:linear-gradient(90deg,var(--ink) 0%,var(--cyan-2) 45%,var(--cyan) 80%,var(--mint) 100%);
+    -webkit-background-clip:text;background-clip:text;
+    -webkit-text-fill-color:transparent;color:transparent;
+  }
+  header.page-hero p.lede{
+    font-size:16.5px;color:var(--ink-2);max-width:920px;margin:0 0 20px;
+  }
+  header.page-hero p.lede b{color:var(--cyan-2);font-weight:600}
+  .thesis{
+    display:inline-flex;gap:10px;align-items:center;flex-wrap:wrap;
+    background:var(--navy-3);border:1px solid var(--rule-2);
+    border-left:3px solid var(--cyan);
+    padding:12px 18px;border-radius:10px;
+    font-size:13.5px;color:var(--ink-2);margin-bottom:18px;
+  }
+  .thesis b{color:var(--cyan)}
+  .thesis .sep{opacity:.4;margin:0 4px}
+
+  .anchors{display:flex;gap:14px;flex-wrap:wrap}
+  .anchors .chip{
+    background:var(--navy-3);border:1px solid var(--rule-2);
+    border-radius:10px;padding:12px 18px;
+    display:flex;flex-direction:column;gap:2px;
+    min-width:180px;
+  }
+  .anchors .chip .n{
+    font-size:24px;font-weight:800;color:var(--cyan);
+    font-variant-numeric:tabular-nums;letter-spacing:-.02em;line-height:1.1;
+  }
+  .anchors .chip .lbl{
+    font-size:11px;color:var(--ink-3);
+    text-transform:uppercase;letter-spacing:.12em;font-weight:600;
+  }
+
+  /* ============ MODE TOGGLE (sticky) ============ */
+  .mode-toggle-wrap{
+    position:sticky;top:0;z-index:40;
+    background:rgba(10,21,48,.88);
+    backdrop-filter:blur(14px);
+    -webkit-backdrop-filter:blur(14px);
+    border-bottom:1px solid var(--rule-2);
+    margin:30px -32px 20px;
+    padding:16px 32px;
+  }
+  .mode-toggle{
+    display:flex;gap:10px;max-width:1320px;margin:0 auto;align-items:center;flex-wrap:wrap;
+  }
+  .mode-toggle-label{
+    font-size:11px;color:var(--ink-3);
+    text-transform:uppercase;letter-spacing:.14em;font-weight:700;
+    margin-right:4px;
+  }
+  .mode-btn{
+    background:var(--navy-3);
+    border:1px solid var(--rule-2);
+    color:var(--ink-2);
+    padding:10px 18px 10px 14px;border-radius:10px;
+    font-size:13px;font-weight:600;
+    cursor:pointer;transition:all .22s;
+    display:flex;align-items:center;gap:10px;
+    font-family:inherit;
+  }
+  .mode-btn:hover{border-color:var(--cyan);color:var(--ink)}
+  .mode-btn .dot{
+    width:10px;height:10px;border-radius:50%;flex-shrink:0;
+  }
+  .mode-btn[data-mode="public"]    .dot{background:var(--mode-public)}
+  .mode-btn[data-mode="private"]   .dot{background:var(--mode-private)}
+  .mode-btn[data-mode="hybrid"]    .dot{background:var(--mode-hybrid)}
+  .mode-btn .mode-sub{
+    font-size:10.5px;color:var(--ink-4);margin-left:6px;font-weight:500;
+  }
+  .mode-btn.active{
+    background:var(--navy-4);color:var(--ink);
+    box-shadow:0 0 0 3px rgba(77,210,240,.18);
+  }
+  body[data-mode="public"]  .mode-btn[data-mode="public"] {border-color:var(--mode-public); background:var(--navy-4); box-shadow:0 0 0 3px rgba(77,210,240,.18)}
+  body[data-mode="private"] .mode-btn[data-mode="private"]{border-color:var(--mode-private);background:var(--navy-4); box-shadow:0 0 0 3px rgba(251,191,36,.18)}
+  body[data-mode="hybrid"]  .mode-btn[data-mode="hybrid"] {border-color:var(--mode-hybrid); background:var(--navy-4); box-shadow:0 0 0 3px rgba(192,132,252,.18)}
+
+  .mode-description{
+    margin-top:10px;font-size:12.5px;color:var(--ink-3);
+    max-width:1320px;margin-left:auto;margin-right:auto;
+  }
+  .mode-description b{color:var(--cyan)}
+
+  /* ============ LAYER STACK (the hero visual) ============ */
+  .stack-wrap{
+    position:relative;
+    background:var(--navy-2);
+    border:1px solid var(--rule-2);
+    border-radius:14px;
+    padding:26px;
+    margin-bottom:24px;
+    transition:box-shadow .5s;
+  }
+  body[data-mode="public"]  .stack-wrap{box-shadow:0 0 0 1px rgba(77,210,240,.25), 0 0 60px rgba(77,210,240,.12)}
+  body[data-mode="private"] .stack-wrap{box-shadow:0 0 0 1px rgba(251,191,36,.25), 0 0 60px rgba(251,191,36,.12)}
+  body[data-mode="hybrid"]  .stack-wrap{box-shadow:0 0 0 1px rgba(192,132,252,.25), 0 0 60px rgba(192,132,252,.12)}
+
+  .stack-head{
+    display:flex;justify-content:space-between;align-items:flex-end;
+    margin-bottom:18px;gap:20px;flex-wrap:wrap;
+  }
+  .stack-head h2{
+    font-size:11px;text-transform:uppercase;letter-spacing:.18em;
+    color:var(--cyan);margin:0 0 4px;font-weight:700;
+  }
+  .stack-head .stack-sub{
+    font-size:13px;color:var(--ink-3);max-width:620px;
+  }
+  .stack-head .wrap-badge{
+    display:flex;align-items:center;gap:8px;
+    background:linear-gradient(135deg,rgba(94,234,212,.14),rgba(77,210,240,.08));
+    border:1px solid rgba(94,234,212,.35);
+    border-radius:20px;padding:6px 14px;
+    font-size:11px;color:var(--mint);font-weight:700;
+    text-transform:uppercase;letter-spacing:.1em;
+    white-space:nowrap;
+  }
+  .stack-head .wrap-badge::before{
+    content:"";width:6px;height:6px;border-radius:50%;
+    background:var(--mint);box-shadow:0 0 8px var(--mint);
+    animation:pulse 2s infinite;
+  }
+  @keyframes pulse{
+    0%,100%{opacity:1}50%{opacity:.4}
+  }
+
+  .layer-stack{
+    display:flex;flex-direction:column;gap:8px;
+  }
+  .layer-card{
+    background:var(--navy-3);
+    border:1px solid var(--rule-2);
+    border-left:4px solid var(--layer-7);
+    border-radius:10px;
+    padding:14px 20px 14px 18px;
+    display:grid;
+    grid-template-columns:44px 1fr 2fr auto;
+    gap:18px;align-items:center;
+    transition:background .3s, border-color .3s, transform .2s;
+  }
+  .layer-card:hover{background:var(--navy-4);transform:translateX(2px)}
+  .layer-card[data-layer="7"]{border-left-color:var(--layer-7)}
+  .layer-card[data-layer="6"]{border-left-color:var(--layer-6)}
+  .layer-card[data-layer="5"]{border-left-color:var(--layer-5)}
+  .layer-card[data-layer="4"]{border-left-color:var(--layer-4)}
+  .layer-card[data-layer="3"]{border-left-color:var(--layer-3)}
+  .layer-card[data-layer="2"]{border-left-color:var(--layer-2)}
+  .layer-card[data-layer="1"]{border-left-color:var(--layer-1)}
+
+  .layer-num{
+    font-size:26px;font-weight:900;line-height:1;
+    font-variant-numeric:tabular-nums;
+    text-align:center;
+    color:rgba(255,255,255,.18);
+    letter-spacing:-.04em;
+  }
+  .layer-card[data-layer="7"] .layer-num{color:rgba(127,222,245,.5)}
+  .layer-card[data-layer="6"] .layer-num{color:rgba(77,210,240,.5)}
+  .layer-card[data-layer="5"] .layer-num{color:rgba(94,234,212,.5)}
+  .layer-card[data-layer="4"] .layer-num{color:rgba(167,139,250,.5)}
+  .layer-card[data-layer="3"] .layer-num{color:rgba(192,132,252,.5)}
+  .layer-card[data-layer="2"] .layer-num{color:rgba(244,114,182,.5)}
+  .layer-card[data-layer="1"] .layer-num{color:rgba(251,191,36,.5)}
+
+  .layer-name-col{display:flex;flex-direction:column;gap:3px;min-width:0}
+  .layer-name{
+    font-size:15px;font-weight:800;color:var(--ink);
+    letter-spacing:-.01em;line-height:1.2;
+  }
+  .layer-role{
+    font-size:11.5px;color:var(--ink-3);line-height:1.35;
+  }
+
+  .layer-components{
+    display:flex;gap:8px;flex-wrap:wrap;min-width:0;
+  }
+  .comp-pill{
+    background:rgba(255,255,255,.05);
+    border:1px solid var(--rule-2);
+    border-radius:16px;
+    padding:6px 13px;
+    font-size:11.5px;font-weight:600;
+    color:var(--ink);
+    white-space:nowrap;
+    transition:all .35s;
+  }
+  body[data-mode="public"]  .comp-pill{border-color:rgba(77,210,240,.3); background:rgba(77,210,240,.08); color:var(--cyan-2)}
+  body[data-mode="private"] .comp-pill{border-color:rgba(251,191,36,.3); background:rgba(251,191,36,.08); color:#fde68a}
+  body[data-mode="hybrid"]  .comp-pill{border-color:rgba(192,132,252,.3);background:rgba(192,132,252,.08); color:#e9d5ff}
+
+  .layer-proto{
+    display:flex;flex-direction:column;align-items:flex-end;gap:3px;
+    font-size:9.5px;color:var(--ink-4);
+    text-transform:uppercase;letter-spacing:.1em;font-weight:700;
+    min-width:84px;
+  }
+  .layer-proto .proto-lbl{opacity:.7}
+  .layer-proto .proto-tag{
+    background:var(--navy-2);
+    border:1px solid var(--rule-2);
+    padding:3px 10px;border-radius:12px;
+    color:var(--cyan);font-size:10px;font-weight:800;letter-spacing:.08em;
+  }
+
+  /* ============ SUBSTITUTION MATRIX ============ */
+  .matrix-wrap{
+    background:var(--navy-2);
+    border:1px solid var(--rule-2);
+    border-radius:14px;
+    padding:24px 28px;
+    margin-bottom:24px;
+    overflow-x:auto;
+  }
+  .matrix-wrap h2{
+    font-size:11px;text-transform:uppercase;letter-spacing:.18em;
+    color:var(--cyan);margin:0 0 6px;font-weight:700;
+  }
+  .matrix-wrap .m-sub{font-size:13px;color:var(--ink-3);margin-bottom:18px;max-width:820px}
+  .matrix-wrap .m-sub b{color:var(--ink-2)}
+
+  .matrix{
+    width:100%;border-collapse:separate;border-spacing:0;
+    font-size:12.5px;
+    min-width:920px;
+  }
+  .matrix th,.matrix td{
+    padding:12px 14px;text-align:left;
+    border-bottom:1px solid var(--rule);
+    vertical-align:top;
+  }
+  .matrix thead th{
+    font-size:10px;color:var(--ink-3);font-weight:700;
+    text-transform:uppercase;letter-spacing:.12em;
+    background:var(--navy-3);
+    position:sticky;top:80px;
+  }
+  .matrix thead th.mode-col{
+    text-align:left;
+  }
+  .matrix thead th .mode-dot{
+    display:inline-block;width:8px;height:8px;border-radius:50%;
+    margin-right:6px;vertical-align:middle;
+  }
+  .matrix thead th.public   .mode-dot{background:var(--mode-public)}
+  .matrix thead th.private  .mode-dot{background:var(--mode-private)}
+  .matrix thead th.hybrid   .mode-dot{background:var(--mode-hybrid)}
+
+  .matrix tbody tr:hover{background:rgba(255,255,255,.025)}
+  .matrix td.layer-cell{
+    font-weight:700;color:var(--ink);width:200px;
+  }
+  .matrix td.layer-cell .l-num{
+    font-size:10px;color:var(--ink-4);font-weight:800;
+    letter-spacing:.12em;text-transform:uppercase;display:block;margin-bottom:2px;
+  }
+  .matrix td.comps{color:var(--ink-2);line-height:1.55}
+  .matrix td.comps.highlight{background:rgba(255,255,255,.04)}
+  body[data-mode="public"]  .matrix td.public-col.comps {background:rgba(77,210,240,.08); border-left:2px solid var(--mode-public); color:var(--cyan-2)}
+  body[data-mode="private"] .matrix td.private-col.comps{background:rgba(251,191,36,.08); border-left:2px solid var(--mode-private); color:#fde68a}
+  body[data-mode="hybrid"]  .matrix td.hybrid-col.comps {background:rgba(192,132,252,.08);border-left:2px solid var(--mode-hybrid); color:#e9d5ff}
+
+  .matrix td.comps .dot{
+    display:inline-block;width:5px;height:5px;border-radius:50%;
+    background:var(--ink-4);margin-right:6px;vertical-align:middle;
+  }
+
+  /* ============ RESPONSIBLE AI WRAP PANEL ============ */
+  .rai-wrap{
+    background:linear-gradient(135deg,var(--navy-2),var(--navy-3));
+    border:1px solid rgba(94,234,212,.25);
+    border-radius:14px;
+    padding:24px 28px;
+    margin-bottom:24px;
+  }
+  .rai-wrap h2{
+    font-size:11px;text-transform:uppercase;letter-spacing:.18em;
+    color:var(--mint);margin:0 0 6px;font-weight:700;
+  }
+  .rai-wrap .r-sub{font-size:13px;color:var(--ink-3);margin-bottom:22px;max-width:900px}
+  .rai-flow{
+    display:grid;
+    grid-template-columns:1fr auto 1fr;
+    gap:16px;align-items:center;
+    margin-bottom:22px;
+  }
+  .rai-col{
+    background:rgba(255,255,255,.025);
+    border:1px solid var(--rule-2);
+    border-radius:10px;padding:14px 16px;
+  }
+  .rai-col .col-head{
+    font-size:10px;color:var(--mint);font-weight:800;
+    text-transform:uppercase;letter-spacing:.14em;margin-bottom:10px;
+    display:flex;align-items:center;gap:8px;
+  }
+  .rai-col .col-head .arrow{font-size:14px}
+  .rai-col.outbound .col-head{color:var(--cyan-2)}
+  .rai-col.inbound  .col-head{color:var(--mint)}
+  .rai-steps{display:flex;flex-direction:column;gap:6px}
+  .rai-step{
+    background:var(--navy-3);
+    border:1px solid var(--rule);
+    border-radius:6px;
+    padding:7px 11px;
+    font-size:11.5px;color:var(--ink-2);
+    display:flex;align-items:center;gap:8px;
+  }
+  .rai-step .step-num{
+    font-size:9px;color:var(--ink-4);font-weight:800;
+    min-width:14px;
+  }
+  .rai-step b{color:var(--ink);font-weight:700}
+
+  .rai-llm{
+    background:linear-gradient(135deg,var(--cyan),var(--purple));
+    color:var(--navy-0);
+    border-radius:50%;
+    width:84px;height:84px;
+    display:flex;align-items:center;justify-content:center;
+    font-weight:800;font-size:14px;
+    text-align:center;line-height:1;
+    box-shadow:0 0 30px rgba(77,210,240,.35);
+    flex-shrink:0;
+  }
+
+  .rai-footer{
+    display:flex;gap:10px;flex-wrap:wrap;
+    padding-top:16px;border-top:1px solid var(--rule);
+    font-size:11px;color:var(--ink-3);
+  }
+  .rai-footer .map-chip{
+    background:rgba(94,234,212,.08);
+    border:1px solid rgba(94,234,212,.2);
+    border-radius:20px;padding:4px 12px;
+    color:var(--mint);font-weight:600;
+  }
+
+  /* ============ INTEROP FABRIC ============ */
+  .interop{
+    background:var(--navy-2);
+    border:1px solid var(--rule-2);
+    border-radius:14px;
+    padding:24px 28px;
+    margin-bottom:24px;
+  }
+  .interop h2{
+    font-size:11px;text-transform:uppercase;letter-spacing:.18em;
+    color:var(--cyan);margin:0 0 6px;font-weight:700;
+  }
+  .interop .i-sub{font-size:13px;color:var(--ink-3);margin-bottom:18px;max-width:900px}
+  .interop .i-sub b{color:var(--cyan)}
+  .proto-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+    gap:14px;
+  }
+  .proto-card{
+    background:var(--navy-3);
+    border:1px solid var(--rule-2);
+    border-radius:10px;
+    padding:16px 18px;
+  }
+  .proto-card .proto-name{
+    font-size:14px;font-weight:800;color:var(--ink);
+    display:flex;align-items:center;gap:10px;margin-bottom:3px;
+  }
+  .proto-card .proto-name .tag{
+    font-size:9px;font-weight:800;padding:3px 8px;border-radius:12px;
+    background:rgba(77,210,240,.12);color:var(--cyan);
+    letter-spacing:.08em;text-transform:uppercase;
+  }
+  .proto-card .proto-name .tag.lf{
+    background:rgba(94,234,212,.14);color:var(--mint);
+  }
+  .proto-card .proto-seam{
+    font-size:10.5px;color:var(--ink-4);font-weight:600;
+    text-transform:uppercase;letter-spacing:.1em;margin-bottom:9px;
+  }
+  .proto-card .proto-desc{
+    font-size:12px;color:var(--ink-2);line-height:1.5;
+  }
+  .proto-card .proto-adopt{
+    margin-top:10px;padding-top:10px;border-top:1px solid var(--rule);
+    font-size:10.5px;color:var(--ink-3);
+  }
+  .proto-card .proto-adopt b{color:var(--ink-2)}
+
+  /* ============ CROSS-LINKS ============ */
+  .crosslinks{
+    background:var(--navy-2);
+    border:1px solid var(--rule-2);
+    border-radius:14px;
+    padding:22px 26px;
+    margin-bottom:24px;
+  }
+  .crosslinks h2{
+    font-size:11px;text-transform:uppercase;letter-spacing:.18em;
+    color:var(--cyan);margin:0 0 14px;font-weight:700;
+  }
+  .cl-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+    gap:12px;
+  }
+  .cl-card{
+    background:var(--navy-3);
+    border:1px solid var(--rule-2);
+    border-radius:10px;
+    padding:14px 16px;
+    transition:all .2s;
+    cursor:pointer;
+    display:block;
+  }
+  .cl-card:hover{
+    border-color:var(--cyan);
+    background:var(--navy-4);
+    transform:translateY(-1px);
+  }
+  .cl-card .cl-eb{
+    font-size:9.5px;color:var(--cyan);font-weight:800;
+    text-transform:uppercase;letter-spacing:.12em;margin-bottom:4px;
+  }
+  .cl-card .cl-title{
+    font-size:14px;font-weight:800;color:var(--ink);margin-bottom:3px;
+  }
+  .cl-card .cl-desc{
+    font-size:11.5px;color:var(--ink-3);line-height:1.4;
+  }
+
+  .footer-note{
+    text-align:center;color:var(--ink-4);font-size:11px;
+    margin-top:40px;letter-spacing:.02em;line-height:1.7;
+  }
+  .footer-note .verb-chain{
+    color:var(--ink-3);font-style:italic;display:block;margin-top:6px;
+  }
+  .footer-note a{color:var(--ink-3);text-decoration:underline}
+
+  @media (max-width:1020px){
+    .layer-card{
+      grid-template-columns:40px 1fr;
+      grid-template-rows:auto auto;
+      gap:10px 14px;
+    }
+    .layer-components{grid-column:2/3}
+    .layer-proto{grid-column:2/3;flex-direction:row;align-items:center;gap:8px;justify-content:flex-start}
+    .rai-flow{grid-template-columns:1fr;gap:20px}
+    .rai-llm{margin:0 auto}
+  }
+  @media (max-width:720px){
+    .wrap{padding:28px 20px 60px}
+    header.page-hero h1{font-size:32px}
+    .mode-toggle-wrap{margin:24px -20px 18px;padding:14px 20px}
+    .mode-btn{font-size:12px;padding:9px 14px}
+    .stack-wrap, .matrix-wrap, .rai-wrap, .interop, .crosslinks{padding:18px}
+  }
+</style>
+</head>
+<body data-mode="public">
+
+<nav class="pg-breadcrumb">
+  <div class="wrap" style="padding:14px 32px">
+    <a href="/links">Index</a>
+    <span class="sep">›</span>
+    <a href="/ai-practice/b.html">AI Practice</a>
+    <span class="sep">›</span>
+    <span class="here">AI Portability Architecture</span>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <header class="page-hero">
+    <div class="eyebrow">AI Factory · Technical Reference · v0.1</div>
+    <h1>AI Portability Architecture</h1>
+    <p class="lede">
+      Build once. Run anywhere. Right-size the consumption.
+      A seven-layer reference for enterprise AI — <b>vendor-neutral at the seams, instantiated three ways</b>: public cloud by default, private for regulated lighthouses, hybrid for air-gapped and edge. Every seam between layers is an open protocol. No lock-in by design.
+    </p>
+    <div class="thesis">
+      <b>Thesis</b><span class="sep">·</span>AI portability is what we sell<span class="sep">·</span><b>Mechanism</b><span class="sep">·</span>Open protocols at every seam<span class="sep">·</span><b>Outcome</b><span class="sep">·</span>Customers right-size public, private and edge
+    </div>
+    <div class="anchors">
+      <div class="chip"><div class="n">7</div><div class="lbl">Layers · UI to Infra</div></div>
+      <div class="chip"><div class="n">3</div><div class="lbl">Consumption modes</div></div>
+      <div class="chip"><div class="n">4</div><div class="lbl">Open protocols at the seams</div></div>
+    </div>
+  </header>
+
+  <!-- ============ MODE TOGGLE (sticky) ============ -->
+  <div class="mode-toggle-wrap">
+    <div class="mode-toggle">
+      <div class="mode-toggle-label">Consumption mode</div>
+      <button class="mode-btn" data-mode="public">
+        <span class="dot"></span>Public<span class="mode-sub">Azure default</span>
+      </button>
+      <button class="mode-btn" data-mode="private">
+        <span class="dot"></span>Private<span class="mode-sub">regulated lighthouse</span>
+      </button>
+      <button class="mode-btn" data-mode="hybrid">
+        <span class="dot"></span>Hybrid<span class="mode-sub">edge &amp; air-gapped</span>
+      </button>
+    </div>
+    <div class="mode-description" id="modeDesc">
+      <b>Public</b> — Microsoft-first, fastest time-to-value, per-token billing. The default path for 80% of the pipeline. Azure Landing Zone, Foundry Agent Service, Fabric + OneLake. Microsoft 365 Copilot at the top, AKS at the bottom.
+    </div>
+  </div>
+
+  <!-- ============ 7-LAYER STACK ============ -->
+  <div class="stack-wrap">
+    <div class="stack-head">
+      <div>
+        <h2>The seven-layer stack</h2>
+        <div class="stack-sub">Top-to-bottom: how a user intent becomes an agent action on grounded data, running on portable infrastructure. Each layer lists the two primary components for the currently selected consumption mode.</div>
+      </div>
+      <div class="wrap-badge">Responsible AI Wrap · all layers</div>
+    </div>
+
+    <div class="layer-stack" id="layerStack">
+      <!-- layers injected by JS -->
+    </div>
+  </div>
+
+  <!-- ============ SUBSTITUTION MATRIX ============ -->
+  <div class="matrix-wrap">
+    <h2>Substitution matrix — two components per cell, across all three modes</h2>
+    <div class="m-sub">The killer slide. Every cell shows the real components we put in that layer for that consumption mode. <b>Same seven layers, same open protocols, different runtime</b> — which is what "build once, run anywhere" actually looks like in a bill of materials.</div>
+    <table class="matrix">
+      <thead>
+        <tr>
+          <th>Layer</th>
+          <th class="mode-col public"><span class="mode-dot"></span>Public — Azure default</th>
+          <th class="mode-col private"><span class="mode-dot"></span>Private — regulated lighthouse</th>
+          <th class="mode-col hybrid"><span class="mode-dot"></span>Hybrid — edge &amp; air-gapped</th>
+        </tr>
+      </thead>
+      <tbody id="matrixBody">
+        <!-- rows injected by JS -->
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ============ RESPONSIBLE AI WRAP ============ -->
+  <div class="rai-wrap">
+    <h2>Responsible AI Wrap — applied to every layer, every interaction</h2>
+    <div class="r-sub">Governance is not a layer. It's a wrap. Every prompt outbound to a model and every response inbound from a model passes through the same bidirectional control plane — regardless of which consumption mode the customer is on. This is the "never bolted on at the end" principle made operational.</div>
+
+    <div class="rai-flow">
+      <div class="rai-col outbound">
+        <div class="col-head">Prompt journey<span class="arrow">→</span></div>
+        <div class="rai-steps">
+          <div class="rai-step"><span class="step-num">01</span><b>Secure Data Retrieval</b> — respects user identity, ACLs, row-level security</div>
+          <div class="rai-step"><span class="step-num">02</span><b>Grounding</b> — Fabric / OneLake / vector search / RAG injection</div>
+          <div class="rai-step"><span class="step-num">03</span><b>PII Masking</b> — Purview DLP, sensitivity labels, token swap</div>
+          <div class="rai-step"><span class="step-num">04</span><b>Prompt Defense</b> — Prompt Shields, injection detection, scope guards</div>
+          <div class="rai-step"><span class="step-num">05</span><b>Zero Data Retention</b> — contractual + technical enforcement</div>
+        </div>
+      </div>
+
+      <div class="rai-llm">MODEL<br>CALL</div>
+
+      <div class="rai-col inbound">
+        <div class="col-head"><span class="arrow">←</span>Response journey</div>
+        <div class="rai-steps">
+          <div class="rai-step"><span class="step-num">06</span><b>Content Safety</b> — harm, bias, toxicity scoring on every response</div>
+          <div class="rai-step"><span class="step-num">07</span><b>Groundedness Check</b> — hallucination detection against source corpus</div>
+          <div class="rai-step"><span class="step-num">08</span><b>PII De-masking</b> — rehydrate tokens after the model call</div>
+          <div class="rai-step"><span class="step-num">09</span><b>Agent Identity &amp; Audit</b> — Entra Agent ID on every action, full audit trail</div>
+          <div class="rai-step"><span class="step-num">10</span><b>Continuous Evaluation</b> — drift, quality, red-team feedback loop</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="rai-footer">
+      <span style="color:var(--ink-3);margin-right:6px">Mapped externally to →</span>
+      <span class="map-chip">Gartner AI TRiSM</span>
+      <span class="map-chip">Forrester AEGIS</span>
+      <span class="map-chip">NIST AI RMF</span>
+      <span class="map-chip">EU AI Act</span>
+      <span class="map-chip">OWASP Agentic AI Top 10</span>
+      <span class="map-chip">ISO/IEC 42001</span>
+    </div>
+  </div>
+
+  <!-- ============ INTEROP FABRIC ============ -->
+  <div class="interop">
+    <h2>The interop fabric — every seam is an open standard</h2>
+    <div class="i-sub">Four protocols cover the four seams of the stack. Three are <b>open, multi-vendor</b> and in production. The fourth is the lowest-common-denominator fallback that every SDK supports. This is what makes "no vendor lock-in" a diagrammable claim instead of a slogan.</div>
+    <div class="proto-grid">
+
+      <div class="proto-card">
+        <div class="proto-name">MCP <span class="tag lf">Linux Foundation</span></div>
+        <div class="proto-seam">Agent ↕ Tools &amp; Knowledge</div>
+        <div class="proto-desc">Model Context Protocol. JSON-RPC 2.0 over stdio or streamable HTTP. Three primitives: Tools, Resources, Prompts. Donated to the Linux Foundation in December 2025 — now vendor-neutral.</div>
+        <div class="proto-adopt"><b>Adopted by:</b> Microsoft · Google · AWS · Salesforce · ServiceNow · Anthropic · OpenAI · Databricks</div>
+      </div>
+
+      <div class="proto-card">
+        <div class="proto-name">A2A <span class="tag">Open proposal</span></div>
+        <div class="proto-seam">Agent ↔ Agent (peer)</div>
+        <div class="proto-desc">Agent-to-Agent protocol. Capability cards, task delegation, multi-vendor agent choreography. Handles how two agents find each other and collaborate across trust boundaries.</div>
+        <div class="proto-adopt"><b>50+ launch partners</b> including Salesforce, SAP, ServiceNow, Workday, Atlassian, Accenture, Deloitte, TCS</div>
+      </div>
+
+      <div class="proto-card">
+        <div class="proto-name">AG-UI <span class="tag">Emerging</span></div>
+        <div class="proto-seam">Frontend ↕ Agent</div>
+        <div class="proto-desc">Agent-User Interaction protocol. HTTP + SSE streaming of agent events to any web UI. Shared state, human-in-the-loop approvals, generative UI. Microsoft Agent Framework integrated.</div>
+        <div class="proto-adopt"><b>Led by:</b> CopilotKit + Microsoft · early adoption across Agent SDKs</div>
+      </div>
+
+      <div class="proto-card">
+        <div class="proto-name">OpenAPI <span class="tag">Baseline</span></div>
+        <div class="proto-seam">Tools fallback</div>
+        <div class="proto-desc">OpenAPI + function calling. The legacy but universal way to expose tools to a model. Every MCP server is effectively a wrapper over this; every vendor SDK supports it natively. The safety net.</div>
+        <div class="proto-adopt"><b>Universal.</b> Supported everywhere.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============ CROSS-LINKS ============ -->
+  <div class="crosslinks">
+    <h2>See also — the rest of the AI Factory story</h2>
+    <div class="cl-grid">
+      <a class="cl-card" href="/ai-practice/lifecycle.html">
+        <div class="cl-eb">Delivery shape</div>
+        <div class="cl-title">AI Service Lifecycle</div>
+        <div class="cl-desc">Six operational phases under three executive ones. What happens when, and which squads run each phase.</div>
+      </a>
+      <a class="cl-card" href="/ai-practice/squads.html">
+        <div class="cl-eb">Commercial shape</div>
+        <div class="cl-title">Squad Economics</div>
+        <div class="cl-desc">The interactive unit-economics model. What a sprint costs, what a squad delivers, how break-even and scaling actually look.</div>
+      </a>
+      <a class="cl-card" href="/ai-practice/b.html">
+        <div class="cl-eb">Narrative shape</div>
+        <div class="cl-title">AI Factory landing page</div>
+        <div class="cl-desc">The sectioned story: why agentic AI, how we deliver, what we build on. The customer-facing narrative version.</div>
+      </a>
+    </div>
+  </div>
+
+  <div class="footer-note">
+    v0.1 · AI Portability Architecture · seven layers · three consumption modes · every seam open by design · <a href="/links">back to index</a>
+    <span class="verb-chain"><span class="d3">Data<sup>#</sup>3</span> advise, build, secure, optimise and manage AI services at enterprise scale.</span>
+  </div>
+
+</div>
+
+<script>
+  const LAYERS = [
+    {
+      n:7, id:'experience',
+      name:'Experience',
+      role:'UI, channels, conversational surfaces',
+      protocol:'AG-UI',
+      components:{
+        public:   ['Microsoft 365 Copilot','Copilot Studio'],
+        private:  ['Custom Web UI','OpenShift Gen AI Studio'],
+        hybrid:   ['Field App (offline-capable)','Embedded AG-UI client']
+      }
+    },
+    {
+      n:6, id:'agent',
+      name:'Agent',
+      role:'Agents as first-class identified principals · catalog · lifecycle',
+      protocol:'A2A',
+      components:{
+        public:   ['Foundry Agent Service','Microsoft Agent Framework'],
+        private:  ['watsonx Agent Lab','BeeAI Framework'],
+        hybrid:   ['NVIDIA AgentIQ','Strands / LangGraph SDK']
+      }
+    },
+    {
+      n:5, id:'orchestration',
+      name:'Orchestration',
+      role:'Multi-agent patterns · routing · workflows · evaluation',
+      protocol:'A2A',
+      components:{
+        public:   ['Foundry Control Plane','Azure AI Foundry Workflows'],
+        private:  ['Red Hat llm-d','OpenShift AI Pipelines'],
+        hybrid:   ['LangGraph','CrewAI']
+      }
+    },
+    {
+      n:4, id:'model',
+      name:'Model',
+      role:'Catalog · serving · fine-tune · evaluation',
+      protocol:'OpenAPI',
+      components:{
+        public:   ['Azure OpenAI (GPT-5, o-series)','Foundry Model Catalog'],
+        private:  ['NVIDIA NIM (Granite, Llama, Mistral)','vLLM on OpenShift'],
+        hybrid:   ['Phi-3 on-device','NIM Edge containers']
+      }
+    },
+    {
+      n:3, id:'knowledge',
+      name:'Knowledge',
+      role:'RAG · vector · grounding · lineage · lakehouse',
+      protocol:'MCP',
+      components:{
+        public:   ['Microsoft Fabric + OneLake','Azure AI Search'],
+        private:  ['watsonx.data (Iceberg)','Milvus on OpenShift'],
+        hybrid:   ['Local vector DB','NeMo Retriever Edge']
+      }
+    },
+    {
+      n:2, id:'tools',
+      name:'Tools &amp; Actions',
+      role:'MCP endpoints · connectors · function calls · 1,400+ integrations',
+      protocol:'MCP',
+      components:{
+        public:   ['MCP Servers + M365 connectors','Power Platform actions'],
+        private:  ['Custom MCP servers','OpenAPI tool specs on OpenShift'],
+        hybrid:   ['Local MCP bridges','Function calling over OpenAPI']
+      }
+    },
+    {
+      n:1, id:'platform',
+      name:'Platform &amp; Infrastructure',
+      role:'Landing zone · K8s · container substrate · GPU compute',
+      protocol:'OCI / K8s',
+      components:{
+        public:   ['Azure Landing Zone','Azure Kubernetes Service'],
+        private:  ['OpenShift + NVIDIA GPU Operator','NextDC sovereign hosting'],
+        hybrid:   ['Azure Arc','K3s / edge Kubernetes']
+      }
+    }
+  ];
+
+  const MODE_DESC = {
+    public:  '<b>Public</b> — Microsoft-first, fastest time-to-value, per-token billing. The default path for 80% of the pipeline. Azure Landing Zone, Foundry Agent Service, Fabric + OneLake. Microsoft 365 Copilot at the top, AKS at the bottom.',
+    private: '<b>Private</b> — regulated lighthouse customers. NVIDIA NIM containers on OpenShift AI at NextDC. Customer-owned identity, customer-owned keys, fully isolated network, sovereign data perimeter. Granite / Llama / Mistral models. This is how Defence, healthcare, critical infrastructure and intelligence work looks.',
+    hybrid:  '<b>Hybrid &amp; Edge</b> — disconnected, bandwidth-constrained, or field-deployed. Azure Arc reaches an edge K3s cluster running NIM Edge containers and on-device Phi-3. MCP bridges let edge agents call cloud tools when they are online. Same seven layers, compressed runtime.'
+  };
+
+  function renderStack(mode){
+    const stack = document.getElementById('layerStack');
+    stack.innerHTML = LAYERS.map(L => `
+      <div class="layer-card" data-layer="${L.n}" data-layer-id="${L.id}">
+        <div class="layer-num">${L.n}</div>
+        <div class="layer-name-col">
+          <div class="layer-name">${L.name}</div>
+          <div class="layer-role">${L.role}</div>
+        </div>
+        <div class="layer-components">
+          ${L.components[mode].map(c => `<span class="comp-pill">${c}</span>`).join('')}
+        </div>
+        <div class="layer-proto">
+          <span class="proto-lbl">Open seam</span>
+          <span class="proto-tag">${L.protocol}</span>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function renderMatrix(){
+    const body = document.getElementById('matrixBody');
+    body.innerHTML = LAYERS.map(L => `
+      <tr data-layer="${L.n}">
+        <td class="layer-cell"><span class="l-num">Layer ${L.n}</span>${L.name}</td>
+        <td class="comps public-col">${L.components.public.map(c => `<div><span class="dot"></span>${c}</div>`).join('')}</td>
+        <td class="comps private-col">${L.components.private.map(c => `<div><span class="dot"></span>${c}</div>`).join('')}</td>
+        <td class="comps hybrid-col">${L.components.hybrid.map(c => `<div><span class="dot"></span>${c}</div>`).join('')}</td>
+      </tr>
+    `).join('');
+  }
+
+  function setMode(mode){
+    document.body.setAttribute('data-mode', mode);
+    document.querySelectorAll('.mode-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.mode === mode);
+    });
+    document.getElementById('modeDesc').innerHTML = MODE_DESC[mode];
+    renderStack(mode);
+  }
+
+  document.querySelectorAll('.mode-btn').forEach(btn => {
+    btn.addEventListener('click', () => setMode(btn.dataset.mode));
+  });
+
+  // Init
+  renderMatrix();
+  setMode('public');
+</script>
+</body>
+</html>

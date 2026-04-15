@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Data#3 — AI Portability</title>
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --d3-red: #E60028;
+    --d3-red-dark: #B80020;
+    --ink: #0F1115;
+    --ink-2: #3A3F48;
+    --ink-3: #6B7280;
+    --bg: #FAFAF6;
+    --card: #FFFFFF;
+    --line: #E6E3D9;
+    --chip: #F2F0E8;
+    --warn: #8B6B00;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: -apple-system, "SF Pro Display", "Inter", "Segoe UI", system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.55;
+    font-size: 15px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .d3 { font-weight: 800; letter-spacing: -0.01em; }
+  .d3 sup {
+    font-size: 0.55em;
+    vertical-align: super;
+    color: var(--d3-red);
+    font-weight: 800;
+    margin: 0 1px;
+  }
+
+  .page {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 44px 56px 80px;
+  }
+
+  /* Masthead */
+  .masthead {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 18px;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 40px;
+  }
+  .brand { display: flex; align-items: center; gap: 18px; font-size: 20px; }
+  .rule { width: 32px; height: 1px; background: var(--ink-3); }
+  .kicker {
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    font-weight: 600;
+  }
+  .crosslink a {
+    color: var(--ink-2);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 8px 14px;
+    border: 1px solid var(--line);
+    border-radius: 100px;
+    transition: all 0.2s;
+  }
+  .crosslink a:hover { border-color: var(--d3-red); color: var(--d3-red); }
+
+  /* Hero */
+  .hero { margin-bottom: 56px; max-width: 900px; }
+  .hero-tag {
+    display: inline-block;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--d3-red);
+    font-weight: 700;
+    margin-bottom: 18px;
+    padding: 6px 12px;
+    background: rgba(230, 0, 40, 0.08);
+    border-radius: 4px;
+  }
+  .hero h1 {
+    font-size: 72px;
+    line-height: 0.95;
+    font-weight: 800;
+    letter-spacing: -0.035em;
+    margin-bottom: 18px;
+    color: var(--ink);
+  }
+  .hero h1 span { color: var(--d3-red); }
+  .hero .sub {
+    font-size: 22px;
+    font-weight: 500;
+    color: var(--ink-2);
+    margin-bottom: 14px;
+    letter-spacing: -0.01em;
+  }
+  .hero .promise {
+    font-size: 16px;
+    color: var(--ink-3);
+    max-width: 680px;
+    line-height: 1.6;
+  }
+
+  /* Three planes centrepiece */
+  .planes-wrap {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 44px 40px 36px;
+    margin-bottom: 56px;
+    position: relative;
+  }
+  .planes-wrap .label {
+    position: absolute;
+    top: 16px;
+    left: 20px;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    font-weight: 600;
+  }
+  .planes-svg { width: 100%; height: auto; display: block; max-width: 1100px; margin: 0 auto; }
+
+  /* Why portability — 4 levers */
+  .levers {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 56px;
+  }
+  .lever {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 24px 22px;
+    position: relative;
+    overflow: hidden;
+  }
+  .lever::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 3px;
+    background: var(--d3-red);
+    transform: scaleX(0.3);
+    transform-origin: left;
+    transition: transform 0.3s;
+  }
+  .lever:hover::before { transform: scaleX(1); }
+  .lever-num {
+    font-size: 11px;
+    color: var(--ink-3);
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    margin-bottom: 10px;
+  }
+  .lever h3 {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 10px;
+    color: var(--ink);
+  }
+  .lever p { font-size: 13px; color: var(--ink-2); line-height: 1.55; }
+
+  .quote {
+    grid-column: span 4;
+    margin-top: 8px;
+    padding: 22px 28px;
+    background: var(--ink);
+    color: #EDECE5;
+    border-radius: 10px;
+    font-size: 18px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    position: relative;
+  }
+  .quote::before {
+    content: "";
+    position: absolute;
+    left: 0; top: 20%;
+    width: 3px; height: 60%;
+    background: var(--d3-red);
+  }
+  .quote cite { display: block; font-size: 12px; font-style: normal; color: #9B9A93; margin-top: 8px; font-weight: 400; letter-spacing: 0.08em; text-transform: uppercase; }
+
+  /* Section heading */
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 22px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--line);
+  }
+  .section-head h2 {
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+  }
+  .section-head .meta {
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    font-weight: 600;
+  }
+
+  /* Workload fit matrix */
+  .matrix {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 56px;
+  }
+  .matrix-row {
+    display: grid;
+    grid-template-columns: 2.5fr 1fr 3fr;
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--line);
+    align-items: center;
+    gap: 20px;
+  }
+  .matrix-row:last-child { border-bottom: none; }
+  .matrix-row.header {
+    background: var(--chip);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    font-weight: 700;
+    padding: 14px 24px;
+  }
+  .matrix-row .workload { font-weight: 600; color: var(--ink); font-size: 14px; }
+  .matrix-row .plane-badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 5px 11px;
+    border-radius: 100px;
+    letter-spacing: 0.05em;
+  }
+  .plane-badge.public { background: #EAF1FB; color: #1E4B8E; }
+  .plane-badge.private { background: #F1ECE0; color: #6B5820; }
+  .plane-badge.edge { background: #FCE7EB; color: var(--d3-red-dark); }
+  .matrix-row .why { font-size: 13px; color: var(--ink-2); }
+
+  /* Vendor ecosystem */
+  .vendors {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 32px 28px;
+    margin-bottom: 40px;
+  }
+  .vendors-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+  .vendor-group {
+    padding: 18px 20px;
+    background: var(--bg);
+    border-radius: 8px;
+    border-left: 3px solid var(--d3-red);
+  }
+  .vendor-group .plane-name {
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+  .vendor-group .anchor {
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    margin-bottom: 4px;
+  }
+  .vendor-group .others {
+    font-size: 13px;
+    color: var(--ink-2);
+  }
+  .vendors-caption {
+    margin-top: 24px;
+    padding-top: 22px;
+    border-top: 1px solid var(--line);
+    font-size: 14px;
+    font-style: italic;
+    color: var(--ink-2);
+    text-align: center;
+  }
+
+  /* CaaS callout */
+  .caas {
+    background: linear-gradient(135deg, var(--d3-red) 0%, var(--d3-red-dark) 100%);
+    color: white;
+    border-radius: 12px;
+    padding: 40px 44px;
+    margin-bottom: 40px;
+    position: relative;
+    overflow: hidden;
+  }
+  .caas::before {
+    content: "CaaS";
+    position: absolute;
+    right: 32px; top: 12px;
+    font-size: 140px;
+    font-weight: 900;
+    opacity: 0.08;
+    letter-spacing: -0.05em;
+  }
+  .caas .tag {
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    font-weight: 700;
+    opacity: 0.85;
+    margin-bottom: 14px;
+  }
+  .caas h2 {
+    font-size: 32px;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    line-height: 1.15;
+    max-width: 720px;
+    position: relative;
+  }
+  .caas p {
+    margin-top: 12px;
+    font-size: 15px;
+    opacity: 0.9;
+    max-width: 640px;
+    position: relative;
+  }
+
+  /* Skills gate */
+  .gate {
+    display: flex;
+    gap: 22px;
+    align-items: flex-start;
+    padding: 24px 28px;
+    background: #FFF8E1;
+    border: 1px solid #F0E2A6;
+    border-left: 4px solid #C89B0E;
+    border-radius: 8px;
+    margin-bottom: 40px;
+  }
+  .gate .icon {
+    font-size: 22px;
+    flex-shrink: 0;
+    color: #8B6B00;
+    font-weight: 900;
+    line-height: 1;
+  }
+  .gate .content { flex: 1; }
+  .gate .content strong {
+    display: block;
+    font-size: 13px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #8B6B00;
+    margin-bottom: 6px;
+  }
+  .gate .content p {
+    font-size: 15px;
+    color: var(--ink);
+    font-weight: 500;
+    line-height: 1.5;
+  }
+  .gate cite {
+    display: block;
+    font-size: 11px;
+    font-style: normal;
+    color: #8B6B00;
+    margin-top: 6px;
+    letter-spacing: 0.05em;
+  }
+
+  /* Footer */
+  .footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 24px;
+    border-top: 1px solid var(--line);
+    font-size: 11px;
+    color: var(--ink-3);
+    letter-spacing: 0.05em;
+  }
+  .footer .crosslink-big {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--d3-red);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .footer .crosslink-big:hover { text-decoration: underline; }
+
+  @media (max-width: 900px) {
+    .page { padding: 32px 24px 60px; }
+    .hero h1 { font-size: 48px; }
+    .levers { grid-template-columns: repeat(2, 1fr); }
+    .quote { grid-column: span 2; }
+    .vendors-grid { grid-template-columns: 1fr; }
+    .matrix-row { grid-template-columns: 1fr; }
+    .matrix-row.header { display: none; }
+  }
+
+  @media print {
+    body { background: white; }
+    .crosslink, .footer .crosslink-big { display: none; }
+  }
+</style>
+</head>
+<body>
+  <div class="page">
+    <header class="masthead">
+      <div class="brand">
+        <span class="d3">Data<sup>#</sup>3</span>
+        <span class="rule"></span>
+        <span class="kicker">AI Practice · Portfolio View · 01 of 02</span>
+      </div>
+      <div class="crosslink"><a href="d.html">Non-linear Lifecycle →</a></div>
+    </header>
+
+    <section class="hero">
+      <span class="hero-tag">Portfolio Artefact A</span>
+      <h1>AI <span>Portability</span>.</h1>
+      <p class="sub">Build once. Run anywhere. Move anytime.</p>
+      <p class="promise">One AI workload, any plane — public cloud, private data centre, or edge — with portability baked into the architecture, not bolted on. The customer keeps control of where intelligence lives, what it costs, and who can turn it off.</p>
+    </section>
+
+    <section class="planes-wrap">
+      <div class="label">The three planes</div>
+      <svg class="planes-svg" viewBox="0 0 1100 380" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#E60028"/>
+          </marker>
+          <marker id="arrow-rev" viewBox="0 0 10 10" refX="1" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M 10 0 L 0 5 L 10 10 z" fill="#E60028"/>
+          </marker>
+        </defs>
+
+        <!-- Horizontal transport layer line -->
+        <line x1="80" y1="340" x2="1020" y2="340" stroke="#E6E3D9" stroke-width="1" stroke-dasharray="3 4"/>
+        <text x="550" y="362" text-anchor="middle" font-size="10" letter-spacing="2" fill="#6B7280" font-weight="600">TRANSPORT LAYER · BUILD ONCE · MOVE ANYTIME</text>
+
+        <!-- Public cloud card -->
+        <g>
+          <rect x="60" y="70" width="280" height="220" rx="10" fill="#FAFAF6" stroke="#E6E3D9" stroke-width="1.5"/>
+          <text x="200" y="108" text-anchor="middle" font-size="11" letter-spacing="2" fill="#E60028" font-weight="700">PUBLIC CLOUD</text>
+          <circle cx="200" cy="168" r="38" fill="none" stroke="#E60028" stroke-width="1.5"/>
+          <circle cx="200" cy="168" r="24" fill="none" stroke="#E60028" stroke-width="1.5" opacity="0.5"/>
+          <circle cx="200" cy="168" r="10" fill="#E60028"/>
+          <text x="200" y="238" text-anchor="middle" font-size="13" fill="#0F1115" font-weight="700">Elastic · Opex</text>
+          <text x="200" y="258" text-anchor="middle" font-size="11" fill="#3A3F48">Fastest time to value</text>
+          <text x="200" y="274" text-anchor="middle" font-size="11" fill="#3A3F48">Training &amp; inference at scale</text>
+        </g>
+
+        <!-- Private DC card -->
+        <g>
+          <rect x="410" y="70" width="280" height="220" rx="10" fill="#FAFAF6" stroke="#E6E3D9" stroke-width="1.5"/>
+          <text x="550" y="108" text-anchor="middle" font-size="11" letter-spacing="2" fill="#E60028" font-weight="700">PRIVATE DATA CENTRE</text>
+          <rect x="520" y="140" width="60" height="60" rx="2" fill="none" stroke="#E60028" stroke-width="1.5"/>
+          <rect x="528" y="148" width="44" height="4" fill="#E60028"/>
+          <rect x="528" y="156" width="44" height="4" fill="#E60028" opacity="0.6"/>
+          <rect x="528" y="164" width="44" height="4" fill="#E60028" opacity="0.4"/>
+          <rect x="528" y="178" width="10" height="14" fill="#E60028"/>
+          <text x="550" y="238" text-anchor="middle" font-size="13" fill="#0F1115" font-weight="700">Owned · Predictable</text>
+          <text x="550" y="258" text-anchor="middle" font-size="11" fill="#3A3F48">Data stays put</text>
+          <text x="550" y="274" text-anchor="middle" font-size="11" fill="#3A3F48">Regulated workloads &amp; HPC</text>
+        </g>
+
+        <!-- Edge card -->
+        <g>
+          <rect x="760" y="70" width="280" height="220" rx="10" fill="#FAFAF6" stroke="#E6E3D9" stroke-width="1.5"/>
+          <text x="900" y="108" text-anchor="middle" font-size="11" letter-spacing="2" fill="#E60028" font-weight="700">EDGE</text>
+          <circle cx="870" cy="170" r="8" fill="#E60028"/>
+          <circle cx="900" cy="155" r="8" fill="#E60028"/>
+          <circle cx="930" cy="170" r="8" fill="#E60028"/>
+          <circle cx="885" cy="190" r="8" fill="#E60028"/>
+          <circle cx="915" cy="190" r="8" fill="#E60028"/>
+          <line x1="870" y1="170" x2="900" y2="155" stroke="#E60028" stroke-width="1" opacity="0.5"/>
+          <line x1="900" y1="155" x2="930" y2="170" stroke="#E60028" stroke-width="1" opacity="0.5"/>
+          <line x1="870" y1="170" x2="885" y2="190" stroke="#E60028" stroke-width="1" opacity="0.5"/>
+          <line x1="885" y1="190" x2="915" y2="190" stroke="#E60028" stroke-width="1" opacity="0.5"/>
+          <line x1="915" y1="190" x2="930" y2="170" stroke="#E60028" stroke-width="1" opacity="0.5"/>
+          <text x="900" y="238" text-anchor="middle" font-size="13" fill="#0F1115" font-weight="700">Local · Offline-capable</text>
+          <text x="900" y="258" text-anchor="middle" font-size="11" fill="#3A3F48">Latency-critical</text>
+          <text x="900" y="274" text-anchor="middle" font-size="11" fill="#3A3F48">IoT · Manufacturing · Mining</text>
+        </g>
+
+        <!-- Transport arrows between planes -->
+        <path d="M 340 180 C 370 150, 385 150, 410 180" stroke="#E60028" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+        <path d="M 410 200 C 385 230, 370 230, 340 200" stroke="#E60028" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+        <path d="M 690 180 C 720 150, 735 150, 760 180" stroke="#E60028" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+        <path d="M 760 200 C 735 230, 720 230, 690 200" stroke="#E60028" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+      </svg>
+    </section>
+
+    <div class="section-head">
+      <h2>Why portability</h2>
+      <span class="meta">Four customer levers</span>
+    </div>
+
+    <section class="levers">
+      <div class="lever">
+        <div class="lever-num">01</div>
+        <h3>Cost</h3>
+        <p>Move workloads to where the economics win today. Training in public cloud burst, steady-state inference on owned infrastructure, edge where bandwidth is the tax.</p>
+      </div>
+      <div class="lever">
+        <div class="lever-num">02</div>
+        <h3>Security</h3>
+        <p>Keep regulated data on the plane your compliance officer can walk to. Move inference to the data, not the other way around.</p>
+      </div>
+      <div class="lever">
+        <div class="lever-num">03</div>
+        <h3>Control</h3>
+        <p>Own your intelligence. No single vendor can raise the price, throttle the API, or turn it off. Every workload has an exit.</p>
+      </div>
+      <div class="lever">
+        <div class="lever-num">04</div>
+        <h3>Sovereignty</h3>
+        <p>When the data must stay in-country, in-tenant, or in-building — the architecture already knows how to handle it without a rewrite.</p>
+      </div>
+      <blockquote class="quote">
+        "We need to be able to build once and have that portability. Part of our source needs to be our architecture and approach and how we deliver this stuff to allow complete flexibility for the customer."
+        <cite>— Matt Gooden, 15 April 2026</cite>
+      </blockquote>
+    </section>
+
+    <div class="section-head">
+      <h2>Workload fit</h2>
+      <span class="meta">What runs where, and why</span>
+    </div>
+
+    <section class="matrix">
+      <div class="matrix-row header">
+        <div>Workload</div>
+        <div>Natural plane</div>
+        <div>Why it lands there</div>
+      </div>
+      <div class="matrix-row">
+        <div class="workload">Training large foundation models</div>
+        <div><span class="plane-badge public">Public Cloud</span></div>
+        <div class="why">Elastic burst compute; pay only for the hours you train; GPUs on tap.</div>
+      </div>
+      <div class="matrix-row">
+        <div class="workload">Real-time inference at scale</div>
+        <div><span class="plane-badge public">Public Cloud</span></div>
+        <div class="why">Autoscale against unpredictable user demand; global edge POPs built in.</div>
+      </div>
+      <div class="matrix-row">
+        <div class="workload">Regulated data inference</div>
+        <div><span class="plane-badge private">Private DC</span></div>
+        <div class="why">Data stays in-tenant, in-country; audit trail under customer control.</div>
+      </div>
+      <div class="matrix-row">
+        <div class="workload">Steady-state high-volume inference</div>
+        <div><span class="plane-badge private">Private DC</span></div>
+        <div class="why">Predictable opex beats elastic pricing once the curve flattens.</div>
+      </div>
+      <div class="matrix-row">
+        <div class="workload">Latency-critical agentic workflows</div>
+        <div><span class="plane-badge edge">Edge</span></div>
+        <div class="why">Round-trips measured in milliseconds; no tolerance for cloud hops.</div>
+      </div>
+      <div class="matrix-row">
+        <div class="workload">IoT · manufacturing · mining telemetry</div>
+        <div><span class="plane-badge edge">Edge</span></div>
+        <div class="why">Bandwidth is the bottleneck; inference at the sensor beats shipping raw data.</div>
+      </div>
+    </section>
+
+    <div class="section-head">
+      <h2>Vendor ecosystem, underneath</h2>
+      <span class="meta">Anchors per plane</span>
+    </div>
+
+    <section class="vendors">
+      <div class="vendors-grid">
+        <div class="vendor-group">
+          <div class="plane-name">Public Cloud</div>
+          <div class="anchor">Microsoft</div>
+          <div class="others">Platform anchor · Azure · Copilot · Agent 365</div>
+        </div>
+        <div class="vendor-group">
+          <div class="plane-name">Private Data Centre</div>
+          <div class="anchor">NEXTDC</div>
+          <div class="others">with Dell · Cisco · Microsoft on-prem</div>
+        </div>
+        <div class="vendor-group">
+          <div class="plane-name">Edge &amp; HPC</div>
+          <div class="anchor">NVIDIA</div>
+          <div class="others">alongside Dell · Cisco — infra capability, not a practice</div>
+        </div>
+      </div>
+      <div class="vendors-caption">Vendor-agnostic portfolio. Vendor-ecosystem delivery. NVIDIA sits alongside Microsoft as a platform play — never competing with it.</div>
+    </section>
+
+    <section class="caas">
+      <div class="tag">Capability-as-a-Service</div>
+      <h2>We sell capability, not vendors.</h2>
+      <p>Our squads deliver AI outcomes across any plane, any vendor, any delivery model. The customer buys the capability; we pick the right tools to land it.</p>
+    </section>
+
+    <div class="gate">
+      <div class="icon">!</div>
+      <div class="content">
+        <strong>Skills commitment gate</strong>
+        <p>Every vendor opportunity carries a matching skills and resource commitment. Otherwise we're just a tech reseller.</p>
+        <cite>Matt Gooden, 15 April 2026 — Cisco CAI call</cite>
+      </div>
+    </div>
+
+    <footer class="footer">
+      <div>Data<sup style="font-size: 0.6em; vertical-align: super; color: var(--d3-red); font-weight: 800;">#</sup>3 &nbsp;·&nbsp; AI Practice Portfolio &nbsp;·&nbsp; Internal Draft for Dave Gold pitch</div>
+      <a class="crosslink-big" href="d.html">Delivered via our non-linear AI Service Lifecycle &nbsp;→</a>
+    </footer>
+  </div>
+</body>
+</html>

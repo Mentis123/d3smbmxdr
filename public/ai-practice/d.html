@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Data#3 — AI Service Lifecycle</title>
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --d3-red: #E60028;
+    --d3-red-dark: #B80020;
+    --ink: #0F1115;
+    --ink-2: #3A3F48;
+    --ink-3: #6B7280;
+    --bg: #FAFAF6;
+    --card: #FFFFFF;
+    --line: #E6E3D9;
+    --chip: #F2F0E8;
+
+    --envision: #1E4B8E;
+    --transform: #6B5820;
+    --operate: #7A1F2E;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: -apple-system, "SF Pro Display", "Inter", "Segoe UI", system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.55;
+    font-size: 15px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .d3 { font-weight: 800; letter-spacing: -0.01em; }
+  .d3 sup {
+    font-size: 0.55em;
+    vertical-align: super;
+    color: var(--d3-red);
+    font-weight: 800;
+    margin: 0 1px;
+  }
+
+  .page {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 44px 56px 80px;
+  }
+
+  /* Masthead */
+  .masthead {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 18px;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 40px;
+  }
+  .brand { display: flex; align-items: center; gap: 18px; font-size: 20px; }
+  .rule { width: 32px; height: 1px; background: var(--ink-3); }
+  .kicker {
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    font-weight: 600;
+  }
+  .crosslink a {
+    color: var(--ink-2);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 8px 14px;
+    border: 1px solid var(--line);
+    border-radius: 100px;
+    transition: all 0.2s;
+  }
+  .crosslink a:hover { border-color: var(--d3-red); color: var(--d3-red); }
+
+  /* Hero */
+  .hero { margin-bottom: 48px; max-width: 960px; }
+  .hero-tag {
+    display: inline-block;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--d3-red);
+    font-weight: 700;
+    margin-bottom: 18px;
+    padding: 6px 12px;
+    background: rgba(230, 0, 40, 0.08);
+    border-radius: 4px;
+  }
+  .hero h1 {
+    font-size: 64px;
+    line-height: 0.98;
+    font-weight: 800;
+    letter-spacing: -0.035em;
+    margin-bottom: 18px;
+  }
+  .hero h1 span { color: var(--d3-red); }
+  .hero .sub {
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--ink-2);
+    margin-bottom: 14px;
+    letter-spacing: -0.01em;
+  }
+  .hero .promise {
+    font-size: 16px;
+    color: var(--ink-3);
+    max-width: 760px;
+    line-height: 1.6;
+  }
+
+  /* Node graph centrepiece */
+  .graph-wrap {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 32px 28px 24px;
+    margin-bottom: 48px;
+    position: relative;
+  }
+  .graph-wrap .label {
+    position: absolute;
+    top: 16px;
+    left: 20px;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    font-weight: 600;
+  }
+  .graph-svg { width: 100%; height: auto; display: block; max-width: 1200px; margin: 12px auto 0; }
+
+  .graph-legend {
+    display: flex;
+    gap: 28px;
+    justify-content: center;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid var(--line);
+    flex-wrap: wrap;
+  }
+  .leg-item { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--ink-2); }
+  .leg-line {
+    width: 30px;
+    height: 2px;
+    background: var(--d3-red);
+  }
+  .leg-line.dashed {
+    background: none;
+    border-top: 2px dashed var(--d3-red);
+  }
+  .leg-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--envision);
+  }
+  .leg-dot.t { background: var(--transform); }
+  .leg-dot.o { background: var(--operate); }
+
+  /* ETO buckets */
+  .eto {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 48px;
+  }
+  .bucket {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 26px 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  .bucket::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0;
+    width: 4px; height: 100%;
+  }
+  .bucket.envision::before { background: var(--envision); }
+  .bucket.transform::before { background: var(--transform); }
+  .bucket.operate::before { background: var(--operate); }
+
+  .bucket-name {
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .bucket.envision .bucket-name { color: var(--envision); }
+  .bucket.transform .bucket-name { color: var(--transform); }
+  .bucket.operate .bucket-name { color: var(--operate); }
+
+  .bucket h3 {
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    margin-bottom: 10px;
+  }
+  .bucket .dur {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink-2);
+    margin-bottom: 12px;
+  }
+  .bucket .dur .weeks { color: var(--d3-red); font-weight: 800; }
+  .bucket .phases {
+    font-size: 12px;
+    color: var(--ink-3);
+    border-top: 1px solid var(--line);
+    padding-top: 12px;
+  }
+
+  /* Section heading */
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 22px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--line);
+  }
+  .section-head h2 {
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+  }
+  .section-head .meta {
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    font-weight: 600;
+  }
+
+  /* Archetypes */
+  .archetypes {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 48px;
+  }
+  .arch {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 26px 24px;
+  }
+  .arch-num {
+    font-size: 36px;
+    font-weight: 800;
+    color: var(--d3-red);
+    letter-spacing: -0.03em;
+    line-height: 1;
+    margin-bottom: 10px;
+  }
+  .arch h3 {
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin-bottom: 8px;
+  }
+  .arch .entry {
+    font-size: 11px;
+    color: var(--d3-red);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .arch p {
+    font-size: 13px;
+    color: var(--ink-2);
+    line-height: 1.55;
+  }
+
+  /* ROI ladder */
+  .roi {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 32px 28px;
+    margin-bottom: 48px;
+  }
+  .roi-steps {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-top: 18px;
+  }
+  .roi-step {
+    padding: 20px;
+    background: var(--bg);
+    border-radius: 8px;
+    text-align: center;
+    position: relative;
+  }
+  .roi-step .pct {
+    font-size: 36px;
+    font-weight: 800;
+    color: var(--d3-red);
+    letter-spacing: -0.03em;
+    line-height: 1;
+  }
+  .roi-step .when {
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    margin-top: 8px;
+    font-weight: 700;
+  }
+  .roi-step .what {
+    font-size: 13px;
+    color: var(--ink-2);
+    margin-top: 6px;
+  }
+
+  /* Min engagement callout */
+  .minimum {
+    background: var(--ink);
+    color: #EDECE5;
+    border-radius: 12px;
+    padding: 36px 40px;
+    margin-bottom: 40px;
+    display: flex;
+    align-items: center;
+    gap: 40px;
+  }
+  .minimum .big-num {
+    font-size: 96px;
+    font-weight: 900;
+    letter-spacing: -0.05em;
+    color: var(--d3-red);
+    line-height: 0.9;
+    flex-shrink: 0;
+  }
+  .minimum .big-num sub {
+    font-size: 16px;
+    color: #9B9A93;
+    font-weight: 500;
+    letter-spacing: 0;
+    margin-left: 6px;
+    vertical-align: baseline;
+  }
+  .minimum .text h2 {
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    margin-bottom: 10px;
+  }
+  .minimum .text p {
+    font-size: 14px;
+    color: #9B9A93;
+    max-width: 540px;
+    line-height: 1.6;
+  }
+  .minimum cite {
+    display: block;
+    font-size: 11px;
+    font-style: normal;
+    color: #6B7280;
+    margin-top: 10px;
+    letter-spacing: 0.05em;
+  }
+
+  /* Footer */
+  .footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 24px;
+    border-top: 1px solid var(--line);
+    font-size: 11px;
+    color: var(--ink-3);
+    letter-spacing: 0.05em;
+  }
+  .footer .crosslink-big {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--d3-red);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .footer .crosslink-big:hover { text-decoration: underline; }
+
+  /* Node graph hover */
+  .phase-node { cursor: pointer; transition: transform 0.2s; }
+  .phase-node:hover { transform: scale(1.03); transform-origin: center; }
+
+  @media (max-width: 900px) {
+    .page { padding: 32px 24px 60px; }
+    .hero h1 { font-size: 44px; }
+    .eto, .archetypes, .roi-steps { grid-template-columns: 1fr; }
+    .minimum { flex-direction: column; gap: 20px; text-align: center; }
+    .minimum .big-num { font-size: 72px; }
+  }
+  @media print { body { background: white; } .crosslink, .footer .crosslink-big { display: none; } }
+</style>
+</head>
+<body>
+  <div class="page">
+    <header class="masthead">
+      <div class="brand">
+        <span class="d3">Data<sup>#</sup>3</span>
+        <span class="rule"></span>
+        <span class="kicker">AI Practice · Portfolio View · 02 of 02</span>
+      </div>
+      <div class="crosslink"><a href="c.html">← AI Portability</a></div>
+    </header>
+
+    <section class="hero">
+      <span class="hero-tag">Portfolio Artefact B</span>
+      <h1>Our methodology is <span>not a waterfall</span>.</h1>
+      <p class="sub">Six phases. Iteration loops. Multiple entry points. One squad.</p>
+      <p class="promise">The AI Service Lifecycle is deliberately non-linear. Customers enter where they are, phases feed back into each other, and value is measured against a sharpening ROI ladder — not against the completion of a stage gate.</p>
+    </section>
+
+    <section class="graph-wrap">
+      <div class="label">Phase graph · iteration flow · ETO overlay</div>
+      <svg class="graph-svg" viewBox="0 0 1200 560" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="arrow-d" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#E60028"/>
+          </marker>
+          <marker id="arrow-dash" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#E60028" opacity="0.55"/>
+          </marker>
+        </defs>
+
+        <!-- ETO bucket backgrounds -->
+        <rect x="40" y="40" width="360" height="480" rx="16" fill="#1E4B8E" opacity="0.045"/>
+        <rect x="420" y="40" width="360" height="480" rx="16" fill="#6B5820" opacity="0.06"/>
+        <rect x="800" y="40" width="360" height="480" rx="16" fill="#7A1F2E" opacity="0.05"/>
+
+        <text x="220" y="68" text-anchor="middle" font-size="11" letter-spacing="2" fill="#1E4B8E" font-weight="700">ENVISION</text>
+        <text x="600" y="68" text-anchor="middle" font-size="11" letter-spacing="2" fill="#6B5820" font-weight="700">TRANSFORM</text>
+        <text x="980" y="68" text-anchor="middle" font-size="11" letter-spacing="2" fill="#7A1F2E" font-weight="700">OPERATE</text>
+
+        <text x="220" y="86" text-anchor="middle" font-size="10" fill="#6B7280">3 weeks min</text>
+        <text x="600" y="86" text-anchor="middle" font-size="10" fill="#6B7280">6 weeks min</text>
+        <text x="980" y="86" text-anchor="middle" font-size="10" fill="#6B7280">6 weeks min</text>
+
+        <!-- Forward edges (solid) -->
+        <path d="M 220 220 Q 290 220 290 260 Q 290 300 220 300" stroke="#E60028" stroke-width="2" fill="none" marker-end="url(#arrow-d)"/>
+        <path d="M 290 300 Q 360 300 420 240 Q 460 220 520 220" stroke="#E60028" stroke-width="2" fill="none" marker-end="url(#arrow-d)"/>
+        <path d="M 600 220 Q 670 220 670 260 Q 670 300 600 300" stroke="#E60028" stroke-width="2" fill="none" marker-end="url(#arrow-d)"/>
+        <path d="M 670 300 Q 740 300 800 240 Q 850 220 900 220" stroke="#E60028" stroke-width="2" fill="none" marker-end="url(#arrow-d)"/>
+        <path d="M 980 220 Q 1050 220 1050 260 Q 1050 300 980 300" stroke="#E60028" stroke-width="2" fill="none" marker-end="url(#arrow-d)"/>
+
+        <!-- Feedback edges (dashed) — phase 6 back to phase 2, phase 2 back to phase 1 -->
+        <path d="M 940 340 Q 820 420 500 420 Q 320 420 260 340" stroke="#E60028" stroke-width="1.8" stroke-dasharray="6 5" fill="none" marker-end="url(#arrow-dash)" opacity="0.7"/>
+        <text x="600" y="446" text-anchor="middle" font-size="11" fill="#E60028" font-weight="600" font-style="italic">enhancement feedback loop</text>
+
+        <path d="M 220 330 Q 160 330 160 250 Q 160 200 220 200" stroke="#E60028" stroke-width="1.8" stroke-dasharray="6 5" fill="none" marker-end="url(#arrow-dash)" opacity="0.7"/>
+
+        <!-- Phase nodes -->
+        <!-- Phase 1: Strategy & Roadmap -->
+        <g class="phase-node">
+          <circle cx="140" cy="220" r="52" fill="white" stroke="#1E4B8E" stroke-width="2.5"/>
+          <text x="140" y="208" text-anchor="middle" font-size="10" fill="#6B7280" font-weight="700">PHASE 01</text>
+          <text x="140" y="226" text-anchor="middle" font-size="13" fill="#0F1115" font-weight="800">Strategy &amp;</text>
+          <text x="140" y="242" text-anchor="middle" font-size="13" fill="#0F1115" font-weight="800">Roadmap</text>
+        </g>
+        <text x="140" y="300" text-anchor="middle" font-size="10" fill="#3A3F48">Indicative case · vision</text>
+
+        <!-- Phase 2: Ideate & Prove Value -->
+        <g class="phase-node">
+          <circle cx="300" cy="220" r="52" fill="white" stroke="#1E4B8E" stroke-width="2.5"/>
+          <text x="300" y="208" text-anchor="middle" font-size="10" fill="#6B7280" font-weight="700">PHASE 02</text>
+          <text x="300" y="226" text-anchor="middle" font-size="13" fill="#0F1115" font-weight="800">Ideate &amp;</text>
+          <text x="300" y="242" text-anchor="middle" font-size="13" fill="#0F1115" font-weight="800">Prove Value</text>
+        </g>
+        <text x="300" y="300" text-anchor="middle" font-size="10" fill="#3A3F48">15 use cases · PoV</text>
+
+        <!-- Phase 3: Solution Design -->
+        <g class="phase-node">
+          <circle cx="520" cy="220" r="52" fill="white" stroke="#6B5820" stroke-width="2.5"/>
+          <text x="520" y="208" text-anchor="middle" font-size="10" fill="#6B7280" font-weight="700">PHASE 03</text>
+          <text x="520" y="226" text-anchor="middle" font-size="13" fill="#0F1115" font-weight="800">Solution</text>
+          <text x="520" y="242" text-anchor="middle" font-size="13" fill="#0F1115" font-weight="800">Design</text>
+        </g>
+        <text x="520" y="300" text-anchor="middle" font-size="10" fill="#3A3F48">Architecture · data · change</text>
+
+        <!-- Phase 4: Build & Deploy -->
+        <g class="phase-node">
+          <circle cx="680" cy="220" r="52" fill="white" stroke="#6B5820" stroke-width="2.5"/>
+          <text x="680" y="208" text-anchor="middle" font-size="10" fill="#6B7280" font-weight="700">PHASE 04</text>
+          <text x="680" y="226" text-anchor="middle" font-size="13" fill="#0F1115" font-weight="800">Build &amp;</text>
+          <text x="680" y="242" text-anchor="middle" font-size="13" fill="#0F1115" font-weight="800">Deploy</text>
+        </g>
+        <text x="680" y="300" text-anchor="middle" font-size="10" fill="#3A3F48">Platform · 1-2 use cases</text>
+
+        <!-- Phase 5: Adopt & Scale -->
+        <g class="phase-node">
+          <circle cx="900" cy="220" r="52" fill="white" stroke="#7A1F2E" stroke-width="2.5"/>
+          <text x="900" y="208" text-anchor="middle" font-size="10" fill="#6B7280" font-weight="700">PHASE 05</text>
+          <text x="900" y="226" text-anchor="middle" font-size="13" fill="#0F1115" font-weight="800">Adopt &amp;</text>
+          <text x="900" y="242" text-anchor="middle" font-size="13" fill="#0F1115" font-weight="800">Scale</text>
+        </g>
+        <text x="900" y="300" text-anchor="middle" font-size="10" fill="#3A3F48">Rollout · change · training</text>
+
+        <!-- Phase 6: Operate & Optimise -->
+        <g class="phase-node">
+          <circle cx="1060" cy="220" r="52" fill="white" stroke="#7A1F2E" stroke-width="2.5"/>
+          <text x="1060" y="208" text-anchor="middle" font-size="10" fill="#6B7280" font-weight="700">PHASE 06</text>
+          <text x="1060" y="226" text-anchor="middle" font-size="13" fill="#0F1115" font-weight="800">Operate &amp;</text>
+          <text x="1060" y="242" text-anchor="middle" font-size="13" fill="#0F1115" font-weight="800">Optimise</text>
+        </g>
+        <text x="1060" y="300" text-anchor="middle" font-size="10" fill="#3A3F48">MLOps · ROI · telemetry</text>
+
+        <!-- Entry point markers -->
+        <g>
+          <circle cx="140" cy="490" r="18" fill="#E60028"/>
+          <text x="140" y="495" text-anchor="middle" font-size="11" fill="white" font-weight="800">S</text>
+          <text x="140" y="528" text-anchor="middle" font-size="10" fill="#3A3F48">Starter enters</text>
+        </g>
+        <g>
+          <circle cx="600" cy="490" r="18" fill="#E60028"/>
+          <text x="600" y="495" text-anchor="middle" font-size="11" fill="white" font-weight="800">B</text>
+          <text x="600" y="528" text-anchor="middle" font-size="10" fill="#3A3F48">Builder enters</text>
+        </g>
+        <g>
+          <circle cx="1060" cy="490" r="18" fill="#E60028"/>
+          <text x="1060" y="495" text-anchor="middle" font-size="11" fill="white" font-weight="800">X</text>
+          <text x="1060" y="528" text-anchor="middle" font-size="10" fill="#3A3F48">Sustainer enters</text>
+        </g>
+      </svg>
+
+      <div class="graph-legend">
+        <div class="leg-item"><span class="leg-line"></span>Forward flow</div>
+        <div class="leg-item"><span class="leg-line dashed"></span>Iteration &amp; feedback</div>
+        <div class="leg-item"><span class="leg-dot"></span>Envision</div>
+        <div class="leg-item"><span class="leg-dot t"></span>Transform</div>
+        <div class="leg-item"><span class="leg-dot o"></span>Operate</div>
+      </div>
+    </section>
+
+    <div class="section-head">
+      <h2>Three buckets, six phases</h2>
+      <span class="meta">Minimum durations · Alenka-verified</span>
+    </div>
+
+    <section class="eto">
+      <div class="bucket envision">
+        <div class="bucket-name">Envision</div>
+        <h3>Where is the value?</h3>
+        <div class="dur">Minimum <span class="weeks">3 weeks</span></div>
+        <div class="phases">Phase 01 Strategy &amp; Roadmap · Phase 02 Ideate &amp; Prove Value. Fifteen use cases flushed, top candidates with conceptual design.</div>
+      </div>
+      <div class="bucket transform">
+        <div class="bucket-name">Transform</div>
+        <h3>How do we build it?</h3>
+        <div class="dur">Minimum <span class="weeks">6 weeks</span></div>
+        <div class="phases">Phase 03 Solution Design · Phase 04 Build &amp; Deploy. Platform foundations plus one or two production use cases end-to-end.</div>
+      </div>
+      <div class="bucket operate">
+        <div class="bucket-name">Operate</div>
+        <h3>How do we scale &amp; realise?</h3>
+        <div class="dur">Minimum <span class="weeks">6 weeks</span></div>
+        <div class="phases">Phase 05 Adopt &amp; Scale · Phase 06 Operate &amp; Optimise. Rollout, change, MLOps telemetry, ROI realisation, feedback into the squad.</div>
+      </div>
+    </section>
+
+    <div class="section-head">
+      <h2>Enter where you are</h2>
+      <span class="meta">Three customer archetypes</span>
+    </div>
+
+    <section class="archetypes">
+      <div class="arch">
+        <div class="arch-num">S</div>
+        <div class="entry">Enters at Phase 01</div>
+        <h3>Starter</h3>
+        <p>Early-journey customer. No strategy, no production use cases, mostly curious. The squad begins with vision and business case before anything gets built.</p>
+      </div>
+      <div class="arch">
+        <div class="arch-num">B</div>
+        <div class="entry">Enters at Phase 03 or 04</div>
+        <h3>Builder</h3>
+        <p>Has prototypes in pockets across the business. Needs enterprise architecture, platform consolidation, and the discipline to ship one thing properly.</p>
+      </div>
+      <div class="arch">
+        <div class="arch-num">X</div>
+        <div class="entry">Enters at Phase 05 or 06</div>
+        <h3>Sustainer</h3>
+        <p>Running AI in production already. Needs adoption at scale, agentic workforce management, ROI measurement, and the enhancement feedback loop back into design.</p>
+      </div>
+    </section>
+
+    <div class="section-head">
+      <h2>ROI confidence ladder</h2>
+      <span class="meta">Value sharpens as we move right</span>
+    </div>
+
+    <section class="roi">
+      <p style="font-size: 14px; color: var(--ink-2); max-width: 700px;">Every phase adds confidence to the business case. We don't promise the final number on day one — we promise a narrowing band as the work compounds.</p>
+      <div class="roi-steps">
+        <div class="roi-step">
+          <div class="pct">±50%</div>
+          <div class="when">End of Envision</div>
+          <div class="what">Indicative business case</div>
+        </div>
+        <div class="roi-step">
+          <div class="pct">±25%</div>
+          <div class="when">End of Transform</div>
+          <div class="what">Refined against real build cost</div>
+        </div>
+        <div class="roi-step">
+          <div class="pct">±10%</div>
+          <div class="when">In Operate</div>
+          <div class="what">Measured against P&amp;L and utilisation</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="minimum">
+      <div class="big-num">15<sub>weeks</sub></div>
+      <div class="text">
+        <h2>Minimum engagement.</h2>
+        <p>Three weeks envision plus six weeks transform plus six weeks operate. Under that, the squad can't spin up, the ROI can't land, and the customer can't realise value. We trade scope for dollars, never dollars for dollars.</p>
+        <cite>— Matt Gooden &amp; Alenka, 14 April 2026</cite>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <div>Data<sup style="font-size: 0.6em; vertical-align: super; color: var(--d3-red); font-weight: 800;">#</sup>3 &nbsp;·&nbsp; AI Practice Portfolio &nbsp;·&nbsp; Internal Draft for Dave Gold pitch</div>
+      <a class="crosslink-big" href="c.html">← Run it anywhere — AI Portability</a>
+    </footer>
+  </div>
+</body>
+</html>

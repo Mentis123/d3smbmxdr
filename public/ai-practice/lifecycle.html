@@ -682,12 +682,35 @@
       <!-- Line A: forward handoff (solid gradient purple → cyan → mint) -->
       <path d="M 470 81 A 260 160 0 0 1 600 220 A 260 160 0 0 0 860 380"
             class="handoff-line"/>
-      <text x="565" y="145" class="handoff-lbl" text-anchor="middle">GO-LIVE</text>
+      <text x="676" y="313" class="handoff-lbl" text-anchor="middle">GO-LIVE</text>
 
       <!-- Line B: return / next cycle (dashed amber, riding the other diagonal) -->
       <path d="M 860 60 A 260 160 0 0 0 600 220 A 260 160 0 0 1 470 359"
             class="return-line"/>
       <text x="676" y="95" class="return-lbl" text-anchor="middle">Operate → Discover · next cycle</text>
+
+      <!-- ========= DIRECTION ARROWS along the curved X-lines =========
+           Each triangle is shape "M 10 0 L -10 -8 L -10 8 z" (right-pointing, centred
+           at origin) then translated + rotated to sit on its arc and point along the
+           tangent at that point. Angles computed from the ellipse parametric tangent. -->
+
+      <!-- Line A: purple arrow on upper arc (P4 → crossover, left ellipse θ=-45°) -->
+      <path d="M 10 0 L -10 -8 L -10 8 z"
+            transform="translate(524 107) rotate(32)"
+            fill="#c084fc"/>
+      <!-- Line A: cyan arrow on lower arc (crossover → P5, right ellipse θ=120°) -->
+      <path d="M 10 0 L -10 -8 L -10 8 z"
+            transform="translate(730 359) rotate(20)"
+            fill="#4dd2f0"/>
+
+      <!-- Line B: amber arrow on upper arc (P6 → crossover, right ellipse θ=-150°) -->
+      <path d="M 10 0 L -10 -8 L -10 8 z"
+            transform="translate(635 140) rotate(133)"
+            fill="#fbbf24"/>
+      <!-- Line B: amber arrow on lower arc (crossover → P1, left ellipse θ=30°) -->
+      <path d="M 10 0 L -10 -8 L -10 8 z"
+            transform="translate(565 300) rotate(133)"
+            fill="#fbbf24"/>
 
       <!-- =========== PHASE NODES (new positions) ===========
            Left loop CLOCKWISE:

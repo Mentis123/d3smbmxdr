@@ -96,6 +96,133 @@
     text-transform:uppercase;letter-spacing:.12em;font-weight:600;
   }
 
+  /* INFINITY LOOP HERO */
+  .loop-hero{
+    margin:36px 0 28px;
+    padding:22px 26px 24px;
+    background:linear-gradient(180deg,rgba(77,210,240,.05),rgba(77,210,240,0) 70%);
+    border:1px solid var(--rule-2);
+    border-radius:14px;
+    position:relative;
+  }
+  .loop-hero .loop-eyebrow{
+    font-size:11px;font-weight:700;letter-spacing:.18em;
+    text-transform:uppercase;color:var(--cyan);
+    margin-bottom:6px;
+  }
+  .loop-hero .loop-title{
+    font-size:17px;font-weight:700;color:var(--ink);
+    margin:0 0 16px;letter-spacing:-.005em;
+  }
+  .loop-hero svg{
+    width:100%;height:auto;display:block;
+    max-width:1200px;margin:0 auto;
+  }
+  .loop-hero .loop-path{
+    stroke:var(--cyan);
+    stroke-width:2.5;
+    opacity:.88;
+    fill:none;
+  }
+  .loop-hero .loop-right{ stroke:var(--mint); }
+  .loop-hero .crossover-dot{
+    fill:var(--navy-1);
+    stroke:var(--cyan-2);
+    stroke-width:2.5;
+  }
+  .loop-hero .crossover-lbl{
+    fill:var(--cyan-2);
+    font-size:11px;
+    font-weight:800;
+    letter-spacing:.06em;
+    font-family:'Inter',sans-serif;
+  }
+  .loop-hero .phase-node circle{
+    stroke-width:2.75;
+    fill:var(--navy-2);
+  }
+  .loop-hero .phase-node.env circle{ stroke:var(--cyan); }
+  .loop-hero .phase-node.tra circle{ stroke:var(--purple); }
+  .loop-hero .phase-node.ope circle{ stroke:var(--mint); }
+  .loop-hero .phase-node .ph-num{
+    fill:var(--ink);
+    font-size:20px;
+    font-weight:900;
+    font-family:'Inter',sans-serif;
+    letter-spacing:-.02em;
+  }
+  .loop-hero .phase-node .ph-lbl{
+    fill:var(--ink-2);
+    font-size:11px;
+    font-weight:700;
+    font-family:'Inter',sans-serif;
+    letter-spacing:.04em;
+    text-transform:uppercase;
+  }
+  .loop-hero .pivot-arc{
+    stroke:var(--amber);
+    stroke-width:2;
+    stroke-dasharray:6 4;
+    opacity:.78;
+    fill:none;
+  }
+  .loop-hero .pivot-lbl{
+    fill:var(--amber);
+    font-size:10px;
+    font-weight:700;
+    font-family:'Inter',sans-serif;
+    letter-spacing:.04em;
+    text-transform:uppercase;
+    opacity:.85;
+  }
+  .loop-hero .eto-lbl{
+    font-family:'Inter',sans-serif;
+    font-size:10px;
+    font-weight:800;
+    letter-spacing:.22em;
+  }
+  .loop-hero .eto-lbl.env{ fill:var(--cyan-2); }
+  .loop-hero .eto-lbl.tra{ fill:#e9d5ff; }
+  .loop-hero .eto-lbl.ope{ fill:var(--mint); }
+  .loop-hero .ms-label{
+    font-family:'Inter',sans-serif;
+    font-size:11px;
+    font-weight:800;
+    fill:var(--mint);
+    letter-spacing:.18em;
+    text-transform:uppercase;
+  }
+  .loop-hero .next-cycle-lbl{
+    font-family:'Inter',sans-serif;
+    font-size:10px;
+    font-weight:700;
+    fill:var(--ink-3);
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    font-style:italic;
+  }
+  .loop-hero .loop-legend{
+    display:flex;gap:26px;justify-content:center;
+    margin-top:8px;flex-wrap:wrap;
+    font-size:11px;color:var(--ink-3);
+  }
+  .loop-hero .loop-legend .li{
+    display:flex;align-items:center;gap:9px;
+    font-weight:600;letter-spacing:.04em;
+  }
+  .loop-hero .loop-legend .swatch{
+    width:22px;height:3px;border-radius:2px;flex-shrink:0;
+  }
+  .loop-hero .loop-legend .swatch.solid-cyan{background:var(--cyan)}
+  .loop-hero .loop-legend .swatch.solid-mint{background:var(--mint)}
+  .loop-hero .loop-legend .swatch.dashed-amber{
+    background:repeating-linear-gradient(90deg,var(--amber) 0 5px,transparent 5px 9px);
+  }
+  @media (max-width:820px){
+    .loop-hero .phase-node .ph-lbl{ display:none; }
+    .loop-hero{ padding:18px 14px 18px; }
+  }
+
   /* ETO BAND */
   .eto-band{
     display:grid;grid-template-columns:repeat(3,1fr);
@@ -408,11 +535,11 @@
 <div class="wrap">
 
   <header class="page-hero">
-    <div class="eyebrow">AI Factory · V3.3 canon · Matt Gooden methodology</div>
+    <div class="eyebrow">AI Factory · V3.3 · Matt Gooden methodology</div>
     <h1>AI Service Lifecycle</h1>
     <p class="lede">
-      Six operational phases parented under three executive phases — <b>Envision · Transform · Operate</b>. Commercial clarity compounds phase by phase so you commit to production with clarity, not hope.
-      The phase grid is the <b>delivery shape</b>. The capability ribbon below is the <b>commercial shape</b> — five SKUs that chain across the lifecycle.
+      <b>Our methodology is not a waterfall.</b> Six phases. Iteration loops. Multiple entry points. One squad. Six operational phases parented under three executive phases — <b>Envision · Transform · Operate</b>. Commercial clarity compounds phase by phase so you commit to production with clarity, not hope.
+      The loop below is the <b>delivery shape</b>. The phase grid unpacks the activities. The capability ribbon further down is the <b>commercial shape</b> — five SKUs that chain across the lifecycle.
       <span class="d3">Data<sup>#</sup>3</span> squads deliver; the capability is what you buy.
     </p>
     <div class="anchors">
@@ -421,6 +548,104 @@
       <div class="chip"><div class="n">Rolling</div><div class="lbl">Phase 6 · 6-month commit</div></div>
     </div>
   </header>
+
+  <!-- INFINITY LOOP HERO — the shape of the lifecycle -->
+  <section class="loop-hero" aria-labelledby="loopTitle">
+    <div class="loop-eyebrow">The shape of the lifecycle</div>
+    <h2 class="loop-title" id="loopTitle">A continuous loop, not a straight line. Delivery on the left. Managed service on the right.</h2>
+
+    <svg viewBox="0 0 1200 420" xmlns="http://www.w3.org/2000/svg" role="img">
+      <defs>
+        <radialGradient id="msBand" cx="50%" cy="50%" r="60%">
+          <stop offset="0%"  stop-color="#5eead4" stop-opacity=".22"/>
+          <stop offset="60%" stop-color="#5eead4" stop-opacity=".08"/>
+          <stop offset="100%" stop-color="#5eead4" stop-opacity="0"/>
+        </radialGradient>
+        <marker id="pivotHead" viewBox="0 0 10 10" refX="8" refY="5"
+                markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="#fbbf24" opacity=".9"/>
+        </marker>
+      </defs>
+
+      <!-- Managed-service band behind right loop -->
+      <ellipse cx="860" cy="210" rx="320" ry="180" fill="url(#msBand)"/>
+
+      <!-- Left loop (delivery) -->
+      <path d="M 600 210
+               C 600 40, 80 40, 80 210
+               C 80 380, 600 380, 600 210 Z"
+            class="loop-path loop-left"/>
+
+      <!-- Right loop (operate / managed service) -->
+      <path d="M 600 210
+               C 600 40, 1120 40, 1120 210
+               C 1120 380, 600 380, 600 210 Z"
+            class="loop-path loop-right"/>
+
+      <!-- ETO labels -->
+      <text x="340" y="20"  class="eto-lbl env" text-anchor="middle">ENVISION · TRANSFORM · DELIVERY LOOP</text>
+      <text x="860" y="20"  class="eto-lbl ope" text-anchor="middle">OPERATE · MANAGED-SERVICE LOOP</text>
+
+      <!-- Pivot-back arc: Phase 2 → Phase 1 (iteration within Envision) -->
+      <path d="M 165 120 Q 290 165 405 115" class="pivot-arc" marker-end="url(#pivotHead)"/>
+      <text x="285" y="158" class="pivot-lbl" text-anchor="middle">Pivot back · PoC invalidates</text>
+
+      <!-- Pivot-back arc: Phase 4 → Phase 3 (iteration within Transform) -->
+      <path d="M 405 305 Q 290 260 170 305" class="pivot-arc" marker-end="url(#pivotHead)"/>
+      <text x="285" y="273" class="pivot-lbl" text-anchor="middle">Pivot back · design gap</text>
+
+      <!-- Next-cycle label near crossover (bottom) -->
+      <text x="600" y="398" class="next-cycle-lbl" text-anchor="middle">Next use-case feeds back into Envision</text>
+
+      <!-- Crossover "GO-LIVE" marker -->
+      <circle cx="600" cy="210" r="28" class="crossover-dot"/>
+      <text x="600" y="214" class="crossover-lbl" text-anchor="middle">GO-LIVE</text>
+
+      <!-- Managed-service band label -->
+      <text x="1100" y="210" class="ms-label" text-anchor="end">
+        <tspan x="1100" dy="-6">MANAGED</tspan>
+        <tspan x="1100" dy="14">SERVICE</tspan>
+      </text>
+
+      <!-- Phase nodes -->
+      <g class="phase-node env" transform="translate(420, 95)">
+        <circle r="44"/>
+        <text class="ph-num" text-anchor="middle" dy="-2">1</text>
+        <text class="ph-lbl" text-anchor="middle" dy="18">DISCOVER</text>
+      </g>
+      <g class="phase-node env" transform="translate(150, 95)">
+        <circle r="44"/>
+        <text class="ph-num" text-anchor="middle" dy="-2">2</text>
+        <text class="ph-lbl" text-anchor="middle" dy="18">PROTOTYPE</text>
+      </g>
+      <g class="phase-node tra" transform="translate(150, 325)">
+        <circle r="44"/>
+        <text class="ph-num" text-anchor="middle" dy="-2">3</text>
+        <text class="ph-lbl" text-anchor="middle" dy="18">DESIGN</text>
+      </g>
+      <g class="phase-node tra" transform="translate(420, 325)">
+        <circle r="44"/>
+        <text class="ph-num" text-anchor="middle" dy="-2">4</text>
+        <text class="ph-lbl" text-anchor="middle" dy="18">BUILD</text>
+      </g>
+      <g class="phase-node ope" transform="translate(860, 95)">
+        <circle r="44"/>
+        <text class="ph-num" text-anchor="middle" dy="-2">5</text>
+        <text class="ph-lbl" text-anchor="middle" dy="18">ADOPT</text>
+      </g>
+      <g class="phase-node ope" transform="translate(860, 325)">
+        <circle r="44"/>
+        <text class="ph-num" text-anchor="middle" dy="-2">6</text>
+        <text class="ph-lbl" text-anchor="middle" dy="18">OPERATE</text>
+      </g>
+    </svg>
+
+    <div class="loop-legend">
+      <div class="li"><span class="swatch solid-cyan"></span>Delivery flow · 1 → 4</div>
+      <div class="li"><span class="swatch solid-mint"></span>Managed-service flow · 5 → 6</div>
+      <div class="li"><span class="swatch dashed-amber"></span>Pivot-back · iteration within a phase</div>
+    </div>
+  </section>
 
   <!-- ETO ribbon labels -->
   <div class="eto-band">
@@ -435,7 +660,6 @@
     <div class="phase-card" data-caps="strategy governance">
       <div class="num">1</div>
       <div class="phase-name">Discover &amp; Envision</div>
-      <div class="phase-sub">Envision</div>
       <h3>Activities</h3>
       <ul class="activities">
         <li data-cap="strategy">AI Strategy</li>
@@ -447,14 +671,13 @@
       </ul>
       <div class="phase-meta">
         <div class="meta-item"><span class="meta-lbl">Min sprints</span><span class="meta-val cyan">2</span></div>
-        <div class="meta-item"><span class="meta-lbl">ROI gate</span><span class="meta-val amber">±50%</span></div>
+        <div class="meta-item"><span class="meta-lbl">Clarity</span><span class="meta-val cyan">Strategic direction</span></div>
       </div>
     </div>
 
     <div class="phase-card" data-caps="discovery governance">
       <div class="num">2</div>
       <div class="phase-name">Prototype &amp; Validate</div>
-      <div class="phase-sub">Envision</div>
       <h3>Activities</h3>
       <ul class="activities">
         <li data-cap="discovery">PoC &amp; PoV build</li>
@@ -465,14 +688,13 @@
       </ul>
       <div class="phase-meta">
         <div class="meta-item"><span class="meta-lbl">Min sprints</span><span class="meta-val cyan">2</span></div>
-        <div class="meta-item"><span class="meta-lbl">ROI gate</span><span class="meta-val amber">±25%</span></div>
+        <div class="meta-item"><span class="meta-lbl">Clarity</span><span class="meta-val cyan">Production-ready</span></div>
       </div>
     </div>
 
     <div class="phase-card" data-caps="factory governance">
       <div class="num">3</div>
       <div class="phase-name">Solution Design</div>
-      <div class="phase-sub">Transform</div>
       <h3>Activities</h3>
       <ul class="activities">
         <li data-cap="factory">Architect solution</li>
@@ -484,14 +706,13 @@
       </ul>
       <div class="phase-meta">
         <div class="meta-item"><span class="meta-lbl">Min sprints</span><span class="meta-val cyan">1</span></div>
-        <div class="meta-item"><span class="meta-lbl">ROI gate</span><span class="meta-val amber">±10%</span></div>
+        <div class="meta-item"><span class="meta-lbl">Clarity</span><span class="meta-val cyan">Go-live ready</span></div>
       </div>
     </div>
 
     <div class="phase-card" data-caps="factory governance">
       <div class="num">4</div>
       <div class="phase-name">Build &amp; Deploy</div>
-      <div class="phase-sub">Transform</div>
       <h3>Activities</h3>
       <ul class="activities">
         <li data-cap="factory">Production development</li>
@@ -503,14 +724,13 @@
       </ul>
       <div class="phase-meta">
         <div class="meta-item"><span class="meta-lbl">Min sprints</span><span class="meta-val cyan">3 → 6</span></div>
-        <div class="meta-item"><span class="meta-lbl">ROI gate</span><span class="meta-val cyan">Committed</span></div>
+        <div class="meta-item"><span class="meta-lbl">Clarity</span><span class="meta-val cyan">Telemetry-driven</span></div>
       </div>
     </div>
 
     <div class="phase-card" data-caps="factory foundation governance">
       <div class="num">5</div>
       <div class="phase-name">Adopt &amp; Scale</div>
-      <div class="phase-sub">Operate</div>
       <h3>Activities</h3>
       <ul class="activities">
         <li data-cap="factory">Change management</li>
@@ -529,7 +749,6 @@
     <div class="phase-card" data-caps="foundation governance">
       <div class="num">6</div>
       <div class="phase-name">Operate &amp; Optimise</div>
-      <div class="phase-sub">Operate</div>
       <h3>Activities</h3>
       <ul class="activities">
         <li data-cap="foundation">Manage agents</li>
@@ -617,66 +836,46 @@
   <!-- Commercial gates -->
   <div class="gates">
     <h2>Commercial clarity gates — time to line-of-sight on ROI</h2>
-    <div class="gates-sub">Every phase is a decision gate. Customers don't commit to production; they commit to the next phase. Clarity compounds. Assumes default squad economics: $2,400/day sell · 2 FTE blended · $48k per sprint — tune on the <a href="/ai-practice/squads.html" style="color:var(--cyan);text-decoration:underline">Squad Economics</a> page.</div>
+    <div class="gates-sub">Every phase is a decision gate. Customers don't commit to production; they commit to the next gate. Clarity compounds phase by phase. Tune the sprint-level economics on the <a href="/ai-practice/squads.html" style="color:var(--cyan);text-decoration:underline">Squad Economics</a> page.</div>
     <table class="gates-table">
       <thead>
         <tr>
           <th>Gate</th>
           <th>After</th>
-          <th>Cumulative sprints</th>
-          <th>Cumulative weeks</th>
-          <th>Cumulative spend</th>
-          <th>ROI confidence</th>
+          <th>Commitment level</th>
+          <th>What you can commit to next</th>
         </tr>
       </thead>
       <tbody>
         <tr>
           <td><b>Gate 1</b></td>
           <td>Phase 1 Discover &amp; Envision</td>
-          <td class="num">2</td>
-          <td class="num">4</td>
-          <td class="num cyan">$96k</td>
-          <td><span class="gate-col gate-50">±50%</span></td>
+          <td><span class="gate-col gate-50">Strategic direction</span></td>
+          <td>The next phase</td>
         </tr>
         <tr>
           <td><b>Gate 2</b></td>
           <td>Phase 2 Prototype &amp; Validate</td>
-          <td class="num">4</td>
-          <td class="num">8</td>
-          <td class="num cyan">$192k</td>
-          <td><span class="gate-col gate-25">±25%</span></td>
+          <td><span class="gate-col gate-25">Production-ready clarity</span></td>
+          <td>Build with clarity, not hope</td>
         </tr>
         <tr>
           <td><b>Gate 3</b></td>
           <td>Phase 3 Solution Design</td>
-          <td class="num">5</td>
-          <td class="num">10</td>
-          <td class="num cyan">$240k</td>
-          <td><span class="gate-col gate-10">±10%</span></td>
-        </tr>
-        <tr>
-          <td><b>Commit</b></td>
-          <td>Phase 4 Build &amp; Deploy <span class="muted" style="color:var(--ink-4)">(MVP)</span></td>
-          <td class="num">8</td>
-          <td class="num">16</td>
-          <td class="num cyan">$384k</td>
-          <td><span class="gate-col gate-commit">Committed</span></td>
+          <td><span class="gate-col gate-10">Go-live clarity</span></td>
+          <td>Production · the Operate phase</td>
         </tr>
         <tr>
           <td><b>Live</b></td>
-          <td>Phase 5 Adopt &amp; Scale</td>
-          <td class="num">10</td>
-          <td class="num">20</td>
-          <td class="num cyan">$480k</td>
-          <td><span class="gate-col gate-commit">In production</span></td>
+          <td>Phase 4 Build &amp; Deploy</td>
+          <td><span class="gate-col gate-commit">Telemetry-driven</span></td>
+          <td>Continuous optimisation</td>
         </tr>
         <tr>
           <td><b>Rolling</b></td>
-          <td>Phase 6 Operate &amp; Optimise</td>
-          <td class="num">13+</td>
-          <td class="num">26+</td>
-          <td class="num cyan">$624k+</td>
+          <td>Phases 5–6 Adopt &amp; Scale · Operate &amp; Optimise</td>
           <td><span class="gate-col gate-ops">Managed service</span></td>
+          <td>Innovation pipeline · next use-case cycle</td>
         </tr>
       </tbody>
     </table>

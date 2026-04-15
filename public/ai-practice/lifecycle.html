@@ -1,0 +1,738 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI Service Lifecycle · Data#3</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy-0:#050d1f;
+    --navy-1:#0a1530;
+    --navy-2:#0f1f3d;
+    --navy-3:#142847;
+    --navy-4:#1a3358;
+    --navy-5:#234680;
+    --cyan:#4dd2f0;
+    --cyan-2:#7fdef5;
+    --cyan-3:#2bb5d8;
+    --magenta:#ff66c4;
+    --purple:#c084fc;
+    --amber:#fbbf24;
+    --mint:#5eead4;
+    --good:#5eead4;
+    --bad:#f87171;
+    --ink:#ffffff;
+    --ink-2:#c8d4e6;
+    --ink-3:#8fa3c0;
+    --ink-4:#5d7193;
+    --rule:rgba(255,255,255,.08);
+    --rule-2:rgba(255,255,255,.12);
+
+    /* Capability colours */
+    --cap-strategy:#7fdef5;
+    --cap-discovery:#c084fc;
+    --cap-factory:#4dd2f0;
+    --cap-governance:#fbbf24;
+    --cap-foundation:#5eead4;
+  }
+  *{box-sizing:border-box}
+  html,body{
+    margin:0;padding:0;
+    background:var(--navy-1);
+    color:var(--ink);
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    font-size:15px;line-height:1.55;
+  }
+  a{color:inherit;text-decoration:none}
+
+  .d3{display:inline}
+  .d3 sup{font-size:.62em;font-weight:800;position:relative;top:-.5em;margin:0 .05em 0 .04em;line-height:0}
+
+  .pg-breadcrumb{background:var(--navy-2);border-bottom:1px solid var(--rule)}
+  .pg-breadcrumb .wrap{max-width:1320px;margin:0 auto;padding:14px 32px;font-size:12.5px;color:var(--ink-3)}
+  .pg-breadcrumb a{color:var(--ink-3);transition:color .15s}
+  .pg-breadcrumb a:hover{color:var(--cyan)}
+  .pg-breadcrumb .sep{margin:0 10px;opacity:.5}
+  .pg-breadcrumb .here{color:var(--ink-2)}
+
+  .wrap{max-width:1320px;margin:0 auto;padding:40px 32px 80px}
+
+  header.page-hero{margin-bottom:30px}
+  header.page-hero .eyebrow{
+    display:inline-block;font-size:11px;font-weight:700;
+    letter-spacing:.18em;text-transform:uppercase;
+    color:var(--cyan);margin-bottom:10px;
+  }
+  header.page-hero h1{
+    font-size:44px;font-weight:800;line-height:1.05;margin:0 0 14px;
+    letter-spacing:-.02em;
+    background:linear-gradient(90deg,var(--ink) 0%,var(--cyan-2) 55%,var(--cyan) 100%);
+    -webkit-background-clip:text;background-clip:text;
+    -webkit-text-fill-color:transparent;color:transparent;
+  }
+  header.page-hero p.lede{
+    font-size:16.5px;color:var(--ink-2);max-width:900px;margin:0 0 22px;
+  }
+  header.page-hero p.lede b{color:var(--cyan-2);font-weight:600}
+
+  /* Anchor number chips */
+  .anchors{display:flex;gap:14px;flex-wrap:wrap}
+  .anchors .chip{
+    background:var(--navy-3);border:1px solid var(--rule-2);
+    border-radius:10px;padding:12px 18px;
+    display:flex;flex-direction:column;gap:2px;
+    min-width:180px;
+  }
+  .anchors .chip .n{
+    font-size:24px;font-weight:800;color:var(--cyan);
+    font-variant-numeric:tabular-nums;letter-spacing:-.02em;line-height:1.1;
+  }
+  .anchors .chip .lbl{
+    font-size:11px;color:var(--ink-3);
+    text-transform:uppercase;letter-spacing:.12em;font-weight:600;
+  }
+
+  /* ETO BAND */
+  .eto-band{
+    display:grid;grid-template-columns:repeat(3,1fr);
+    gap:6px;margin:30px 0 6px;
+  }
+  .eto-block{
+    padding:10px 20px;border-radius:8px 8px 0 0;
+    text-align:center;font-weight:800;font-size:12px;
+    text-transform:uppercase;letter-spacing:.18em;
+  }
+  .eto-envision{background:linear-gradient(180deg,rgba(77,210,240,.25),rgba(77,210,240,.08));border-top:3px solid var(--cyan);color:var(--cyan-2)}
+  .eto-transform{background:linear-gradient(180deg,rgba(192,132,252,.25),rgba(192,132,252,.08));border-top:3px solid var(--purple);color:#e9d5ff}
+  .eto-operate{background:linear-gradient(180deg,rgba(94,234,212,.22),rgba(94,234,212,.08));border-top:3px solid var(--mint);color:#a7f3d0}
+
+  /* PHASE GRID */
+  .phase-grid{
+    display:grid;grid-template-columns:repeat(6,1fr);
+    gap:14px;margin-bottom:30px;
+  }
+  .phase-card{
+    background:var(--navy-2);
+    border:1px solid var(--rule-2);
+    border-radius:12px;
+    padding:18px 18px 16px;
+    display:flex;flex-direction:column;gap:10px;
+    position:relative;
+    transition:opacity .25s, border-color .25s, box-shadow .25s;
+    min-width:0;
+  }
+  .phase-card .num{
+    position:absolute;top:14px;right:14px;
+    font-size:42px;font-weight:900;line-height:1;
+    color:rgba(255,255,255,.05);letter-spacing:-.04em;
+    pointer-events:none;
+  }
+  .phase-card .phase-name{
+    font-size:15px;font-weight:800;color:var(--ink);
+    letter-spacing:-.01em;line-height:1.25;
+    padding-right:28px;
+  }
+  .phase-card .phase-sub{
+    font-size:10.5px;color:var(--ink-3);
+    text-transform:uppercase;letter-spacing:.1em;font-weight:600;
+  }
+  .phase-card h3{
+    font-size:9.5px;font-weight:700;color:var(--ink-3);
+    text-transform:uppercase;letter-spacing:.14em;
+    margin:8px 0 4px;
+  }
+  .phase-card ul.activities{
+    list-style:none;padding:0;margin:0;
+    display:flex;flex-direction:column;gap:3px;
+  }
+  .phase-card ul.activities li{
+    font-size:12px;color:var(--ink-2);line-height:1.35;
+    padding:3px 0 3px 12px;position:relative;
+    border-left:2px solid transparent;
+    transition:opacity .2s, border-color .2s, color .2s;
+  }
+  .phase-card ul.activities li::before{
+    content:"";position:absolute;left:0;top:10px;
+    width:4px;height:4px;border-radius:50%;
+    background:var(--ink-4);
+    transition:background .2s;
+  }
+  .phase-card ul.activities li[data-cap="factory"]::before{background:var(--cap-factory)}
+  .phase-card ul.activities li[data-cap="governance"]::before{background:var(--cap-governance)}
+  .phase-card ul.activities li[data-cap="strategy"]::before{background:var(--cap-strategy)}
+  .phase-card ul.activities li[data-cap="discovery"]::before{background:var(--cap-discovery)}
+  .phase-card ul.activities li[data-cap="foundation"]::before{background:var(--cap-foundation)}
+
+  .phase-meta{
+    display:flex;justify-content:space-between;align-items:flex-end;
+    margin-top:auto;padding-top:10px;
+    border-top:1px solid var(--rule);gap:6px;
+  }
+  .phase-meta .meta-item{display:flex;flex-direction:column;gap:1px}
+  .phase-meta .meta-lbl{
+    font-size:8.5px;color:var(--ink-4);
+    text-transform:uppercase;letter-spacing:.1em;font-weight:600;
+  }
+  .phase-meta .meta-val{
+    font-size:13px;color:var(--ink);font-weight:800;
+    font-variant-numeric:tabular-nums;
+  }
+  .phase-meta .meta-val.cyan{color:var(--cyan)}
+  .phase-meta .meta-val.amber{color:var(--amber)}
+
+  /* FILTER CHIPS */
+  .cap-filter{
+    background:var(--navy-2);
+    border:1px solid var(--rule-2);
+    border-radius:12px;
+    padding:18px 22px;
+    margin-bottom:14px;
+  }
+  .cap-filter h2{
+    font-size:11px;text-transform:uppercase;letter-spacing:.18em;
+    color:var(--cyan);margin:0 0 14px;font-weight:700;
+  }
+  .cap-filter .chips{display:flex;gap:10px;flex-wrap:wrap}
+  .chip-btn{
+    background:var(--navy-3);
+    border:1px solid var(--rule-2);
+    color:var(--ink-2);
+    padding:9px 16px;border-radius:22px;
+    font-size:12.5px;font-weight:600;
+    cursor:pointer;transition:all .2s;
+    display:flex;align-items:center;gap:8px;
+    font-family:inherit;
+  }
+  .chip-btn:hover{border-color:var(--cyan);color:var(--ink)}
+  .chip-btn .dot{
+    width:9px;height:9px;border-radius:50%;flex-shrink:0;
+  }
+  .chip-btn[data-cap="strategy"]   .dot{background:var(--cap-strategy)}
+  .chip-btn[data-cap="discovery"]  .dot{background:var(--cap-discovery)}
+  .chip-btn[data-cap="factory"]    .dot{background:var(--cap-factory)}
+  .chip-btn[data-cap="governance"] .dot{background:var(--cap-governance)}
+  .chip-btn[data-cap="foundation"] .dot{background:var(--cap-foundation)}
+  .chip-btn.active{
+    background:var(--navy-4);
+    border-color:var(--cyan);
+    color:var(--ink);
+    box-shadow:0 0 0 3px rgba(77,210,240,.15);
+  }
+  .chip-btn.reset{background:transparent;border-style:dashed}
+
+  /* CAPABILITY RIBBON (grid) */
+  .ribbon{
+    background:var(--navy-2);
+    border:1px solid var(--rule-2);
+    border-radius:12px;
+    padding:20px 22px;
+    margin-bottom:30px;
+    overflow-x:auto;
+  }
+  .ribbon h2{
+    font-size:11px;text-transform:uppercase;letter-spacing:.18em;
+    color:var(--cyan);margin:0 0 6px;font-weight:700;
+  }
+  .ribbon .ribbon-sub{
+    font-size:12.5px;color:var(--ink-3);margin-bottom:16px;
+  }
+  .ribbon-grid{
+    display:grid;
+    grid-template-columns:200px repeat(6,1fr);
+    gap:4px 6px;
+    min-width:860px;
+  }
+  .ribbon-grid .col-head{
+    font-size:10px;color:var(--ink-3);
+    text-transform:uppercase;letter-spacing:.1em;
+    text-align:center;font-weight:700;padding:4px 0;
+  }
+  .ribbon-grid .row-head{
+    font-size:12px;color:var(--ink-2);font-weight:700;
+    display:flex;align-items:center;gap:8px;
+    padding:8px 12px 8px 0;
+  }
+  .ribbon-grid .row-head .dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+  .ribbon-grid .cell{
+    height:42px;border-radius:6px;
+    background:var(--navy-3);border:1px solid var(--rule);
+    display:flex;align-items:center;justify-content:center;
+    font-size:10.5px;font-weight:700;color:var(--ink-4);
+    position:relative;
+    transition:opacity .25s, background .25s, border-color .25s;
+  }
+  .ribbon-grid .cell.active-strategy{
+    background:linear-gradient(135deg,rgba(127,222,245,.35),rgba(127,222,245,.18));
+    border-color:var(--cap-strategy);color:var(--cap-strategy);
+  }
+  .ribbon-grid .cell.active-discovery{
+    background:linear-gradient(135deg,rgba(192,132,252,.35),rgba(192,132,252,.18));
+    border-color:var(--cap-discovery);color:var(--cap-discovery);
+  }
+  .ribbon-grid .cell.active-factory{
+    background:linear-gradient(135deg,rgba(77,210,240,.35),rgba(77,210,240,.18));
+    border-color:var(--cap-factory);color:var(--cap-factory);
+  }
+  .ribbon-grid .cell.active-governance{
+    background:repeating-linear-gradient(45deg,rgba(251,191,36,.22) 0 6px,rgba(251,191,36,.08) 6px 12px);
+    border-color:var(--cap-governance);border-style:dashed;color:var(--cap-governance);
+  }
+  .ribbon-grid .cell.active-foundation{
+    background:linear-gradient(135deg,rgba(94,234,212,.35),rgba(94,234,212,.18));
+    border-color:var(--cap-foundation);color:var(--cap-foundation);
+  }
+  .ribbon-grid .cell.light{opacity:.55}
+
+  /* COMMERCIAL GATES */
+  .gates{
+    background:var(--navy-2);
+    border:1px solid var(--rule-2);
+    border-radius:12px;
+    padding:22px 26px;
+    margin-bottom:28px;
+  }
+  .gates h2{
+    font-size:11px;text-transform:uppercase;letter-spacing:.18em;
+    color:var(--cyan);margin:0 0 6px;font-weight:700;
+  }
+  .gates .gates-sub{
+    font-size:13px;color:var(--ink-3);margin-bottom:18px;max-width:720px;
+  }
+  .gates-table{width:100%;border-collapse:collapse;font-size:13px}
+  .gates-table th,.gates-table td{
+    padding:11px 14px;text-align:right;border-bottom:1px solid var(--rule);
+  }
+  .gates-table th:first-child,.gates-table td:first-child{text-align:left}
+  .gates-table th{
+    color:var(--ink-3);font-weight:600;font-size:10px;
+    text-transform:uppercase;letter-spacing:.12em;
+  }
+  .gates-table td.num{font-variant-numeric:tabular-nums;font-weight:700;color:var(--ink)}
+  .gates-table td.cyan{color:var(--cyan)}
+  .gates-table .gate-col{
+    display:inline-block;padding:2px 10px;border-radius:20px;
+    font-size:11px;font-weight:800;
+  }
+  .gate-50{background:rgba(251,191,36,.18);color:var(--amber)}
+  .gate-25{background:rgba(192,132,252,.2);color:var(--purple)}
+  .gate-10{background:rgba(94,234,212,.2);color:var(--mint)}
+  .gate-commit{background:rgba(77,210,240,.2);color:var(--cyan)}
+  .gate-ops{background:rgba(255,255,255,.08);color:var(--ink-3)}
+
+  /* MATT QUOTE CALLOUT */
+  .callout{
+    background:linear-gradient(135deg,var(--navy-3),var(--navy-2));
+    border:1px solid var(--rule-2);
+    border-left:4px solid var(--cyan);
+    border-radius:10px;
+    padding:22px 26px;margin-bottom:28px;
+  }
+  .callout .eb{
+    font-size:10px;color:var(--cyan);font-weight:700;
+    text-transform:uppercase;letter-spacing:.16em;margin-bottom:8px;
+  }
+  .callout blockquote{
+    margin:0;font-size:17px;line-height:1.45;color:var(--ink);
+    font-weight:500;font-style:italic;
+  }
+  .callout blockquote b{color:var(--cyan-2);font-weight:700;font-style:normal}
+  .callout .attr{
+    margin-top:10px;font-size:12px;color:var(--ink-3);
+  }
+
+  /* SECTION HEADER */
+  .section-head{
+    margin:0 0 12px;
+    font-size:11px;color:var(--cyan);
+    text-transform:uppercase;letter-spacing:.18em;font-weight:700;
+  }
+
+  .footer-note{
+    text-align:center;color:var(--ink-4);font-size:11px;
+    margin-top:40px;letter-spacing:.02em;
+  }
+  .footer-note a{color:var(--ink-3);text-decoration:underline}
+
+  /* ============ FILTER STATES ============ */
+  body[data-filter] .phase-card{opacity:.35}
+  body[data-filter] .phase-card.match{
+    opacity:1;
+    box-shadow:0 6px 28px rgba(0,0,0,.4);
+  }
+  body[data-filter] .ribbon-grid .cell:not(.active-filter){opacity:.15}
+
+  body[data-filter="strategy"]    .phase-card.match{border-color:var(--cap-strategy)}
+  body[data-filter="discovery"]   .phase-card.match{border-color:var(--cap-discovery)}
+  body[data-filter="factory"]     .phase-card.match{border-color:var(--cap-factory)}
+  body[data-filter="governance"]  .phase-card.match{border-color:var(--cap-governance)}
+  body[data-filter="foundation"]  .phase-card.match{border-color:var(--cap-foundation)}
+
+  /* When a capability is filtered, highlight only its activities */
+  body[data-filter] .phase-card ul.activities li{opacity:.3}
+  body[data-filter="strategy"]    .phase-card ul.activities li[data-cap="strategy"]{opacity:1}
+  body[data-filter="discovery"]   .phase-card ul.activities li[data-cap="discovery"]{opacity:1}
+  body[data-filter="factory"]     .phase-card ul.activities li[data-cap="factory"]{opacity:1}
+  body[data-filter="governance"]  .phase-card ul.activities li[data-cap="governance"]{opacity:1}
+  body[data-filter="foundation"]  .phase-card ul.activities li[data-cap="foundation"]{opacity:1}
+
+  @media (max-width:1180px){
+    .phase-grid{grid-template-columns:repeat(3,1fr)}
+  }
+  @media (max-width:820px){
+    .phase-grid{grid-template-columns:repeat(2,1fr)}
+    .eto-band{grid-template-columns:repeat(3,1fr);font-size:10px}
+    header.page-hero h1{font-size:32px}
+  }
+  @media (max-width:540px){
+    .phase-grid{grid-template-columns:1fr}
+    .wrap{padding:28px 20px 60px}
+  }
+</style>
+</head>
+<body>
+
+<nav class="pg-breadcrumb">
+  <div class="wrap" style="padding:14px 32px">
+    <a href="/links">Index</a>
+    <span class="sep">›</span>
+    <a href="/ai-practice/b.html">AI Practice</a>
+    <span class="sep">›</span>
+    <span class="here">Service Lifecycle</span>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <header class="page-hero">
+    <div class="eyebrow">AI Factory · V3.3 canon · Matt Gooden methodology</div>
+    <h1>AI Service Lifecycle</h1>
+    <p class="lede">
+      Six operational phases parented under three executive phases — <b>Envision · Transform · Operate</b>. Commercial clarity compounds phase by phase so you commit to production with clarity, not hope.
+      The phase grid is the <b>delivery shape</b>. The capability ribbon below is the <b>commercial shape</b> — five SKUs that chain across the lifecycle.
+      <span class="d3">Data<sup>#</sup>3</span> squads deliver; the capability is what you buy.
+    </p>
+    <div class="anchors">
+      <div class="chip"><div class="n">~10</div><div class="lbl">sprints · MVP end-to-end</div></div>
+      <div class="chip"><div class="n">~13</div><div class="lbl">sprints · scaled Factory Pod</div></div>
+      <div class="chip"><div class="n">Rolling</div><div class="lbl">Phase 6 · 6-month commit</div></div>
+    </div>
+  </header>
+
+  <!-- ETO ribbon labels -->
+  <div class="eto-band">
+    <div class="eto-block eto-envision">Envision · Phases 1–2</div>
+    <div class="eto-block eto-transform">Transform · Phases 3–4</div>
+    <div class="eto-block eto-operate">Operate · Phases 5–6</div>
+  </div>
+
+  <!-- 6 phase cards -->
+  <div class="phase-grid">
+
+    <div class="phase-card" data-caps="strategy governance">
+      <div class="num">1</div>
+      <div class="phase-name">Discover &amp; Envision</div>
+      <div class="phase-sub">Envision</div>
+      <h3>Activities</h3>
+      <ul class="activities">
+        <li data-cap="strategy">AI Strategy</li>
+        <li data-cap="strategy">AI Roadmap</li>
+        <li data-cap="strategy">Readiness Assessment</li>
+        <li data-cap="strategy">Use-case scoping</li>
+        <li data-cap="strategy">Value hypothesis</li>
+        <li data-cap="governance">Governance posture baseline</li>
+      </ul>
+      <div class="phase-meta">
+        <div class="meta-item"><span class="meta-lbl">Min sprints</span><span class="meta-val cyan">2</span></div>
+        <div class="meta-item"><span class="meta-lbl">ROI gate</span><span class="meta-val amber">±50%</span></div>
+      </div>
+    </div>
+
+    <div class="phase-card" data-caps="discovery governance">
+      <div class="num">2</div>
+      <div class="phase-name">Prototype &amp; Validate</div>
+      <div class="phase-sub">Envision</div>
+      <h3>Activities</h3>
+      <ul class="activities">
+        <li data-cap="discovery">PoC &amp; PoV build</li>
+        <li data-cap="discovery">Experimentation &amp; tuning</li>
+        <li data-cap="discovery">Solution options</li>
+        <li data-cap="discovery">ROI validation &amp; refinement</li>
+        <li data-cap="governance">Risk &amp; compliance scan</li>
+      </ul>
+      <div class="phase-meta">
+        <div class="meta-item"><span class="meta-lbl">Min sprints</span><span class="meta-val cyan">2</span></div>
+        <div class="meta-item"><span class="meta-lbl">ROI gate</span><span class="meta-val amber">±25%</span></div>
+      </div>
+    </div>
+
+    <div class="phase-card" data-caps="factory governance">
+      <div class="num">3</div>
+      <div class="phase-name">Solution Design</div>
+      <div class="phase-sub">Transform</div>
+      <h3>Activities</h3>
+      <ul class="activities">
+        <li data-cap="factory">Architect solution</li>
+        <li data-cap="factory">Operating model design</li>
+        <li data-cap="factory">Process design</li>
+        <li data-cap="factory">ROI refinement</li>
+        <li data-cap="governance">Governance consulting</li>
+        <li data-cap="governance">Security &amp; compliance consulting</li>
+      </ul>
+      <div class="phase-meta">
+        <div class="meta-item"><span class="meta-lbl">Min sprints</span><span class="meta-val cyan">1</span></div>
+        <div class="meta-item"><span class="meta-lbl">ROI gate</span><span class="meta-val amber">±10%</span></div>
+      </div>
+    </div>
+
+    <div class="phase-card" data-caps="factory governance">
+      <div class="num">4</div>
+      <div class="phase-name">Build &amp; Deploy</div>
+      <div class="phase-sub">Transform</div>
+      <h3>Activities</h3>
+      <ul class="activities">
+        <li data-cap="factory">Production development</li>
+        <li data-cap="factory">RAG &amp; knowledge integration</li>
+        <li data-cap="factory">Multi-agent orchestration</li>
+        <li data-cap="factory">Security hardening</li>
+        <li data-cap="factory">Testing</li>
+        <li data-cap="governance">Control validation</li>
+      </ul>
+      <div class="phase-meta">
+        <div class="meta-item"><span class="meta-lbl">Min sprints</span><span class="meta-val cyan">3 → 6</span></div>
+        <div class="meta-item"><span class="meta-lbl">ROI gate</span><span class="meta-val cyan">Committed</span></div>
+      </div>
+    </div>
+
+    <div class="phase-card" data-caps="factory foundation governance">
+      <div class="num">5</div>
+      <div class="phase-name">Adopt &amp; Scale</div>
+      <div class="phase-sub">Operate</div>
+      <h3>Activities</h3>
+      <ul class="activities">
+        <li data-cap="factory">Change management</li>
+        <li data-cap="factory">User training</li>
+        <li data-cap="factory">Champion network</li>
+        <li data-cap="foundation">Adoption measurement</li>
+        <li data-cap="foundation">Feedback capture / backlog</li>
+        <li data-cap="governance">Change control</li>
+      </ul>
+      <div class="phase-meta">
+        <div class="meta-item"><span class="meta-lbl">Min sprints</span><span class="meta-val cyan">2</span></div>
+        <div class="meta-item"><span class="meta-lbl">Handoff</span><span class="meta-val">Pod → Foundation</span></div>
+      </div>
+    </div>
+
+    <div class="phase-card" data-caps="foundation governance">
+      <div class="num">6</div>
+      <div class="phase-name">Operate &amp; Optimise</div>
+      <div class="phase-sub">Operate</div>
+      <h3>Activities</h3>
+      <ul class="activities">
+        <li data-cap="foundation">Manage agents</li>
+        <li data-cap="foundation">Manage AI platforms</li>
+        <li data-cap="foundation">Tune &amp; optimise agents</li>
+        <li data-cap="foundation">Innovation pipeline</li>
+        <li data-cap="governance">Security &amp; compliance audits</li>
+      </ul>
+      <div class="phase-meta">
+        <div class="meta-item"><span class="meta-lbl">Sprint cadence</span><span class="meta-val cyan">Rolling</span></div>
+        <div class="meta-item"><span class="meta-lbl">Commit</span><span class="meta-val">6 months+</span></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Capability filter -->
+  <div class="cap-filter">
+    <h2>Filter by capability — click a chip to see just that SKU's footprint</h2>
+    <div class="chips">
+      <button class="chip-btn reset" data-cap="">Show all</button>
+      <button class="chip-btn" data-cap="strategy"><span class="dot"></span>Multi Agent Strategy</button>
+      <button class="chip-btn" data-cap="discovery"><span class="dot"></span>Discovery &amp; Proof of Value</button>
+      <button class="chip-btn" data-cap="factory"><span class="dot"></span>Factory Pod</button>
+      <button class="chip-btn" data-cap="governance"><span class="dot"></span>Governance <span style="opacity:.6;font-weight:400">· cross-cutting</span></button>
+      <button class="chip-btn" data-cap="foundation"><span class="dot"></span>Scalable Foundation</button>
+    </div>
+  </div>
+
+  <!-- Capability × Phase ribbon -->
+  <div class="ribbon">
+    <h2>Capability ribbon — what's sold where</h2>
+    <div class="ribbon-sub">Solid = primary delivery · light = touching · dashed = cross-cutting overlay · <b>Governance</b> runs across all six phases and is never a standalone capability.</div>
+    <div class="ribbon-grid">
+      <div></div>
+      <div class="col-head">P1 Discover</div>
+      <div class="col-head">P2 Prototype</div>
+      <div class="col-head">P3 Design</div>
+      <div class="col-head">P4 Build</div>
+      <div class="col-head">P5 Adopt</div>
+      <div class="col-head">P6 Operate</div>
+
+      <div class="row-head"><span class="dot" style="background:var(--cap-strategy)"></span>Multi Agent Strategy</div>
+      <div class="cell active-strategy" data-cap="strategy">2 sprints</div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+
+      <div class="row-head"><span class="dot" style="background:var(--cap-discovery)"></span>Discovery &amp; Proof of Value</div>
+      <div class="cell"></div>
+      <div class="cell active-discovery" data-cap="discovery">2 sprints</div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+
+      <div class="row-head"><span class="dot" style="background:var(--cap-factory)"></span>Factory Pod</div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell active-factory" data-cap="factory">1 sprint</div>
+      <div class="cell active-factory" data-cap="factory">3–6 sprints</div>
+      <div class="cell active-factory light" data-cap="factory">handoff</div>
+      <div class="cell"></div>
+
+      <div class="row-head"><span class="dot" style="background:var(--cap-governance)"></span>Governance</div>
+      <div class="cell active-governance" data-cap="governance">baseline</div>
+      <div class="cell active-governance" data-cap="governance">risk scan</div>
+      <div class="cell active-governance" data-cap="governance">consulting</div>
+      <div class="cell active-governance" data-cap="governance">validation</div>
+      <div class="cell active-governance" data-cap="governance">change</div>
+      <div class="cell active-governance" data-cap="governance">audits</div>
+
+      <div class="row-head"><span class="dot" style="background:var(--cap-foundation)"></span>Scalable Foundation</div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell active-foundation light" data-cap="foundation">warm-up</div>
+      <div class="cell active-foundation" data-cap="foundation">13+ sprints</div>
+    </div>
+  </div>
+
+  <!-- Commercial gates -->
+  <div class="gates">
+    <h2>Commercial clarity gates — time to line-of-sight on ROI</h2>
+    <div class="gates-sub">Every phase is a decision gate. Customers don't commit to production; they commit to the next phase. Clarity compounds. Assumes default squad economics: $2,400/day sell · 2 FTE blended · $48k per sprint — tune on the <a href="/ai-practice/squads.html" style="color:var(--cyan);text-decoration:underline">Squad Economics</a> page.</div>
+    <table class="gates-table">
+      <thead>
+        <tr>
+          <th>Gate</th>
+          <th>After</th>
+          <th>Cumulative sprints</th>
+          <th>Cumulative weeks</th>
+          <th>Cumulative spend</th>
+          <th>ROI confidence</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><b>Gate 1</b></td>
+          <td>Phase 1 Discover &amp; Envision</td>
+          <td class="num">2</td>
+          <td class="num">4</td>
+          <td class="num cyan">$96k</td>
+          <td><span class="gate-col gate-50">±50%</span></td>
+        </tr>
+        <tr>
+          <td><b>Gate 2</b></td>
+          <td>Phase 2 Prototype &amp; Validate</td>
+          <td class="num">4</td>
+          <td class="num">8</td>
+          <td class="num cyan">$192k</td>
+          <td><span class="gate-col gate-25">±25%</span></td>
+        </tr>
+        <tr>
+          <td><b>Gate 3</b></td>
+          <td>Phase 3 Solution Design</td>
+          <td class="num">5</td>
+          <td class="num">10</td>
+          <td class="num cyan">$240k</td>
+          <td><span class="gate-col gate-10">±10%</span></td>
+        </tr>
+        <tr>
+          <td><b>Commit</b></td>
+          <td>Phase 4 Build &amp; Deploy <span class="muted" style="color:var(--ink-4)">(MVP)</span></td>
+          <td class="num">8</td>
+          <td class="num">16</td>
+          <td class="num cyan">$384k</td>
+          <td><span class="gate-col gate-commit">Committed</span></td>
+        </tr>
+        <tr>
+          <td><b>Live</b></td>
+          <td>Phase 5 Adopt &amp; Scale</td>
+          <td class="num">10</td>
+          <td class="num">20</td>
+          <td class="num cyan">$480k</td>
+          <td><span class="gate-col gate-commit">In production</span></td>
+        </tr>
+        <tr>
+          <td><b>Rolling</b></td>
+          <td>Phase 6 Operate &amp; Optimise</td>
+          <td class="num">13+</td>
+          <td class="num">26+</td>
+          <td class="num cyan">$624k+</td>
+          <td><span class="gate-col gate-ops">Managed service</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Matt quote callout -->
+  <div class="callout">
+    <div class="eb">The commercial story — Matt's framing</div>
+    <blockquote>
+      "What is our revenue stream? Where do we make money? <b>Sprint-based</b>. Time to clarity. Time to line of sight on ROI.
+      Spending a small amount of money to quickly figure out it's a bad idea <b>is</b> a good idea."
+    </blockquote>
+    <div class="attr">— Matt Gooden, working notes · 2026-04-15</div>
+  </div>
+
+  <div class="footer-note">
+    V3.3 framework · activities adapted from Matt Gooden's 2026-04-14 card · sprint estimates are placeholders pending Alenka squad-sizing reconciliation · <a href="/links">back to index</a>
+  </div>
+
+</div>
+
+<script>
+  // Tag each phase card with its capability match list (derived from data-caps)
+  document.querySelectorAll('.phase-card').forEach(card => {
+    const caps = (card.dataset.caps || '').split(/\s+/).filter(Boolean);
+    card.dataset.capsList = caps.join(',');
+  });
+
+  function applyFilter(cap) {
+    const body = document.body;
+    if (!cap) {
+      body.removeAttribute('data-filter');
+      document.querySelectorAll('.phase-card').forEach(c => c.classList.remove('match'));
+      document.querySelectorAll('.ribbon-grid .cell').forEach(c => c.classList.remove('active-filter'));
+      document.querySelectorAll('.chip-btn').forEach(b => b.classList.toggle('active', b.dataset.cap === ''));
+      return;
+    }
+    body.setAttribute('data-filter', cap);
+    document.querySelectorAll('.phase-card').forEach(card => {
+      const caps = (card.dataset.caps || '').split(/\s+/);
+      card.classList.toggle('match', caps.includes(cap));
+    });
+    document.querySelectorAll('.ribbon-grid .cell').forEach(cell => {
+      cell.classList.toggle('active-filter', cell.dataset.cap === cap);
+    });
+    document.querySelectorAll('.chip-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.cap === cap);
+    });
+  }
+
+  document.querySelectorAll('.chip-btn').forEach(btn => {
+    btn.addEventListener('click', () => applyFilter(btn.dataset.cap || ''));
+  });
+
+  // Default state: Show all active
+  applyFilter('');
+</script>
+</body>
+</html>

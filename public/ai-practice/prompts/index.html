@@ -18,7 +18,19 @@
   header h1{margin:0 0 6px;font-size:28px;letter-spacing:-.01em}
   header p{margin:0;color:var(--ink2);font-size:14px}
   header .meta{margin-top:10px;font-size:12px;color:var(--ink3)}
-  nav{position:sticky;top:0;z-index:10;background:rgba(10,4,32,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:10px 24px;display:flex;gap:8px;flex-wrap:wrap;font-size:12px}
+
+  .tabbar{position:sticky;top:0;z-index:20;display:flex;gap:0;padding:0 20px;background:linear-gradient(180deg,#140a35 0%,#0e0630 100%);border-bottom:1px solid var(--line)}
+  .tabbtn{background:transparent;border:none;color:var(--ink3);padding:13px 22px;font:600 12px/1 -apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;letter-spacing:.06em;cursor:pointer;border-bottom:2px solid transparent;text-transform:uppercase;transition:all .15s;display:flex;align-items:center;gap:8px}
+  .tabbtn small{font-size:10px;color:var(--ink3);font-weight:600;padding:2px 7px;background:#05031a;border:1px solid var(--line);border-radius:10px;letter-spacing:.02em}
+  .tabbtn:hover{color:var(--ink)}
+  .tabbtn.active{color:var(--cyan);border-bottom-color:var(--cyan);background:#0a0420}
+  .tabbtn.active small{color:var(--cyan);border-color:var(--cyan);background:#0a0420}
+  .tabpanel{display:none}
+  .tabpanel.active{display:block}
+
+  nav{position:sticky;top:42px;z-index:10;background:rgba(10,4,32,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:10px 24px;display:flex;gap:8px;flex-wrap:wrap;font-size:12px}
+  section > .vault{color:var(--ink2);font-size:12px;margin:0 0 14px}
+  section > .vault b{color:var(--cyan);font-weight:500}
   nav a{color:var(--ink2);text-decoration:none;padding:6px 10px;border-radius:6px;border:1px solid transparent}
   nav a:hover{color:var(--cyan);border-color:var(--line);background:#12072e}
   main{max-width:960px;margin:0 auto;padding:28px 24px 80px}
@@ -64,11 +76,17 @@
 </head>
 <body>
 <header>
-  <h1>AI Practice Infographic — NBP prompt kit</h1>
+  <h1>AI Practice — NBP prompt kit</h1>
   <p>Reference chops + Nano Banana Pro prompts, grounded in the d3brain AI Factory vault.</p>
-  <div class="meta">Source: Data_007_Infographic.jpg (745×4474) · Target: single-column infographic, stitched from 8 × 9:16 NBP panels · Content: Mark's ETO framework + AI Squads + AAF stack + 5-service catalogue</div>
+  <div class="meta">Two kits in one page · Infographic panels (stitched 8 × 9:16 for the DAT-008 one-pager) · Maps &amp; Graphics (standalone 16:9 slides for the Matt Gooden AI portfolio workstream)</div>
 </header>
 
+<div class="tabbar">
+  <button class="tabbtn active" data-tab="panel-infographic">Infographic panels <small>8</small></button>
+  <button class="tabbtn" data-tab="panel-maps">Maps &amp; Graphics <small>5</small></button>
+</div>
+
+<div class="tabpanel active" id="panel-infographic">
 <nav>
   <a href="#instructions">Instructions</a>
   <a href="#bible">Style bible</a>
@@ -508,10 +526,275 @@ Data#3  |  Microsoft</div>
 </section>
 
 </main>
+</div>
+
+<div class="tabpanel" id="panel-maps">
+<nav>
+  <a href="#m-instructions">Instructions</a>
+  <a href="#m1">M1 Topography</a>
+  <a href="#m2">M2 Metro</a>
+  <a href="#m3">M3 Nautical ★</a>
+  <a href="#m4">M4 Atlas ★</a>
+  <a href="#m5">M5 Corporate</a>
+  <a href="#pairings">Pairings</a>
+</nav>
+<main>
+
+<section class="instructions" id="m-instructions">
+  <h2>Maps &amp; Graphics — Matt Gooden AI portfolio kit <span class="tag">Read first</span></h2>
+  <p class="subtitle">Five standalone 16:9 Nano Banana Pro prompts. Three methodology variants + two portfolio variants. No stitching — each renders as a single slide.</p>
+  <ol>
+    <li><strong>Context:</strong> From the 2026-04-15 Matt Gooden call, he asked for two distinct graphics — (a) a non-linear 6-phase methodology infographic that <em>shows</em> the iteration (not just describes it), and (b) an "AI portfolio vision on a page" spanning services + infrastructure + software across delivery models with the vendor ecosystem underneath.</li>
+    <li><strong>Phase names:</strong> Using <code>Discover · Design · Build · Pilot · Scale · Operate</code> mapped as Envision(D+D) / Transform(B+P) / Operate(S+O). If Matt's 6-phase methodology uses different words, find-replace in the prompts before submitting.</li>
+    <li><strong>Hero pick:</strong> <b>M3 — AI Portability Chart</b>. It pairs directly with Matt's own phrase "AI portability" from the transcript — <em>"build once and have that portability."</em> It's the one visual that answers three questions at once: non-linear methodology, portfolio vision, and the naming debate.</li>
+    <li><strong>Execution order:</strong> Run M3 first. Then M4 in the same session so Nano Banana Pro holds visual language across the pair. Then M5 as the safe corporate fallback. M1 and M2 are methodology alternatives for softer / more corporate audiences.</li>
+    <li><strong>Branding:</strong> Render "Data3" in-image. Overlay the real <code>Data#3</code> superscript lockup in post — image models mangle the hash glyph every time.</li>
+    <li><strong>Aspect ratio:</strong> 16:9 throughout. Slide-ready, not social tiles.</li>
+  </ol>
+  <div class="note"><strong>Content grounding:</strong> Pulled from the AI Service Lifecycle memory (6 phases × 3 ETO buckets), the capability-as-a-service framing (Dave Gold vision), the Matt Gooden transcript, and the AI Portability naming debate from 2026-04-15. All graphics are non-vendor first — vendor flags are the layer underneath, not the hero.</div>
+  <div class="note warn"><strong>Naming watch:</strong> "AI Portability" is Matt's own phrase — use it in titles. "AI sovereignty" is on hold (he pushed back: reads too data-security-only). "AI control" is Adam's fallback frame (cost + location + security). Resolve at the afternoon debrief before locking anything into collateral.</div>
+</section>
+
+<section id="m1">
+  <h2>M1 — Capability Topography <span class="tag">16:9 · Methodology · Terrain</span></h2>
+  <p class="subtitle">Warm illustrated terrain map. Six regions as phases, three ETO biome bands, feedback rivers flowing backward from Operate to Envision.</p>
+  <div class="vault">Pairs with: <b>non-linear 6-phase methodology</b> · Vibe: warm, creative, humanistic · Use when: internal audiences or Matt wants the "soft" variant.</div>
+  <div class="promptbox" id="prompt-m1">A stylised top-down illustrated topographic map infographic, 16:9 widescreen aspect ratio, professional corporate illustration style with a hand-crafted feel — think "modern explorer's atlas meets enterprise consulting deck." Clean vector linework over a soft parchment-cream background with subtle paper texture.
+
+The map is divided into three horizontal biome bands from left to right, each gently labelled along the top in small elegant serif caps:
+- Left band "ENVISION" — rolling highlands and forested plateaus in sage green
+- Centre band "TRANSFORM" — a workshop valley with rivers and bridges in warm ochre
+- Right band "OPERATE" — a coastal harbour region with docks and lighthouses in teal blue
+
+Place six labelled regions across the map, one per phase, each with a small illustrated icon:
+1. DISCOVER — a hilltop observatory with a telescope (Envision band)
+2. DESIGN — a drafting tent with blueprints (Envision band)
+3. BUILD — a forge and scaffold (Transform band)
+4. PILOT — a test track with a small vehicle (Transform band)
+5. SCALE — terraced fields expanding outward (Operate band)
+6. OPERATE — a working harbour with cranes and ships (Operate band)
+
+Connect the regions with winding trails shown as dashed lines in deep charcoal. Critically, show MULTIPLE routes — some trails loop backward (from Pilot back to Design, from Scale back to Build), some skip ahead, and thin blue "feedback rivers" flow backward across the map from the Operate side to the Envision side, clearly signalling that this is NOT a linear waterfall process but an iterative landscape the customer navigates repeatedly.
+
+In the bottom-right corner, a small compass rose labelled "ETO" with three directional arrows (E, T, O). In the bottom-left, a tiny legend with four small vendor flag icons labelled "Microsoft · NVIDIA · Dell · Cisco · NextDC" planted at relevant regions as little flag markers.
+
+Top-left corner: a clean title block "The AI Capability Map" in a modern geometric sans-serif, with a small "Data3" wordmark in brand red below it. Overall palette: cream background, sage/ochre/teal biomes, charcoal linework, one accent of Data3 brand red (#E4002B) reserved for the title and the customer's dotted journey line that weaves through all six regions.
+
+Aesthetic references: Wes Anderson colour grading, vintage National Geographic illustrated maps, modern Kurzgesagt infographic cleanliness. Avoid fantasy-RPG clichés, no dragons, no treasure chests. Keep it corporate-sophisticated but warm and human. No stock-photo imagery. Vector illustration only.
+
+Aspect ratio: 16:9</div>
+  <div class="copyrow">
+    <span class="hint">Best for internal / practice audiences — too warm for a CFO boardroom</span>
+    <button class="copy" data-target="prompt-m1">Copy M1</button>
+  </div>
+</section>
+
+<section id="m2">
+  <h2>M2 — Metro Map <span class="tag">16:9 · Methodology · Transit</span></h2>
+  <p class="subtitle">Harry Beck London Tube style. Three coloured lines (E/T/O), six stations, three interchange nodes, dashed red customer journey overlay.</p>
+  <div class="vault">Pairs with: <b>non-linear 6-phase methodology</b> · Vibe: safe, geometric, boardroom-ready · Use when: stakeholder wants a "CFO-could-read-this-tomorrow" format.</div>
+  <div class="promptbox" id="prompt-m2">A minimalist transit map infographic in the Harry Beck London Underground tradition, 16:9 widescreen aspect ratio. Clean flat vector design, pure white background, crisp geometric linework with only 45-degree and 90-degree angles. Modern enterprise brand aesthetic.
+
+Three parallel transit lines run horizontally across the map, each a different bold colour with a thick rounded stroke:
+- Top line "ENVISION" in deep sage green
+- Middle line "TRANSFORM" in warm amber/ochre
+- Bottom line "OPERATE" in ocean teal
+
+Six stations total, two per line, rendered as white circles with thick coloured borders matching their line. Station labels in a clean modern sans-serif (geometric, Futura or Gotham style), set in small caps:
+1. DISCOVER (Envision line)
+2. DESIGN (Envision line)
+3. BUILD (Transform line)
+4. PILOT (Transform line)
+5. SCALE (Operate line)
+6. OPERATE (Operate line)
+
+Critically: add THREE interchange stations drawn as larger double-ring circles where the lines cross vertically — these are the iteration / pivot points. Label them with small icons only (a curved-arrow "loop" symbol). Show curved connector lines between the three main lines at these interchanges, indicating riders can hop between ETO buckets.
+
+Overlay a dashed red "customer journey" line (in Data3 brand red #E4002B) that starts at Discover, visits several stations in a clearly NON-linear order — it loops back from Pilot to Design, jumps forward to Scale, returns to Build, and finally ends at Operate. Show small directional arrows along this dashed line. This dashed overlay is the visual proof that the methodology is iterative not waterfall.
+
+Below each station, a tiny vendor badge cluster in muted grey icons: Microsoft, NVIDIA, Dell, Cisco, NextDC — placed under whichever station they're most relevant to, so the whole "vendor ecosystem" sits visually underneath the station line as Matt requested.
+
+Title in the top-left in bold geometric sans-serif: "The AI Service Lifecycle" with subtitle "Six Phases · Three Lines · One Journey". Small "Data3" wordmark bottom-right in brand red. Legend box bottom-left explaining the three line colours and the dashed red customer journey.
+
+Overall feel: executive-boardroom safe, instantly readable, suitable for a CFO slide. Harry Beck clarity. No illustration, no texture, no shading — pure flat vector.
+
+Aspect ratio: 16:9</div>
+  <div class="copyrow">
+    <span class="hint">Safe exec fallback · Lowest creative risk, lowest memorability</span>
+    <button class="copy" data-target="prompt-m2">Copy M2</button>
+  </div>
+</section>
+
+<section id="m3">
+  <h2>M3 — AI Portability Chart <span class="tag">16:9 · Methodology · Nautical · HERO</span></h2>
+  <p class="subtitle">Vintage nautical chart reimagined. Six ports as phases, three named seas as ETO, shipping lanes with feedback currents, customer voyage in Data3 red.</p>
+  <div class="vault">Pairs with: <b>M4 Atlas</b> (same visual language) · Vibe: premium, editorial, cartographic · Use when: this is the hero. Matches Matt's own "AI portability" phrase from the transcript.</div>
+  <div class="promptbox" id="prompt-m3">A stylised modern nautical chart infographic in the tradition of vintage sea charts reimagined for a premium enterprise consulting audience, 16:9 widescreen aspect ratio. Aged parchment-cream background with soft paper texture and faint grid lines. Deep navy-blue linework, elegant serif compass rose, and a hand-drawn feel that's still clean and corporate.
+
+Divide the chart into three labelled seas flowing left to right:
+- "SEA OF ENVISION" in the left third (pale sage-tinted water)
+- "SEA OF TRANSFORMATION" in the middle third (warm amber-tinted water)
+- "OPERATING WATERS" in the right third (teal-tinted water)
+
+Place six illustrated port towns across the seas, each drawn as a small harbour icon with a tiny lighthouse, anchor symbol, and a labelled cartouche beneath:
+1. Port of DISCOVER (Sea of Envision)
+2. Port of DESIGN (Sea of Envision)
+3. Port of BUILD (Sea of Transformation)
+4. Port of PILOT (Sea of Transformation)
+5. Port of SCALE (Operating Waters)
+6. Port of OPERATE (Operating Waters)
+
+Draw shipping lanes as elegant dashed curves connecting the ports — critically, show routes in multiple directions: lanes running forward from Discover to Operate, but also clear return lanes from Pilot back to Design, from Scale back to Build, and a long "feedback current" sweeping from Operate all the way back to Discover. Add small directional chevron arrows along each lane. The visual message: captains sail this chart in loops, not straight lines.
+
+At each port, fly a small vendor flag on a pole — Microsoft, NVIDIA, Dell, Cisco, NextDC — as the "vendor ecosystem underneath" the portfolio. Include a tiny legend bottom-right matching flags to vendor names.
+
+Overlay a dotted red "customer voyage" line (in Data3 brand red #E4002B) showing a tall-ship icon sailing a non-linear route that visits ports out of order, demonstrating AI portability — build once, sail anywhere.
+
+Top-left: an ornate compass rose labelled "ETO" with three cardinal arrows (Envision · Transform · Operate). Top-right: a decorative title cartouche reading "The AI Portability Chart" with subtitle "Navigate your AI capability across public, private and edge waters". Bottom-left: a small "Built by Data3" wordmark in brand red. Bottom-right: a tiny illustrated key showing the four delivery models as waters: Public Cloud, Private Cloud, Edge, Hybrid.
+
+Palette: parchment cream base, navy linework, sage/amber/teal seas, one accent of Data3 brand red (#E4002B) for the voyage line and title. Typography: elegant modern serif for titles (Cormorant or similar), clean sans-serif for port labels.
+
+Aesthetic references: vintage Admiralty charts, Wes Anderson colour sensibility, Monocle magazine layouts, modern "Atlas Obscura" editorial illustration. No pirates, no sea monsters, no treasure maps — keep it sophisticated, corporate, and editorial. Vector illustration with subtle texture, no photography.
+
+Aspect ratio: 16:9</div>
+  <div class="copyrow">
+    <span class="hint">★ Hero pick · Run this first · Match with M4 in the same session</span>
+    <button class="copy" data-target="prompt-m3">Copy M3</button>
+  </div>
+</section>
+
+<section id="m4">
+  <h2>M4 — Portfolio Atlas <span class="tag">16:9 · Portfolio · Nautical · PAIRS WITH M3</span></h2>
+  <p class="subtitle">Nautical sibling to M3. An atlas of the territory (offerings × delivery models × vendors), not the voyage route. Three island-groups = services / software / infrastructure.</p>
+  <div class="vault">Pairs with: <b>M3 Portability Chart</b> (same visual language) · Vibe: premium atlas page · Use when: you want the portfolio graphic to speak the same map metaphor as the methodology graphic.</div>
+  <div class="promptbox" id="prompt-m4">A stylised modern nautical atlas page infographic in the tradition of vintage cartographer's atlases reimagined for a premium enterprise consulting audience, 16:9 widescreen aspect ratio. Aged parchment-cream background with soft paper texture, faint latitude/longitude grid, deep navy-blue linework, elegant compass roses, and a hand-crafted feel that stays clean and corporate. This is the companion piece to "The AI Portability Chart" — same visual language, different content: this one is an ATLAS of the territory, not a voyage route.
+
+Title cartouche top-centre in an ornate rectangular banner: "The Data3 AI Portfolio Atlas" with subtitle "A map of the capability, not a map of the journey."
+
+Across the middle of the chart, render an ARCHIPELAGO of three large islands arranged left-to-right, each a different shape, each labelled with an elegant serif cartouche:
+
+1. ADVISORY &amp; SERVICES ISLAND (left) — a mountainous island with a lighthouse, a lecture hall icon, and small port towns labelled: "Discovery Workshops · Strategy · Implementation · Managed Services · Training &amp; Enablement"
+
+2. SOFTWARE ISLAND (centre) — a forested island with a small observatory and research station, port towns labelled: "Copilot · NVIDIA NIM · NeMo · Foundation Models · Agentic Platforms · Governance"
+
+3. INFRASTRUCTURE ISLAND (right) — a rocky industrial island with cranes and a shipyard, port towns labelled: "GPU Compute · Networking · Storage · Edge Nodes · Data Centre Hosting"
+
+Surround the archipelago with FOUR named seas (the delivery models), each tinted a different soft colour and labelled in italic serif:
+- "Public Cloud Sea" (pale teal) to the north
+- "Private Cloud Sea" (deep navy) to the south
+- "Edge Waters" (sage green) to the west
+- "Hybrid Strait" (warm amber) running through the middle of the archipelago
+
+Across the top of the map, draw an ornate compass rose labelled "ETO" with three winds blowing from different directions — "Envision Wind", "Transform Wind", "Operate Wind" — as long curving arrows that sweep across all three islands, visually communicating that ETO applies to every offering regardless of island.
+
+At key harbours on each island, fly small vendor flags on poles: Microsoft, NVIDIA, Dell, Cisco, NextDC, HPE. Include a tiny legend bottom-right matching flag colours to vendor names.
+
+Along the bottom of the atlas, a subtle horizontal banner reading in refined italic serif: "Capability as a Service" — framed like a cartographer's dedication line.
+
+Top-right: a small inset panel titled "Customer Problems We Solve" with four tiny compass-bearing markers: "Adopt · Implement · Scale · Right-size" — each with a small arrow pointing into the archipelago.
+
+Bottom-left: a small "Built by Data3" wordmark in Data3 brand red (#E4002B). Bottom-right: a delicate scale bar labelled "From Pilot to Platform" instead of kilometres.
+
+Palette: parchment cream base, navy linework, sage/amber/teal/deep-navy seas, one accent of Data3 brand red (#E4002B) reserved for the title lettering, the capability-as-a-service banner, and small decorative flourishes. Typography: elegant modern serif (Cormorant or similar) for titles and cartouches, clean sans-serif for port-town labels.
+
+Aesthetic references: vintage Admiralty atlases, Monocle magazine cartography features, Wes Anderson colour grading, modern Atlas Obscura editorial illustration, antique bookplate style. No pirates, no sea monsters, no treasure maps. Sophisticated, corporate, editorial. Vector illustration with subtle paper texture, no photography.
+
+CRITICAL: this must visually pair with "The AI Portability Chart" (M3) as a matching set — same palette, same linework weight, same typography family, same compass rose style.
+
+Aspect ratio: 16:9</div>
+  <div class="copyrow">
+    <span class="hint">★ Run in same session as M3 so NBP holds the visual language</span>
+    <button class="copy" data-target="prompt-m4">Copy M4</button>
+  </div>
+</section>
+
+<section id="m5">
+  <h2>M5 — Corporate Standard Portfolio <span class="tag">16:9 · Portfolio · McKinsey</span></h2>
+  <p class="subtitle">Safe corporate alternative to M4. Layered service-catalogue architecture — four horizontal bands (Engage → Deliver → Deliver Model → Vendors) + outcomes rail.</p>
+  <div class="vault">Pairs with: <b>M3 for creative+corporate split</b> · Vibe: McKinsey / Deloitte / NTT DATA · Use when: Dave Gold or Brad will want structure over metaphor.</div>
+  <div class="promptbox" id="prompt-m5">A premium enterprise consulting infographic in the visual tradition of McKinsey, Deloitte, BCG, and NTT DATA service catalogue slides, 16:9 widescreen aspect ratio. Clean flat vector design on a soft off-white background (#F7F7F9). Modern geometric sans-serif typography throughout (Inter or similar). No illustration, no texture, no decoration — just crisp architectural layering of the kind an executive GM of Services would put in front of a CEO. Professional, calm, confident.
+
+Title top-left in bold geometric sans-serif: "The Data3 AI Portfolio" with subtitle in lighter weight: "Capability as a Service — across every delivery model, built on every vendor."
+
+Structure the body as FOUR horizontal layered bands stacked top to bottom, each a distinct card row with a thin dividing rule between them. Label each band with a small left-margin tag in brand red (#E4002B).
+
+BAND 1 — "HOW WE ENGAGE" (tag: red)
+A single horizontal strip divided into three equal pill-shaped segments in muted colours, labelled in clean sans-serif caps:
+• ENVISION (sage green pill)
+• TRANSFORM (warm amber pill)
+• OPERATE (teal pill)
+With a thin curved arrow flowing across all three from left to right and a smaller return arrow underneath signalling iteration.
+
+BAND 2 — "WHAT WE DELIVER" (tag: red)
+Three equal-width card columns, each a white rounded rectangle with a thin navy border and a coloured header bar:
+• SERVICES (sage header) — bullet list: Discovery Workshops, Strategy &amp; Advisory, Implementation, Managed Services, Training &amp; Enablement
+• SOFTWARE (amber header) — bullet list: Microsoft Copilot, NVIDIA NIM, NeMo, Foundation Models, Agentic Platforms, AI Governance
+• INFRASTRUCTURE (teal header) — bullet list: GPU Compute, AI Networking, Storage, Edge Nodes, Data Centre Hosting
+Each card has a small monoline icon in the top-right corner of its header (a person-with-handshake for Services, a code-brackets for Software, a server-stack for Infrastructure).
+
+BAND 3 — "HOW WE DELIVER" (tag: red)
+A single horizontal strip split into four equal segments with small monoline icons, labelled:
+• PUBLIC CLOUD (cloud icon)
+• PRIVATE CLOUD (shield-over-cloud icon)
+• EDGE (antenna icon)
+• HYBRID (connected-loop icon)
+Each segment in a soft pale fill with thin navy border.
+
+BAND 4 — "VENDOR ECOSYSTEM" (tag: red)
+A clean horizontal row of vendor logos on a light grey strip, evenly spaced and all rendered at the same visual weight: Microsoft, NVIDIA, Dell Technologies, Cisco, NextDC, HPE. Render them as simple monochrome wordmark-style placeholders if exact logos can't be reproduced. A tiny caption underneath in italic grey: "Tier-1 partnerships, Australian delivery."
+
+On the far right edge of the infographic, a vertical slim panel titled "OUTCOMES" with four short phrases stacked vertically in small caps, each preceded by a small arrow chevron:
+→ ADOPT AI CONFIDENTLY
+→ IMPLEMENT AT PACE
+→ SCALE WITHOUT LOCK-IN
+→ RIGHT-SIZE THE INVESTMENT
+
+Bottom of the infographic: a single thin footer strip in Data3 brand red (#E4002B) containing a small "Data3" wordmark on the left and the phrase "AI Portability · AI Control · AI Advantage" on the right in clean white sans-serif.
+
+Palette: off-white background (#F7F7F9), navy linework (#1A2332), three accent tints (sage #A8C8A8, amber #E8B55A, teal #5FA8A8) used only for band headers and pills, Data3 brand red (#E4002B) reserved for tags, title accents, and the footer strip. No gradients, no shadows, no 3D, no textures. Pure flat vector.
+
+Aesthetic references: McKinsey exhibit style, Deloitte AI service brochures, NTT DATA managed-services one-pagers, Apple keynote slide minimalism, Stripe documentation clarity. The kind of slide that looks expensive because it's restrained.
+
+CRITICAL: this must look instantly credible to a CFO, Exec GM Services, and CEO in a boardroom. No whimsy, no illustration, no metaphor — structure and hierarchy only.
+
+Aspect ratio: 16:9</div>
+  <div class="copyrow">
+    <span class="hint">The Dave Gold / Brad-safe print-ready fallback</span>
+    <button class="copy" data-target="prompt-m5">Copy M5</button>
+  </div>
+</section>
+
+<section class="stitch" id="pairings">
+  <h2>Pairings for the debrief <span class="tag">Recommendation</span></h2>
+  <p class="subtitle">Walk Matt through two pairings, not five graphics. Pick which story you want to tell.</p>
+  <table>
+    <thead><tr><th>Pairing</th><th>Graphics</th><th>Story</th><th>Audience</th></tr></thead>
+    <tbody>
+      <tr><td>Nautical twins ★</td><td>M3 + M4</td><td>"Here's the territory, here's how we navigate it." Single visual language, cartographic metaphor all the way through.</td><td>Hero pitch for Dave Gold — memorable, confident, different.</td></tr>
+      <tr><td>Hero + safe</td><td>M3 + M5</td><td>Metaphor opens the room, structure closes it. Creative left hook, corporate right cross.</td><td>Brad Colledge / CFO presence — needs structure to land.</td></tr>
+      <tr><td>All-corporate</td><td>M2 + M5</td><td>Transit map methodology + layered service catalogue. Safest option but lowest memorability.</td><td>Cold boardroom that doesn't know Data3 yet.</td></tr>
+      <tr><td>All-creative</td><td>M1 + M4</td><td>Warm terrain map + nautical atlas. Internal workshop energy.</td><td>Practice managers / internal capability sessions, not exec pitches.</td></tr>
+    </tbody>
+  </table>
+  <div class="note"><strong>My recommendation:</strong> Run <b>M3 + M4</b> first. Bring <b>M5</b> as the print-ready fallback if Matt flinches on the metaphor for the exec room. M1 and M2 are nice-to-have variants for flexibility.</div>
+  <div class="note warn"><strong>Before pasting into NBP:</strong> ✅ Confirm the 6 phase names match Matt's methodology (find-replace if not) · ✅ Decide "AI Portability" vs "AI Control" in the titles · ✅ Run M3 and M4 in the same session for visual consistency · ✅ Overlay real Data#3 superscript lockup in post.</div>
+</section>
+
+</main>
+</div>
 
 <footer>From the Mind of Mentis · generated for d3brain AI Factory workstream · refs stored at <code>./refs/</code></footer>
 
 <script>
+document.querySelectorAll('.tabbtn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const id = btn.dataset.tab;
+    document.querySelectorAll('.tabbtn').forEach(b=>b.classList.toggle('active', b===btn));
+    document.querySelectorAll('.tabpanel').forEach(p=>p.classList.toggle('active', p.id===id));
+    window.scrollTo({top:0,behavior:'instant'});
+  });
+});
+
 document.querySelectorAll('button.copy').forEach(btn=>{
   btn.addEventListener('click', async ()=>{
     const target = document.getElementById(btn.dataset.target);

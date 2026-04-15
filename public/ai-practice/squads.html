@@ -369,11 +369,11 @@
         <div class="lk-value" id="lkSprintGp">$24k</div>
       </div>
       <div class="live-kpi">
-        <div class="lk-label">Annual revenue</div>
+        <div class="lk-label" id="lkAnnualRevLabel">Annual revenue</div>
         <div class="lk-value" id="lkAnnualRev">$1.06M</div>
       </div>
       <div class="live-kpi pos" id="lkAnnualGpKpi">
-        <div class="lk-label">Annual GP</div>
+        <div class="lk-label" id="lkAnnualGpLabel">Annual GP</div>
         <div class="lk-value" id="lkAnnualGp">$528k</div>
       </div>
       <div class="live-kpi accent">
@@ -601,6 +601,15 @@ function compute(){
   const annualCost = sprintCost * sprintsYr;
   const annualGp   = annualRev - annualCost;
 
+  // Portfolio math (honours specialist-sharing up to 4 squads)
+  const workingDays = 220;
+  const specHC_port = podCount <= 4 ? specCount : Math.ceil(specCount * podCount / 4);
+  const coreAnnualCostPerSquad = coreCount * coreAlloc * workingDays * costRate;
+  const portfolioRev  = sprintRev * sprintsYr * podCount;
+  const portfolioCost = (coreAnnualCostPerSquad * podCount) + (specHC_port * workingDays * costRate);
+  const portfolioGp   = portfolioRev - portfolioCost;
+  const portfolioHC   = coreCount * podCount + specHC_port;
+
   const beSprints = sprintRev > sprintCost ? Math.ceil(annualCost / sprintRev) : Infinity;
   const beBuffer  = isFinite(beSprints) ? sprintsYr - beSprints : -sprintsYr;
   const beUtil    = isFinite(beSprints) ? beSprints / sprintsYr : NaN;
@@ -641,14 +650,20 @@ function compute(){
     : 'rate ≤ cost — unprofitable';
   $('beUtil').textContent = isFinite(beUtil) ? fmtPct(beUtil) : 'N/A';
 
-  // Live KPI strip (sticky top)
+  // Live KPI strip (sticky top) — annual numbers scale with # of squads
   $('lkSprintRev').textContent = fmtK(sprintRev);
   $('lkSprintGp').textContent  = fmtK(sprintGp);
-  $('lkAnnualRev').textContent = fmtK(annualRev);
-  $('lkAnnualGp').textContent  = fmtK(annualGp);
+  $('lkAnnualRev').textContent = fmtK(portfolioRev);
+  $('lkAnnualGp').textContent  = fmtK(portfolioGp);
+  $('lkAnnualRevLabel').textContent = podCount > 1
+    ? `Portfolio revenue · ${podCount} squads`
+    : 'Annual revenue';
+  $('lkAnnualGpLabel').textContent = podCount > 1
+    ? `Portfolio GP · ${portfolioHC} heads`
+    : 'Annual GP';
   $('lkBe').textContent = isFinite(beSprints) ? (beSprints + ' sprints') : '∞';
   $('lkSprintGpKpi').className = 'live-kpi ' + (sprintGp >= 0 ? 'pos' : 'neg');
-  $('lkAnnualGpKpi').className = 'live-kpi ' + (annualGp >= 0 ? 'pos' : 'neg');
+  $('lkAnnualGpKpi').className = 'live-kpi ' + (portfolioGp >= 0 ? 'pos' : 'neg');
 
   // Waterfall bars — heights relative to revenue
   const maxV = Math.max(sprintRev, 1);
@@ -682,7 +697,7 @@ function compute(){
     : `Every sprint loses ${Math.abs(cents)}¢ on every dollar of revenue`;
 
   drawBeChart(sprintRev, sprintCost, sprintsYr, beSprints);
-  drawScaleTable(coreCount, coreAlloc, specCount, specAlloc, sprintsYr, sellRate, costRate, sprintDays);
+  drawScaleTable(coreCount, coreAlloc, specCount, specAlloc, sprintsYr, sellRate, costRate, sprintDays, podCount);
   drawSensitivity(sellRate, costRate, sprintsYr, effortDays, annualGp);
 }
 
@@ -723,7 +738,7 @@ function drawBeChart(sprintRev, sprintCost, maxSprints, beSprints){
   svg.innerHTML = parts.join('');
 }
 
-function drawScaleTable(coreCount, coreAlloc, specCount, specAlloc, sprintsYr, sellRate, costRate, sprintDays){
+function drawScaleTable(coreCount, coreAlloc, specCount, specAlloc, sprintsYr, sellRate, costRate, sprintDays, selected){
   const tbody = $('scaleBody');
   tbody.innerHTML = '';
   const workingDays = 220;
@@ -744,9 +759,15 @@ function drawScaleTable(coreCount, coreAlloc, specCount, specAlloc, sprintsYr, s
     const gp = totalRev - totalCost;
     const gpPct = totalRev ? gp / totalRev : 0;
 
+    const isSelected = squads === selected;
     const tr = document.createElement('tr');
+    if (isSelected) {
+      tr.style.background = 'rgba(77,210,240,.08)';
+      tr.style.outline = '1px solid rgba(77,210,240,.5)';
+    }
+    const marker = isSelected ? '◆ ' : '';
     tr.innerHTML = `
-      <td><b>${squads}</b></td>
+      <td style="${isSelected?'color:var(--cyan);font-weight:800':''}">${marker}<b>${squads}</b></td>
       <td class="num">${totalHC}</td>
       <td class="num">${fmtK(totalRev)}</td>
       <td class="num">${fmtK(totalCost)}</td>

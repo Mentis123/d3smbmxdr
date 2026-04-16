@@ -100,6 +100,10 @@ body::after {
 }
 .nav-brand span { color: var(--blue-primary); font-weight: 600; }
 
+.nav-right {
+  display: flex; align-items: center; gap: 0.75rem;
+}
+
 .nav-status {
   display: flex; align-items: center; gap: 0.5rem;
   font-size: 0.7rem; font-family: 'JetBrains Mono', monospace;
@@ -114,6 +118,22 @@ body::after {
 @keyframes pulse-dot {
   0%, 100% { opacity: 1; } 50% { opacity: 0.4; }
 }
+
+/* ─── Edit Status Indicator ─── */
+.edit-status {
+  display: none;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.65rem;
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.25rem 0.6rem;
+  border-radius: 4px;
+}
+.edit-status.saving { display: inline-flex; color: var(--blue-light); background: rgba(59, 130, 246, 0.1); }
+.edit-status.saved { display: inline-flex; color: var(--green-accent); background: rgba(52, 211, 153, 0.1); }
+.edit-status.error { display: inline-flex; color: var(--rose-accent); background: rgba(251, 113, 133, 0.1); }
 
 /* ─── Hero ─── */
 .hero { padding: 6rem 0 4rem; position: relative; }
@@ -416,6 +436,140 @@ body::after {
   letter-spacing: 0.08em;
 }
 
+/* ═══════════════════ INLINE EDIT STYLES ═══════════════════ */
+
+[data-block-id] {
+  cursor: pointer;
+  transition: outline 0.15s ease, outline-offset 0.15s ease;
+  outline: 2px dashed transparent;
+  outline-offset: 3px;
+  border-radius: 3px;
+}
+[data-block-id]:hover { outline-color: rgba(59, 130, 246, 0.35); }
+[data-block-id].editing {
+  outline: 2px solid var(--blue-primary) !important;
+  outline-offset: 4px;
+  background: rgba(59, 130, 246, 0.04) !important;
+}
+[data-block-id].deleted {
+  opacity: 0; max-height: 0; overflow: hidden;
+  padding: 0 !important; margin: 0 !important; border: none !important;
+  pointer-events: none; transition: opacity 0.3s, max-height 0.3s;
+}
+body.show-deleted [data-block-id].deleted {
+  opacity: 0.35; max-height: 500px; overflow: visible;
+  text-decoration: line-through; pointer-events: auto;
+  padding: revert !important; margin: revert !important; position: relative;
+}
+body.show-deleted [data-block-id].deleted::after {
+  content: 'DELETED'; position: absolute; top: -6px; right: -6px;
+  font-family: 'JetBrains Mono', monospace; font-size: 0.5rem;
+  letter-spacing: 0.1em; color: var(--rose-accent);
+  background: rgba(251, 113, 133, 0.15);
+  padding: 0.1rem 0.4rem; border-radius: 3px; text-decoration: none;
+}
+
+.edit-toolbar {
+  position: fixed; z-index: 9999;
+  display: flex; gap: 0.35rem; padding: 0.4rem;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-accent);
+  border-radius: 8px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  animation: toolbar-in 0.15s ease;
+}
+@keyframes toolbar-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.edit-toolbar button {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.62rem; letter-spacing: 0.05em; text-transform: uppercase;
+  padding: 0.35rem 0.7rem; border: 1px solid transparent;
+  border-radius: 5px; cursor: pointer; transition: all 0.15s ease; white-space: nowrap;
+}
+.edit-toolbar .btn-save { background: rgba(52, 211, 153, 0.15); color: var(--green-accent); border-color: rgba(52, 211, 153, 0.3); }
+.edit-toolbar .btn-save:hover { background: rgba(52, 211, 153, 0.25); }
+.edit-toolbar .btn-cancel { background: rgba(148, 163, 184, 0.1); color: var(--text-secondary); border-color: rgba(148, 163, 184, 0.2); }
+.edit-toolbar .btn-cancel:hover { background: rgba(148, 163, 184, 0.2); }
+.edit-toolbar .btn-delete { background: rgba(251, 113, 133, 0.1); color: var(--rose-accent); border-color: rgba(251, 113, 133, 0.2); }
+.edit-toolbar .btn-delete:hover { background: rgba(251, 113, 133, 0.2); }
+.edit-toolbar .btn-restore { background: rgba(59, 130, 246, 0.15); color: var(--blue-light); border-color: rgba(59, 130, 246, 0.3); }
+.edit-toolbar .btn-restore:hover { background: rgba(59, 130, 246, 0.25); }
+
+@keyframes save-flash {
+  0% { outline-color: var(--green-accent); }
+  100% { outline-color: transparent; }
+}
+[data-block-id].just-saved { animation: save-flash 0.8s ease; }
+
+.changes-trigger {
+  position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 998;
+  font-family: 'JetBrains Mono', monospace; font-size: 0.65rem;
+  letter-spacing: 0.05em; padding: 0.5rem 1rem; border-radius: 8px;
+  border: 1px solid var(--border-mid); background: var(--bg-elevated);
+  color: var(--text-secondary); cursor: pointer; transition: all 0.2s ease;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+}
+.changes-trigger:hover { border-color: var(--border-accent); color: var(--text-primary); }
+.changes-trigger.has-changes { border-color: rgba(59, 130, 246, 0.4); color: var(--blue-light); }
+
+.changes-panel {
+  position: fixed; bottom: 4rem; right: 1.5rem; z-index: 997;
+  width: 360px; max-height: 60vh;
+  background: var(--bg-card); border: 1px solid var(--border-accent);
+  border-radius: 12px; box-shadow: 0 8px 40px rgba(0,0,0,0.6);
+  display: none; flex-direction: column; overflow: hidden;
+  animation: panel-in 0.2s ease;
+}
+.changes-panel.open { display: flex; }
+@keyframes panel-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.changes-panel-header {
+  padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-subtle);
+  display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
+}
+.changes-panel-title {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.65rem;
+  letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted);
+}
+.changes-panel-actions { display: flex; gap: 0.5rem; align-items: center; }
+.changes-panel-actions button {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.55rem;
+  letter-spacing: 0.05em; text-transform: uppercase;
+  padding: 0.25rem 0.5rem; border-radius: 4px;
+  border: 1px solid transparent; cursor: pointer; transition: all 0.15s ease;
+}
+.btn-show-deleted { background: rgba(251, 113, 133, 0.08); color: var(--text-muted); border-color: rgba(251, 113, 133, 0.15); }
+.btn-show-deleted:hover, .btn-show-deleted.active { background: rgba(251, 113, 133, 0.15); color: var(--rose-accent); border-color: rgba(251, 113, 133, 0.3); }
+.changes-panel-body { overflow-y: auto; padding: 0.5rem; flex: 1; }
+.changes-panel-empty { padding: 2rem 1rem; text-align: center; font-size: 0.8rem; color: var(--text-muted); }
+.change-item { display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0.6rem; border-radius: 6px; margin-bottom: 0.25rem; transition: background 0.15s; }
+.change-item:hover { background: rgba(99, 140, 255, 0.05); }
+.change-badge { font-family: 'JetBrains Mono', monospace; font-size: 0.5rem; letter-spacing: 0.05em; text-transform: uppercase; padding: 0.15rem 0.35rem; border-radius: 3px; flex-shrink: 0; font-weight: 600; }
+.change-badge.edited { background: rgba(59, 130, 246, 0.12); color: var(--blue-light); }
+.change-badge.deleted-badge { background: rgba(251, 113, 133, 0.12); color: var(--rose-accent); }
+.change-label { font-size: 0.72rem; color: var(--text-secondary); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; }
+.change-label:hover { color: var(--text-primary); }
+.change-reset { font-family: 'JetBrains Mono', monospace; font-size: 0.5rem; letter-spacing: 0.05em; text-transform: uppercase; padding: 0.2rem 0.4rem; border-radius: 3px; border: 1px solid rgba(251, 191, 36, 0.2); background: rgba(251, 191, 36, 0.08); color: var(--amber-accent); cursor: pointer; flex-shrink: 0; transition: all 0.15s; }
+.change-reset:hover { background: rgba(251, 191, 36, 0.18); }
+
+/* ─── Print ─── */
+@media print {
+  body { background: #fff; color: #111; }
+  body::before, body::after { display: none; }
+  .doc-nav { display: none; }
+  .page-wrapper { max-width: 100%; padding: 0 1cm; }
+  .hero { padding: 2cm 0 1cm; }
+  .section { padding: 1.5cm 0; break-inside: avoid; }
+  * { color: #222 !important; }
+  .hero h1, h2, h3, h4 { color: #111 !important; }
+  [data-block-id] { outline: none !important; cursor: default; }
+  .edit-toolbar, .edit-status, .changes-trigger, .changes-panel { display: none !important; }
+}
+
 /* ─── Responsive ─── */
 @media (max-width: 768px) {
   .hero h1 { font-size: 2.6rem; }
@@ -434,33 +588,36 @@ body::after {
   <nav class="doc-nav">
     <div class="nav-inner">
       <div class="nav-brand">Data<span>#</span>3 &mdash; AI Practice</div>
-      <div class="nav-status">Position Paper</div>
+      <div class="nav-right">
+        <span class="edit-status" id="editStatus"></span>
+        <div class="nav-status">Position Paper</div>
+      </div>
     </div>
   </nav>
 
   <!-- Hero -->
   <header class="hero">
     <div class="hero-eyebrow">AI Practice &mdash; Delivery Model</div>
-    <h1>The Squad <em>is</em> the Product</h1>
-    <p class="hero-subtitle">
+    <h1 data-block-id="hero-h1">The Squad <em>is</em> the Product</h1>
+    <p class="hero-subtitle" data-block-id="hero-subtitle">
       Why we're moving from sprint-based delivery to dedicated squads &mdash; and why this is the model that scales an AI practice from the ground up.
     </p>
     <div class="hero-meta">
       <div class="hero-meta-item">
         <div class="hero-meta-label">Author</div>
-        <div class="hero-meta-value">Adam Rappaport</div>
+        <div class="hero-meta-value" data-block-id="hero-meta-author">Adam Rappaport</div>
       </div>
       <div class="hero-meta-item">
         <div class="hero-meta-label">Date</div>
-        <div class="hero-meta-value">April 2026</div>
+        <div class="hero-meta-value" data-block-id="hero-meta-date">April 2026</div>
       </div>
       <div class="hero-meta-item">
         <div class="hero-meta-label">Status</div>
-        <div class="hero-meta-value">Active</div>
+        <div class="hero-meta-value" data-block-id="hero-meta-status">Active</div>
       </div>
       <div class="hero-meta-item">
         <div class="hero-meta-label">Model</div>
-        <div class="hero-meta-value">Capability-as-a-Service</div>
+        <div class="hero-meta-value" data-block-id="hero-meta-model">Capability-as-a-Service</div>
       </div>
     </div>
   </header>
@@ -468,26 +625,26 @@ body::after {
   <!-- Section 01: The Shift -->
   <section class="section">
     <div class="section-num">01 &mdash; The Shift</div>
-    <h2>From sprints and catalogues to <em>dedicated teams</em></h2>
+    <h2 data-block-id="s1-h2">From sprints and catalogues to <em>dedicated teams</em></h2>
 
-    <p>
+    <p data-block-id="s1-p1">
       We've been building the AI Factory delivery model for weeks now &mdash; five capabilities, t-shirt sizes, sprint-based allocation, fractional roles. It's good thinking and it got us here. But I've landed somewhere different, and I want to be transparent about why.
     </p>
-    <p>
+    <p data-block-id="s1-p2">
       The sprint model allocates people fractionally &mdash; core roles at 50%, specialists at 25%. On paper that's efficient. In practice it means nobody is fully present on any engagement. The customer never gets a team. They get a rotating cast of partial humans, context-switching between engagements, rebuilding rapport every standup. We deliver 2 FTE of effort from 6 people and call it a squad. It isn't.
     </p>
-    <p>
+    <p data-block-id="s1-p3">
       Jack's model cuts through all of that. A dedicated team of five. Full-time. One engagement. They own it end to end.
     </p>
 
     <div class="callout">
       <div class="callout-label">The core idea</div>
-      <p>
+      <p data-block-id="s1-callout">
         Stop selling sprints. Stop selling a catalogue of five capabilities. Sell the team. The squad is how we deliver. The squad is what the customer buys. Capability-as-a-service &mdash; literally.
       </p>
     </div>
 
-    <p>
+    <p data-block-id="s1-p4">
       This doesn't throw away the lifecycle methodology or the work on governance and architecture. It simplifies the commercial wrapper. One product: a dedicated AI squad that moves through the customer's lifecycle with them &mdash; discovery, build, governance, operate. Same methodology. Radically simpler packaging.
     </p>
   </section>
@@ -495,60 +652,60 @@ body::after {
   <!-- Section 02: The Cell -->
   <section class="section">
     <div class="section-num">02 &mdash; The Cell Model</div>
-    <h2>Two squad shapes, <em>one growth engine</em></h2>
+    <h2 data-block-id="s2-h2">Two squad shapes, <em>one growth engine</em></h2>
 
-    <p>
+    <p data-block-id="s2-p1">
       Every squad is structured as a mentorship cell. Not just a delivery unit &mdash; a capability cell that produces outcomes <em>and</em> future leaders in the same motion.
     </p>
 
-    <h3>The 1-0-4 Cell &mdash; The Factory Engine</h3>
+    <h3 data-block-id="s2-h3-104">The 1-0-4 Cell &mdash; The Factory Engine</h3>
     <div class="cell-grid">
       <div class="cell-card mentor">
         <span class="cell-badge">x1 &middot; Principal</span>
-        <h4>Mentor</h4>
-        <p>Accountable for quality, risk, and client outcomes. Provides oversight, pattern authority, and developmental guidance. Shared across squads as the practice scales.</p>
-        <div class="cell-rate">$2,400 / day</div>
+        <h4 data-block-id="s2-104-mentor-h4">Mentor</h4>
+        <p data-block-id="s2-104-mentor-p">Accountable for quality, risk, and client outcomes. Provides oversight, pattern authority, and developmental guidance. Shared across squads as the practice scales.</p>
+        <div class="cell-rate" data-block-id="s2-104-mentor-rate">$2,400 / day</div>
       </div>
       <div class="cell-card shadow">
         <span class="cell-badge">x4 &middot; Junior</span>
-        <h4>Shadows</h4>
-        <p>The engine room. Build, test, learn, repeat. Handle bounded tasks with increasing autonomy. Every engagement graduates the next generation of leads.</p>
-        <div class="cell-rate">$1,200 / day</div>
+        <h4 data-block-id="s2-104-shadow-h4">Shadows</h4>
+        <p data-block-id="s2-104-shadow-p">The engine room. Build, test, learn, repeat. Handle bounded tasks with increasing autonomy. Every engagement graduates the next generation of leads.</p>
+        <div class="cell-rate" data-block-id="s2-104-shadow-rate">$1,200 / day</div>
       </div>
     </div>
 
-    <h3>The 1-1-2 Cell &mdash; The Premium Variant</h3>
+    <h3 data-block-id="s2-h3-112">The 1-1-2 Cell &mdash; The Premium Variant</h3>
     <div class="cell-grid">
       <div class="cell-card mentor">
         <span class="cell-badge">x1 &middot; Principal</span>
-        <h4>Mentor</h4>
-        <p>Accountable for quality, risk, and client outcomes. Provides oversight, pattern authority, and developmental guidance.</p>
-        <div class="cell-rate">$2,400 / day</div>
+        <h4 data-block-id="s2-112-mentor-h4">Mentor</h4>
+        <p data-block-id="s2-112-mentor-p">Accountable for quality, risk, and client outcomes. Provides oversight, pattern authority, and developmental guidance.</p>
+        <div class="cell-rate" data-block-id="s2-112-mentor-rate">$2,400 / day</div>
       </div>
       <div class="cell-card lead">
         <span class="cell-badge">x1 &middot; Senior</span>
-        <h4>Lead</h4>
-        <p>Carries the engagement. Owns delivery decisions, technical trade-offs, and sprint execution. Grows into tomorrow's Mentor through accountability with support.</p>
-        <div class="cell-rate">$1,920 / day</div>
+        <h4 data-block-id="s2-112-lead-h4">Lead</h4>
+        <p data-block-id="s2-112-lead-p">Carries the engagement. Owns delivery decisions, technical trade-offs, and sprint execution. Grows into tomorrow's Mentor through accountability with support.</p>
+        <div class="cell-rate" data-block-id="s2-112-lead-rate">$1,920 / day</div>
       </div>
       <div class="cell-card shadow">
         <span class="cell-badge">x2 &middot; Mid</span>
-        <h4>Shadows</h4>
-        <p>Learning through proximity. Observe, assist, absorb process, handle bounded tasks, and build readiness for future leadership.</p>
-        <div class="cell-rate">$1,600 / day</div>
+        <h4 data-block-id="s2-112-shadow-h4">Shadows</h4>
+        <p data-block-id="s2-112-shadow-p">Learning through proximity. Observe, assist, absorb process, handle bounded tasks, and build readiness for future leadership.</p>
+        <div class="cell-rate" data-block-id="s2-112-shadow-rate">$1,600 / day</div>
       </div>
     </div>
 
     <div class="quote-block">
-      <div class="quote-text">&ldquo;Today's Shadow becomes tomorrow's Lead.<br>Today's Lead becomes tomorrow's Mentor.&rdquo;</div>
-      <div class="quote-sub">Every delivery engagement produces not just outcomes, but future leaders.</div>
+      <div class="quote-text" data-block-id="s2-quote">&ldquo;Today's Shadow becomes tomorrow's Lead.<br>Today's Lead becomes tomorrow's Mentor.&rdquo;</div>
+      <div class="quote-sub" data-block-id="s2-quote-sub">Every delivery engagement produces not just outcomes, but future leaders.</div>
     </div>
   </section>
 
   <!-- Section 03: Why This Beats the Sprint Model -->
   <section class="section">
     <div class="section-num">03 &mdash; Why This Beats What We Had</div>
-    <h2>The case for <em>dedicated over fractional</em></h2>
+    <h2 data-block-id="s3-h2">The case for <em>dedicated over fractional</em></h2>
 
     <table class="compare-table">
       <thead>
@@ -560,51 +717,51 @@ body::after {
       </thead>
       <tbody>
         <tr>
-          <td>Team allocation</td>
-          <td class="dim">6 people, fractional (50% / 25%)</td>
-          <td class="highlight">5 people, 100% dedicated</td>
+          <td data-block-id="s3-row1-label">Team allocation</td>
+          <td class="dim" data-block-id="s3-row1-old">6 people, fractional (50% / 25%)</td>
+          <td class="highlight" data-block-id="s3-row1-new">5 people, 100% dedicated</td>
         </tr>
         <tr>
-          <td>Effort per sprint</td>
-          <td class="dim">2 FTE (spread thin)</td>
-          <td class="highlight">5 FTE (full weight)</td>
+          <td data-block-id="s3-row2-label">Effort per sprint</td>
+          <td class="dim" data-block-id="s3-row2-old">2 FTE (spread thin)</td>
+          <td class="highlight" data-block-id="s3-row2-new">5 FTE (full weight)</td>
         </tr>
         <tr>
-          <td>Context switching</td>
-          <td class="dim">Constant &mdash; everyone part-time</td>
-          <td class="highlight">Zero</td>
+          <td data-block-id="s3-row3-label">Context switching</td>
+          <td class="dim" data-block-id="s3-row3-old">Constant &mdash; everyone part-time</td>
+          <td class="highlight" data-block-id="s3-row3-new">Zero</td>
         </tr>
         <tr>
-          <td>Customer experience</td>
-          <td class="dim">"Where's my architect this week?"</td>
-          <td class="highlight">Named team, every standup</td>
+          <td data-block-id="s3-row4-label">Customer experience</td>
+          <td class="dim" data-block-id="s3-row4-old">"Where's my architect this week?"</td>
+          <td class="highlight" data-block-id="s3-row4-new">Named team, every standup</td>
         </tr>
         <tr>
-          <td>What the customer buys</td>
-          <td class="dim">A capability from a catalogue</td>
-          <td class="highlight">A team that owns their problem</td>
+          <td data-block-id="s3-row5-label">What the customer buys</td>
+          <td class="dim" data-block-id="s3-row5-old">A capability from a catalogue</td>
+          <td class="highlight" data-block-id="s3-row5-new">A team that owns their problem</td>
         </tr>
         <tr>
-          <td>Talent development</td>
-          <td class="dim">Incidental</td>
-          <td class="highlight">Structural &mdash; Cell model</td>
+          <td data-block-id="s3-row6-label">Talent development</td>
+          <td class="dim" data-block-id="s3-row6-old">Incidental</td>
+          <td class="highlight" data-block-id="s3-row6-new">Structural &mdash; Cell model</td>
         </tr>
         <tr>
-          <td>Scaling model</td>
-          <td class="dim">Hire seniors externally</td>
-          <td class="highlight">Graduate juniors internally</td>
+          <td data-block-id="s3-row7-label">Scaling model</td>
+          <td class="dim" data-block-id="s3-row7-old">Hire seniors externally</td>
+          <td class="highlight" data-block-id="s3-row7-new">Graduate juniors internally</td>
         </tr>
         <tr>
-          <td>Commercial packaging</td>
-          <td class="dim">5 capabilities, t-shirt sizes, tiers</td>
-          <td class="highlight">One product: the squad</td>
+          <td data-block-id="s3-row8-label">Commercial packaging</td>
+          <td class="dim" data-block-id="s3-row8-old">5 capabilities, t-shirt sizes, tiers</td>
+          <td class="highlight" data-block-id="s3-row8-new">One product: the squad</td>
         </tr>
       </tbody>
     </table>
 
     <div class="callout">
       <div class="callout-label">The simplification</div>
-      <p>
+      <p data-block-id="s3-callout">
         The five capabilities, the t-shirt sizes, the tier progressions &mdash; they were all ways of packaging fractional delivery into something that sounded like a product. With a dedicated squad, you don't need the packaging. The team <em>is</em> the product. The customer buys ongoing capability, not a menu item.
       </p>
     </div>
@@ -613,94 +770,94 @@ body::after {
   <!-- Section 04: Economics -->
   <section class="section">
     <div class="section-num">04 &mdash; The Economics</div>
-    <h2>Unit economics at <em>rack rate</em></h2>
+    <h2 data-block-id="s4-h2">Unit economics at <em>rack rate</em></h2>
 
-    <p>Both models use standard Data#3 rack rates. 10-day sprints, 22 productive sprints per year. GP at 29% minimum (standard gross profit at rack).</p>
+    <p data-block-id="s4-p1">Both models use standard Data#3 rack rates. 10-day sprints, 22 productive sprints per year. GP at 29% minimum (standard gross profit at rack).</p>
 
     <div class="econ-grid">
       <div class="econ-card">
-        <h4>1-1-2 Cell &mdash; Premium</h4>
-        <div class="econ-sub">1 Principal + 1 Senior + 2 Mid &middot; 4 people</div>
+        <h4 data-block-id="s4-112-title">1-1-2 Cell &mdash; Premium</h4>
+        <div class="econ-sub" data-block-id="s4-112-sub">1 Principal + 1 Senior + 2 Mid &middot; 4 people</div>
         <div class="econ-row">
           <span class="econ-label">Daily revenue</span>
-          <span class="econ-value">$7,520</span>
+          <span class="econ-value" data-block-id="s4-112-daily">$7,520</span>
         </div>
         <div class="econ-row">
           <span class="econ-label">Sprint revenue (10 days)</span>
-          <span class="econ-value">$75,200</span>
+          <span class="econ-value" data-block-id="s4-112-sprint">$75,200</span>
         </div>
         <div class="econ-row">
           <span class="econ-label">Sprint GP (29%)</span>
-          <span class="econ-value">$21,808</span>
+          <span class="econ-value" data-block-id="s4-112-gp">$21,808</span>
         </div>
         <div class="econ-row">
           <span class="econ-label">Annual revenue (22 sprints)</span>
-          <span class="econ-value">$1,654,400</span>
+          <span class="econ-value" data-block-id="s4-112-annual">$1,654,400</span>
         </div>
         <div class="econ-row">
           <span class="econ-label">Annual GP</span>
-          <span class="econ-value accent">$479,776</span>
+          <span class="econ-value accent" data-block-id="s4-112-annualgp">$479,776</span>
         </div>
       </div>
 
       <div class="econ-card">
-        <h4>1-0-4 Cell &mdash; Factory Engine</h4>
-        <div class="econ-sub">1 Principal + 4 Junior &middot; 5 people</div>
+        <h4 data-block-id="s4-104-title">1-0-4 Cell &mdash; Factory Engine</h4>
+        <div class="econ-sub" data-block-id="s4-104-sub">1 Principal + 4 Junior &middot; 5 people</div>
         <div class="econ-row">
           <span class="econ-label">Daily revenue</span>
-          <span class="econ-value">$7,200</span>
+          <span class="econ-value" data-block-id="s4-104-daily">$7,200</span>
         </div>
         <div class="econ-row">
           <span class="econ-label">Sprint revenue (10 days)</span>
-          <span class="econ-value">$72,000</span>
+          <span class="econ-value" data-block-id="s4-104-sprint">$72,000</span>
         </div>
         <div class="econ-row">
           <span class="econ-label">Sprint GP (29%)</span>
-          <span class="econ-value">$20,880</span>
+          <span class="econ-value" data-block-id="s4-104-gp">$20,880</span>
         </div>
         <div class="econ-row">
           <span class="econ-label">Annual revenue (22 sprints)</span>
-          <span class="econ-value">$1,584,000</span>
+          <span class="econ-value" data-block-id="s4-104-annual">$1,584,000</span>
         </div>
         <div class="econ-row">
           <span class="econ-label">Annual GP</span>
-          <span class="econ-value accent">$459,360</span>
+          <span class="econ-value accent" data-block-id="s4-104-annualgp">$459,360</span>
         </div>
       </div>
     </div>
 
-    <h3>The upside: selling the team, not the rate card</h3>
-    <p>
+    <h3 data-block-id="s4-h3-upside">The upside: selling the team, not the rate card</h3>
+    <p data-block-id="s4-p2">
       Once a 1-0-4 squad has run 2&ndash;3 engagement cycles and proven itself as a high-performing unit, we stop selling individual rate cards and sell the team at a blended rate &mdash; $1,920 per head per day. The customer sees a senior-calibre squad of five. We're delivering it with juniors whose loaded cost hasn't changed.
     </p>
 
     <div class="econ-grid">
       <div class="econ-card">
-        <h4>1-0-4 Cell &mdash; Future State</h4>
-        <div class="econ-sub">Same team, billed at $1,920/head blended &middot; 5 people</div>
+        <h4 data-block-id="s4-future-title">1-0-4 Cell &mdash; Future State</h4>
+        <div class="econ-sub" data-block-id="s4-future-sub">Same team, billed at $1,920/head blended &middot; 5 people</div>
         <div class="econ-row">
           <span class="econ-label">Daily revenue</span>
-          <span class="econ-value">$9,600</span>
+          <span class="econ-value" data-block-id="s4-future-daily">$9,600</span>
         </div>
         <div class="econ-row">
           <span class="econ-label">Sprint revenue (10 days)</span>
-          <span class="econ-value">$96,000</span>
+          <span class="econ-value" data-block-id="s4-future-sprint">$96,000</span>
         </div>
         <div class="econ-row">
           <span class="econ-label">Annual revenue (22 sprints)</span>
-          <span class="econ-value">$2,112,000</span>
+          <span class="econ-value" data-block-id="s4-future-annual">$2,112,000</span>
         </div>
         <div class="econ-row">
           <span class="econ-label">Cost (unchanged)</span>
-          <span class="econ-value">$1,124,640</span>
+          <span class="econ-value" data-block-id="s4-future-cost">$1,124,640</span>
         </div>
         <div class="econ-row">
           <span class="econ-label">Annual GP</span>
-          <span class="econ-value accent">$987,360</span>
+          <span class="econ-value accent" data-block-id="s4-future-gp">$987,360</span>
         </div>
         <div class="econ-row">
           <span class="econ-label">GP%</span>
-          <span class="econ-value accent">46.8%</span>
+          <span class="econ-value accent" data-block-id="s4-future-gppct">46.8%</span>
         </div>
       </div>
     </div>
@@ -709,31 +866,31 @@ body::after {
   <!-- Section 05: Growth -->
   <section class="section">
     <div class="section-num">05 &mdash; The Growth Model</div>
-    <h2>Self-funding, <em>demand-led</em></h2>
+    <h2 data-block-id="s5-h2">Self-funding, <em>demand-led</em></h2>
 
-    <p>
+    <p data-block-id="s5-p1">
       This model doesn't need investment. The squad is sourced from existing resources. It grows as demand grows. Each new squad is a temporary cost bump that resolves as engagements fill &mdash; and each cycle is faster than the last because the talent pipeline is producing.
     </p>
 
     <div class="timeline">
       <div class="timeline-step">
         <div class="timeline-label">Phase 1 &mdash; Stand Up</div>
-        <h4>Squad 1 from existing bench</h4>
-        <p>
+        <h4 data-block-id="s5-step1-h4">Squad 1 from existing bench</h4>
+        <p data-block-id="s5-step1-p">
           Redeploy existing staff into a dedicated formation. No new hires. The only cost is opportunity &mdash; moving people from fractional work into a committed squad. Initially underutilised as demand fills. Breaks even by sprint 8&ndash;9. Profitable by end of the second quarter.
         </p>
       </div>
       <div class="timeline-step">
         <div class="timeline-label">Phase 2 &mdash; Scale</div>
-        <h4>Squad 2 carved from Squad 1's graduates</h4>
-        <p>
+        <h4 data-block-id="s5-step2-h4">Squad 2 carved from Squad 1's graduates</h4>
+        <p data-block-id="s5-step2-p">
           Demand signals a second squad. Carve out resources &mdash; temporary GP dip. The Principal from Squad 1 mentors across both. Squad 1's best juniors step up as leads in Squad 2. No external hire needed for the senior roles &mdash; the Cell model produced them.
         </p>
       </div>
       <div class="timeline-step">
         <div class="timeline-label">Phase 3+ &mdash; Compound</div>
-        <h4>Each new squad is cheaper to stand up than the last</h4>
-        <p>
+        <h4 data-block-id="s5-step3-h4">Each new squad is cheaper to stand up than the last</h4>
+        <p data-block-id="s5-step3-p">
           The talent pipeline is producing. The Principal is shared across 2&ndash;3 squads. Graduates fill lead positions organically. The practice stops competing for senior AI talent on the open market and starts growing it internally, on live customer engagements.
         </p>
       </div>
@@ -741,7 +898,7 @@ body::after {
 
     <div class="callout">
       <div class="callout-label">The pitch to leadership</div>
-      <p>
+      <p data-block-id="s5-callout">
         No capital ask. No hiring ahead of demand. The model funds itself from existing resources and grows in lockstep with the pipeline. Every engagement we run creates future leaders for the practice &mdash; not just outcomes for the customer.
       </p>
     </div>
@@ -750,9 +907,9 @@ body::after {
   <!-- Section 06: Multi-Squad -->
   <section class="section">
     <div class="section-num">06 &mdash; Multi-Squad Economics</div>
-    <h2>The leverage at <em>scale</em></h2>
+    <h2 data-block-id="s6-h2">The leverage at <em>scale</em></h2>
 
-    <p>The Principal sharing across squads is the Cell model's leverage point. One high-cost person guaranteeing quality across multiple squads while juniors carry the delivery.</p>
+    <p data-block-id="s6-p1">The Principal sharing across squads is the Cell model's leverage point. One high-cost person guaranteeing quality across multiple squads while juniors carry the delivery.</p>
 
     <table class="compare-table">
       <thead>
@@ -767,36 +924,36 @@ body::after {
       </thead>
       <tbody>
         <tr>
-          <td>1 (rack rate)</td>
-          <td>5</td>
-          <td>$1,584,000</td>
-          <td>$1,124,640</td>
-          <td class="highlight">$459,360</td>
-          <td>29.0%</td>
+          <td data-block-id="s6-r1-squads">1 (rack rate)</td>
+          <td data-block-id="s6-r1-hc">5</td>
+          <td data-block-id="s6-r1-rev">$1,584,000</td>
+          <td data-block-id="s6-r1-cost">$1,124,640</td>
+          <td class="highlight" data-block-id="s6-r1-gp">$459,360</td>
+          <td data-block-id="s6-r1-gppct">29.0%</td>
         </tr>
         <tr>
-          <td>2 (shared Principal)</td>
-          <td>9</td>
-          <td>$2,952,000</td>
-          <td>$2,033,280</td>
-          <td class="highlight">$918,720</td>
-          <td>31.1%</td>
+          <td data-block-id="s6-r2-squads">2 (shared Principal)</td>
+          <td data-block-id="s6-r2-hc">9</td>
+          <td data-block-id="s6-r2-rev">$2,952,000</td>
+          <td data-block-id="s6-r2-cost">$2,033,280</td>
+          <td class="highlight" data-block-id="s6-r2-gp">$918,720</td>
+          <td data-block-id="s6-r2-gppct">31.1%</td>
         </tr>
         <tr>
-          <td>3 (shared Principal)</td>
-          <td>13</td>
-          <td>$4,320,000</td>
-          <td>$2,941,920</td>
-          <td class="highlight">$1,378,080</td>
-          <td>31.9%</td>
+          <td data-block-id="s6-r3-squads">3 (shared Principal)</td>
+          <td data-block-id="s6-r3-hc">13</td>
+          <td data-block-id="s6-r3-rev">$4,320,000</td>
+          <td data-block-id="s6-r3-cost">$2,941,920</td>
+          <td class="highlight" data-block-id="s6-r3-gp">$1,378,080</td>
+          <td data-block-id="s6-r3-gppct">31.9%</td>
         </tr>
         <tr>
-          <td>2 (future blended rate)</td>
-          <td>9</td>
-          <td>$3,936,000</td>
-          <td>$2,033,280</td>
-          <td class="highlight">$1,902,720</td>
-          <td class="highlight">48.3%</td>
+          <td data-block-id="s6-r4-squads">2 (future blended rate)</td>
+          <td data-block-id="s6-r4-hc">9</td>
+          <td data-block-id="s6-r4-rev">$3,936,000</td>
+          <td data-block-id="s6-r4-cost">$2,033,280</td>
+          <td class="highlight" data-block-id="s6-r4-gp">$1,902,720</td>
+          <td class="highlight" data-block-id="s6-r4-gppct">48.3%</td>
         </tr>
       </tbody>
     </table>
@@ -805,24 +962,24 @@ body::after {
   <!-- Section 07: Position -->
   <section class="section">
     <div class="section-num">07 &mdash; My Position</div>
-    <h2>Why I'm <em>on board</em></h2>
+    <h2 data-block-id="s7-h2">Why I'm <em>on board</em></h2>
 
-    <p>
+    <p data-block-id="s7-p1">
       I came into this building a five-capability catalogue with t-shirt sizes, tier progressions, and fractional allocation models. That work was necessary &mdash; it mapped the landscape and stress-tested the commercial options. But the more I sat with it, the more I could feel the complexity. We were packaging complexity, not eliminating it.
     </p>
-    <p>
+    <p data-block-id="s7-p2">
       Jack's squad model eliminates it. One product. One team. Full ownership. The customer doesn't choose from a menu &mdash; they get a dedicated squad that moves through their lifecycle with them. Discovery, architecture, build, governance, operate. Same people. Growing together.
     </p>
-    <p>
+    <p data-block-id="s7-p3">
       The Cell model is what makes it sustainable. Without the mentorship structure, dedicated squads would just be an expensive way to lock up senior resources. With it, every engagement is simultaneously a delivery motion and a training program. The juniors do real work on real customer problems under real accountability &mdash; and they graduate into the next squad's leadership. The practice scales from within.
     </p>
-    <p>
+    <p data-block-id="s7-p4">
       The economics work at rack rate from day one &mdash; 29% GP floor, no new investment, demand-led growth. The economics get <em>better</em> over time as squads prove themselves and we shift from rate cards to team-based pricing. And the model gives leadership something the sprint-based approach never could: a clean, fundable growth story that doesn't require a hiring plan or a capital ask.
     </p>
 
     <div class="quote-block">
-      <div class="quote-text">&ldquo;Squads are how we deliver.<br>The squad is what you buy.&rdquo;</div>
-      <div class="quote-sub">Capability-as-a-service &mdash; literally.</div>
+      <div class="quote-text" data-block-id="s7-quote">&ldquo;Squads are how we deliver.<br>The squad is what you buy.&rdquo;</div>
+      <div class="quote-sub" data-block-id="s7-quote-sub">Capability-as-a-service &mdash; literally.</div>
     </div>
   </section>
 
@@ -831,5 +988,338 @@ body::after {
   </footer>
 
 </div>
+
+<!-- Changes Panel -->
+<button class="changes-trigger" id="changesTrigger">Changes (0)</button>
+<div class="changes-panel" id="changesPanel">
+  <div class="changes-panel-header">
+    <span class="changes-panel-title">Change History</span>
+    <div class="changes-panel-actions">
+      <button class="btn-show-deleted" id="showDeletedBtn">Show Deleted</button>
+    </div>
+  </div>
+  <div class="changes-panel-body" id="changesList"></div>
+</div>
+
+<!-- ═══════════════════ INLINE EDIT SCRIPT ═══════════════════ -->
+<script>
+(function() {
+  const PAGE_ID = 'ai-practice-squads';
+  const API = '/api/page-edits';
+
+  const originals = {};
+  document.querySelectorAll('[data-block-id]').forEach(function(el) {
+    originals[el.getAttribute('data-block-id')] = el.innerHTML;
+  });
+
+  let editsMap = {};
+  let activeBlock = null;
+  let originalContent = '';
+  let toolbar = null;
+
+  const statusEl = document.getElementById('editStatus');
+
+  function showStatus(type, text) {
+    statusEl.className = 'edit-status ' + type;
+    statusEl.textContent = text;
+    if (type === 'saved') {
+      setTimeout(function() { statusEl.className = 'edit-status'; }, 2000);
+    }
+  }
+
+  async function loadEdits() {
+    try {
+      var res = await fetch(API + '?page_id=' + encodeURIComponent(PAGE_ID));
+      if (!res.ok) return;
+      var data = await res.json();
+      editsMap = data.edits || {};
+      applyEdits();
+      renderChangesPanel();
+    } catch (e) {
+      console.error('Failed to load edits:', e);
+    }
+  }
+
+  function applyEdits() {
+    for (var blockId in editsMap) {
+      var edit = editsMap[blockId];
+      var el = document.querySelector('[data-block-id="' + blockId + '"]');
+      if (!el) continue;
+      if (edit.content !== null && edit.content !== undefined) {
+        el.innerHTML = edit.content;
+      }
+      if (edit.deleted) {
+        el.classList.add('deleted');
+      } else {
+        el.classList.remove('deleted');
+      }
+    }
+  }
+
+  function getChangeCounts() {
+    var edited = 0, deleted = 0;
+    for (var k in editsMap) {
+      if (editsMap[k].deleted) deleted++; else edited++;
+    }
+    return { edited: edited, deleted: deleted, total: edited + deleted };
+  }
+
+  function renderChangesPanel() {
+    var counts = getChangeCounts();
+    var trigger = document.getElementById('changesTrigger');
+    var parts = [];
+    if (counts.edited) parts.push(counts.edited + ' edited');
+    if (counts.deleted) parts.push(counts.deleted + ' deleted');
+    trigger.textContent = counts.total > 0 ? 'Changes (' + parts.join(', ') + ')' : 'No Changes';
+    trigger.classList.toggle('has-changes', counts.total > 0);
+    var sdBtn = document.getElementById('showDeletedBtn');
+    sdBtn.textContent = counts.deleted > 0 ? 'Show Deleted (' + counts.deleted + ')' : 'Show Deleted';
+    var list = document.getElementById('changesList');
+    if (counts.total === 0) {
+      list.innerHTML = '<div class="changes-panel-empty">No changes yet.<br>Click any text to edit it.</div>';
+      return;
+    }
+    var html = '';
+    var entries = Object.keys(editsMap).sort();
+    for (var i = 0; i < entries.length; i++) {
+      var bid = entries[i];
+      var edit = editsMap[bid];
+      var isDel = edit.deleted;
+      var badgeClass = isDel ? 'deleted-badge' : 'edited';
+      var badgeText = isDel ? 'Del' : 'Edit';
+      var el = document.querySelector('[data-block-id="' + bid + '"]');
+      var label = bid;
+      if (el) {
+        var text = el.textContent.trim();
+        label = text.length > 40 ? text.substring(0, 40) + '...' : (text || bid);
+      }
+      html += '<div class="change-item">' +
+        '<span class="change-badge ' + badgeClass + '">' + badgeText + '</span>' +
+        '<span class="change-label" data-goto="' + bid + '" title="' + bid + '">' + label.replace(/</g, '&lt;') + '</span>' +
+        '<button class="change-reset" data-reset="' + bid + '">Reset</button>' +
+        '</div>';
+    }
+    list.innerHTML = html;
+  }
+
+  async function saveEdit(blockId, content, deleted) {
+    showStatus('saving', 'Saving...');
+    try {
+      var res = await fetch(API, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ page_id: PAGE_ID, block_id: blockId, content: content, deleted: deleted })
+      });
+      if (!res.ok) throw new Error('Save failed');
+      showStatus('saved', 'Saved');
+      editsMap[blockId] = { content: content, deleted: deleted, updated_at: new Date().toISOString() };
+      renderChangesPanel();
+    } catch (e) {
+      showStatus('error', 'Error saving');
+      console.error('Save failed:', e);
+    }
+  }
+
+  async function resetBlock(blockId) {
+    showStatus('saving', 'Resetting...');
+    try {
+      var res = await fetch(API, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ page_id: PAGE_ID, block_id: blockId })
+      });
+      if (!res.ok) throw new Error('Reset failed');
+      showStatus('saved', 'Reset to original');
+      delete editsMap[blockId];
+      var el = document.querySelector('[data-block-id="' + blockId + '"]');
+      if (el && originals[blockId] !== undefined) {
+        el.innerHTML = originals[blockId];
+        el.classList.remove('deleted');
+      }
+      renderChangesPanel();
+    } catch (e) {
+      showStatus('error', 'Reset failed');
+      console.error('Reset failed:', e);
+    }
+  }
+
+  function createToolbar() {
+    if (toolbar) toolbar.remove();
+    toolbar = document.createElement('div');
+    toolbar.className = 'edit-toolbar';
+    document.body.appendChild(toolbar);
+    return toolbar;
+  }
+
+  function positionToolbar(el) {
+    if (!toolbar) return;
+    var rect = el.getBoundingClientRect();
+    var toolbarHeight = 40;
+    var top = rect.top - toolbarHeight - 8;
+    var left = rect.left;
+    if (rect.top < toolbarHeight + 20) { top = rect.bottom + 8; }
+    var maxLeft = window.innerWidth - 340;
+    if (left > maxLeft) left = maxLeft;
+    if (left < 8) left = 8;
+    toolbar.style.top = top + 'px';
+    toolbar.style.left = left + 'px';
+  }
+
+  function enterEdit(el) {
+    if (activeBlock) cancelEdit();
+    activeBlock = el;
+    originalContent = el.innerHTML;
+    el.classList.add('editing');
+    el.setAttribute('contenteditable', 'true');
+    el.focus();
+
+    var blockId = el.getAttribute('data-block-id');
+    var isDeleted = el.classList.contains('deleted');
+    var hasBeenEdited = blockId in editsMap;
+    var tb = createToolbar();
+
+    if (isDeleted) {
+      tb.innerHTML =
+        '<button class="btn-restore" onclick="window._editRestore()">Restore</button>' +
+        '<button class="btn-cancel" onclick="window._editCancel()">Cancel</button>' +
+        '<button class="btn-delete" style="background:rgba(251,191,36,0.1);color:var(--amber-accent);border-color:rgba(251,191,36,0.2)" onclick="window._editReset()">Reset to Original</button>';
+    } else {
+      var buttons =
+        '<button class="btn-save" onclick="window._editSave()">Save</button>' +
+        '<button class="btn-cancel" onclick="window._editCancel()">Cancel</button>' +
+        '<button class="btn-delete" onclick="window._editDelete()">Delete</button>';
+      if (hasBeenEdited) {
+        buttons += '<button class="btn-delete" style="background:rgba(251,191,36,0.1);color:var(--amber-accent);border-color:rgba(251,191,36,0.2)" onclick="window._editReset()">Reset</button>';
+      }
+      tb.innerHTML = buttons;
+    }
+    positionToolbar(el);
+  }
+
+  function cancelEdit() {
+    if (!activeBlock) return;
+    activeBlock.innerHTML = originalContent;
+    activeBlock.classList.remove('editing');
+    activeBlock.removeAttribute('contenteditable');
+    activeBlock = null;
+    originalContent = '';
+    if (toolbar) { toolbar.remove(); toolbar = null; }
+  }
+
+  async function doSave() {
+    if (!activeBlock) return;
+    var blockId = activeBlock.getAttribute('data-block-id');
+    var content = activeBlock.innerHTML;
+    activeBlock.classList.remove('editing');
+    activeBlock.removeAttribute('contenteditable');
+    activeBlock.classList.add('just-saved');
+    setTimeout(function() { var el = document.querySelector('[data-block-id="' + blockId + '"]'); if (el) el.classList.remove('just-saved'); }, 800);
+    if (toolbar) { toolbar.remove(); toolbar = null; }
+    activeBlock = null;
+    originalContent = '';
+    await saveEdit(blockId, content, false);
+  }
+
+  async function doDelete() {
+    if (!activeBlock) return;
+    var blockId = activeBlock.getAttribute('data-block-id');
+    var content = activeBlock.innerHTML;
+    activeBlock.classList.remove('editing');
+    activeBlock.removeAttribute('contenteditable');
+    activeBlock.classList.add('deleted');
+    if (toolbar) { toolbar.remove(); toolbar = null; }
+    activeBlock = null;
+    originalContent = '';
+    await saveEdit(blockId, content, true);
+  }
+
+  async function doRestore() {
+    if (!activeBlock) return;
+    var blockId = activeBlock.getAttribute('data-block-id');
+    var content = activeBlock.innerHTML;
+    activeBlock.classList.remove('editing', 'deleted');
+    activeBlock.removeAttribute('contenteditable');
+    if (toolbar) { toolbar.remove(); toolbar = null; }
+    activeBlock = null;
+    originalContent = '';
+    await saveEdit(blockId, content, false);
+  }
+
+  async function doReset() {
+    if (!activeBlock) return;
+    var blockId = activeBlock.getAttribute('data-block-id');
+    activeBlock.classList.remove('editing');
+    activeBlock.removeAttribute('contenteditable');
+    if (toolbar) { toolbar.remove(); toolbar = null; }
+    activeBlock = null;
+    originalContent = '';
+    await resetBlock(blockId);
+  }
+
+  window._editSave = doSave;
+  window._editCancel = cancelEdit;
+  window._editDelete = doDelete;
+  window._editRestore = doRestore;
+  window._editReset = doReset;
+
+  document.addEventListener('click', function(e) {
+    if (e.target.closest('.changes-trigger')) {
+      document.getElementById('changesPanel').classList.toggle('open');
+      return;
+    }
+    if (e.target.closest('.changes-panel')) {
+      if (e.target.id === 'showDeletedBtn' || e.target.closest('#showDeletedBtn')) {
+        document.body.classList.toggle('show-deleted');
+        document.getElementById('showDeletedBtn').classList.toggle('active');
+        return;
+      }
+      var resetBtn = e.target.closest('[data-reset]');
+      if (resetBtn) {
+        if (activeBlock) cancelEdit();
+        resetBlock(resetBtn.getAttribute('data-reset'));
+        return;
+      }
+      var gotoLabel = e.target.closest('[data-goto]');
+      if (gotoLabel) {
+        var bid = gotoLabel.getAttribute('data-goto');
+        var target = document.querySelector('[data-block-id="' + bid + '"]');
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          target.classList.add('just-saved');
+          setTimeout(function() { target.classList.remove('just-saved'); }, 1000);
+        }
+        return;
+      }
+      return;
+    }
+
+    var block = e.target.closest('[data-block-id]');
+    if (activeBlock && !block) {
+      if (e.target.closest('.edit-toolbar')) return;
+      cancelEdit();
+      return;
+    }
+    if (block && block !== activeBlock) {
+      document.getElementById('changesPanel').classList.remove('open');
+      enterEdit(block);
+    }
+  });
+
+  document.addEventListener('keydown', function(e) {
+    if (!activeBlock) return;
+    if (e.key === 'Escape') { e.preventDefault(); cancelEdit(); }
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); doSave(); }
+  });
+
+  function onReposition() {
+    if (activeBlock && toolbar) positionToolbar(activeBlock);
+  }
+  window.addEventListener('scroll', onReposition, { passive: true });
+  window.addEventListener('resize', onReposition, { passive: true });
+
+  loadEdits();
+})();
+</script>
+
 </body>
 </html>

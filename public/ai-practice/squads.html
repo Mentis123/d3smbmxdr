@@ -779,6 +779,16 @@
 </div>
 
 <script>
+// ============ SHARED FORMATTERS ============
+const fmt = n => (n < 0 ? '−$' : '$') + Math.abs(Math.round(n)).toLocaleString('en-AU');
+const fmtK = n => {
+  const absN = Math.abs(n);
+  if (absN >= 1e6) return (n < 0 ? '−$' : '$') + (absN/1e6).toFixed(2) + 'M';
+  return (n < 0 ? '−$' : '$') + Math.round(absN/1000).toLocaleString('en-AU') + 'k';
+};
+const fmtPct = n => (n*100).toFixed(1) + '%';
+function $(id){ return document.getElementById(id); }
+
 // ============ TAB SWITCHING ============
 function switchTab(which){
   document.querySelectorAll('.tab-content').forEach(el=>el.classList.remove('active'));
@@ -937,14 +947,6 @@ document.querySelectorAll('#tab-cell input[type="range"]').forEach(el=>{
 computeCell();
 
 // ============ SPRINT MODEL (original) ============
-const fmt = n => (n < 0 ? '−$' : '$') + Math.abs(Math.round(n)).toLocaleString('en-AU');
-const fmtK = n => {
-  const absN = Math.abs(n);
-  if (absN >= 1e6) return (n < 0 ? '−$' : '$') + (absN/1e6).toFixed(2) + 'M';
-  return (n < 0 ? '−$' : '$') + Math.round(absN/1000).toLocaleString('en-AU') + 'k';
-};
-const fmtPct = n => (n*100).toFixed(1) + '%';
-function $(id){ return document.getElementById(id); }
 
 function compute(){
   const sellRate  = +$('sellRate').value;

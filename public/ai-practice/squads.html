@@ -160,6 +160,99 @@
   }
   .footer-note a{color:var(--ink-3);text-decoration:underline}
 
+  /* ============ TAB SWITCHER ============ */
+  .tab-bar{
+    display:flex;gap:4px;margin:0 0 24px;
+    background:var(--navy-2);border:1px solid var(--rule-2);
+    border-radius:10px;padding:4px;
+  }
+  .tab-btn{
+    flex:1;padding:12px 20px;
+    background:transparent;border:none;border-radius:8px;
+    font-family:'Inter',sans-serif;font-size:13px;font-weight:600;
+    color:var(--ink-3);cursor:pointer;transition:all .2s;
+    letter-spacing:.01em;
+  }
+  .tab-btn:hover{color:var(--ink-2);background:rgba(255,255,255,.03)}
+  .tab-btn.active{
+    background:var(--navy-4);color:var(--ink);
+    box-shadow:0 2px 8px rgba(0,0,0,.3);
+  }
+  .tab-btn .tab-badge{
+    display:inline-block;font-size:9px;font-weight:700;
+    letter-spacing:.1em;text-transform:uppercase;
+    padding:2px 7px;border-radius:4px;margin-left:8px;
+    vertical-align:middle;
+  }
+  .tab-btn.active .tab-badge{background:rgba(77,210,240,.15);color:var(--cyan)}
+  .tab-btn:not(.active) .tab-badge{background:rgba(255,255,255,.05);color:var(--ink-4)}
+  .tab-content{display:none}
+  .tab-content.active{display:block}
+
+  /* ============ CELL MODEL STYLES ============ */
+  .cell-toggle{
+    display:flex;gap:4px;margin-bottom:20px;
+    background:var(--navy-3);border:1px solid var(--rule-2);
+    border-radius:8px;padding:3px;
+  }
+  .cell-toggle-btn{
+    flex:1;padding:10px 16px;
+    background:transparent;border:none;border-radius:6px;
+    font-family:'Inter',sans-serif;font-size:12.5px;font-weight:600;
+    color:var(--ink-3);cursor:pointer;transition:all .2s;
+  }
+  .cell-toggle-btn.active{background:var(--navy-5);color:var(--ink)}
+  .cell-toggle-btn:hover:not(.active){color:var(--ink-2)}
+
+  .cell-kpi-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+    gap:12px;margin-bottom:20px;
+  }
+  .cell-kpi{
+    background:var(--navy-3);border:1px solid var(--rule-2);
+    border-radius:10px;padding:14px 16px;
+  }
+  .cell-kpi .ck-label{
+    font-size:10px;text-transform:uppercase;letter-spacing:.12em;
+    color:var(--ink-3);margin-bottom:6px;font-weight:600;
+  }
+  .cell-kpi .ck-value{
+    font-size:24px;font-weight:800;color:var(--ink);
+    font-variant-numeric:tabular-nums;letter-spacing:-.02em;line-height:1.1;
+  }
+  .cell-kpi .ck-sub{font-size:11.5px;color:var(--ink-3);margin-top:3px}
+  .cell-kpi.good .ck-value{color:var(--good)}
+  .cell-kpi.accent .ck-value{color:var(--cyan)}
+
+  .cell-composition{
+    display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;
+  }
+  .cell-role{
+    background:var(--navy-3);border:1px solid var(--rule-2);
+    border-radius:10px;padding:14px 18px;flex:1;min-width:160px;
+    position:relative;overflow:hidden;
+  }
+  .cell-role::before{
+    content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  }
+  .cell-role.mentor::before{background:#e879f9}
+  .cell-role.lead::before{background:#22d3ee}
+  .cell-role.shadow::before{background:#fbbf24}
+  .cell-role .cr-title{font-size:14px;font-weight:700;color:var(--ink);margin-bottom:2px}
+  .cell-role .cr-count{font-size:11px;color:var(--ink-3);font-weight:600;text-transform:uppercase;letter-spacing:.08em}
+  .cell-role .cr-rate{font-size:12px;color:var(--cyan);font-weight:700;margin-top:6px}
+
+  .future-state{
+    background:linear-gradient(135deg,rgba(94,234,212,.04),rgba(77,210,240,.04));
+    border:1px solid rgba(94,234,212,.2);
+    border-radius:12px;padding:22px 26px;margin-top:20px;
+  }
+  .future-state h3{
+    font-size:11px;text-transform:uppercase;letter-spacing:.16em;
+    color:var(--good);margin:0 0 14px;font-weight:700;
+  }
+
   /* ============ LIVE KPI STRIP — sticky on scroll ============ */
   .live-strip{
     position:sticky;top:0;z-index:40;
@@ -330,20 +423,136 @@
 <div class="wrap">
 
   <header class="page-hero">
-    <div class="eyebrow">AI Factory · Financial Model · v0.1</div>
+    <div class="eyebrow">AI Factory · Financial Model · v0.2</div>
     <h1>Squad Economics</h1>
     <p class="lede">
-      Interactive unit-economics model for <span class="d3">Data<sup>#</sup>3</span> AI squads.
-      A <b>Squad</b> is the delivery team. A <b>Sprint</b> is the unit of sale. The
-      <b>Factory Pod</b> is one of the capabilities you can buy — delivered by a Squad over a number of Sprints.
-      Drag the sliders and watch the numbers move.
+      Interactive unit-economics models for <span class="d3">Data<sup>#</sup>3</span> AI squads.
+      Two approaches: the <b>Cell Model</b> (dedicated squads, mentorship structure) and the
+      original <b>Sprint Model</b> (fractional allocation). Toggle between them.
     </p>
-    <div class="vocab">
-      <div class="chip"><b>SQUAD</b> · 2 core @ 50% + 4 specialist @ 25% = 2.0 FTE of blended capability</div>
-      <div class="chip"><b>SPRINT</b> · 10 business days · 20 person-days delivered</div>
-      <div class="chip"><b>FACTORY POD</b> · a packaged capability the squad builds for the customer</div>
-    </div>
   </header>
+
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('cell')">Cell Model <span class="tab-badge">New</span></button>
+    <button class="tab-btn" onclick="switchTab('sprint')">Sprint Model <span class="tab-badge">V1</span></button>
+  </div>
+
+  <!-- ════════════════ CELL MODEL TAB ════════════════ -->
+  <div class="tab-content active" id="tab-cell">
+
+  <div class="cell-toggle">
+    <button class="cell-toggle-btn active" onclick="switchCell('104')">1-0-4 · Factory Engine</button>
+    <button class="cell-toggle-btn" onclick="switchCell('112')">1-1-2 · Premium</button>
+  </div>
+
+  <div id="cellComposition" class="cell-composition"></div>
+
+  <div class="panel">
+    <h2>Inputs</h2>
+    <div class="grid grid-inputs" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr))">
+      <div class="input-row">
+        <label>Principal rate <span class="val" id="cPrinVal">$2,400/day</span></label>
+        <input type="range" id="cPrinRate" min="1800" max="3500" step="100" value="2400">
+      </div>
+      <div class="input-row">
+        <label>Senior rate <span class="val" id="cSenVal">$1,920/day</span></label>
+        <input type="range" id="cSenRate" min="1400" max="2800" step="80" value="1920">
+      </div>
+      <div class="input-row">
+        <label>Mid rate <span class="val" id="cMidVal">$1,600/day</span></label>
+        <input type="range" id="cMidRate" min="1200" max="2400" step="80" value="1600">
+      </div>
+      <div class="input-row">
+        <label>Junior rate <span class="val" id="cJunVal">$1,200/day</span></label>
+        <input type="range" id="cJunRate" min="800" max="1800" step="50" value="1200">
+      </div>
+      <div class="input-row">
+        <label>GP% at rack <span class="val" id="cGpPctVal">29%</span></label>
+        <input type="range" id="cGpPct" min="15" max="55" step="1" value="29">
+      </div>
+      <div class="input-row">
+        <label>Sprints / year <span class="val" id="cSprintsVal">22</span></label>
+        <input type="range" id="cSprintsYr" min="12" max="26" step="1" value="22">
+      </div>
+      <div class="input-row">
+        <label>Number of squads <span class="val" id="cSquadsVal">1</span></label>
+        <input type="range" id="cSquadCount" min="1" max="6" step="1" value="1">
+      </div>
+      <div class="input-row">
+        <label>Future blended rate <span class="val" id="cFutureVal">$1,920/day</span></label>
+        <input type="range" id="cFutureRate" min="1400" max="2800" step="80" value="1920">
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Per-Sprint Unit Economics</h2>
+    <div class="cell-kpi-grid" id="cellKpis"></div>
+  </div>
+
+  <div class="panel">
+    <h2>Annual Economics — Single Squad</h2>
+    <div class="cell-kpi-grid" id="cellAnnual"></div>
+  </div>
+
+  <div class="future-state">
+    <h3>Future State — Team-Based Pricing</h3>
+    <p style="font-size:12.5px;color:var(--ink-2);margin:0 0 14px">
+      Once the squad proves itself (2–3 cycles), sell the team at a blended rate instead of individual rate cards. Same cost base, higher margin.
+    </p>
+    <div class="cell-kpi-grid" id="cellFuture"></div>
+  </div>
+
+  <div class="panel" style="margin-top:20px">
+    <h2>Multi-Squad Scaling</h2>
+    <p style="font-size:12.5px;color:var(--ink-2);margin:0 0 14px">
+      Principal shared across squads. GP% improves as the highest-cost person is amortised.
+    </p>
+    <table>
+      <thead>
+        <tr><th>Squads</th><th>Headcount</th><th>Annual Rev</th><th>Annual Cost</th><th>Annual GP</th><th>GP%</th></tr>
+      </thead>
+      <tbody id="cellScaleBody"></tbody>
+    </table>
+  </div>
+
+  <div class="panel">
+    <h2>Multi-Squad Scaling — Future Rate</h2>
+    <table>
+      <thead>
+        <tr><th>Squads</th><th>Headcount</th><th>Annual Rev</th><th>Annual Cost</th><th>Annual GP</th><th>GP%</th></tr>
+      </thead>
+      <tbody id="cellScaleFutureBody"></tbody>
+    </table>
+  </div>
+
+  <details>
+    <summary>Cell Model assumptions</summary>
+    <ul>
+      <li><b>1-0-4 Cell:</b> 1 Principal ($2,400/day) + 4 Juniors ($1,200/day) = 5 people, 100% dedicated</li>
+      <li><b>1-1-2 Cell:</b> 1 Principal ($2,400/day) + 1 Senior ($1,920/day) + 2 Mids ($1,600/day) = 4 people, 100% dedicated</li>
+      <li><b>Dedicated squad:</b> 100% allocated to one engagement — no fractional allocation</li>
+      <li><b>GP% at rack:</b> 29% is standard <span class="d3">Data<sup>#</sup>3</span> gross profit at rack rates</li>
+      <li><b>Multi-squad scaling:</b> Principal shared across squads (max 3). Each additional squad adds juniors only.</li>
+      <li><b>Future state:</b> sell proven team at blended rate per head. Cost unchanged — margin improves.</li>
+      <li><b>Growth model:</b> self-funding, demand-led. No upfront investment. Squad sourced from existing bench.</li>
+    </ul>
+  </details>
+
+  <div class="footer-note">
+    Cell Model v0.1 · <a href="/ai-practice/squads">read the position paper</a> · <a href="/links">back to index</a>
+  </div>
+
+  </div><!-- /tab-cell -->
+
+  <!-- ════════════════ SPRINT MODEL TAB ════════════════ -->
+  <div class="tab-content" id="tab-sprint">
+
+  <div class="vocab" style="margin-bottom:20px">
+    <div class="chip"><b>SQUAD</b> · 2 core @ 50% + 4 specialist @ 25% = 2.0 FTE of blended capability</div>
+    <div class="chip"><b>SPRINT</b> · 10 business days · 20 person-days delivered</div>
+    <div class="chip"><b>FACTORY POD</b> · a packaged capability the squad builds for the customer</div>
+  </div>
 
   <details>
     <summary>Assumptions &amp; model notes</summary>
@@ -562,12 +771,172 @@
   </div><!-- /.layout -->
 
   <div class="footer-note">
-    Model v0.1 · placeholder burden rates · refine with <span class="d3">Data<sup>#</sup>3</span> internal numbers before committing to exec pitches · <a href="/links">back to index</a>
+    Sprint Model v0.1 · placeholder burden rates · refine with <span class="d3">Data<sup>#</sup>3</span> internal numbers before committing to exec pitches · <a href="/links">back to index</a>
   </div>
+
+  </div><!-- /tab-sprint -->
 
 </div>
 
 <script>
+// ============ TAB SWITCHING ============
+function switchTab(which){
+  document.querySelectorAll('.tab-content').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(el=>el.classList.remove('active'));
+  document.getElementById('tab-'+which).classList.add('active');
+  document.querySelector('.tab-btn[onclick*="'+which+'"]').classList.add('active');
+  if(which==='cell') computeCell();
+}
+
+let cellMode = '104';
+function switchCell(mode){
+  cellMode = mode;
+  document.querySelectorAll('.cell-toggle-btn').forEach(el=>el.classList.remove('active'));
+  document.querySelector('.cell-toggle-btn[onclick*="'+mode+'"]').classList.add('active');
+  computeCell();
+}
+
+function computeCell(){
+  const prinRate = +document.getElementById('cPrinRate').value;
+  const senRate  = +document.getElementById('cSenRate').value;
+  const midRate  = +document.getElementById('cMidRate').value;
+  const junRate  = +document.getElementById('cJunRate').value;
+  const gpPct    = +document.getElementById('cGpPct').value / 100;
+  const sprintsYr= +document.getElementById('cSprintsYr').value;
+  const squadCount=+document.getElementById('cSquadCount').value;
+  const futureRate=+document.getElementById('cFutureRate').value;
+  const sprintDays = 10;
+
+  // Update labels
+  document.getElementById('cPrinVal').textContent = '$'+prinRate.toLocaleString()+'/day';
+  document.getElementById('cSenVal').textContent  = '$'+senRate.toLocaleString()+'/day';
+  document.getElementById('cMidVal').textContent   = '$'+midRate.toLocaleString()+'/day';
+  document.getElementById('cJunVal').textContent   = '$'+junRate.toLocaleString()+'/day';
+  document.getElementById('cGpPctVal').textContent = (gpPct*100)+'%';
+  document.getElementById('cSprintsVal').textContent = sprintsYr;
+  document.getElementById('cSquadsVal').textContent  = squadCount;
+  document.getElementById('cFutureVal').textContent  = '$'+futureRate.toLocaleString()+'/day';
+
+  let dailyRev, headcount, roles;
+  if(cellMode==='104'){
+    dailyRev = prinRate + 4*junRate;
+    headcount = 5;
+    roles = [
+      {title:'Principal',count:'x1',rate:prinRate,cls:'mentor'},
+      {title:'Junior',count:'x4',rate:junRate,cls:'shadow'},
+    ];
+  } else {
+    dailyRev = prinRate + senRate + 2*midRate;
+    headcount = 4;
+    roles = [
+      {title:'Principal',count:'x1',rate:prinRate,cls:'mentor'},
+      {title:'Senior',count:'x1',rate:senRate,cls:'lead'},
+      {title:'Mid',count:'x2',rate:midRate,cls:'shadow'},
+    ];
+  }
+
+  const dailyCost = dailyRev * (1 - gpPct);
+  const sprintRev = dailyRev * sprintDays;
+  const sprintCost= dailyCost * sprintDays;
+  const sprintGp  = sprintRev - sprintCost;
+  const annualRev = sprintRev * sprintsYr;
+  const annualCost= sprintCost * sprintsYr;
+  const annualGp  = annualRev - annualCost;
+
+  // Composition
+  const compEl = document.getElementById('cellComposition');
+  compEl.innerHTML = roles.map(r=>`
+    <div class="cell-role ${r.cls}">
+      <div class="cr-count">${r.count}</div>
+      <div class="cr-title">${r.title}</div>
+      <div class="cr-rate">$${r.rate.toLocaleString()} / day</div>
+    </div>
+  `).join('');
+
+  // Sprint KPIs
+  document.getElementById('cellKpis').innerHTML = `
+    <div class="cell-kpi"><div class="ck-label">Headcount</div><div class="ck-value">${headcount}</div><div class="ck-sub">100% dedicated</div></div>
+    <div class="cell-kpi"><div class="ck-label">Daily revenue</div><div class="ck-value">${fmtK(dailyRev)}</div><div class="ck-sub">at rack rates</div></div>
+    <div class="cell-kpi"><div class="ck-label">Sprint revenue</div><div class="ck-value">${fmt(sprintRev)}</div><div class="ck-sub">${sprintDays} days</div></div>
+    <div class="cell-kpi"><div class="ck-label">Sprint cost</div><div class="ck-value">${fmt(sprintCost)}</div><div class="ck-sub">${(gpPct*100).toFixed(0)}% GP = ${(100-gpPct*100).toFixed(0)}% cost</div></div>
+    <div class="cell-kpi good"><div class="ck-label">Sprint GP</div><div class="ck-value">${fmt(sprintGp)}</div><div class="ck-sub">${(gpPct*100).toFixed(1)}% margin</div></div>
+    <div class="cell-kpi"><div class="ck-label">Effort delivered</div><div class="ck-value">${headcount*sprintDays}</div><div class="ck-sub">person-days per sprint</div></div>
+  `;
+
+  // Annual KPIs
+  document.getElementById('cellAnnual').innerHTML = `
+    <div class="cell-kpi"><div class="ck-label">Annual revenue</div><div class="ck-value">${fmtK(annualRev)}</div><div class="ck-sub">${sprintsYr} sprints</div></div>
+    <div class="cell-kpi"><div class="ck-label">Annual cost</div><div class="ck-value">${fmtK(annualCost)}</div><div class="ck-sub">loaded at ${(100-gpPct*100).toFixed(0)}%</div></div>
+    <div class="cell-kpi good"><div class="ck-label">Annual GP</div><div class="ck-value">${fmtK(annualGp)}</div><div class="ck-sub">${(gpPct*100).toFixed(1)}% margin</div></div>
+  `;
+
+  // Future state
+  const futureDailyRev = futureRate * headcount;
+  const futureSprintRev = futureDailyRev * sprintDays;
+  const futureAnnualRev = futureSprintRev * sprintsYr;
+  const futureAnnualGp = futureAnnualRev - annualCost;
+  const futureGpPct = futureAnnualRev > 0 ? futureAnnualGp / futureAnnualRev : 0;
+
+  document.getElementById('cellFuture').innerHTML = `
+    <div class="cell-kpi accent"><div class="ck-label">Blended rate</div><div class="ck-value">$${futureRate.toLocaleString()}</div><div class="ck-sub">per head per day</div></div>
+    <div class="cell-kpi"><div class="ck-label">Annual revenue</div><div class="ck-value">${fmtK(futureAnnualRev)}</div><div class="ck-sub">${headcount} &times; $${futureRate.toLocaleString()} &times; ${sprintDays}d &times; ${sprintsYr}</div></div>
+    <div class="cell-kpi"><div class="ck-label">Cost (unchanged)</div><div class="ck-value">${fmtK(annualCost)}</div><div class="ck-sub">same team, same cost</div></div>
+    <div class="cell-kpi good"><div class="ck-label">Annual GP</div><div class="ck-value">${fmtK(futureAnnualGp)}</div><div class="ck-sub">${(futureGpPct*100).toFixed(1)}% margin</div></div>
+  `;
+
+  // Multi-squad scaling (rack rate)
+  drawCellScale('cellScaleBody', prinRate, dailyRev, dailyCost, headcount, sprintsYr, squadCount, false, 0);
+  // Multi-squad scaling (future rate)
+  drawCellScale('cellScaleFutureBody', prinRate, dailyRev, dailyCost, headcount, sprintsYr, squadCount, true, futureRate);
+}
+
+function drawCellScale(bodyId, prinRate, dailyRev, dailyCost, headcount, sprintsYr, selected, useFuture, futureRate){
+  const tbody = document.getElementById(bodyId);
+  tbody.innerHTML = '';
+  const prinDailyCost = prinRate * (1 - (+document.getElementById('cGpPct').value/100));
+
+  for(let squads=1;squads<=6;squads++){
+    // Principal shared up to 3 squads
+    const prinCount = squads <= 3 ? 1 : Math.ceil(squads/3);
+    const othersPerSquad = headcount - 1;
+    const totalHC = prinCount + othersPerSquad * squads;
+    const otherDailyRev = dailyRev - prinRate;
+    const otherDailyCost = dailyCost - prinDailyCost;
+
+    let rev, cost;
+    if(useFuture){
+      rev = futureRate * (prinCount + othersPerSquad*squads) * 10 * sprintsYr;
+      cost = (prinDailyCost * prinCount + otherDailyCost * squads) * 10 * sprintsYr;
+    } else {
+      rev = (prinRate * prinCount + otherDailyRev * squads) * 10 * sprintsYr;
+      cost= (prinDailyCost * prinCount + otherDailyCost * squads) * 10 * sprintsYr;
+    }
+    const gp = rev - cost;
+    const gpP = rev ? gp/rev : 0;
+
+    const isSelected = squads === selected;
+    const tr = document.createElement('tr');
+    if(isSelected){tr.style.background='rgba(77,210,240,.08)';tr.style.outline='1px solid rgba(77,210,240,.5)';}
+    const marker = isSelected ? '◆ ' : '';
+    tr.innerHTML = `
+      <td style="${isSelected?'color:var(--cyan);font-weight:800':''}">${marker}<b>${squads}</b></td>
+      <td class="num">${totalHC}</td>
+      <td class="num">${fmtK(rev)}</td>
+      <td class="num">${fmtK(cost)}</td>
+      <td class="num" style="color:${gp>=0?'var(--good)':'var(--bad)'};font-weight:700">${fmtK(gp)}</td>
+      <td class="num">${fmtPct(gpP)}</td>
+    `;
+    tbody.appendChild(tr);
+  }
+}
+
+// Cell model slider listeners
+document.querySelectorAll('#tab-cell input[type="range"]').forEach(el=>{
+  el.addEventListener('input', computeCell);
+});
+computeCell();
+
+// ============ SPRINT MODEL (original) ============
 const fmt = n => (n < 0 ? '−$' : '$') + Math.abs(Math.round(n)).toLocaleString('en-AU');
 const fmtK = n => {
   const absN = Math.abs(n);

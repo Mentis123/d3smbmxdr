@@ -15,6 +15,10 @@ const nextConfig = {
         source: '/links',
         destination: '/index-page.html',
       },
+      {
+        source: '/ai-practice/squads',
+        destination: '/ai-practice-squads.html',
+      },
     ]
   },
 }

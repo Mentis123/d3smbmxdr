@@ -433,16 +433,16 @@
   </header>
 
   <div class="tab-bar">
-    <button class="tab-btn active" onclick="switchTab('cell')">Cell Model <span class="tab-badge">New</span></button>
-    <button class="tab-btn" onclick="switchTab('sprint')">Sprint Model <span class="tab-badge">V1</span></button>
+    <button class="tab-btn active" onclick="switchTab('cell')">Squad Model <span class="tab-badge">V4.0</span></button>
+    <button class="tab-btn" onclick="switchTab('sprint')">Sprint Model <span class="tab-badge">Legacy</span></button>
   </div>
 
   <!-- ════════════════ CELL MODEL TAB ════════════════ -->
   <div class="tab-content active" id="tab-cell">
 
   <div class="cell-toggle">
-    <button class="cell-toggle-btn active" onclick="switchCell('104')">1-0-4 · Factory Engine</button>
-    <button class="cell-toggle-btn" onclick="switchCell('112')">1-1-2 · Premium</button>
+    <button class="cell-toggle-btn" onclick="switchCell('104')">1-0-4 · Factory Engine</button>
+    <button class="cell-toggle-btn active" onclick="switchCell('112')">1-1-2 · Base Squad</button>
   </div>
 
   <div id="cellComposition" class="cell-composition"></div>
@@ -467,16 +467,24 @@
         <input type="range" id="cJunRate" min="800" max="1800" step="50" value="1200">
       </div>
       <div class="input-row">
-        <label>GP% at rack <span class="val" id="cGpPctVal">29%</span></label>
-        <input type="range" id="cGpPct" min="15" max="55" step="1" value="29">
+        <label>GP% at rack <span class="val" id="cGpPctVal">31%</span></label>
+        <input type="range" id="cGpPct" min="15" max="55" step="1" value="31">
       </div>
       <div class="input-row">
-        <label>Sprints / year <span class="val" id="cSprintsVal">22</span></label>
-        <input type="range" id="cSprintsYr" min="12" max="26" step="1" value="22">
+        <label>Principal allocation / squad <span class="val" id="cPrinAllocVal">25%</span></label>
+        <input type="range" id="cPrinAlloc" min="10" max="100" step="5" value="25">
+      </div>
+      <div class="input-row">
+        <label>Sprints / year <span class="val" id="cSprintsVal">17</span></label>
+        <input type="range" id="cSprintsYr" min="12" max="26" step="1" value="17">
       </div>
       <div class="input-row">
         <label>Number of squads <span class="val" id="cSquadsVal">1</span></label>
         <input type="range" id="cSquadCount" min="1" max="6" step="1" value="1">
+      </div>
+      <div class="input-row">
+        <label>Practice overhead <span class="val" id="cOverheadVal">$1,000,000</span></label>
+        <input type="range" id="cOverhead" min="0" max="2000000" step="50000" value="1000000">
       </div>
       <div class="input-row">
         <label>Future blended rate <span class="val" id="cFutureVal">$1,920/day</span></label>
@@ -526,14 +534,30 @@
     </table>
   </div>
 
+  <div class="panel" style="margin-top:20px;border:1px solid rgba(248,113,113,.3);background:linear-gradient(135deg,rgba(248,113,113,.04),rgba(251,191,36,.04))">
+    <h2 style="color:var(--warn)">Net Profit — After Practice Overhead</h2>
+    <p style="font-size:12.5px;color:var(--ink-2);margin:0 0 14px">
+      Delivery GP minus practice management costs (Practice Manager, Product Manager, Sales Specialist). This is the real P&amp;L view.
+    </p>
+    <div class="cell-kpi-grid" id="cellNetProfit"></div>
+    <table style="margin-top:16px">
+      <thead>
+        <tr><th>Principals</th><th>Squads</th><th>Annual Rev</th><th>Delivery Cost</th><th>Delivery GP</th><th>Overhead</th><th>Net Profit</th><th>Net%</th></tr>
+      </thead>
+      <tbody id="cellNetBody"></tbody>
+    </table>
+  </div>
+
   <details>
-    <summary>Cell Model assumptions</summary>
+    <summary>Squad Model assumptions (V4.0)</summary>
     <ul>
-      <li><b>1-0-4 Cell:</b> 1 Principal ($2,400/day) + 4 Juniors ($1,200/day) = 5 people, 100% dedicated</li>
-      <li><b>1-1-2 Cell:</b> 1 Principal ($2,400/day) + 1 Senior ($1,920/day) + 2 Mids ($1,600/day) = 4 people, 100% dedicated</li>
-      <li><b>Dedicated squad:</b> 100% allocated to one engagement — no fractional allocation</li>
-      <li><b>GP% at rack:</b> 29% is standard <span class="d3">Data<sup>#</sup>3</span> gross profit at rack rates</li>
-      <li><b>Multi-squad scaling:</b> Principal shared across squads (max 3). Each additional squad adds juniors only.</li>
+      <li><b>1-1-2 Squad (base):</b> 1 Principal ($2,400/day) + 1 Senior ($1,920/day) + 2 Consultants ($1,600/day) = 4 people</li>
+      <li><b>1-0-4 Squad (alt):</b> 1 Principal ($2,400/day) + 4 Juniors ($1,200/day) = 5 people</li>
+      <li><b>Principal allocation:</b> 25% per squad (50% billable / 50% pre-sales). Runs 2 squads max.</li>
+      <li><b>Sprints / year:</b> 17 (44 workable weeks &times; 80% utilisation &divide; 10 days)</li>
+      <li><b>GP% at rack:</b> 31% gross profit at rack rates</li>
+      <li><b>Practice overhead:</b> ~$1M (Practice Manager + Product Manager + Sales Specialist). Must be recovered through delivery margin.</li>
+      <li><b>Break-even:</b> 3 Principals (6 squads) for net profit after overhead</li>
       <li><b>Future state:</b> sell proven team at blended rate per head. Cost unchanged — margin improves.</li>
       <li><b>Growth model:</b> self-funding, demand-led. No upfront investment. Squad sourced from existing bench.</li>
     </ul>
@@ -798,7 +822,7 @@ function switchTab(which){
   if(which==='cell') computeCell();
 }
 
-let cellMode = '104';
+let cellMode = '112';
 function switchCell(mode){
   cellMode = mode;
   document.querySelectorAll('.cell-toggle-btn').forEach(el=>el.classList.remove('active'));
@@ -812,8 +836,10 @@ function computeCell(){
   const midRate  = +document.getElementById('cMidRate').value;
   const junRate  = +document.getElementById('cJunRate').value;
   const gpPct    = +document.getElementById('cGpPct').value / 100;
+  const prinAlloc= +document.getElementById('cPrinAlloc').value / 100;
   const sprintsYr= +document.getElementById('cSprintsYr').value;
   const squadCount=+document.getElementById('cSquadCount').value;
+  const overhead = +document.getElementById('cOverhead').value;
   const futureRate=+document.getElementById('cFutureRate').value;
   const sprintDays = 10;
 
@@ -823,25 +849,29 @@ function computeCell(){
   document.getElementById('cMidVal').textContent   = '$'+midRate.toLocaleString()+'/day';
   document.getElementById('cJunVal').textContent   = '$'+junRate.toLocaleString()+'/day';
   document.getElementById('cGpPctVal').textContent = (gpPct*100)+'%';
+  document.getElementById('cPrinAllocVal').textContent = (prinAlloc*100)+'%';
   document.getElementById('cSprintsVal').textContent = sprintsYr;
   document.getElementById('cSquadsVal').textContent  = squadCount;
+  document.getElementById('cOverheadVal').textContent = '$'+overhead.toLocaleString();
   document.getElementById('cFutureVal').textContent  = '$'+futureRate.toLocaleString()+'/day';
 
-  let dailyRev, headcount, roles;
+  let dailyRev, headcount, roles, othersCount;
   if(cellMode==='104'){
-    dailyRev = prinRate + 4*junRate;
+    dailyRev = prinRate * prinAlloc + 4*junRate;
     headcount = 5;
+    othersCount = 4;
     roles = [
-      {title:'Principal',count:'x1',rate:prinRate,cls:'mentor'},
-      {title:'Junior',count:'x4',rate:junRate,cls:'shadow'},
+      {title:'Principal',count:'x1',rate:prinRate,alloc:prinAlloc,cls:'mentor'},
+      {title:'Junior',count:'x4',rate:junRate,alloc:1,cls:'shadow'},
     ];
   } else {
-    dailyRev = prinRate + senRate + 2*midRate;
+    dailyRev = prinRate * prinAlloc + senRate + 2*midRate;
     headcount = 4;
+    othersCount = 3;
     roles = [
-      {title:'Principal',count:'x1',rate:prinRate,cls:'mentor'},
-      {title:'Senior',count:'x1',rate:senRate,cls:'lead'},
-      {title:'Mid',count:'x2',rate:midRate,cls:'shadow'},
+      {title:'Principal',count:'x1',rate:prinRate,alloc:prinAlloc,cls:'mentor'},
+      {title:'Senior',count:'x1',rate:senRate,alloc:1,cls:'lead'},
+      {title:'Consultant',count:'x2',rate:midRate,alloc:1,cls:'shadow'},
     ];
   }
 
@@ -852,6 +882,8 @@ function computeCell(){
   const annualRev = sprintRev * sprintsYr;
   const annualCost= sprintCost * sprintsYr;
   const annualGp  = annualRev - annualCost;
+  const squadsPerPrincipal = Math.round(1/prinAlloc);
+  const effortDays = prinAlloc * sprintDays + (headcount-1) * sprintDays;
 
   // Composition
   const compEl = document.getElementById('cellComposition');
@@ -859,18 +891,18 @@ function computeCell(){
     <div class="cell-role ${r.cls}">
       <div class="cr-count">${r.count}</div>
       <div class="cr-title">${r.title}</div>
-      <div class="cr-rate">$${r.rate.toLocaleString()} / day</div>
+      <div class="cr-rate">$${r.rate.toLocaleString()} / day${r.alloc<1?' · '+(r.alloc*100)+'% alloc':''}</div>
     </div>
   `).join('');
 
   // Sprint KPIs
   document.getElementById('cellKpis').innerHTML = `
-    <div class="cell-kpi"><div class="ck-label">Headcount</div><div class="ck-value">${headcount}</div><div class="ck-sub">100% dedicated</div></div>
-    <div class="cell-kpi"><div class="ck-label">Daily revenue</div><div class="ck-value">${fmtK(dailyRev)}</div><div class="ck-sub">at rack rates</div></div>
+    <div class="cell-kpi"><div class="ck-label">Headcount</div><div class="ck-value">${headcount}</div><div class="ck-sub">Principal at ${(prinAlloc*100)}%, others 100%</div></div>
+    <div class="cell-kpi"><div class="ck-label">Daily revenue</div><div class="ck-value">${fmtK(dailyRev)}</div><div class="ck-sub">at rack rates (Principal ${(prinAlloc*100)}%)</div></div>
     <div class="cell-kpi"><div class="ck-label">Sprint revenue</div><div class="ck-value">${fmt(sprintRev)}</div><div class="ck-sub">${sprintDays} days</div></div>
     <div class="cell-kpi"><div class="ck-label">Sprint cost</div><div class="ck-value">${fmt(sprintCost)}</div><div class="ck-sub">${(gpPct*100).toFixed(0)}% GP = ${(100-gpPct*100).toFixed(0)}% cost</div></div>
     <div class="cell-kpi good"><div class="ck-label">Sprint GP</div><div class="ck-value">${fmt(sprintGp)}</div><div class="ck-sub">${(gpPct*100).toFixed(1)}% margin</div></div>
-    <div class="cell-kpi"><div class="ck-label">Effort delivered</div><div class="ck-value">${headcount*sprintDays}</div><div class="ck-sub">person-days per sprint</div></div>
+    <div class="cell-kpi"><div class="ck-label">Principal capacity</div><div class="ck-value">${squadsPerPrincipal} squads</div><div class="ck-sub">at ${(prinAlloc*100)}% alloc each</div></div>
   `;
 
   // Annual KPIs
@@ -895,22 +927,64 @@ function computeCell(){
   `;
 
   // Multi-squad scaling (rack rate)
-  drawCellScale('cellScaleBody', prinRate, dailyRev, dailyCost, headcount, sprintsYr, squadCount, false, 0);
+  drawCellScale('cellScaleBody', prinRate, prinAlloc, dailyRev, dailyCost, headcount, sprintsYr, squadCount, false, 0);
   // Multi-squad scaling (future rate)
-  drawCellScale('cellScaleFutureBody', prinRate, dailyRev, dailyCost, headcount, sprintsYr, squadCount, true, futureRate);
+  drawCellScale('cellScaleFutureBody', prinRate, prinAlloc, dailyRev, dailyCost, headcount, sprintsYr, squadCount, true, futureRate);
+
+  // Net profit — after practice overhead
+  const netGp = annualGp * squadCount;
+  const netProfit = netGp - overhead;
+  const netPct = (annualRev * squadCount) > 0 ? netProfit / (annualRev * squadCount) : 0;
+  const netEl = document.getElementById('cellNetProfit');
+  netEl.innerHTML = `
+    <div class="cell-kpi"><div class="ck-label">Delivery GP (${squadCount} squad${squadCount>1?'s':''})</div><div class="ck-value">${fmtK(netGp)}</div><div class="ck-sub">${fmtPct(gpPct)} on ${fmtK(annualRev*squadCount)} revenue</div></div>
+    <div class="cell-kpi"><div class="ck-label">Practice overhead</div><div class="ck-value" style="color:var(--bad)">${fmtK(-overhead)}</div><div class="ck-sub">management + sales</div></div>
+    <div class="cell-kpi ${netProfit>=0?'good':''}"><div class="ck-label">Net profit</div><div class="ck-value" style="color:${netProfit>=0?'var(--good)':'var(--bad)'}">${fmtK(netProfit)}</div><div class="ck-sub">${fmtPct(netPct)} net margin</div></div>
+  `;
+
+  // Net profit scaling table — by principals
+  const netBody = document.getElementById('cellNetBody');
+  netBody.innerHTML = '';
+  const squadsPerPrin = Math.round(1/prinAlloc);
+  for(let prins=1;prins<=4;prins++){
+    const sq = prins * squadsPerPrin;
+    const totalRev = sprintRev * sprintsYr * sq;
+    const totalDelCost = sprintCost * sprintsYr * sq;
+    const totalGp = totalRev - totalDelCost;
+    const net = totalGp - overhead;
+    const netP = totalRev ? net / totalRev : 0;
+    const tr = document.createElement('tr');
+    if(prins * squadsPerPrin === squadCount){
+      tr.style.background='rgba(77,210,240,.08)';
+      tr.style.outline='1px solid rgba(77,210,240,.5)';
+    }
+    tr.innerHTML = `
+      <td><b>${prins}</b></td>
+      <td class="num">${sq}</td>
+      <td class="num">${fmtK(totalRev)}</td>
+      <td class="num">${fmtK(totalDelCost)}</td>
+      <td class="num">${fmtK(totalGp)}</td>
+      <td class="num">${fmtK(overhead)}</td>
+      <td class="num" style="color:${net>=0?'var(--good)':'var(--bad)'};font-weight:700">${fmtK(net)}</td>
+      <td class="num">${fmtPct(netP)}</td>
+    `;
+    netBody.appendChild(tr);
+  }
 }
 
-function drawCellScale(bodyId, prinRate, dailyRev, dailyCost, headcount, sprintsYr, selected, useFuture, futureRate){
+function drawCellScale(bodyId, prinRate, prinAlloc, dailyRev, dailyCost, headcount, sprintsYr, selected, useFuture, futureRate){
   const tbody = document.getElementById(bodyId);
   tbody.innerHTML = '';
-  const prinDailyCost = prinRate * (1 - (+document.getElementById('cGpPct').value/100));
+  const gpPctVal = +document.getElementById('cGpPct').value/100;
+  const prinDailyRev = prinRate * prinAlloc;
+  const prinDailyCost = prinDailyRev * (1 - gpPctVal);
+  const squadsPerPrin = Math.round(1/prinAlloc);
 
   for(let squads=1;squads<=6;squads++){
-    // Principal shared up to 3 squads
-    const prinCount = squads <= 3 ? 1 : Math.ceil(squads/3);
+    const prinCount = squads <= squadsPerPrin ? 1 : Math.ceil(squads/squadsPerPrin);
     const othersPerSquad = headcount - 1;
     const totalHC = prinCount + othersPerSquad * squads;
-    const otherDailyRev = dailyRev - prinRate;
+    const otherDailyRev = dailyRev - prinDailyRev;
     const otherDailyCost = dailyCost - prinDailyCost;
 
     let rev, cost;
@@ -918,7 +992,7 @@ function drawCellScale(bodyId, prinRate, dailyRev, dailyCost, headcount, sprints
       rev = futureRate * (prinCount + othersPerSquad*squads) * 10 * sprintsYr;
       cost = (prinDailyCost * prinCount + otherDailyCost * squads) * 10 * sprintsYr;
     } else {
-      rev = (prinRate * prinCount + otherDailyRev * squads) * 10 * sprintsYr;
+      rev = (prinDailyRev * prinCount + otherDailyRev * squads) * 10 * sprintsYr;
       cost= (prinDailyCost * prinCount + otherDailyCost * squads) * 10 * sprintsYr;
     }
     const gp = rev - cost;

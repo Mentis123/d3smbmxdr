@@ -1,0 +1,445 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>THE AI SQUAD — Veo 3.1 Promo Prompt Kit</title>
+<style>
+  :root{
+    --bg:#060215; --bg2:#12062d; --card:#1a0f3e; --card2:#231555;
+    --ink:#f4f1ff; --ink2:#b6a9e6; --ink3:#837aa8;
+    --cyan:#00e0ff; --magenta:#ff3ba7; --amber:#ffb347; --line:#2e1f5c;
+    --ok:#4ade80;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif}
+  body{background:radial-gradient(ellipse at top,#1d0d4a 0%,#060215 60%) no-repeat fixed}
+  a{color:var(--cyan);text-decoration:none}
+  a:hover{text-decoration:underline}
+
+  header{padding:52px 32px 22px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#1d0d4a 0%,#10062a 100%)}
+  header .eyebrow{font-size:11px;color:var(--cyan);letter-spacing:.2em;text-transform:uppercase;font-weight:700;margin-bottom:10px}
+  header h1{margin:0 0 8px;font-size:32px;letter-spacing:-.01em;font-weight:800}
+  header h1 .accent{background:linear-gradient(90deg,var(--cyan),var(--magenta));-webkit-background-clip:text;background-clip:text;color:transparent}
+  header p{margin:0;color:var(--ink2);font-size:15px;max-width:780px}
+  header .meta{margin-top:14px;font-size:12px;color:var(--ink3)}
+  header .meta span{margin-right:22px}
+  header .meta b{color:var(--ink2);font-weight:600}
+
+  nav.sticky{position:sticky;top:0;z-index:10;background:rgba(6,2,21,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:10px 24px;display:flex;gap:4px;flex-wrap:wrap;font-size:12px}
+  nav.sticky a{color:var(--ink2);padding:6px 10px;border-radius:6px;border:1px solid transparent}
+  nav.sticky a:hover{color:var(--cyan);border-color:var(--line);background:#12072e;text-decoration:none}
+
+  main{max-width:980px;margin:0 auto;padding:28px 24px 100px}
+
+  section{margin:30px 0;padding:26px;background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:0 1px 0 rgba(255,255,255,.03) inset}
+  section h2{margin:0 0 6px;font-size:22px;color:var(--ink);letter-spacing:-.005em;font-weight:700}
+  section h2 .tag{font-size:10px;color:var(--cyan);margin-left:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;vertical-align:middle;padding:3px 9px;border:1px solid var(--cyan);border-radius:10px}
+  section .subtitle{margin:0 0 16px;color:var(--ink2);font-size:13.5px}
+  section.shot{border-left:3px solid var(--cyan)}
+  section.shot.reveal{border-left-color:var(--magenta)}
+  section.shot.climax{border-left-color:var(--amber)}
+  section.shot .shotmeta{display:flex;gap:16px;flex-wrap:wrap;margin:0 0 14px;font-size:11px;color:var(--ink3);text-transform:uppercase;letter-spacing:.06em}
+  section.shot .shotmeta b{color:var(--ink2);font-weight:600;letter-spacing:.04em;text-transform:none;font-size:12px}
+
+  .rules{background:linear-gradient(180deg,#1f1048,#150930);border-color:#4a2ba8}
+  .rules h2 .tag{color:var(--magenta);border-color:var(--magenta)}
+  .rules ul{padding-left:20px;margin:10px 0 0}
+  .rules li{margin:7px 0;color:var(--ink2);font-size:13.5px}
+  .rules li strong{color:var(--ink)}
+  .rules code{background:#05031a;padding:2px 6px;border-radius:4px;font-size:12px;color:var(--cyan);border:1px solid var(--line)}
+
+  .promptbox{position:relative;background:#05031a;border:1px solid var(--line);border-radius:10px;padding:18px 18px;font:13px/1.65 "SF Mono","JetBrains Mono",Consolas,monospace;color:#e4dcff;white-space:pre-wrap;word-break:break-word;max-height:none;overflow:visible}
+  .promptbox::-webkit-scrollbar{width:8px}
+  .promptbox::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px}
+
+  .copyrow{display:flex;justify-content:space-between;align-items:center;margin-top:12px;gap:10px;flex-wrap:wrap}
+  .copyrow .hint{font-size:11.5px;color:var(--ink3)}
+  button.copy{background:linear-gradient(180deg,#3a1f8a,#1e0f56);color:var(--ink);border:1px solid #5a38c8;padding:9px 18px;border-radius:8px;font-size:12.5px;cursor:pointer;font-weight:600;letter-spacing:.02em;transition:all .15s;font-family:inherit}
+  button.copy:hover{background:linear-gradient(180deg,#4a2ba8,#2e1877);border-color:var(--cyan);box-shadow:0 0 0 3px rgba(0,224,255,.12)}
+  button.copy.ok{background:linear-gradient(180deg,#166534,#0b3d1d);border-color:var(--ok);color:#d6ffe4}
+
+  .dialogue{background:#0d0828;border:1px solid var(--line);border-left:3px solid var(--cyan);border-radius:8px;padding:11px 14px;margin-top:14px;font-size:13px;color:var(--ink)}
+  .dialogue::before{content:"DIALOGUE";display:block;font:10px/1 "SF Mono",Consolas,monospace;color:var(--cyan);text-transform:uppercase;letter-spacing:.1em;margin-bottom:7px}
+  .dialogue em{color:var(--ink2);font-style:normal}
+
+  table.assembly{width:100%;border-collapse:collapse;margin-top:12px;font-size:13px}
+  table.assembly th,table.assembly td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);color:var(--ink2)}
+  table.assembly th{color:var(--ink);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.06em}
+  table.assembly td:first-child{color:var(--cyan);font-family:"SF Mono",Consolas,monospace;font-size:12px;white-space:nowrap}
+  table.assembly td b{color:var(--ink);font-weight:600}
+
+  .tips ol{padding-left:22px;margin:8px 0}
+  .tips li{margin:9px 0;color:var(--ink2);font-size:13.5px}
+  .tips li strong{color:var(--ink)}
+  .tips code{background:#05031a;padding:2px 6px;border-radius:4px;font-size:12px;color:var(--cyan);border:1px solid var(--line)}
+
+  .chants{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:12px}
+  .chant{background:#0d0828;border:1px solid var(--line);border-radius:8px;padding:14px}
+  .chant .line{font-size:15px;font-weight:700;color:var(--ink);margin-bottom:6px}
+  .chant .why{font-size:12px;color:var(--ink3)}
+
+  footer{text-align:center;color:var(--ink3);font-size:11.5px;padding:32px;border-top:1px solid var(--line);margin-top:40px;line-height:1.8}
+  footer a{color:var(--ink2)}
+
+  @media (max-width:720px){
+    header h1{font-size:26px}
+    main{padding:22px 16px 60px}
+    section{padding:20px;margin:22px 0}
+    .promptbox{font-size:12px;padding:14px}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="eyebrow">Data#3 · AI Practice · Promo Prompt Kit</div>
+  <h1>THE <span class="accent">AI SQUAD</span> — Veo 3.1 Promo Prompts</h1>
+  <p>Eight self-contained 8-second shots. Confused whispers, then Melbourne Convention Centre erupts. Copy each prompt directly into Veo 3.1 and go — no assembly, no bible to stitch in, character descriptions are baked into every shot that needs them.</p>
+  <div class="meta">
+    <span><b>~64s total</b> · 8 × 8s clips</span>
+    <span><b>16:9</b> cinematic (9:16 notes per shot)</span>
+    <span><b>Model:</b> Veo 3.1 text-to-video + native audio</span>
+    <span><b>Arc:</b> confusion → reveal → crowd roar</span>
+  </div>
+</header>
+
+<nav class="sticky">
+  <a href="#rules">Rules</a>
+  <a href="#shot1">1 Email</a>
+  <a href="#shot2">2 Boardroom</a>
+  <a href="#shot3">3 Café</a>
+  <a href="#shot4">4 Corridor</a>
+  <a href="#shot5">5 Reveal</a>
+  <a href="#shot6">6 Cockpit</a>
+  <a href="#shot7">7 MCEC roar</a>
+  <a href="#shot8">8 Brand plate</a>
+  <a href="#assembly">Assembly</a>
+  <a href="#tips">Iteration tips</a>
+  <a href="#chants">Chant A/B</a>
+</nav>
+
+<main>
+
+<section class="rules" id="rules">
+  <h2>Rules baked into every prompt <span class="tag">Read once</span></h2>
+  <p class="subtitle">These are already inside each shot's prompt. Listed here so you understand <em>why</em> they're there.</p>
+  <ul>
+    <li><strong>8-second clips, 16:9 cinematic</strong> — Veo 3.1 default. One dialogue line per clip (Veo lip-syncs best when the line fits in one natural breath).</li>
+    <li><strong>Dialogue in double quotes</strong> with explicit speaker framing — e.g. <code>She says, "..."</code>. Veo treats anything in quotes as speech to render; everything else is description.</li>
+    <li><strong>Audio labelled explicitly</strong> — <code>Audio:</code> for the soundscape, <code>SFX:</code> for punctuation. Veo syncs audio to visuals more reliably when the two are separated.</li>
+    <li><strong>Lip-sync kept tight</strong> — every speaking shot frames at medium close-up or tighter with <em>clearly enunciates, visible mouth movement</em> baked in. One speaker per clip.</li>
+    <li><strong>Character descriptions are inline</strong> — every shot that features the squad carries the full appearance description of each squad member inside the prompt itself. No cross-referencing. Copy-paste and go.</li>
+    <li><strong>Shared negative prompt</strong> — every shot ends with: no subtitles, no captions, no on-screen text, no watermark, no music (unless the shot specifies), no cartoonish style.</li>
+    <li><strong><code>Data#3</code> lockup is NOT generated by Veo</strong> — Shot 8 is a clean plate. Composite the lockup with cyan superscript <code>#</code> in After Effects over the plate.</li>
+  </ul>
+</section>
+
+<section class="shot" id="shot1">
+  <h2>Shot 1 — Cold open: email confusion</h2>
+  <div class="shotmeta"><span><b>8s</b></span><span><b>16:9</b></span><span><b>Medium close-up</b></span><span><b>One speaker</b></span></div>
+  <p class="subtitle">Hook. Nobody knows what the AI Squad is — not even the execs.</p>
+  <div class="promptbox" id="p1">Cinematic medium close-up, shallow depth of field, soft handheld drift.
+
+A woman in her 50s in a grey blazer, reading glasses low on her nose, sits at a minimalist white oak desk in a modern Melbourne high-rise office. Morning light from a floor-to-ceiling window behind her, soft blue-hour glow, the Yarra River and distant cranes visible out of focus.
+
+She squints at her laptop screen, re-reads something twice, then looks up at a colleague off-camera with a flat, puzzled expression.
+
+She says, flatly and slowly, "The... AI Squad?" She clearly enunciates, mouth movement visible. A single beat of silence after.
+
+Audio: ambient open-plan office hum, distant keyboard clicks, faint espresso machine hiss. No music.
+SFX: one soft email-notification blip at the very start before she reads.
+
+Style: Fincher-muted corporate palette, teal shadows, clean glass and timber surfaces, natural skin tones. Shot on 35mm lens, f/2.0, 24fps.
+
+Negative: no subtitles, no captions, no on-screen text overlays, no watermark, no fisheye distortion, no music, no cartoonish style.</div>
+  <div class="dialogue">She says, flatly and slowly: <strong>"The... AI Squad?"</strong></div>
+  <div class="copyrow">
+    <button class="copy" data-target="p1">Copy Shot 1 prompt</button>
+    <span class="hint">Paste straight into Veo 3.1 text-to-video</span>
+  </div>
+</section>
+
+<section class="shot" id="shot2">
+  <h2>Shot 2 — Boardroom interrupt</h2>
+  <div class="shotmeta"><span><b>8s</b></span><span><b>16:9</b></span><span><b>Eye-level medium</b></span><span><b>One speaker</b></span></div>
+  <p class="subtitle">Stakes rise. Even the C-suite didn't see this coming.</p>
+  <div class="promptbox" id="p2">Slow push-in dolly, eye-level medium shot on a glass-walled boardroom.
+
+A man in his late 50s in a tailored dark navy suit, silver hair, stands at the head of a long boardroom table in front of a large screen showing a blurred strategy deck. Six executives are seated around the table, notebooks and laptops open.
+
+He pauses mid-sentence, pointer in hand, turns to the room. His brow furrows. He repeats the phrase with disbelief.
+
+He says, incredulously, "Wait — the AI Squad?" Clear lip movement, visible enunciation. His head tilts very slightly to the side on the word "Squad."
+
+Audio: low HVAC hum of a boardroom, almost imperceptible projector buzz, a single distant phone ring beyond the glass. No music.
+SFX: subtle pen-click from one of the seated execs right on "Squad."
+
+Style: cool overhead corporate lighting, crisp glass reflections, neutral greige carpet, high-key with controlled contrast. Shot on a 50mm, f/2.8, 24fps.
+
+Negative: no subtitles, no on-screen captions, no text overlays, no watermark, no music, no cartoonish style.</div>
+  <div class="dialogue">He says, incredulously: <strong>"Wait — the AI Squad?"</strong></div>
+  <div class="copyrow">
+    <button class="copy" data-target="p2">Copy Shot 2 prompt</button>
+    <span class="hint">9:16 note: reframe tighter on him alone; drop the exec table</span>
+  </div>
+</section>
+
+<section class="shot" id="shot3">
+  <h2>Shot 3 — Café whisper (conspiratorial)</h2>
+  <div class="shotmeta"><span><b>8s</b></span><span><b>16:9</b></span><span><b>Handheld OTS</b></span><span><b>One speaker</b></span></div>
+  <p class="subtitle">Mystery deepens. The whispers are starting.</p>
+  <div class="promptbox" id="p3">Handheld over-the-shoulder two-shot, very shallow focus, café ambient noise wash.
+
+Two analysts in their early 30s — a man in a charcoal puffer over a hoodie, a woman in a rust-coloured turtleneck — lean in over takeaway flat whites at a Melbourne laneway café. Red brick wall behind them, graffiti, warm tungsten pendant lights overhead.
+
+She leans in conspiratorially. His eyes widen. She glances once to check who's listening.
+
+She whispers, almost gossip-toned, "Did you hear? They got the AI Squad." She clearly enunciates despite the whisper, mouth movement readable.
+
+Audio: layered café hum — milk steaming, background chatter, one distant laugh, a tram bell in the far distance. Warm and alive. No music.
+SFX: the clink of her cup being set down on the saucer right on the word "Squad."
+
+Style: Melbourne laneway café warmth, tungsten pools against deep shadow, film grain, slight lens breathing. Shot on a 35mm, f/1.8, handheld, 24fps.
+
+Negative: no subtitles, no captions, no on-screen text, no watermark, no music, no cartoonish style.</div>
+  <div class="dialogue">She whispers, gossip-toned: <strong>"Did you hear? They got the AI Squad."</strong></div>
+  <div class="copyrow">
+    <button class="copy" data-target="p3">Copy Shot 3 prompt</button>
+    <span class="hint">Works 9:16 as-is — tight OTS is already vertical-friendly</span>
+  </div>
+</section>
+
+<section class="shot" id="shot4">
+  <h2>Shot 4 — Corridor confidence (momentum build)</h2>
+  <div class="shotmeta"><span><b>8s</b></span><span><b>16:9</b></span><span><b>Steadicam backward tracking</b></span><span><b>One speaker</b></span></div>
+  <p class="subtitle">First hint of swagger. <em>Someone</em> has one.</p>
+  <div class="promptbox" id="p4">Steadicam tracking shot, walking backwards, medium-wide framing.
+
+A man in his late 20s, South Asian, fade haircut, open-collar white shirt under a grey zip-up hoodie, smart sneakers — walks briskly down a modern office corridor. Floor-to-ceiling glass on one side shows the Melbourne CBD skyline at golden hour.
+
+He is on a phone call, laptop under his arm, smiling to himself. A colleague passes him, does a double-take, turns as if to ask something — he just nods once without slowing down.
+
+He says into the phone, with quiet confidence, "Yeah — it's the AI Squad." Clear enunciation, mouth movement visible, then a small knowing smile.
+
+Audio: footsteps on polished concrete, HVAC hush, a muffled meeting audible as he passes one glass pod, a distant city siren far below. No music.
+SFX: subtle swoosh as the colleague passes camera-side.
+
+Style: golden-hour amber spilling through the glass wall, long shadows across the corridor floor, cinematic teal-and-orange grade. Shot on a 35mm, f/2.8, Steadicam, 24fps.
+
+Negative: no subtitles, no captions, no on-screen text, no watermark, no music, no cartoonish style.</div>
+  <div class="dialogue">He says, quietly confident: <strong>"Yeah — it's the AI Squad."</strong></div>
+  <div class="copyrow">
+    <button class="copy" data-target="p4">Copy Shot 4 prompt</button>
+    <span class="hint">Works 9:16 — reframe vertical with the skyline glass behind him</span>
+  </div>
+</section>
+
+<section class="shot reveal" id="shot5">
+  <h2>Shot 5 — The reveal: squad walk-in <span class="tag">HERO</span></h2>
+  <div class="shotmeta"><span><b>8s</b></span><span><b>16:9</b></span><span><b>Low-angle slo-mo tracking</b></span><span><b>No dialogue</b></span></div>
+  <p class="subtitle">This is the AI Squad. Four people, walking in sync, into the customer's reception.</p>
+  <div class="promptbox" id="p5">Low-angle slow-motion tracking shot, four-abreast hero walk, slight Dutch tilt for energy. Shot at 48fps, played back at 24fps for 2× slow motion.
+
+Four people walk abreast through a set of automatic glass doors into a corporate reception floor:
+- Centre-left: a man in his early 40s, salt-and-pepper hair short on the sides, trimmed beard, sharp charcoal suit over a crisp white shirt no tie, calm intelligent eyes, athletic build.
+- Centre-right: a woman in her mid-30s, shoulder-length dark brown hair tied back, tortoiseshell glasses, fitted navy blazer over a black merino tee, dark jeans.
+- Far left: a man in his late 20s, South Asian, fade haircut, open-collar white shirt under a grey zip-up hoodie, smart sneakers.
+- Far right: a woman in her late 20s, short cropped blonde hair, minimalist silver earrings, olive linen blazer over a cream tee, slim trousers.
+
+The automatic doors slide open with a soft pneumatic hiss. The four step forward in sync, unhurried, purposeful. The man in the charcoal suit feels a breeze catch his jacket. The woman in the navy blazer adjusts her glasses. The blonde woman smiles faintly. The man in the hoodie scans the room.
+
+No dialogue. Let the visuals carry it.
+
+Audio: soft hiss of sliding doors, a single gentle reception bell, polished footfalls on marble, ambient lobby murmur. At the exact moment they cross the threshold, one soft low sub-bass hit — felt more than heard.
+SFX: sub-bass impact on threshold crossing, a soft shoe-squeak.
+
+Style: Fincher-meets-Villeneuve — clean geometric lobby architecture, cyan rim-light behind them from the exterior daylight, deep blacks in wardrobe, film grain, anamorphic lens flare across reception glass. Shot on an anamorphic 40mm, f/2.0, 48fps.
+
+Negative: no subtitles, no captions, no on-screen text, no watermark, no music.</div>
+  <div class="copyrow">
+    <button class="copy" data-target="p5">Copy Shot 5 prompt</button>
+    <span class="hint">Works 9:16 with a reframe — tighten to centre two and push Dutch tilt harder</span>
+  </div>
+</section>
+
+<section class="shot" id="shot6">
+  <h2>Shot 6 — Inside the cockpit (squad at work)</h2>
+  <div class="shotmeta"><span><b>8s</b></span><span><b>16:9</b></span><span><b>Slow circular dolly</b></span><span><b>One speaker</b></span></div>
+  <p class="subtitle">Proof of capability. The squad does what squads do.</p>
+  <div class="promptbox" id="p6">Slow circular dolly, 360° partial orbit around a standing-height war-room table.
+
+Four people are at work in a glass-walled Melbourne war-room. Floor-to-ceiling whiteboards are covered in agent architecture diagrams and sticky notes. Two large monitors show live agent traces and a data pipeline visualisation. A single cyan accent light strip glows under the table.
+
+- A man in his early 40s, salt-and-pepper hair short on the sides, trimmed beard, charcoal suit over a white shirt no tie, athletic build — pointing to one node on the whiteboard with measured calm.
+- A woman in her mid-30s, shoulder-length dark brown hair tied back, tortoiseshell glasses, navy blazer over a black merino tee — typing into a laptop, nodding.
+- A man in his late 20s, South Asian, fade haircut, open-collar white shirt under a grey zip-up hoodie, smart sneakers — marking up a printout.
+- A woman in her late 20s, short cropped blonde hair, minimalist silver earrings, olive linen blazer over a cream tee — placing a fresh sticky on the whiteboard.
+
+They move in quiet, confident choreography — a team that has done this before.
+
+The man in the charcoal suit says, softly, almost to himself, "This is what we're here for." Medium shot on him on the line, clear mouth movement, unhurried delivery.
+
+Audio: soft key clicks, whiteboard marker squeak, low HVAC hush, monitor hum. One distant lift ding beyond the glass. No music.
+SFX: marker squeak on the word "here."
+
+Style: high-tech consultancy war-room — cool daylight mixed with the under-table cyan, teal shadow palette, crisp glass, warm skin tones. Shot on a 28mm, f/2.8, slow dolly, 24fps.
+
+Negative: no subtitles, no captions, no on-screen text, no fictional cartoonish AI interfaces, no watermark, no music.</div>
+  <div class="dialogue">He says, softly, almost to himself: <strong>"This is what we're here for."</strong></div>
+  <div class="copyrow">
+    <button class="copy" data-target="p6">Copy Shot 6 prompt</button>
+    <span class="hint">9:16 note: built for width — skip for vertical or reshoot as a tight single on the Mentor</span>
+  </div>
+</section>
+
+<section class="shot climax" id="shot7">
+  <h2>Shot 7 — Melbourne Convention Centre crowd roar <span class="tag">MONEY SHOT</span></h2>
+  <div class="shotmeta"><span><b>8s</b></span><span><b>16:9</b></span><span><b>Crane + drone blend</b></span><span><b>Crowd unison</b></span></div>
+  <p class="subtitle">Crescendo. Everyone wants one.</p>
+  <div class="promptbox" id="p7">Wide crane shot rising up and pulling back, revealing scale. Starts on a handful of faces in medium, ascends into a massive aerial wide.
+
+Hundreds of people — mixed corporate and smart-casual, lanyards visible — fill the forecourt of the Melbourne Convention and Exhibition Centre (MCEC) at South Wharf. The distinctive angular glass-and-steel facade rises behind them. The Yarra River and the yellow Melbourne tramline are visible at the edge of frame. Late afternoon, golden-hour sun low over the river.
+
+The crowd is packed, energised, hands raised. On the beat they all shout in unison — one sharp, joyful roar — arms in the air, some jumping. Confetti cannons fire from two sides on the peak of the shout. The camera continues rising to reveal the full scale of the gathering.
+
+The crowd shouts in unison, full-throated and celebratory, "THE AI SQUAD!" Clear, synchronised, one collective voice. Visible mouths, visible energy.
+
+Audio: massive reverberant crowd cheer wrapping the shout, confetti cannon bursts, a single distant air-horn, the distinctive clang of a Melbourne tram bell off-camera (W-class style, metallic ding-ding). The shout peaks then tails into sustained applause and whoops.
+SFX: stereo confetti cannon poofs, tram bell, air-horn.
+
+Style: documentary-meets-blockbuster — golden-hour sun flaring off the MCEC glass, long shadows across the forecourt, saturated but natural, slight handheld micro-shake on the crane. Shot on a 24mm, f/4, crane + drone blend, 24fps. Feels like the end of a championship parade.
+
+Negative: no subtitles, no on-screen captions, no fictional brand logos on the MCEC facade, no cartoonish energy, no music overlay — let the crowd carry it.</div>
+  <div class="dialogue">The crowd, in full-throated unison: <strong>"THE AI SQUAD!"</strong></div>
+  <div class="copyrow">
+    <button class="copy" data-target="p7">Copy Shot 7 prompt</button>
+    <span class="hint">If MCEC doesn't render, see Iteration tip #2 below. A/B the chant variants below too.</span>
+  </div>
+</section>
+
+<section class="shot" id="shot8">
+  <h2>Shot 8 — Brand closer (comp plate)</h2>
+  <div class="shotmeta"><span><b>8s</b></span><span><b>16:9</b></span><span><b>Locked, gentle push-in</b></span><span><b>No dialogue</b></span></div>
+  <p class="subtitle">Negative space. Composite the <code>Data#3</code> lockup + tagline in AE/Premiere.</p>
+  <div class="promptbox" id="p8">Locked-off static shot, gentle push-in across 8 seconds, minimal.
+
+A clean matte charcoal wall with subtle concrete texture, soft top-down key light, no people in frame.
+
+The camera slowly pushes in on the centre of the wall. Nothing happens on the wall itself — this is a clean plate for brand lockup and tagline to be composited in post.
+
+No dialogue.
+
+Audio: a single sustained low sub-bass pad, almost sub-audible. One gentle breath of room tone. Pure negative space.
+SFX: none.
+
+Style: product-photography minimalism, perfectly exposed matte surface, subtle natural vignetting. Shot on a 50mm, f/4, locked, 24fps.
+
+Negative: no text, no logos, no characters, no movement other than the push-in, no music.</div>
+  <div class="copyrow">
+    <button class="copy" data-target="p8">Copy Shot 8 prompt</button>
+    <span class="hint">Composite the Data#3 lockup (superscript # in cyan) + tagline <b>"The Squad is the Product."</b> over this plate</span>
+  </div>
+</section>
+
+<section id="assembly">
+  <h2>Edit assembly <span class="tag">64s total</span></h2>
+  <p class="subtitle">Suggested cut order. Shorter cuts below.</p>
+  <table class="assembly">
+    <thead><tr><th>Position</th><th>Shot</th><th>Purpose</th></tr></thead>
+    <tbody>
+      <tr><td>00:00 – 00:08</td><td><b>1 · Email confusion</b></td><td>Hook — what even <em>is</em> this?</td></tr>
+      <tr><td>00:08 – 00:16</td><td><b>2 · Boardroom interrupt</b></td><td>Stakes rise — the execs don't know either.</td></tr>
+      <tr><td>00:16 – 00:24</td><td><b>3 · Café whisper</b></td><td>Mystery deepens; social proof seeding.</td></tr>
+      <tr><td>00:24 – 00:32</td><td><b>4 · Corridor confidence</b></td><td>First hint — someone <em>has</em> one.</td></tr>
+      <tr><td>00:32 – 00:40</td><td><b>5 · Squad walk-in</b></td><td>Reveal — this is the AI Squad.</td></tr>
+      <tr><td>00:40 – 00:48</td><td><b>6 · Cockpit at work</b></td><td>Proof of capability.</td></tr>
+      <tr><td>00:48 – 00:56</td><td><b>7 · MCEC crowd roar</b></td><td>Crescendo — everyone wants one.</td></tr>
+      <tr><td>00:56 – 01:04</td><td><b>8 · Brand closer</b></td><td>Tagline: <em>The Squad is the Product.</em></td></tr>
+    </tbody>
+  </table>
+  <ul style="margin-top:18px;padding-left:20px;color:var(--ink2);font-size:13.5px">
+    <li><strong>30s cut:</strong> 1 · 3 · 5 · 7 · 8</li>
+    <li><strong>15s cut:</strong> 1 · 5 · 7 · 8</li>
+    <li><strong>Vertical 9:16:</strong> Shots 1, 3, 4, 5, 7 reframe cleanly. Shots 2 and 6 are built for width — skip or reshoot as tight singles.</li>
+    <li><strong>Music:</strong> Veo-generated beds can be hit-or-miss on sync. Recommend adding a single cinematic bed in edit — something slow-building, ducking under dialogue, peaking under Shot 7's roar, releasing on Shot 8.</li>
+    <li><strong>Colour:</strong> Grade all eight shots to a shared LUT — cool teal shadows, warm golden highlights, natural skin tones, cyan-protected so the squad's cyan accent stays vivid.</li>
+  </ul>
+</section>
+
+<section class="tips" id="tips">
+  <h2>Iteration tips <span class="tag">If a shot misses</span></h2>
+  <ol>
+    <li><strong>Lip-sync drifting?</strong> Tighten the camera to a closer close-up, cut the dialogue to under 6 words, add <code>"clearly enunciates, visible mouth movement, one speaker only, sync mouth to audio"</code> explicitly inside the prompt.</li>
+    <li><strong>Wrong city / wrong building (Shot 7)?</strong> Veo's grasp of MCEC specifically is patchy. Reinforce with <code>"Melbourne Convention and Exhibition Centre, South Wharf Melbourne Australia, distinctive angular steel and glass facade, Yarra River visible, iconic Melbourne architecture"</code>. If still wrong, accept a plausible modern convention centre and add a Melbourne establishing cutaway between 6 and 7 (trams, Yarra, cityscape).</li>
+    <li><strong>Crowd scale not reading?</strong> Add <code>"thousands of people, deep crowd extending far beyond frame, dense packed bodies"</code> and lift the crane higher. If still thin, generate twice and stack takes in edit to double the apparent density.</li>
+    <li><strong>Squad faces drifting shot-to-shot?</strong> Veo 3.1 drifts on identity across generations. Strongest fixes: (a) the character descriptions already baked into Shots 4, 5, 6 are your anchor — keep them verbatim, (b) use Veo 3.1's reference-image / Ingredients feature with a still from Shot 5 as the identity anchor for Shots 4 and 6.</li>
+    <li><strong>Tram bell / Australian ambience not registering?</strong> Explicitly add <code>"Melbourne tram bell (Yarra Trams W-class, distinct metallic ding-ding)"</code> and <code>"Australian outdoor ambience"</code>.</li>
+    <li><strong>Wardrobe inconsistency?</strong> The cyan accent is the squad's visual anchor across all shots (lanyards, laptop stickers, a single rim-light). If it's drifting, add <code>"subtle cyan accent in wardrobe or props"</code> to the shot.</li>
+  </ol>
+</section>
+
+<section id="chants">
+  <h2>Shot 7 chant A/B variants <span class="tag">Pick your energy</span></h2>
+  <p class="subtitle">Drop any of these into Shot 7 in place of <code>"THE AI SQUAD!"</code> to test different tones.</p>
+  <div class="chants">
+    <div class="chant">
+      <div class="line">"THE AI SQUAD!"</div>
+      <div class="why">Default. Clean, punchy, brand-forward.</div>
+    </div>
+    <div class="chant">
+      <div class="line">"WE WANT THE AI SQUAD!"</div>
+      <div class="why">Demand framing. More campaign-y, more active.</div>
+    </div>
+    <div class="chant">
+      <div class="line">"BRING IN THE AI SQUAD!"</div>
+      <div class="why">Action framing. Bigger energy, arena-sized.</div>
+    </div>
+    <div class="chant">
+      <div class="line">"SQUAD UP!"</div>
+      <div class="why">Tribal, short, shareable. Best as a 6-second vertical cut.</div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  Built on Veo 3.1 prompt-craft guidance from
+  <a href="https://cloud.google.com/blog/products/ai-machine-learning/ultimate-prompting-guide-for-veo-3-1" target="_blank" rel="noopener">Google Cloud</a>,
+  <a href="https://deepmind.google/models/veo/prompt-guide/" target="_blank" rel="noopener">Google DeepMind</a>,
+  <a href="https://skywork.ai/blog/how-to-prompt-lip-synced-dialogue-google-veo-3/" target="_blank" rel="noopener">Skywork (lip-sync)</a>, and
+  <a href="https://www.glbgpt.com/hub/how-to-make-characters-speak-in-veo-3-1-the-ultimate-guide-to-dialogue-audio-lip-sync/" target="_blank" rel="noopener">GlobalGPT (dialogue, audio, lip-sync)</a>.
+  <br>
+  <span class="d3">Data<sup>#</sup>3</span> · AI Practice · <a href="/ai-practice/squads" target="_blank">Squad Model</a> · <a href="/ai-practice/lifecycle.html" target="_blank">Service Lifecycle</a> · <a href="/links" target="_blank">Site index</a>
+</footer>
+
+</main>
+
+<script>
+document.querySelectorAll('button.copy').forEach(btn=>{
+  btn.addEventListener('click',async()=>{
+    const id=btn.getAttribute('data-target');
+    const el=document.getElementById(id);
+    if(!el) return;
+    try{
+      await navigator.clipboard.writeText(el.innerText);
+      const old=btn.textContent;
+      btn.textContent='✓ Copied to clipboard';
+      btn.classList.add('ok');
+      setTimeout(()=>{btn.textContent=old;btn.classList.remove('ok')},1600);
+    }catch(e){
+      // fallback: select
+      const r=document.createRange();r.selectNode(el);
+      window.getSelection().removeAllRanges();window.getSelection().addRange(r);
+      document.execCommand('copy');
+      btn.textContent='✓ Selected — press Ctrl/Cmd+C';
+      setTimeout(()=>{btn.textContent='Copy prompt';btn.classList.remove('ok')},2200);
+    }
+  });
+});
+</script>
+
+<style>.d3{display:inline}.d3 sup{font-size:.62em;font-weight:800;position:relative;top:-.5em;margin:0 .05em 0 .04em;line-height:0;color:var(--cyan)}</style>
+
+</body>
+</html>

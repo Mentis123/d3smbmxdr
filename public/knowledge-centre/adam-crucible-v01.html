@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Six weeks in the crucible &mdash; v0.1 rough | Data#3</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap');
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root {
+  --bg-deep: #000018;
+  --bg-card: #0a0f24;
+  --bg-elevated: #131b3c;
+  --border-subtle: rgba(0, 174, 255, 0.08);
+  --border-mid: rgba(0, 174, 255, 0.15);
+  --border-accent: rgba(0, 174, 255, 0.3);
+  --d3-blue-black: #000025;
+  --d3-light-blue: #00AEFF;
+  --d3-pale-blue: #78DCFF;
+  --d3-aqua: #00FFFF;
+  --d3-green-yellow: #DAFF00;
+  --d3-green: #00FF00;
+  --text-primary: #e8ecf4;
+  --text-secondary: #a8b3cc;
+  --text-muted: #6e7894;
+  --text-bright: #ffffff;
+  --gradient-aqua: linear-gradient(135deg, #00FFFF, #00AEFF);
+  --gradient-crucible: linear-gradient(135deg, #DAFF00, #00FFFF);
+}
+html { scroll-behavior: smooth; font-size: 16px; }
+body { font-family: 'DM Sans', -apple-system, sans-serif; background: var(--bg-deep); color: var(--text-primary); line-height: 1.7; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+body::before { content: ''; position: fixed; top: -50%; left: -50%; width: 200%; height: 200%; pointer-events: none; z-index: 0; background: radial-gradient(ellipse at 25% 15%, rgba(218, 255, 0, 0.04) 0%, transparent 50%), radial-gradient(ellipse at 80% 80%, rgba(0, 174, 255, 0.06) 0%, transparent 55%); }
+.wrap { position: relative; z-index: 1; max-width: 760px; margin: 0 auto; padding: 0 1.5rem; }
+.full { max-width: 1100px; margin: 0 auto; padding: 0 1.5rem; }
+
+.doc-nav { position: sticky; top: 0; z-index: 100; backdrop-filter: blur(24px) saturate(1.5); -webkit-backdrop-filter: blur(24px) saturate(1.5); background: rgba(0, 0, 24, 0.78); border-bottom: 1px solid var(--border-subtle); padding: 0.85rem 1.5rem; }
+.nav-inner { max-width: 1100px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; }
+.nav-brand { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-muted); }
+.nav-brand b { color: var(--d3-light-blue); font-weight: 600; }
+.nav-back { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; letter-spacing: 0.1em; color: var(--d3-light-blue); text-decoration: none; display: inline-flex; align-items: center; gap: 0.4rem; }
+.nav-back:hover { color: var(--d3-aqua); }
+.nav-back::before { content: '←'; font-size: 1rem; }
+
+.draft-banner { background: linear-gradient(135deg, rgba(218, 255, 0, 0.08), rgba(0, 174, 255, 0.06)); border-bottom: 1px solid var(--border-accent); padding: 0.7rem 1.5rem; text-align: center; font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--d3-green-yellow); }
+.draft-banner b { color: var(--text-bright); font-weight: 500; }
+.draft-banner span { color: var(--text-muted); margin-left: 0.6rem; }
+
+.edit-status { display: none; align-items: center; gap: 0.4rem; font-size: 0.62rem; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase; padding: 0.3rem 0.7rem; border-radius: 5px; }
+.edit-status.saving { display: inline-flex; color: var(--d3-light-blue); background: rgba(0, 174, 255, 0.12); }
+.edit-status.saved  { display: inline-flex; color: #34d399; background: rgba(52, 211, 153, 0.12); }
+.edit-status.error  { display: inline-flex; color: #fb7185; background: rgba(251, 113, 133, 0.12); }
+
+.art-header { padding: 4.5rem 0 2.5rem; }
+.art-eyebrow { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--d3-green-yellow); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.75rem; }
+.art-eyebrow::before { content: ''; width: 32px; height: 1px; background: var(--gradient-crucible); }
+.art-title { font-family: 'Instrument Serif', Georgia, serif; font-size: clamp(2.4rem, 5vw, 3.6rem); font-weight: 400; line-height: 1.1; color: var(--text-bright); letter-spacing: -0.02em; margin-bottom: 1.25rem; }
+.art-title em { font-style: italic; background: var(--gradient-crucible); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.art-deck { font-size: 1.2rem; color: var(--text-secondary); line-height: 1.55; font-style: italic; max-width: 680px; margin-bottom: 2rem; }
+.art-meta { display: flex; gap: 1.25rem; align-items: center; flex-wrap: wrap; padding-top: 1.5rem; border-top: 1px solid var(--border-subtle); font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; letter-spacing: 0.06em; color: var(--text-muted); }
+.art-meta b { color: var(--d3-light-blue); font-weight: 500; }
+
+.art-body { padding: 1rem 0 3rem; }
+.art-body p { font-size: 1.12rem; color: var(--text-primary); line-height: 1.75; margin-bottom: 1.4rem; }
+.art-body p.lede { font-size: 1.32rem; color: var(--text-bright); line-height: 1.55; margin-bottom: 2rem; font-weight: 400; }
+.art-body p.lede::first-letter { font-family: 'Instrument Serif', Georgia, serif; font-size: 4rem; font-weight: 400; line-height: 0.85; float: left; margin: 0.05em 0.15em 0 -0.05em; background: var(--gradient-crucible); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.art-body h2 { font-family: 'Instrument Serif', Georgia, serif; font-size: 1.85rem; line-height: 1.2; color: var(--text-bright); margin: 3rem 0 1rem; letter-spacing: -0.01em; }
+.art-body h2 em { font-style: italic; background: var(--gradient-aqua); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.art-body blockquote { margin: 2rem 0; padding: 1.5rem 1.75rem; border-left: 3px solid var(--d3-green-yellow); background: rgba(218, 255, 0, 0.04); border-radius: 0 10px 10px 0; font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-size: 1.4rem; line-height: 1.4; color: var(--text-bright); }
+.art-body strong { color: var(--text-bright); font-weight: 600; }
+.art-body a { color: var(--d3-light-blue); text-decoration: underline; text-decoration-color: rgba(0, 174, 255, 0.4); text-underline-offset: 3px; transition: color 0.2s; }
+.art-body a:hover { color: var(--d3-aqua); }
+
+.delta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 2.5rem 0; }
+.delta { padding: 1.5rem 1.5rem 1.4rem; border-radius: 12px; border: 1px solid var(--border-mid); background: var(--bg-card); }
+.delta-h { font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 0.6rem; }
+.delta.up .delta-h { color: var(--d3-green-yellow); }
+.delta.down .delta-h { color: #fb7185; }
+.delta p { font-size: 0.95rem; color: var(--text-secondary); line-height: 1.55; margin: 0; }
+
+.reading-list { margin: 3rem 0 1rem; padding: 2rem; border-radius: 14px; background: var(--bg-card); border: 1px solid var(--border-mid); }
+.reading-list h3 { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--d3-aqua); margin-bottom: 1.25rem; }
+.reading-list ul { list-style: none; padding: 0; margin: 0; }
+.reading-list li { padding: 0.75rem 0; border-bottom: 1px dashed var(--border-subtle); font-size: 0.95rem; color: var(--text-secondary); }
+.reading-list li:last-child { border-bottom: none; }
+.reading-list li a { color: var(--text-bright); text-decoration: none; font-weight: 500; }
+.reading-list li a:hover { color: var(--d3-aqua); }
+.reading-list li small { display: block; color: var(--text-muted); font-size: 0.78rem; margin-top: 0.2rem; }
+
+.end-slug { text-align: center; margin: 2.5rem 0 1rem; font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; letter-spacing: 0.3em; color: var(--text-muted); }
+.end-slug::before, .end-slug::after { content: '◇'; margin: 0 0.6rem; color: var(--d3-green-yellow); }
+
+.foot { padding: 3rem 0 2rem; border-top: 1px solid var(--border-subtle); font-family: 'JetBrains Mono', monospace; font-size: 0.62rem; letter-spacing: 0.14em; color: var(--text-muted); text-align: center; margin-top: 2rem; }
+.foot b { color: var(--d3-light-blue); font-weight: 600; }
+
+[data-block-id] { cursor: pointer; transition: outline 0.15s ease; outline: 2px dashed transparent; outline-offset: 3px; border-radius: 3px; }
+[data-block-id]:hover { outline-color: rgba(0, 174, 255, 0.35); }
+[data-block-id].editing { outline: 2px solid var(--d3-light-blue) !important; outline-offset: 4px; background: rgba(0, 174, 255, 0.05) !important; }
+[data-block-id].deleted { opacity: 0; max-height: 0; overflow: hidden; padding: 0 !important; margin: 0 !important; border: none !important; pointer-events: none; transition: opacity 0.3s, max-height 0.3s; }
+body.show-deleted [data-block-id].deleted { opacity: 0.35; max-height: 500px; overflow: visible; text-decoration: line-through; pointer-events: auto; padding: revert !important; margin: revert !important; position: relative; }
+.edit-toolbar { position: fixed; z-index: 9999; display: flex; gap: 0.35rem; padding: 0.4rem; background: var(--bg-elevated); border: 1px solid var(--border-accent); border-radius: 8px; box-shadow: 0 8px 32px rgba(0,0,0,0.5); }
+.edit-toolbar button { font-family: 'JetBrains Mono', monospace; font-size: 0.62rem; letter-spacing: 0.05em; text-transform: uppercase; padding: 0.35rem 0.7rem; border: 1px solid transparent; border-radius: 5px; cursor: pointer; transition: all 0.15s ease; white-space: nowrap; }
+.edit-toolbar .btn-save { background: rgba(52, 211, 153, 0.15); color: #34d399; border-color: rgba(52, 211, 153, 0.3); }
+.edit-toolbar .btn-cancel { background: rgba(148, 163, 184, 0.1); color: var(--text-secondary); border-color: rgba(148, 163, 184, 0.2); }
+.edit-toolbar .btn-delete { background: rgba(251, 113, 133, 0.1); color: #fb7185; border-color: rgba(251, 113, 133, 0.2); }
+.edit-toolbar .btn-restore { background: rgba(0, 174, 255, 0.15); color: var(--d3-light-blue); border-color: rgba(0, 174, 255, 0.3); }
+@keyframes save-flash { 0% { outline-color: #34d399; } 100% { outline-color: transparent; } }
+[data-block-id].just-saved { animation: save-flash 0.8s ease; }
+.changes-trigger { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 998; font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; letter-spacing: 0.05em; padding: 0.55rem 1.1rem; border-radius: 8px; border: 1px solid var(--border-mid); background: var(--bg-elevated); color: var(--text-secondary); cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 16px rgba(0,0,0,0.4); }
+.changes-trigger.has-changes { border-color: rgba(0, 174, 255, 0.4); color: var(--d3-light-blue); }
+.changes-panel { position: fixed; bottom: 4.2rem; right: 1.5rem; z-index: 997; width: 340px; max-height: 60vh; background: var(--bg-card); border: 1px solid var(--border-accent); border-radius: 12px; box-shadow: 0 8px 40px rgba(0,0,0,0.6); display: none; flex-direction: column; overflow: hidden; }
+.changes-panel.open { display: flex; }
+.changes-panel-header { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-subtle); display: flex; align-items: center; justify-content: space-between; }
+.changes-panel-title { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); }
+.changes-panel-actions button { font-family: 'JetBrains Mono', monospace; font-size: 0.55rem; letter-spacing: 0.05em; text-transform: uppercase; padding: 0.25rem 0.5rem; border-radius: 4px; border: 1px solid transparent; cursor: pointer; }
+.btn-show-deleted { background: rgba(251, 113, 133, 0.08); color: var(--text-muted); border-color: rgba(251, 113, 133, 0.15); }
+.changes-panel-body { overflow-y: auto; padding: 0.5rem; flex: 1; }
+.changes-panel-empty { padding: 2rem 1rem; text-align: center; font-size: 0.8rem; color: var(--text-muted); }
+.change-item { display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0.6rem; border-radius: 6px; margin-bottom: 0.25rem; }
+.change-badge { font-family: 'JetBrains Mono', monospace; font-size: 0.5rem; letter-spacing: 0.05em; text-transform: uppercase; padding: 0.15rem 0.35rem; border-radius: 3px; flex-shrink: 0; font-weight: 600; }
+.change-badge.edited { background: rgba(0, 174, 255, 0.15); color: var(--d3-light-blue); }
+.change-badge.deleted-badge { background: rgba(251, 113, 133, 0.15); color: #fb7185; }
+.change-label { font-size: 0.72rem; color: var(--text-secondary); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; }
+.change-reset { font-family: 'JetBrains Mono', monospace; font-size: 0.5rem; letter-spacing: 0.05em; text-transform: uppercase; padding: 0.2rem 0.4rem; border-radius: 3px; border: 1px solid rgba(251, 191, 36, 0.2); background: rgba(251, 191, 36, 0.08); color: #fbbf24; cursor: pointer; flex-shrink: 0; }
+
+.lock-toggle { position: fixed; top: 0.65rem; right: 0.75rem; z-index: 9999; display: inline-flex; align-items: center; gap: 0.4rem; font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; letter-spacing: 0.16em; text-transform: uppercase; font-weight: 500; padding: 0.4rem 0.7rem; border-radius: 6px; border: 1px solid rgba(0, 174, 255, 0.3); background: rgba(0, 0, 24, 0.92); -webkit-backdrop-filter: blur(20px) saturate(1.4); backdrop-filter: blur(20px) saturate(1.4); color: var(--d3-aqua); cursor: pointer; transition: all 0.18s ease; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5); user-select: none; }
+.lock-toggle:hover { background: rgba(0, 174, 255, 0.15); border-color: rgba(0, 174, 255, 0.6); transform: translateY(-1px); }
+.lock-toggle svg { display: inline-block; vertical-align: middle; }
+.lock-toggle .lock-icon-locked, .lock-toggle .lock-label-locked { display: none; }
+body.locked .lock-toggle { color: var(--text-muted); border-color: rgba(157, 159, 162, 0.25); }
+body.locked .lock-toggle:hover { color: var(--d3-aqua); border-color: rgba(0, 174, 255, 0.6); }
+body.locked .lock-toggle .lock-icon-unlocked, body.locked .lock-toggle .lock-label-unlocked { display: none; }
+body.locked .lock-toggle .lock-icon-locked { display: inline-block; }
+body.locked .lock-toggle .lock-label-locked { display: inline; }
+body.locked [data-block-id] { cursor: default !important; outline: none !important; }
+body.locked [data-block-id]:hover { outline: none !important; background: transparent !important; }
+body.locked .changes-trigger, body.locked .changes-panel, body.locked .edit-status, body.locked .edit-toolbar { display: none !important; }
+
+@media print { body { background: #fff; color: #111; } body::before { display: none; } .doc-nav, .draft-banner, .changes-trigger, .changes-panel, .edit-toolbar, .edit-status, .lock-toggle { display: none !important; } * { color: #222 !important; } }
+@media (max-width: 720px) { .art-body p.lede::first-letter { font-size: 3rem; } .delta-grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<button class="lock-toggle" id="lockToggle" type="button" aria-label="Toggle page edit lock" aria-pressed="false">
+  <svg class="lock-icon-unlocked" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>
+  <svg class="lock-icon-locked" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+  <span class="lock-label-unlocked">Unlocked</span>
+  <span class="lock-label-locked">Locked</span>
+</button>
+
+<div class="draft-banner">
+  <b>v0.1 ROUGH</b> &middot; Adam&rsquo;s sequel to March 4 <span>Click any paragraph to edit. Edits save automatically.</span>
+</div>
+
+<nav class="doc-nav">
+  <div class="nav-inner">
+    <a class="nav-back" href="/knowledge-centre/links">Back to canvas</a>
+    <div class="nav-brand">DATA<b>#</b>3 KNOWLEDGE CENTRE</div>
+    <span class="edit-status" id="editStatus"></span>
+  </div>
+</nav>
+
+<div class="full">
+  <header class="art-header">
+    <div class="wrap" style="padding:0">
+      <div class="art-eyebrow" data-block-id="art-eyebrow">Microsoft &middot; AI &middot; Practitioner Reflection</div>
+      <h1 class="art-title" data-block-id="art-title">Six weeks <em>in the crucible</em>: what we&rsquo;ve learned since March 4</h1>
+      <p class="art-deck" data-block-id="art-deck">When I wrote about the agentic AI builder six weeks ago, I called 2026 the year. Six weeks in, the thing that&rsquo;s surprised me most isn&rsquo;t how fast the technology has moved. It&rsquo;s how much faster the customers have moved than the buying model has.</p>
+      <div class="art-meta">
+        <span data-block-id="art-byline">By <b>Adam Rappaport</b> &middot; AI Specialist, Data#3</span>
+        <span data-block-id="art-readtime">5 min read</span>
+        <span data-block-id="art-date">Rough draft &middot; April 2026</span>
+      </div>
+    </div>
+  </header>
+</div>
+
+<main class="wrap">
+  <article class="art-body">
+
+    <p class="lede" data-block-id="p-lede">Six weeks ago I wrote that 2026 was the year of the agentic AI builder &mdash; that the crucible was here, that the gap between &ldquo;reads about it&rdquo; and &ldquo;ships with it&rdquo; was widening fast, that you either build with AI now or you watch your competitors do it. Six weeks in, the call was right. Some parts were righter than I expected. Some parts I underestimated. This is the honest update.</p>
+
+    <p data-block-id="p-1"><a href="https://www.data3.com/knowledge-centre/blog/2026-the-year-of-the-agentic-ai-builder/">The original piece</a> made three predictions: customer pull would outpace vendor capacity, governance would become the new bottleneck, and the buying model would have to change. All three are true. They&rsquo;re also moving in different directions at different speeds.</p>
+
+    <h2 data-block-id="h2-pace">What&rsquo;s <em>accelerated</em></h2>
+
+    <p data-block-id="p-acc-1"><strong>Customer pull is well ahead of vendor capacity.</strong> In just the last 30 days I&rsquo;ve been on calls with three Australian enterprises asking the same thing: &ldquo;we don&rsquo;t want to build the capability in-house, can you deliver 100%?&rdquo; That used to be a once-a-quarter conversation. Now it&rsquo;s weekly.</p>
+
+    <p data-block-id="p-acc-2"><strong>Agent platforms are stable enough to ship boring agents now &mdash; not just demos.</strong> Six weeks ago we were still arguing about which agent runtime to bet on. That argument has cooled. Copilot Studio, Power Platform, Azure AI Foundry now stack into something you can hand to a customer with a straight face.</p>
+
+    <p data-block-id="p-acc-3"><strong>The pattern is being named industry-wide.</strong> NTT DATA published their Smart AI Agent&trade; Ecosystem with a $2B FY27 revenue target. Microsoft is running &ldquo;always-on&rdquo; AI marketing for the whole next financial year. Capability-as-a-service stopped being a Data#3 proposition six weeks ago and started being a category.</p>
+
+    <h2 data-block-id="h2-stalled">What&rsquo;s <em>stalled</em></h2>
+
+    <div class="delta-grid">
+      <div class="delta down">
+        <div class="delta-h" data-block-id="d1-h">↓ Buying model</div>
+        <p data-block-id="d1-p">Customers want capability-as-a-service. Their procurement systems are still configured to buy 2018 ERP-shaped projects. The legal templates haven&rsquo;t caught up. The CFO templates haven&rsquo;t caught up. This is now the load-bearing blocker.</p>
+      </div>
+      <div class="delta down">
+        <div class="delta-h" data-block-id="d2-h">↓ Internal AI talent</div>
+        <p data-block-id="d2-p">Companies are hiring AI engineers and watching them leave six months in. The roadmap doesn&rsquo;t. Pure internal-build strategies are buckling under the velocity of the technology shift.</p>
+      </div>
+      <div class="delta down">
+        <div class="delta-h" data-block-id="d3-h">↓ CISO comfort</div>
+        <p data-block-id="d3-p">Universally cited as a concern, rarely operationalised. Most security teams haven&rsquo;t seen an AI risk register that works. Governance is talked about more than it&rsquo;s practised.</p>
+      </div>
+      <div class="delta down">
+        <div class="delta-h" data-block-id="d4-h">↓ POC graduation</div>
+        <p data-block-id="d4-p">MIT&rsquo;s 95% pilot-failure rate is still the ceiling. The reasons haven&rsquo;t changed: no sponsor, no success metric, no path from sandbox to production governance.</p>
+      </div>
+    </div>
+
+    <h2 data-block-id="h2-surprised">What&rsquo;s <em>surprised us</em></h2>
+
+    <p data-block-id="p-sur-1">Three things have landed faster than I expected.</p>
+
+    <p data-block-id="p-sur-2"><strong>Boring is already the bar.</strong> My colleague <a href="https://www.data3.com/knowledge-centre/blog/building-australias-most-boring-ai/">Jack Latrobe published &ldquo;Building Australia&rsquo;s most boring AI&rdquo; on April 27</a>. The premise &mdash; useful, reliable, sticks around &mdash; isn&rsquo;t a niche taste. It&rsquo;s already the operating standard customers are asking us against. Discipline beat hype in seven weeks, not seven months.</p>
+
+    <p data-block-id="p-sur-3"><strong>The workforce frame has legs.</strong> The next article in the series picks up the idea of agents as a workforce you hire, onboard, supervise, and retire. It works because it&rsquo;s old. We&rsquo;ve managed people for fifty years. Apply the muscle to agents and most of the &ldquo;agent governance&rdquo; conversation gets smaller, not bigger.</p>
+
+    <p data-block-id="p-sur-4"><strong>Customers are funding the work.</strong> &ldquo;Reference customer&rdquo; is becoming a market mechanism, not a one-off case study. Vendors and integrators are funding pilots in exchange for a published win. The asymmetry that used to favour brand-name SIs is collapsing fast.</p>
+
+    <blockquote data-block-id="bq-1">
+      &ldquo;The crucible was real. The technology held. The governance held. The buying model didn&rsquo;t.&rdquo;
+    </blockquote>
+
+    <h2 data-block-id="h2-next"><em>What&rsquo;s coming</em> in the next six weeks</h2>
+
+    <p data-block-id="p-next-1">My colleague Scott Gosling is publishing &ldquo;It&rsquo;s the Windows&nbsp;97 moment for AI&rdquo; in the next week, picking up the buying-model problem head-on. Mark Pattie is writing about what fortnightly delivery actually looks like inside a squad. Richard Dornhart is writing about why the governance gap shows up at the operations layer, not the model layer.</p>
+
+    <p data-block-id="p-next-2">Through all of it, we&rsquo;re testing &ldquo;AI-augmented authoring&rdquo; on ourselves. This piece you&rsquo;re reading was drafted by Claude against my own working notes, then edited by me in-browser, then committed. The cycle is days instead of weeks. If it works at our scale, it changes how every blog, KB article, and customer brief inside Data#3 gets made.</p>
+
+    <p data-block-id="p-next-3">Twelve months minus six weeks left. Build with us.</p>
+
+    <div class="end-slug">END</div>
+
+    <div class="reading-list">
+      <h3>The boring AI thread</h3>
+      <ul>
+        <li>
+          <a href="https://www.data3.com/knowledge-centre/blog/2026-the-year-of-the-agentic-ai-builder/" target="_blank" rel="noopener">2026: The Year of the Agentic AI Builder</a>
+          <small>Adam Rappaport &middot; March 4, 2026 &middot; The call</small>
+        </li>
+        <li>
+          <a href="https://www.data3.com/knowledge-centre/blog/building-australias-most-boring-ai/" target="_blank" rel="noopener">Building Australia&rsquo;s Most Boring AI</a>
+          <small>Jack Latrobe &middot; April 27, 2026 &middot; The standard</small>
+        </li>
+        <li>
+          <a href="#" style="color:var(--d3-green-yellow)">Six weeks in the crucible</a>
+          <small>Adam Rappaport &middot; Week 1 &middot; The reflection &middot; <em>this article</em></small>
+        </li>
+        <li>
+          <a href="/scott-pillar">It&rsquo;s the Windows 97 moment for AI</a>
+          <small>Scott Gosling &middot; Week 1 &middot; The buying-model shift &middot; v0.1 draft</small>
+        </li>
+        <li>
+          <a href="/suzanne-pillar">Treat your agents like a workforce</a>
+          <small>Suzanne Maroc &middot; Week 3 &middot; The workforce frame &middot; v0.1 draft</small>
+        </li>
+      </ul>
+    </div>
+  </article>
+</main>
+
+<div class="full">
+  <footer class="foot" data-block-id="foot">DATA<b>#</b>3 &middot; Knowledge Centre &middot; Boring AI Series &middot; Adam&rsquo;s crucible sequel v0.1 ROUGH</footer>
+</div>
+
+<button class="changes-trigger" id="changesTrigger">Changes (0)</button>
+<div class="changes-panel" id="changesPanel">
+  <div class="changes-panel-header">
+    <span class="changes-panel-title">Change History</span>
+    <div class="changes-panel-actions">
+      <button class="btn-show-deleted" id="showDeletedBtn">Show Deleted</button>
+    </div>
+  </div>
+  <div class="changes-panel-body" id="changesList"></div>
+</div>
+
+<script src="/_kc-editor.js"></script>
+<script>kcEditor('adam-crucible');</script>
+</body>
+</html>

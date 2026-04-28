@@ -267,9 +267,55 @@ body.show-deleted [data-block-id].deleted { opacity: 0.35; max-height: 500px; ov
   .stat-callout { grid-template-columns: 1fr; }
   .art-body p.lede::first-letter { font-size: 3rem; }
 }
+
+/* ─── Lock toggle (always-on; persists per-page in localStorage) ─── */
+.lock-toggle {
+  position: fixed; top: 0.65rem; right: 0.75rem; z-index: 9999;
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  font-family: 'JetBrains Mono', monospace; font-size: 0.6rem;
+  letter-spacing: 0.16em; text-transform: uppercase; font-weight: 500;
+  padding: 0.4rem 0.7rem; border-radius: 6px;
+  border: 1px solid rgba(0, 174, 255, 0.3);
+  background: rgba(0, 0, 24, 0.92);
+  -webkit-backdrop-filter: blur(20px) saturate(1.4);
+  backdrop-filter: blur(20px) saturate(1.4);
+  color: var(--d3-aqua);
+  cursor: pointer; transition: all 0.18s ease;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
+  user-select: none;
+}
+.lock-toggle:hover {
+  background: rgba(0, 174, 255, 0.15);
+  border-color: rgba(0, 174, 255, 0.6);
+  transform: translateY(-1px);
+}
+.lock-toggle svg { display: inline-block; vertical-align: middle; }
+.lock-toggle .lock-icon-locked,
+.lock-toggle .lock-label-locked { display: none; }
+body.locked .lock-toggle { color: var(--text-muted); border-color: rgba(157, 159, 162, 0.25); }
+body.locked .lock-toggle:hover { color: var(--d3-aqua); border-color: rgba(0, 174, 255, 0.6); }
+body.locked .lock-toggle .lock-icon-unlocked,
+body.locked .lock-toggle .lock-label-unlocked { display: none; }
+body.locked .lock-toggle .lock-icon-locked { display: inline-block; }
+body.locked .lock-toggle .lock-label-locked { display: inline; }
+
+/* Locked state — neutralise editing affordances */
+body.locked [data-block-id] { cursor: default !important; outline: none !important; }
+body.locked [data-block-id]:hover { outline: none !important; background: transparent !important; }
+body.locked .changes-trigger,
+body.locked .changes-panel,
+body.locked .edit-status,
+body.locked .edit-toolbar { display: none !important; }
 </style>
 </head>
 <body>
+
+<button class="lock-toggle" id="lockToggle" type="button" aria-label="Toggle page edit lock" aria-pressed="false">
+  <svg class="lock-icon-unlocked" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>
+  <svg class="lock-icon-locked" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+  <span class="lock-label-unlocked">Unlocked</span>
+  <span class="lock-label-locked">Locked</span>
+</button>
 
 <div class="draft-banner">
   <b>v0.1 DRAFT</b> &middot; for Scott Gosling to react to <span>Click any paragraph to edit. Edits save automatically.</span>
@@ -401,6 +447,13 @@ body.show-deleted [data-block-id].deleted { opacity: 0.35; max-height: 500px; ov
 (function() {
   const PAGE_ID = 'scott-pillar';
   const API = '/api/page-edits';
+  const LOCK_KEY = 'editLock_' + PAGE_ID;
+  function applyLock(locked) {
+    document.body.classList.toggle('locked', locked);
+    var btn = document.getElementById('lockToggle');
+    if (btn) btn.setAttribute('aria-pressed', locked ? 'true' : 'false');
+  }
+  if (localStorage.getItem(LOCK_KEY) === 'locked') applyLock(true);
   const originals = {};
   document.querySelectorAll('[data-block-id]').forEach(function(el) {
     originals[el.getAttribute('data-block-id')] = el.innerHTML;
@@ -557,6 +610,7 @@ body.show-deleted [data-block-id].deleted { opacity: 0.35; max-height: 500px; ov
   }
   window._editSave = doSave; window._editCancel = cancelEdit; window._editDelete = doDelete; window._editRestore = doRestore; window._editReset = doReset;
   document.addEventListener('click', function(e) {
+    if (document.body.classList.contains('locked')) return;
     if (e.target.closest('.changes-trigger')) { document.getElementById('changesPanel').classList.toggle('open'); return; }
     if (e.target.closest('.changes-panel')) {
       if (e.target.id === 'showDeletedBtn' || e.target.closest('#showDeletedBtn')) { document.body.classList.toggle('show-deleted'); document.getElementById('showDeletedBtn').classList.toggle('active'); return; }
@@ -576,6 +630,19 @@ body.show-deleted [data-block-id].deleted { opacity: 0.35; max-height: 500px; ov
   function onReposition() { if (activeBlock && toolbar) positionToolbar(activeBlock); }
   window.addEventListener('scroll', onReposition, { passive: true });
   window.addEventListener('resize', onReposition, { passive: true });
+
+  // Lock toggle wiring (sync aria-pressed + click handler)
+  var lockBtn = document.getElementById('lockToggle');
+  if (lockBtn) {
+    applyLock(document.body.classList.contains('locked'));
+    lockBtn.addEventListener('click', function() {
+      var nowLocked = !document.body.classList.contains('locked');
+      if (nowLocked) cancelEdit();
+      applyLock(nowLocked);
+      try { localStorage.setItem(LOCK_KEY, nowLocked ? 'locked' : 'unlocked'); } catch(e) {}
+    });
+  }
+
   loadEdits();
 })();
 </script>

@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex,nofollow">
+<title>Boring AI &mdash; Canvas | Data#3</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap');
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root {
+  --bg-deep: #000018;
+  --bg-card: #0a0f24;
+  --bg-card-hover: #0f1530;
+  --border-subtle: rgba(0, 174, 255, 0.08);
+  --border-mid: rgba(0, 174, 255, 0.15);
+  --border-accent: rgba(0, 174, 255, 0.3);
+  --d3-blue-black: #000025;
+  --d3-light-blue: #00AEFF;
+  --d3-pale-blue: #78DCFF;
+  --d3-aqua: #00FFFF;
+  --d3-green-yellow: #DAFF00;
+  --d3-magenta: #FF00FF;
+  --d3-purple: #7300FF;
+  --text-primary: #e8ecf4;
+  --text-secondary: #a8b3cc;
+  --text-muted: #6e7894;
+  --text-bright: #ffffff;
+  --gradient-aqua: linear-gradient(135deg, #00FFFF, #00AEFF);
+  --gradient-brand: linear-gradient(135deg, #00AEFF, #7300FF);
+}
+html { font-size: 15px; }
+body {
+  font-family: 'DM Sans', -apple-system, sans-serif;
+  background: var(--bg-deep); color: var(--text-primary);
+  line-height: 1.6; -webkit-font-smoothing: antialiased; min-height: 100vh;
+}
+body::before {
+  content: ''; position: fixed; top: -50%; left: -50%;
+  width: 200%; height: 200%; pointer-events: none; z-index: 0;
+  background:
+    radial-gradient(ellipse at 25% 15%, rgba(0, 174, 255, 0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 75% 85%, rgba(115, 0, 255, 0.05) 0%, transparent 55%);
+}
+body::after {
+  content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(0, 174, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 174, 255, 0.025) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(ellipse at center, black 30%, transparent 90%);
+}
+.wrap { position: relative; z-index: 1; max-width: 980px; margin: 0 auto; padding: 4rem 1.75rem 5rem; }
+
+header.canvas-h { margin-bottom: 3rem; padding-bottom: 1.75rem; border-bottom: 1px solid var(--border-subtle); }
+.eyebrow { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--d3-aqua); margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.7rem; }
+.eyebrow::before { content: ''; width: 28px; height: 1px; background: var(--gradient-aqua); }
+h1 {
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-size: clamp(2.4rem, 5vw, 3.6rem); font-weight: 400;
+  line-height: 1.05; letter-spacing: -0.02em; color: var(--text-bright);
+  margin-bottom: 0.85rem;
+}
+h1 em {
+  font-style: italic;
+  background: var(--gradient-aqua);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.canvas-deck { font-size: 1.1rem; color: var(--text-secondary); max-width: 720px; line-height: 1.55; }
+.canvas-deck b { color: var(--text-bright); font-weight: 500; }
+
+.private { display: inline-flex; align-items: center; gap: 0.4rem; margin-top: 1.5rem; font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; letter-spacing: 0.18em; text-transform: uppercase; color: #fbbf24; padding: 0.35rem 0.7rem; border: 1px solid rgba(251, 191, 36, 0.3); border-radius: 5px; background: rgba(251, 191, 36, 0.08); }
+.private::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: #fbbf24; box-shadow: 0 0 10px rgba(251, 191, 36, 0.6); }
+
+section.canvas-group { margin-bottom: 3rem; }
+.group-h {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.65rem;
+  letter-spacing: 0.22em; text-transform: uppercase; color: var(--d3-pale-blue);
+  margin-bottom: 1rem; display: flex; align-items: center; gap: 0.6rem;
+}
+.group-h::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, var(--border-accent), transparent); }
+.group-deck { font-size: 0.92rem; color: var(--text-muted); margin-bottom: 1.25rem; max-width: 640px; }
+
+.canvas-grid { display: grid; grid-template-columns: 1fr; gap: 0.8rem; }
+
+.canvas-row {
+  display: grid; grid-template-columns: 60px 1fr 110px;
+  gap: 1.25rem; align-items: center;
+  padding: 1.1rem 1.4rem;
+  background: var(--bg-card); border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  text-decoration: none; color: inherit;
+  transition: all 0.22s ease;
+}
+.canvas-row:hover {
+  border-color: var(--border-accent); background: var(--bg-card-hover);
+  transform: translateX(4px); box-shadow: 0 4px 20px rgba(0, 174, 255, 0.08);
+}
+.canvas-row .num {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.7rem;
+  letter-spacing: 0.05em; color: var(--d3-aqua);
+}
+.canvas-row .meta { display: flex; flex-direction: column; gap: 0.25rem; min-width: 0; }
+.canvas-row .title {
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-size: 1.15rem; line-height: 1.3; color: var(--text-bright);
+  font-style: italic;
+}
+.canvas-row .sub {
+  display: flex; gap: 0.85rem; flex-wrap: wrap;
+  font-family: 'JetBrains Mono', monospace; font-size: 0.62rem;
+  letter-spacing: 0.06em; color: var(--text-muted);
+}
+.canvas-row .sub .by { color: var(--d3-light-blue); }
+.canvas-row .sub code {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.62rem;
+  color: var(--d3-aqua); padding: 0.05rem 0.35rem;
+  background: rgba(0, 255, 255, 0.06); border-radius: 3px;
+}
+.canvas-row .status {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.55rem;
+  letter-spacing: 0.15em; text-transform: uppercase;
+  padding: 0.3rem 0.55rem; border-radius: 4px;
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  justify-self: end;
+}
+.canvas-row .status::before { content: ''; width: 5px; height: 5px; border-radius: 50%; }
+.canvas-row .status.shared { background: rgba(52, 211, 153, 0.12); color: #6ee7b7; border: 1px solid rgba(52, 211, 153, 0.25); }
+.canvas-row .status.shared::before { background: #6ee7b7; }
+.canvas-row .status.draft { background: rgba(0, 255, 255, 0.10); color: var(--d3-aqua); border: 1px solid rgba(0, 255, 255, 0.25); }
+.canvas-row .status.draft::before { background: var(--d3-aqua); animation: pulse 2.4s ease-in-out infinite; }
+.canvas-row .status.rough { background: rgba(218, 255, 0, 0.10); color: var(--d3-green-yellow); border: 1px solid rgba(218, 255, 0, 0.25); }
+.canvas-row .status.rough::before { background: var(--d3-green-yellow); }
+.canvas-row .status.live { background: rgba(0, 174, 255, 0.10); color: var(--d3-light-blue); border: 1px solid rgba(0, 174, 255, 0.25); }
+.canvas-row .status.live::before { background: var(--d3-light-blue); }
+@keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(0.8); } }
+
+.canvas-row.placeholder {
+  background: transparent; border-style: dashed; opacity: 0.5;
+}
+.canvas-row.placeholder:hover { transform: none; box-shadow: none; }
+.canvas-row.placeholder .title { font-style: italic; color: var(--text-muted); }
+
+footer.canvas-foot {
+  margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--border-subtle);
+  text-align: center; font-family: 'JetBrains Mono', monospace; font-size: 0.62rem;
+  letter-spacing: 0.14em; color: var(--text-muted);
+}
+footer.canvas-foot b { color: var(--d3-light-blue); font-weight: 600; }
+footer.canvas-foot a { color: var(--d3-light-blue); text-decoration: none; }
+footer.canvas-foot a:hover { color: var(--d3-aqua); }
+
+@media (max-width: 720px) {
+  .canvas-row { grid-template-columns: 50px 1fr; gap: 0.85rem; }
+  .canvas-row .status { grid-column: 1 / -1; justify-self: start; margin-top: 0.4rem; }
+  .canvas-row:hover { transform: none; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="canvas-h">
+    <div class="eyebrow">Boring AI &middot; Working canvas</div>
+    <h1><em>The canvas.</em> All campaign drafts in one place.</h1>
+    <p class="canvas-deck">A private index of every page in the Boring AI campaign &mdash; the proposal, the pillars, the rough drafts, and the published references. <b>Not linked from anywhere public.</b> Bookmark this URL.</p>
+    <span class="private">Private &middot; Not indexed</span>
+  </header>
+
+  <section class="canvas-group">
+    <div class="group-h">Campaign overview</div>
+    <p class="group-deck">The proposal page. Send to Amanda. Anchor for the conversation.</p>
+    <div class="canvas-grid">
+      <a class="canvas-row" href="/knowledge-centre-rain">
+        <div class="num">CC</div>
+        <div class="meta">
+          <div class="title">Boring AI &middot; Campaign proposal</div>
+          <div class="sub"><span class="by">Adam Rappaport</span> <code>/knowledge-centre-rain</code> <span>also at <code>/boring-ai</code></span></div>
+        </div>
+        <div class="status live">Live</div>
+      </a>
+    </div>
+  </section>
+
+  <section class="canvas-group">
+    <div class="group-h">Pillars &middot; v0.1 drafts ready for the named author</div>
+    <p class="group-deck">Article-format pages. Send the URL to the author. They edit in-browser. We commit when they say go.</p>
+    <div class="canvas-grid">
+      <a class="canvas-row" href="/scott-pillar">
+        <div class="num">P01</div>
+        <div class="meta">
+          <div class="title">It&rsquo;s the Windows&nbsp;97 moment for AI</div>
+          <div class="sub"><span class="by">Scott Gosling</span> <code>/scott-pillar</code> <span>also at <code>/knowledge-centre/scott-pillar</code></span></div>
+        </div>
+        <div class="status shared">Shared</div>
+      </a>
+      <a class="canvas-row" href="/suzanne-pillar">
+        <div class="num">P05</div>
+        <div class="meta">
+          <div class="title">Treat your agents like a workforce</div>
+          <div class="sub"><span class="by">Suzanne Maroc</span> <code>/suzanne-pillar</code> <span>also at <code>/knowledge-centre/suzanne-pillar</code></span></div>
+        </div>
+        <div class="status shared">Shared</div>
+      </a>
+    </div>
+  </section>
+
+  <section class="canvas-group">
+    <div class="group-h">My pieces &middot; v0.1 roughs</div>
+    <p class="group-deck">First cuts of the two posts under my byline. Earlier-stage than the pillars. Edit, sharpen, ship.</p>
+    <div class="canvas-grid">
+      <a class="canvas-row" href="/knowledge-centre/adam-crucible">
+        <div class="num">P02</div>
+        <div class="meta">
+          <div class="title">Six weeks in the crucible: what we&rsquo;ve learned since March 4</div>
+          <div class="sub"><span class="by">Adam Rappaport</span> <code>/knowledge-centre/adam-crucible</code></div>
+        </div>
+        <div class="status rough">Rough</div>
+      </a>
+      <a class="canvas-row" href="/knowledge-centre/adam-wrap">
+        <div class="num">P10</div>
+        <div class="meta">
+          <div class="title">Eight questions every customer asks before buying AI</div>
+          <div class="sub"><span class="by">Adam Rappaport</span> <code>/knowledge-centre/adam-wrap</code></div>
+        </div>
+        <div class="status rough">Rough</div>
+      </a>
+    </div>
+  </section>
+
+  <section class="canvas-group">
+    <div class="group-h">Already published on data3.com</div>
+    <p class="group-deck">The two pieces the thread builds on. External, public, archived for reference.</p>
+    <div class="canvas-grid">
+      <a class="canvas-row" href="https://www.data3.com/knowledge-centre/blog/2026-the-year-of-the-agentic-ai-builder/" target="_blank" rel="noopener">
+        <div class="num">B1</div>
+        <div class="meta">
+          <div class="title">2026: The Year of the Agentic AI Builder</div>
+          <div class="sub"><span class="by">Adam Rappaport</span> <span>March 4, 2026</span> <span>data3.com</span></div>
+        </div>
+        <div class="status shared">Published</div>
+      </a>
+      <a class="canvas-row" href="https://www.data3.com/knowledge-centre/blog/building-australias-most-boring-ai/" target="_blank" rel="noopener">
+        <div class="num">B2</div>
+        <div class="meta">
+          <div class="title">Building Australia&rsquo;s Most Boring AI</div>
+          <div class="sub"><span class="by">Jack Latrobe</span> <span>April 27, 2026</span> <span>data3.com</span></div>
+        </div>
+        <div class="status shared">Published</div>
+      </a>
+    </div>
+  </section>
+
+  <section class="canvas-group">
+    <div class="group-h">Pending &middot; not yet drafted</div>
+    <p class="group-deck">Briefed slots in the rain. Each becomes a v0.1 rough as we send the author the writing prompt.</p>
+    <div class="canvas-grid">
+      <div class="canvas-row placeholder">
+        <div class="num">P03</div>
+        <div class="meta">
+          <div class="title">Boring AI shipped: ten working days inside a squad</div>
+          <div class="sub"><span class="by">Jack Latrobe</span></div>
+        </div>
+        <div class="status">Briefed</div>
+      </div>
+      <div class="canvas-row placeholder">
+        <div class="num">P04</div>
+        <div class="meta">
+          <div class="title">Boring is what fortnightly looks like</div>
+          <div class="sub"><span class="by">Mark Pattie</span></div>
+        </div>
+        <div class="status">Briefed</div>
+      </div>
+      <div class="canvas-row placeholder">
+        <div class="num">P06</div>
+        <div class="meta">
+          <div class="title">Boring AI doesn&rsquo;t fail at the model layer. It fails at governance.</div>
+          <div class="sub"><span class="by">Richard Dornhart</span></div>
+        </div>
+        <div class="status">Briefed</div>
+      </div>
+      <div class="canvas-row placeholder">
+        <div class="num">P07</div>
+        <div class="meta">
+          <div class="title">How a 4-person squad ships like 8: the boring multiplier</div>
+          <div class="sub"><span class="by">Dave Summers</span></div>
+        </div>
+        <div class="status">Briefed</div>
+      </div>
+      <div class="canvas-row placeholder">
+        <div class="num">P08</div>
+        <div class="meta">
+          <div class="title">What &ldquo;four sprints&rdquo; actually means</div>
+          <div class="sub"><span class="by">Matt Gooden</span></div>
+        </div>
+        <div class="status">Briefed</div>
+      </div>
+      <div class="canvas-row placeholder">
+        <div class="num">P09</div>
+        <div class="meta">
+          <div class="title">We&rsquo;ve been doing boring for a year. We called it Data Factory.</div>
+          <div class="sub"><span class="by">Alenka Caserman</span></div>
+        </div>
+        <div class="status">Briefed</div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="canvas-foot">
+    DATA<b>#</b>3 &middot; Boring AI Series Canvas &middot; Private &middot;
+    <a href="/knowledge-centre-rain">Back to campaign overview</a>
+  </footer>
+
+</div>
+</body>
+</html>

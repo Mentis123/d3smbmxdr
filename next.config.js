@@ -39,6 +39,26 @@ const nextConfig = {
         source: '/suzanne-pillar',
         destination: '/suzanne-pillar-v01.html',
       },
+      {
+        source: '/knowledge-centre/links',
+        destination: '/knowledge-centre/links.html',
+      },
+      {
+        source: '/knowledge-centre/scott-pillar',
+        destination: '/scott-pillar-v01.html',
+      },
+      {
+        source: '/knowledge-centre/suzanne-pillar',
+        destination: '/suzanne-pillar-v01.html',
+      },
+      {
+        source: '/knowledge-centre/adam-crucible',
+        destination: '/knowledge-centre/adam-crucible-v01.html',
+      },
+      {
+        source: '/knowledge-centre/adam-wrap',
+        destination: '/knowledge-centre/adam-wrap-v01.html',
+      },
     ]
   },
 }

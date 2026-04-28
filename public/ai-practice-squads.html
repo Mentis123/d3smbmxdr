@@ -211,6 +211,19 @@ body::after {
   background-clip: text;
 }
 
+.section h2 .provisional {
+  display: inline-block; vertical-align: middle;
+  margin-right: 0.75rem; transform: translateY(-3px);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.55rem; letter-spacing: 0.18em; text-transform: uppercase;
+  font-style: normal; font-weight: 500;
+  color: var(--amber-accent);
+  background: rgba(251, 191, 36, 0.1);
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  padding: 0.25rem 0.55rem; border-radius: 4px;
+  -webkit-text-fill-color: var(--amber-accent);
+}
+
 .section h3 {
   font-size: 1.1rem; font-weight: 600;
   color: var(--text-bright); margin: 2rem 0 0.75rem;
@@ -754,7 +767,7 @@ body.show-deleted [data-block-id].deleted::after {
   <!-- Section 04: Economics -->
   <section class="section">
     <div class="section-num">04 &mdash; The Economics</div>
-    <h2 data-block-id="s4-h2">*provisional guidance only* Unit economics at <em>rack rate</em></h2>
+    <h2 data-block-id="s4-h2"><span class="provisional">Provisional</span>Unit economics at <em>rack rate</em></h2>
 
     <p data-block-id="s4-p1">The delivery model uses standard Data#3 rack rates. 10-day sprints, 22 productive sprints per year. GP at 29% minimum (standard gross profit at rack).</p>
 

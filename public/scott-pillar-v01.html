@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>It's the Windows 97 moment for AI &mdash; v0.1 draft | Data#3</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap');
+
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root {
+  --bg-deep: #000018;
+  --bg-card: #0a0f24;
+  --bg-elevated: #131b3c;
+  --border-subtle: rgba(0, 174, 255, 0.08);
+  --border-mid: rgba(0, 174, 255, 0.15);
+  --border-accent: rgba(0, 174, 255, 0.3);
+  --d3-blue-black: #000025;
+  --d3-light-blue: #00AEFF;
+  --d3-pale-blue: #78DCFF;
+  --d3-aqua: #00FFFF;
+  --d3-purple: #7300FF;
+  --text-primary: #e8ecf4;
+  --text-secondary: #a8b3cc;
+  --text-muted: #6e7894;
+  --text-bright: #ffffff;
+  --gradient-aqua: linear-gradient(135deg, #00FFFF, #00AEFF);
+  --gradient-brand: linear-gradient(135deg, #00AEFF, #7300FF);
+}
+html { scroll-behavior: smooth; font-size: 16px; }
+body {
+  font-family: 'DM Sans', -apple-system, sans-serif;
+  background: var(--bg-deep); color: var(--text-primary);
+  line-height: 1.7; -webkit-font-smoothing: antialiased; overflow-x: hidden;
+}
+body::before {
+  content: ''; position: fixed; top: -50%; left: -50%;
+  width: 200%; height: 200%; pointer-events: none; z-index: 0;
+  background:
+    radial-gradient(ellipse at 20% 10%, rgba(0, 174, 255, 0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 90%, rgba(115, 0, 255, 0.05) 0%, transparent 55%);
+}
+
+.wrap { position: relative; z-index: 1; max-width: 760px; margin: 0 auto; padding: 0 1.5rem; }
+.full { max-width: 1100px; margin: 0 auto; padding: 0 1.5rem; }
+
+/* Nav */
+.doc-nav {
+  position: sticky; top: 0; z-index: 100;
+  backdrop-filter: blur(24px) saturate(1.5);
+  -webkit-backdrop-filter: blur(24px) saturate(1.5);
+  background: rgba(0, 0, 24, 0.78);
+  border-bottom: 1px solid var(--border-subtle);
+  padding: 0.85rem 1.5rem;
+}
+.nav-inner { max-width: 1100px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; }
+.nav-brand { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-muted); }
+.nav-brand b { color: var(--d3-light-blue); font-weight: 600; }
+.nav-back {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.7rem;
+  letter-spacing: 0.1em; color: var(--d3-light-blue); text-decoration: none;
+  display: inline-flex; align-items: center; gap: 0.4rem;
+}
+.nav-back:hover { color: var(--d3-aqua); }
+.nav-back::before { content: '←'; font-size: 1rem; }
+
+.draft-banner {
+  background: linear-gradient(135deg, rgba(0, 255, 255, 0.10), rgba(0, 174, 255, 0.06));
+  border-bottom: 1px solid var(--border-accent);
+  padding: 0.7rem 1.5rem; text-align: center;
+  font-family: 'JetBrains Mono', monospace; font-size: 0.65rem;
+  letter-spacing: 0.18em; text-transform: uppercase; color: var(--d3-aqua);
+}
+.draft-banner b { color: var(--text-bright); font-weight: 500; }
+.draft-banner span { color: var(--text-muted); margin-left: 0.6rem; }
+
+.edit-status { display: none; align-items: center; gap: 0.4rem; font-size: 0.62rem; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase; padding: 0.3rem 0.7rem; border-radius: 5px; }
+.edit-status.saving { display: inline-flex; color: var(--d3-light-blue); background: rgba(0, 174, 255, 0.12); }
+.edit-status.saved  { display: inline-flex; color: #34d399; background: rgba(52, 211, 153, 0.12); }
+.edit-status.error  { display: inline-flex; color: #fb7185; background: rgba(251, 113, 133, 0.12); }
+
+/* Article header */
+.art-header { padding: 4.5rem 0 2.5rem; }
+.art-eyebrow {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.65rem;
+  letter-spacing: 0.25em; text-transform: uppercase; color: var(--d3-aqua);
+  margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.75rem;
+}
+.art-eyebrow::before { content: ''; width: 32px; height: 1px; background: var(--gradient-aqua); }
+.art-title {
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-size: clamp(2.4rem, 5vw, 3.6rem); font-weight: 400;
+  line-height: 1.1; color: var(--text-bright); letter-spacing: -0.02em;
+  margin-bottom: 1.25rem;
+}
+.art-title em {
+  font-style: italic;
+  background: var(--gradient-aqua);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.art-deck {
+  font-size: 1.2rem; color: var(--text-secondary); line-height: 1.55;
+  font-style: italic; max-width: 680px; margin-bottom: 2rem;
+}
+.art-meta {
+  display: flex; gap: 1.25rem; align-items: center; flex-wrap: wrap;
+  padding-top: 1.5rem; border-top: 1px solid var(--border-subtle);
+  font-family: 'JetBrains Mono', monospace; font-size: 0.7rem;
+  letter-spacing: 0.06em; color: var(--text-muted);
+}
+.art-meta b { color: var(--d3-light-blue); font-weight: 500; }
+
+/* Body */
+.art-body { padding: 1rem 0 3rem; }
+.art-body p {
+  font-size: 1.12rem; color: var(--text-primary);
+  line-height: 1.75; margin-bottom: 1.4rem;
+}
+.art-body p.lede {
+  font-size: 1.32rem; color: var(--text-bright); line-height: 1.55;
+  margin-bottom: 2rem; font-weight: 400;
+}
+.art-body p.lede::first-letter {
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-size: 4rem; font-weight: 400; line-height: 0.85;
+  float: left; margin: 0.05em 0.15em 0 -0.05em;
+  background: var(--gradient-aqua);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.art-body h2 {
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-size: 1.85rem; line-height: 1.2; color: var(--text-bright);
+  margin: 3rem 0 1rem; letter-spacing: -0.01em;
+}
+.art-body h2 em {
+  font-style: italic;
+  background: var(--gradient-brand);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.art-body blockquote {
+  margin: 2rem 0; padding: 1.5rem 1.75rem;
+  border-left: 3px solid var(--d3-aqua);
+  background: rgba(0, 255, 255, 0.04);
+  border-radius: 0 10px 10px 0;
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-style: italic; font-size: 1.4rem; line-height: 1.4;
+  color: var(--text-bright);
+}
+.art-body blockquote cite {
+  display: block; margin-top: 0.85rem;
+  font-family: 'JetBrains Mono', monospace; font-size: 0.7rem;
+  letter-spacing: 0.08em; color: var(--text-muted);
+  font-style: normal;
+}
+.art-body strong { color: var(--text-bright); font-weight: 600; }
+.art-body a {
+  color: var(--d3-light-blue); text-decoration: underline;
+  text-decoration-color: rgba(0, 174, 255, 0.4); text-underline-offset: 3px;
+  transition: color 0.2s;
+}
+.art-body a:hover { color: var(--d3-aqua); }
+
+/* Stat callout */
+.stat-callout {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;
+  margin: 2.5rem 0; padding: 0;
+}
+.stat {
+  background: var(--bg-card); border: 1px solid var(--border-mid);
+  border-radius: 12px; padding: 1.5rem 1.5rem 1.4rem;
+}
+.stat-num {
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-size: 3rem; font-weight: 400; line-height: 1;
+  background: var(--gradient-aqua);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text; margin-bottom: 0.5rem;
+}
+.stat-label {
+  font-size: 0.92rem; color: var(--text-secondary); line-height: 1.45;
+}
+.stat-source {
+  margin-top: 0.65rem; padding-top: 0.65rem; border-top: 1px dashed var(--border-mid);
+  font-family: 'JetBrains Mono', monospace; font-size: 0.6rem;
+  letter-spacing: 0.1em; color: var(--text-muted); text-transform: uppercase;
+}
+
+/* Reading list */
+.reading-list {
+  margin: 3rem 0 1rem; padding: 2rem; border-radius: 14px;
+  background: var(--bg-card); border: 1px solid var(--border-mid);
+}
+.reading-list h3 {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.72rem;
+  letter-spacing: 0.18em; text-transform: uppercase; color: var(--d3-aqua);
+  margin-bottom: 1.25rem;
+}
+.reading-list ul { list-style: none; padding: 0; margin: 0; }
+.reading-list li {
+  padding: 0.75rem 0; border-bottom: 1px dashed var(--border-subtle);
+  font-size: 0.95rem; color: var(--text-secondary);
+}
+.reading-list li:last-child { border-bottom: none; }
+.reading-list li a { color: var(--text-bright); text-decoration: none; font-weight: 500; }
+.reading-list li a:hover { color: var(--d3-aqua); }
+.reading-list li small { display: block; color: var(--text-muted); font-size: 0.78rem; margin-top: 0.2rem; }
+
+/* End slug */
+.end-slug {
+  text-align: center; margin: 2.5rem 0 1rem;
+  font-family: 'JetBrains Mono', monospace; font-size: 0.7rem;
+  letter-spacing: 0.3em; color: var(--text-muted);
+}
+.end-slug::before, .end-slug::after { content: '◇'; margin: 0 0.6rem; color: var(--d3-aqua); }
+
+/* Foot */
+.foot {
+  padding: 3rem 0 2rem; border-top: 1px solid var(--border-subtle);
+  font-family: 'JetBrains Mono', monospace; font-size: 0.62rem;
+  letter-spacing: 0.14em; color: var(--text-muted); text-align: center;
+  margin-top: 2rem;
+}
+.foot b { color: var(--d3-light-blue); font-weight: 600; }
+
+/* Editor styles (compact, same family) */
+[data-block-id] { cursor: pointer; transition: outline 0.15s ease; outline: 2px dashed transparent; outline-offset: 3px; border-radius: 3px; }
+[data-block-id]:hover { outline-color: rgba(0, 174, 255, 0.35); }
+[data-block-id].editing { outline: 2px solid var(--d3-light-blue) !important; outline-offset: 4px; background: rgba(0, 174, 255, 0.05) !important; }
+[data-block-id].deleted { opacity: 0; max-height: 0; overflow: hidden; padding: 0 !important; margin: 0 !important; border: none !important; pointer-events: none; transition: opacity 0.3s, max-height 0.3s; }
+body.show-deleted [data-block-id].deleted { opacity: 0.35; max-height: 500px; overflow: visible; text-decoration: line-through; pointer-events: auto; padding: revert !important; margin: revert !important; position: relative; }
+.edit-toolbar { position: fixed; z-index: 9999; display: flex; gap: 0.35rem; padding: 0.4rem; background: var(--bg-elevated); border: 1px solid var(--border-accent); border-radius: 8px; box-shadow: 0 8px 32px rgba(0,0,0,0.5); }
+.edit-toolbar button { font-family: 'JetBrains Mono', monospace; font-size: 0.62rem; letter-spacing: 0.05em; text-transform: uppercase; padding: 0.35rem 0.7rem; border: 1px solid transparent; border-radius: 5px; cursor: pointer; transition: all 0.15s ease; white-space: nowrap; }
+.edit-toolbar .btn-save { background: rgba(52, 211, 153, 0.15); color: #34d399; border-color: rgba(52, 211, 153, 0.3); }
+.edit-toolbar .btn-cancel { background: rgba(148, 163, 184, 0.1); color: var(--text-secondary); border-color: rgba(148, 163, 184, 0.2); }
+.edit-toolbar .btn-delete { background: rgba(251, 113, 133, 0.1); color: #fb7185; border-color: rgba(251, 113, 133, 0.2); }
+.edit-toolbar .btn-restore { background: rgba(0, 174, 255, 0.15); color: var(--d3-light-blue); border-color: rgba(0, 174, 255, 0.3); }
+@keyframes save-flash { 0% { outline-color: #34d399; } 100% { outline-color: transparent; } }
+[data-block-id].just-saved { animation: save-flash 0.8s ease; }
+.changes-trigger { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 998; font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; letter-spacing: 0.05em; padding: 0.55rem 1.1rem; border-radius: 8px; border: 1px solid var(--border-mid); background: var(--bg-elevated); color: var(--text-secondary); cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 16px rgba(0,0,0,0.4); }
+.changes-trigger.has-changes { border-color: rgba(0, 174, 255, 0.4); color: var(--d3-light-blue); }
+.changes-panel { position: fixed; bottom: 4.2rem; right: 1.5rem; z-index: 997; width: 340px; max-height: 60vh; background: var(--bg-card); border: 1px solid var(--border-accent); border-radius: 12px; box-shadow: 0 8px 40px rgba(0,0,0,0.6); display: none; flex-direction: column; overflow: hidden; }
+.changes-panel.open { display: flex; }
+.changes-panel-header { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-subtle); display: flex; align-items: center; justify-content: space-between; }
+.changes-panel-title { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); }
+.changes-panel-actions button { font-family: 'JetBrains Mono', monospace; font-size: 0.55rem; letter-spacing: 0.05em; text-transform: uppercase; padding: 0.25rem 0.5rem; border-radius: 4px; border: 1px solid transparent; cursor: pointer; }
+.btn-show-deleted { background: rgba(251, 113, 133, 0.08); color: var(--text-muted); border-color: rgba(251, 113, 133, 0.15); }
+.changes-panel-body { overflow-y: auto; padding: 0.5rem; flex: 1; }
+.changes-panel-empty { padding: 2rem 1rem; text-align: center; font-size: 0.8rem; color: var(--text-muted); }
+.change-item { display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0.6rem; border-radius: 6px; margin-bottom: 0.25rem; }
+.change-badge { font-family: 'JetBrains Mono', monospace; font-size: 0.5rem; letter-spacing: 0.05em; text-transform: uppercase; padding: 0.15rem 0.35rem; border-radius: 3px; flex-shrink: 0; font-weight: 600; }
+.change-badge.edited { background: rgba(0, 174, 255, 0.15); color: var(--d3-light-blue); }
+.change-badge.deleted-badge { background: rgba(251, 113, 133, 0.15); color: #fb7185; }
+.change-label { font-size: 0.72rem; color: var(--text-secondary); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; }
+.change-reset { font-family: 'JetBrains Mono', monospace; font-size: 0.5rem; letter-spacing: 0.05em; text-transform: uppercase; padding: 0.2rem 0.4rem; border-radius: 3px; border: 1px solid rgba(251, 191, 36, 0.2); background: rgba(251, 191, 36, 0.08); color: #fbbf24; cursor: pointer; flex-shrink: 0; }
+
+@media print {
+  body { background: #fff; color: #111; }
+  body::before { display: none; }
+  .doc-nav, .draft-banner, .changes-trigger, .changes-panel, .edit-toolbar, .edit-status { display: none !important; }
+  * { color: #222 !important; }
+  .art-title em, .art-body h2 em, .art-body p.lede::first-letter, .stat-num { -webkit-text-fill-color: #007BC3; }
+}
+@media (max-width: 720px) {
+  .stat-callout { grid-template-columns: 1fr; }
+  .art-body p.lede::first-letter { font-size: 3rem; }
+}
+</style>
+</head>
+<body>
+
+<div class="draft-banner">
+  <b>v0.1 DRAFT</b> &middot; for Scott Gosling to react to <span>Click any paragraph to edit. Edits save automatically.</span>
+</div>
+
+<nav class="doc-nav">
+  <div class="nav-inner">
+    <a class="nav-back" href="/knowledge-centre-rain">Back to campaign</a>
+    <div class="nav-brand">DATA<b>#</b>3 KNOWLEDGE CENTRE</div>
+    <span class="edit-status" id="editStatus"></span>
+  </div>
+</nav>
+
+<div class="full">
+  <header class="art-header">
+    <div class="wrap" style="padding:0">
+      <div class="art-eyebrow" data-block-id="art-eyebrow">Microsoft &middot; AI &middot; Capability-as-a-Service</div>
+      <h1 class="art-title" data-block-id="art-title">It&rsquo;s the Windows&nbsp;97 moment for AI &mdash; <em>and the way you buy it has to change too</em></h1>
+      <p class="art-deck" data-block-id="art-deck">Adam said build. Jack said build it boring. Here&rsquo;s why you can&rsquo;t buy it the old way anymore.</p>
+      <div class="art-meta">
+        <span data-block-id="art-byline">By <b>Scott Gosling</b> &middot; Microsoft Practice Manager, Data#3</span>
+        <span data-block-id="art-readtime">5 min read</span>
+        <span data-block-id="art-date">Draft &middot; April 2026</span>
+      </div>
+    </div>
+  </header>
+</div>
+
+<main class="wrap">
+  <article class="art-body">
+
+    <p class="lede" data-block-id="p-lede">Every twenty years or so, software stops being something you decide to use and starts being something you assume. Word processors did it in the 1980s. Browsers did it in the 1990s. Email did it just after that. The customers who handled those transitions well had one thing in common: they figured out how to <em>buy</em> the new thing before they figured out how to <em>build</em> with it.</p>
+
+    <p data-block-id="p-1">If you grew up around computers in the late nineties, you&rsquo;ll remember the Windows&nbsp;95 and Windows&nbsp;97 moment. Not the operating system itself &mdash; the moment when computing stopped being a project and became an operating reality. Office on every desk. The browser as the new front door. Email as the way work happened. The companies that treated it as an &ldquo;IT thing&rdquo; got eaten by the ones that treated it as a way of working.</p>
+
+    <p data-block-id="p-2">We&rsquo;re in the same kind of moment with AI &mdash; faster, louder, and with more vendors trying to sell you the answer before you&rsquo;ve worked out the question. My colleague <a href="https://www.data3.com/knowledge-centre/blog/2026-the-year-of-the-agentic-ai-builder/">Adam Rappaport called it in March</a>. The crucible is here, and you either build with AI or you fall behind the customers who do. Then last month, Jack Latrobe followed up with the standard most projects miss: <a href="https://www.data3.com/knowledge-centre/blog/building-australias-most-boring-ai/">build AI that&rsquo;s boring</a> &mdash; useful, reliable, sticks around, has a real impact. Discipline over hype.</p>
+
+    <p data-block-id="p-3">Both of those pieces are about the work. This one is about the contract.</p>
+
+    <h2 data-block-id="h2-paradox">The 82% / 95% paradox</h2>
+
+    <p data-block-id="p-paradox">Two numbers explain why most AI initiatives stall.</p>
+
+    <div class="stat-callout">
+      <div class="stat">
+        <div class="stat-num" data-block-id="stat1-n">82%</div>
+        <div class="stat-label" data-block-id="stat1-l">of business leaders say they expect AI agents to be operating in their organisation within 12 to 18 months.</div>
+        <div class="stat-source" data-block-id="stat1-s">Microsoft Work Trend Index 2025</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num" data-block-id="stat2-n">95%</div>
+        <div class="stat-label" data-block-id="stat2-l">of generative AI pilots fail to make it into production with measurable business value.</div>
+        <div class="stat-source" data-block-id="stat2-s">MIT NANDA, 2024</div>
+      </div>
+    </div>
+
+    <p data-block-id="p-paradox-2">Both are true at the same time. Demand is real. Failure is structural. The space between those two numbers is where every CIO in Australia is currently standing &mdash; trying to work out how to be in the 82% without being in the 95%.</p>
+
+    <h2 data-block-id="h2-reason"><em>The bottleneck isn&rsquo;t the model</em></h2>
+
+    <p data-block-id="p-reason-1">Most failed AI projects we&rsquo;ve seen at Data#3 didn&rsquo;t fail because the models weren&rsquo;t good enough. Or because the data wasn&rsquo;t ready. Or because the change management didn&rsquo;t land. Sometimes those things were factors. But the load-bearing problem &mdash; the one that quietly takes down most of the others &mdash; is much more boring.</p>
+
+    <p data-block-id="p-reason-2"><strong>People are still buying AI like it&rsquo;s a 2018 ERP project.</strong></p>
+
+    <p data-block-id="p-reason-3">A scope. A statement of work. A fixed roster of fractional resources. A nine-month plan with a kick-off and a go-live. The trouble is that the technology you&rsquo;re buying that way isn&rsquo;t a fixed thing &mdash; it&rsquo;s a moving frontier. Six weeks into the plan, the model you scoped on has been replaced by a better one. The agent platform you specified shipped a feature that obsoletes a third of your build. The integration partner you booked has rotated their senior engineer onto another engagement.</p>
+
+    <blockquote data-block-id="bq-1">
+      &ldquo;The buying model assumes the technology is the constant and the team is the variable. With AI, it&rsquo;s the other way around.&rdquo;
+    </blockquote>
+
+    <p data-block-id="p-reason-4">When the technology moves faster than the contract, you don&rsquo;t need a better contract &mdash; you need a different shape of contract. One that assumes change instead of resisting it. One that gives you the team for as long as the work takes, not for as long as the SOW says.</p>
+
+    <h2 data-block-id="h2-shift">What we&rsquo;re doing about it</h2>
+
+    <p data-block-id="p-shift-1">At Data#3 we&rsquo;ve been quietly rebuilding our AI delivery model around something we&rsquo;re calling <strong>capability-as-a-service</strong>. The unit isn&rsquo;t a project. The unit is a squad &mdash; a four-person dedicated team with one mentor, one lead, two builders. The unit of sale isn&rsquo;t hours; it&rsquo;s a sprint &mdash; ten working days, fixed price, one defined outcome.</p>
+
+    <p data-block-id="p-shift-2">If you want to deliver Jack&rsquo;s boring AI, you need a boring buying model to wrap around it: predictable, repeatable, durable. The repetition is the point. Same four people, every sprint, until you&rsquo;re live. Then keep them, or graduate your own people into their seats. The output isn&rsquo;t a deliverable handover &mdash; it&rsquo;s an in-house AI delivery muscle that compounds.</p>
+
+    <p data-block-id="p-shift-3">It&rsquo;s not a radical idea. The Analytics practice next to mine has been running this exact pattern for a year, calling it <em>Data Factory</em>. Six-week engagements, three two-week sprints, customers love it, ingestion effort cut by 70%. We&rsquo;re not inventing the model &mdash; we&rsquo;re extending it to where AI work happens. The plumbing is already proven.</p>
+
+    <h2 data-block-id="h2-close">The Win97 customers won</h2>
+
+    <p data-block-id="p-close-1">When Office and the browser became the new operating reality, the customers who pulled ahead weren&rsquo;t the ones with the cleverest IT departments. They were the ones who let the new tools change <em>how they bought software</em>. They moved off custom builds to suites. Off perpetual licenses to enterprise agreements. Off &ldquo;rollouts&rdquo; to &ldquo;adoption.&rdquo; The shape of the contract changed, and the value followed.</p>
+
+    <p data-block-id="p-close-2">AI is the same kind of moment. The customers who&rsquo;ll pull ahead aren&rsquo;t the ones who picked the right model in 2025 &mdash; that model will be obsolete by FY27 anyway. They&rsquo;ll be the ones who got their buying model right early. Bought the team, not the tool. Bought the sprint, not the project. Bought the capability, not the deliverable.</p>
+
+    <p data-block-id="p-close-3">If you&rsquo;re inside the 82% &mdash; expecting agents in production within 18 months &mdash; the question isn&rsquo;t which AI to build. It&rsquo;s how to buy AI delivery in a shape that lets the technology keep changing while you keep shipping. We&rsquo;ve got a strong opinion on what that shape looks like. We&rsquo;d like to talk to you about it.</p>
+
+    <p data-block-id="p-close-4"><em>This piece is the third in a thread my team has been writing on what good AI delivery looks like in Australia. Read the rest in the order they were written below.</em></p>
+
+    <div class="end-slug">END</div>
+
+    <div class="reading-list">
+      <h3>The boring AI thread</h3>
+      <ul>
+        <li>
+          <a href="https://www.data3.com/knowledge-centre/blog/2026-the-year-of-the-agentic-ai-builder/" target="_blank" rel="noopener">2026: The Year of the Agentic AI Builder</a>
+          <small>Adam Rappaport &middot; March 4, 2026 &middot; The call</small>
+        </li>
+        <li>
+          <a href="https://www.data3.com/knowledge-centre/blog/building-australias-most-boring-ai/" target="_blank" rel="noopener">Building Australia&rsquo;s Most Boring AI</a>
+          <small>Jack Latrobe &middot; April 27, 2026 &middot; The standard</small>
+        </li>
+        <li>
+          <a href="#" style="color:var(--d3-aqua)">It&rsquo;s the Windows 97 moment for AI</a>
+          <small>Scott Gosling &middot; ~May 2026 &middot; The shift &middot; <em>this article</em></small>
+        </li>
+      </ul>
+    </div>
+  </article>
+</main>
+
+<div class="full">
+  <footer class="foot" data-block-id="foot">DATA<b>#</b>3 &middot; Knowledge Centre &middot; Boring AI Series &middot; Pillar v0.1 Draft &middot; <span style="color:var(--text-secondary)">For Scott&rsquo;s pen</span></footer>
+</div>
+
+<button class="changes-trigger" id="changesTrigger">Changes (0)</button>
+<div class="changes-panel" id="changesPanel">
+  <div class="changes-panel-header">
+    <span class="changes-panel-title">Change History</span>
+    <div class="changes-panel-actions">
+      <button class="btn-show-deleted" id="showDeletedBtn">Show Deleted</button>
+    </div>
+  </div>
+  <div class="changes-panel-body" id="changesList"></div>
+</div>
+
+<script>
+(function() {
+  const PAGE_ID = 'scott-pillar';
+  const API = '/api/page-edits';
+  const originals = {};
+  document.querySelectorAll('[data-block-id]').forEach(function(el) {
+    originals[el.getAttribute('data-block-id')] = el.innerHTML;
+  });
+  let editsMap = {};
+  let activeBlock = null; let originalContent = ''; let toolbar = null;
+  const statusEl = document.getElementById('editStatus');
+  function showStatus(type, text) {
+    statusEl.className = 'edit-status ' + type;
+    statusEl.textContent = text;
+    if (type === 'saved') setTimeout(function() { statusEl.className = 'edit-status'; }, 2000);
+  }
+  async function loadEdits() {
+    try {
+      var res = await fetch(API + '?page_id=' + encodeURIComponent(PAGE_ID));
+      if (!res.ok) return;
+      var data = await res.json();
+      editsMap = data.edits || {};
+      applyEdits(); renderChangesPanel();
+    } catch (e) { console.error(e); }
+  }
+  function applyEdits() {
+    for (var blockId in editsMap) {
+      var edit = editsMap[blockId];
+      var el = document.querySelector('[data-block-id="' + blockId + '"]');
+      if (!el) continue;
+      if (edit.content !== null && edit.content !== undefined) el.innerHTML = edit.content;
+      if (edit.deleted) el.classList.add('deleted'); else el.classList.remove('deleted');
+    }
+  }
+  function getChangeCounts() {
+    var edited = 0, deleted = 0;
+    for (var k in editsMap) { if (editsMap[k].deleted) deleted++; else edited++; }
+    return { edited: edited, deleted: deleted, total: edited + deleted };
+  }
+  function renderChangesPanel() {
+    var counts = getChangeCounts();
+    var trigger = document.getElementById('changesTrigger');
+    var parts = [];
+    if (counts.edited) parts.push(counts.edited + ' edited');
+    if (counts.deleted) parts.push(counts.deleted + ' deleted');
+    trigger.textContent = counts.total > 0 ? 'Changes (' + parts.join(', ') + ')' : 'No Changes';
+    trigger.classList.toggle('has-changes', counts.total > 0);
+    var sdBtn = document.getElementById('showDeletedBtn');
+    sdBtn.textContent = counts.deleted > 0 ? 'Show Deleted (' + counts.deleted + ')' : 'Show Deleted';
+    var list = document.getElementById('changesList');
+    if (counts.total === 0) {
+      list.innerHTML = '<div class="changes-panel-empty">No changes yet.<br>Click any paragraph to edit it.</div>';
+      return;
+    }
+    var html = ''; var entries = Object.keys(editsMap).sort();
+    for (var i = 0; i < entries.length; i++) {
+      var bid = entries[i]; var edit = editsMap[bid]; var isDel = edit.deleted;
+      var badgeClass = isDel ? 'deleted-badge' : 'edited';
+      var badgeText = isDel ? 'Del' : 'Edit';
+      var el = document.querySelector('[data-block-id="' + bid + '"]');
+      var label = bid;
+      if (el) { var text = el.textContent.trim(); label = text.length > 40 ? text.substring(0, 40) + '...' : (text || bid); }
+      html += '<div class="change-item">' +
+        '<span class="change-badge ' + badgeClass + '">' + badgeText + '</span>' +
+        '<span class="change-label" data-goto="' + bid + '" title="' + bid + '">' + label.replace(/</g, '&lt;') + '</span>' +
+        '<button class="change-reset" data-reset="' + bid + '">Reset</button>' +
+        '</div>';
+    }
+    list.innerHTML = html;
+  }
+  async function saveEdit(blockId, content, deleted) {
+    showStatus('saving', 'Saving...');
+    try {
+      var res = await fetch(API, { method: 'PUT', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ page_id: PAGE_ID, block_id: blockId, content: content, deleted: deleted }) });
+      if (!res.ok) throw new Error('Save failed');
+      showStatus('saved', 'Saved');
+      editsMap[blockId] = { content: content, deleted: deleted, updated_at: new Date().toISOString() };
+      renderChangesPanel();
+    } catch (e) { showStatus('error', 'Error saving'); console.error(e); }
+  }
+  async function resetBlock(blockId) {
+    showStatus('saving', 'Resetting...');
+    try {
+      var res = await fetch(API, { method: 'DELETE', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ page_id: PAGE_ID, block_id: blockId }) });
+      if (!res.ok) throw new Error('Reset failed');
+      showStatus('saved', 'Reset to original');
+      delete editsMap[blockId];
+      var el = document.querySelector('[data-block-id="' + blockId + '"]');
+      if (el && originals[blockId] !== undefined) { el.innerHTML = originals[blockId]; el.classList.remove('deleted'); }
+      renderChangesPanel();
+    } catch (e) { showStatus('error', 'Reset failed'); console.error(e); }
+  }
+  function createToolbar() { if (toolbar) toolbar.remove(); toolbar = document.createElement('div'); toolbar.className = 'edit-toolbar'; document.body.appendChild(toolbar); return toolbar; }
+  function positionToolbar(el) {
+    if (!toolbar) return;
+    var rect = el.getBoundingClientRect();
+    var top = rect.top - 48; var left = rect.left;
+    if (rect.top < 60) top = rect.bottom + 8;
+    var maxLeft = window.innerWidth - 340;
+    if (left > maxLeft) left = maxLeft; if (left < 8) left = 8;
+    toolbar.style.top = top + 'px'; toolbar.style.left = left + 'px';
+  }
+  function enterEdit(el) {
+    if (activeBlock) cancelEdit();
+    activeBlock = el; originalContent = el.innerHTML;
+    el.classList.add('editing'); el.setAttribute('contenteditable', 'true'); el.focus();
+    var blockId = el.getAttribute('data-block-id');
+    var isDeleted = el.classList.contains('deleted');
+    var hasBeenEdited = blockId in editsMap;
+    var tb = createToolbar();
+    if (isDeleted) {
+      tb.innerHTML = '<button class="btn-restore" onclick="window._editRestore()">Restore</button><button class="btn-cancel" onclick="window._editCancel()">Cancel</button><button class="btn-delete" style="background:rgba(251,191,36,0.1);color:#fbbf24;border-color:rgba(251,191,36,0.2)" onclick="window._editReset()">Reset to Original</button>';
+    } else {
+      var buttons = '<button class="btn-save" onclick="window._editSave()">Save</button><button class="btn-cancel" onclick="window._editCancel()">Cancel</button><button class="btn-delete" onclick="window._editDelete()">Delete</button>';
+      if (hasBeenEdited) buttons += '<button class="btn-delete" style="background:rgba(251,191,36,0.1);color:#fbbf24;border-color:rgba(251,191,36,0.2)" onclick="window._editReset()">Reset</button>';
+      tb.innerHTML = buttons;
+    }
+    positionToolbar(el);
+  }
+  function cancelEdit() { if (!activeBlock) return; activeBlock.innerHTML = originalContent; activeBlock.classList.remove('editing'); activeBlock.removeAttribute('contenteditable'); activeBlock = null; originalContent = ''; if (toolbar) { toolbar.remove(); toolbar = null; } }
+  async function doSave() {
+    if (!activeBlock) return;
+    var blockId = activeBlock.getAttribute('data-block-id');
+    var content = activeBlock.innerHTML;
+    activeBlock.classList.remove('editing'); activeBlock.removeAttribute('contenteditable'); activeBlock.classList.add('just-saved');
+    setTimeout(function() { var el = document.querySelector('[data-block-id="' + blockId + '"]'); if (el) el.classList.remove('just-saved'); }, 800);
+    if (toolbar) { toolbar.remove(); toolbar = null; }
+    activeBlock = null; originalContent = '';
+    await saveEdit(blockId, content, false);
+  }
+  async function doDelete() {
+    if (!activeBlock) return;
+    var blockId = activeBlock.getAttribute('data-block-id');
+    var content = activeBlock.innerHTML;
+    activeBlock.classList.remove('editing'); activeBlock.removeAttribute('contenteditable'); activeBlock.classList.add('deleted');
+    if (toolbar) { toolbar.remove(); toolbar = null; }
+    activeBlock = null; originalContent = '';
+    await saveEdit(blockId, content, true);
+  }
+  async function doRestore() {
+    if (!activeBlock) return;
+    var blockId = activeBlock.getAttribute('data-block-id');
+    var content = activeBlock.innerHTML;
+    activeBlock.classList.remove('editing', 'deleted'); activeBlock.removeAttribute('contenteditable');
+    if (toolbar) { toolbar.remove(); toolbar = null; }
+    activeBlock = null; originalContent = '';
+    await saveEdit(blockId, content, false);
+  }
+  async function doReset() {
+    if (!activeBlock) return;
+    var blockId = activeBlock.getAttribute('data-block-id');
+    activeBlock.classList.remove('editing'); activeBlock.removeAttribute('contenteditable');
+    if (toolbar) { toolbar.remove(); toolbar = null; }
+    activeBlock = null; originalContent = '';
+    await resetBlock(blockId);
+  }
+  window._editSave = doSave; window._editCancel = cancelEdit; window._editDelete = doDelete; window._editRestore = doRestore; window._editReset = doReset;
+  document.addEventListener('click', function(e) {
+    if (e.target.closest('.changes-trigger')) { document.getElementById('changesPanel').classList.toggle('open'); return; }
+    if (e.target.closest('.changes-panel')) {
+      if (e.target.id === 'showDeletedBtn' || e.target.closest('#showDeletedBtn')) { document.body.classList.toggle('show-deleted'); document.getElementById('showDeletedBtn').classList.toggle('active'); return; }
+      var resetBtn = e.target.closest('[data-reset]'); if (resetBtn) { if (activeBlock) cancelEdit(); resetBlock(resetBtn.getAttribute('data-reset')); return; }
+      var gotoLabel = e.target.closest('[data-goto]'); if (gotoLabel) { var bid = gotoLabel.getAttribute('data-goto'); var target = document.querySelector('[data-block-id="' + bid + '"]'); if (target) { target.scrollIntoView({ behavior: 'smooth', block: 'center' }); target.classList.add('just-saved'); setTimeout(function() { target.classList.remove('just-saved'); }, 1000); } return; }
+      return;
+    }
+    var block = e.target.closest('[data-block-id]');
+    if (activeBlock && !block) { if (e.target.closest('.edit-toolbar')) return; cancelEdit(); return; }
+    if (block && block !== activeBlock) { document.getElementById('changesPanel').classList.remove('open'); enterEdit(block); }
+  });
+  document.addEventListener('keydown', function(e) {
+    if (!activeBlock) return;
+    if (e.key === 'Escape') { e.preventDefault(); cancelEdit(); }
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); doSave(); }
+  });
+  function onReposition() { if (activeBlock && toolbar) positionToolbar(activeBlock); }
+  window.addEventListener('scroll', onReposition, { passive: true });
+  window.addEventListener('resize', onReposition, { passive: true });
+  loadEdits();
+})();
+</script>
+</body>
+</html>

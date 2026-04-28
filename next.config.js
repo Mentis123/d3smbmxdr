@@ -23,6 +23,18 @@ const nextConfig = {
         source: '/ai-squad',
         destination: '/ai-squad.html',
       },
+      {
+        source: '/knowledge-centre-rain',
+        destination: '/knowledge-centre-rain.html',
+      },
+      {
+        source: '/boring-ai',
+        destination: '/knowledge-centre-rain.html',
+      },
+      {
+        source: '/scott-pillar',
+        destination: '/scott-pillar-v01.html',
+      },
     ]
   },
 }

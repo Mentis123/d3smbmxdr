@@ -3,38 +3,40 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Knowledge Centre Rain &mdash; MSFT &times; AI | Data#3</title>
+<title>Boring AI &mdash; A Knowledge Centre Campaign | Data#3</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap');
 
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 
 :root {
-  --bg-deep: #060913;
-  --bg-surface: #0c1021;
-  --bg-card: #111628;
-  --bg-card-hover: #161d36;
-  --bg-elevated: #1a2242;
-  --border-subtle: rgba(99, 140, 255, 0.08);
-  --border-mid: rgba(99, 140, 255, 0.15);
-  --border-accent: rgba(99, 140, 255, 0.3);
-  --blue-primary: #3b82f6;
-  --blue-light: #60a5fa;
-  --blue-bright: #93bbfd;
-  --purple-primary: #8b5cf6;
-  --purple-light: #a78bfa;
-  --cyan-accent: #22d3ee;
-  --green-accent: #34d399;
-  --amber-accent: #fbbf24;
-  --rose-accent: #fb7185;
-  --magenta-accent: #e879f9;
+  --bg-deep: #000018;
+  --bg-surface: #04081a;
+  --bg-card: #0a0f24;
+  --bg-card-hover: #0f1530;
+  --bg-elevated: #131b3c;
+  --border-subtle: rgba(0, 174, 255, 0.08);
+  --border-mid: rgba(0, 174, 255, 0.15);
+  --border-accent: rgba(0, 174, 255, 0.3);
+  --d3-blue-black: #000025;
+  --d3-blue: #007BC3;
+  --d3-light-blue: #00AEFF;
+  --d3-pale-blue: #78DCFF;
+  --d3-aqua: #00FFFF;
+  --d3-purple: #7300FF;
+  --d3-magenta: #FF00FF;
+  --d3-grey: #9D9FA2;
+  --d3-grey-white: #EEEEEE;
   --text-primary: #e8ecf4;
-  --text-secondary: #94a3b8;
-  --text-muted: #64748b;
-  --text-bright: #f1f5f9;
-  --gradient-brand: linear-gradient(135deg, #3b82f6, #8b5cf6);
-  --shadow-card: 0 1px 3px rgba(0,0,0,0.4), 0 0 0 1px var(--border-subtle);
-  --shadow-elevated: 0 4px 24px rgba(0,0,0,0.5), 0 0 0 1px var(--border-subtle);
+  --text-secondary: #a8b3cc;
+  --text-muted: #6e7894;
+  --text-bright: #ffffff;
+  --gradient-brand: linear-gradient(135deg, #00AEFF, #7300FF);
+  --gradient-aqua: linear-gradient(135deg, #00FFFF, #00AEFF);
+  --gradient-magenta: linear-gradient(135deg, #FF00FF, #7300FF);
+  --shadow-card: 0 1px 3px rgba(0,0,0,0.5), 0 0 0 1px var(--border-subtle);
+  --shadow-elevated: 0 8px 40px rgba(0,0,0,0.55), 0 0 0 1px var(--border-subtle);
+  --shadow-glow: 0 0 60px rgba(0, 174, 255, 0.18);
 }
 
 html { scroll-behavior: smooth; font-size: 15px; }
@@ -46,216 +48,679 @@ body {
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
 }
+
+/* ─── Animated background mesh ─── */
 body::before {
   content: ''; position: fixed; top: -50%; left: -50%;
-  width: 200%; height: 200%;
+  width: 200%; height: 200%; pointer-events: none; z-index: 0;
   background:
-    radial-gradient(ellipse at 25% 15%, rgba(59, 130, 246, 0.05) 0%, transparent 50%),
-    radial-gradient(ellipse at 75% 85%, rgba(139, 92, 246, 0.04) 0%, transparent 50%),
-    radial-gradient(ellipse at 50% 50%, rgba(34, 211, 238, 0.015) 0%, transparent 40%);
-  pointer-events: none; z-index: 0;
+    radial-gradient(ellipse at 20% 10%, rgba(0, 174, 255, 0.08) 0%, transparent 45%),
+    radial-gradient(ellipse at 80% 80%, rgba(115, 0, 255, 0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 50%, rgba(0, 255, 255, 0.025) 0%, transparent 40%);
+  animation: meshDrift 24s ease-in-out infinite alternate;
 }
 body::after {
-  content: ''; position: fixed; inset: 0;
+  content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
   background-image:
-    linear-gradient(rgba(99, 140, 255, 0.02) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(99, 140, 255, 0.02) 1px, transparent 1px);
-  background-size: 60px 60px;
-  pointer-events: none; z-index: 0;
+    linear-gradient(rgba(0, 174, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 174, 255, 0.025) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(ellipse at center, black 30%, transparent 90%);
 }
-.page-wrapper { position: relative; z-index: 1; max-width: 1120px; margin: 0 auto; padding: 0 2rem; }
+@keyframes meshDrift {
+  0%   { transform: translate(0, 0) rotate(0deg); }
+  100% { transform: translate(-3%, 4%) rotate(2deg); }
+}
 
-/* Nav */
+.page-wrapper { position: relative; z-index: 1; max-width: 1180px; margin: 0 auto; padding: 0 2rem; }
+
+/* ─── Nav ─── */
 .doc-nav {
   position: sticky; top: 0; z-index: 100;
-  backdrop-filter: blur(20px) saturate(1.4);
-  -webkit-backdrop-filter: blur(20px) saturate(1.4);
-  background: rgba(6, 9, 19, 0.85);
+  backdrop-filter: blur(24px) saturate(1.5);
+  -webkit-backdrop-filter: blur(24px) saturate(1.5);
+  background: rgba(0, 0, 24, 0.78);
   border-bottom: 1px solid var(--border-subtle);
-  padding: 0.75rem 2rem; margin: 0 -2rem;
+  padding: 0.85rem 2rem; margin: 0 -2rem;
 }
-.nav-inner { max-width: 1120px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; }
-.nav-brand { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-muted); }
-.nav-brand span { color: var(--blue-primary); font-weight: 600; }
-.nav-right { display: flex; align-items: center; gap: 0.75rem; }
-.nav-status { display: flex; align-items: center; gap: 0.5rem; font-size: 0.7rem; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.08em; text-transform: uppercase; color: var(--cyan-accent); }
-.nav-status::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--cyan-accent); animation: pulse-dot 2s ease-in-out infinite; }
-@keyframes pulse-dot { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+.nav-inner { max-width: 1180px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; }
+.nav-brand {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.7rem;
+  letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-muted);
+}
+.nav-brand b { color: var(--d3-light-blue); font-weight: 600; }
+.nav-right { display: flex; align-items: center; gap: 0.85rem; }
+.nav-status {
+  display: flex; align-items: center; gap: 0.5rem;
+  font-size: 0.68rem; font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.1em; text-transform: uppercase; color: var(--d3-aqua);
+}
+.nav-status::before {
+  content: ''; width: 6px; height: 6px; border-radius: 50%;
+  background: var(--d3-aqua); box-shadow: 0 0 12px var(--d3-aqua);
+  animation: pulse-dot 2.4s ease-in-out infinite;
+}
+@keyframes pulse-dot { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.85); } }
 
 /* Edit status */
-.edit-status { display: none; align-items: center; gap: 0.4rem; font-size: 0.65rem; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.08em; text-transform: uppercase; padding: 0.25rem 0.6rem; border-radius: 4px; }
-.edit-status.saving { display: inline-flex; color: var(--blue-light); background: rgba(59, 130, 246, 0.1); }
-.edit-status.saved  { display: inline-flex; color: var(--green-accent); background: rgba(52, 211, 153, 0.1); }
-.edit-status.error  { display: inline-flex; color: var(--rose-accent); background: rgba(251, 113, 133, 0.1); }
+.edit-status { display: none; align-items: center; gap: 0.4rem; font-size: 0.62rem; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase; padding: 0.3rem 0.7rem; border-radius: 5px; }
+.edit-status.saving { display: inline-flex; color: var(--d3-light-blue); background: rgba(0, 174, 255, 0.12); }
+.edit-status.saved  { display: inline-flex; color: #34d399; background: rgba(52, 211, 153, 0.12); }
+.edit-status.error  { display: inline-flex; color: #fb7185; background: rgba(251, 113, 133, 0.12); }
 
-/* Hero */
-.hero { padding: 7rem 0 5rem; position: relative; }
-.hero-eyebrow { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--blue-primary); margin-bottom: 1.75rem; display: flex; align-items: center; gap: 0.75rem; }
-.hero-eyebrow::before { content: ''; width: 32px; height: 1px; background: var(--gradient-brand); }
-.hero h1 { font-family: 'Instrument Serif', Georgia, serif; font-size: 4rem; font-weight: 400; line-height: 1.05; letter-spacing: -0.025em; color: var(--text-bright); margin-bottom: 1.75rem; max-width: 880px; }
-.hero h1 em { font-style: italic; background: var(--gradient-brand); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-.hero-subtitle { font-size: 1.2rem; color: var(--text-secondary); max-width: 760px; line-height: 1.65; }
-.hero-meta { margin-top: 2.5rem; display: flex; gap: 1.25rem; flex-wrap: wrap; font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted); }
-.hero-meta span { padding: 0.4rem 0.75rem; border: 1px solid var(--border-mid); border-radius: 6px; }
-.hero-meta span b { color: var(--blue-light); font-weight: 500; }
+/* ─── Hero ─── */
+.hero { padding: 8rem 0 6rem; position: relative; }
+.hero-eyebrow {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.65rem;
+  letter-spacing: 0.3em; text-transform: uppercase; color: var(--d3-light-blue);
+  margin-bottom: 2rem; display: flex; align-items: center; gap: 0.85rem;
+  opacity: 0; animation: fadeUp 0.7s 0.1s ease-out forwards;
+}
+.hero-eyebrow::before {
+  content: ''; width: 38px; height: 1px; background: var(--gradient-brand);
+}
 
-/* Sections */
-.section { padding: 5rem 0; border-top: 1px solid var(--border-subtle); }
-.section-num { font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--purple-primary); margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem; }
-.section-num::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, var(--border-mid), transparent); }
-.section h2 { font-family: 'Instrument Serif', Georgia, serif; font-size: 2.4rem; font-weight: 400; color: var(--text-bright); margin-bottom: 1.5rem; line-height: 1.12; max-width: 820px; }
-.section h2 em { font-style: italic; background: var(--gradient-brand); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.hero h1 {
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-size: clamp(3.2rem, 8vw, 5.4rem); font-weight: 400;
+  line-height: 1.02; letter-spacing: -0.03em;
+  color: var(--text-bright); margin-bottom: 2rem; max-width: 1000px;
+}
+.hero h1 .build,
+.hero h1 .ship,
+.hero h1 .boring {
+  display: inline-block;
+  opacity: 0; transform: translateY(0.4em);
+}
+.hero h1 .build  { animation: fadeUp 0.7s 0.25s ease-out forwards; }
+.hero h1 .ship   { animation: fadeUp 0.7s 0.50s ease-out forwards; }
+.hero h1 .boring {
+  font-style: italic;
+  background: var(--gradient-aqua);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: fadeUp 0.7s 0.75s ease-out forwards;
+}
+@keyframes fadeUp {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.hero-subtitle {
+  font-size: 1.25rem; color: var(--text-secondary);
+  max-width: 760px; line-height: 1.65;
+  opacity: 0; animation: fadeUp 0.7s 1s ease-out forwards;
+}
+.hero-subtitle b { color: var(--text-bright); font-weight: 500; }
+
+.hero-meta {
+  margin-top: 3rem; display: flex; gap: 0.75rem; flex-wrap: wrap;
+  font-family: 'JetBrains Mono', monospace; font-size: 0.62rem;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-muted);
+  opacity: 0; animation: fadeUp 0.7s 1.2s ease-out forwards;
+}
+.hero-meta span {
+  padding: 0.55rem 0.95rem; border: 1px solid var(--border-mid); border-radius: 6px;
+  background: rgba(0, 174, 255, 0.03); transition: all 0.2s ease;
+}
+.hero-meta span:hover { border-color: var(--border-accent); background: rgba(0, 174, 255, 0.06); }
+.hero-meta span b { color: var(--d3-light-blue); font-weight: 500; }
+
+/* ─── Sections ─── */
+.section { padding: 6rem 0; border-top: 1px solid var(--border-subtle); position: relative; }
+.section.reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.8s ease, transform 0.8s ease; }
+.section.reveal.in-view { opacity: 1; transform: translateY(0); }
+
+.section-num {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.6rem;
+  letter-spacing: 0.22em; text-transform: uppercase; color: var(--d3-aqua);
+  margin-bottom: 1rem; display: flex; align-items: center; gap: 0.6rem;
+}
+.section-num::after {
+  content: ''; flex: 1; height: 1px;
+  background: linear-gradient(90deg, var(--border-accent), transparent);
+}
+
+.section h2 {
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-size: clamp(2rem, 4.4vw, 2.8rem); font-weight: 400;
+  color: var(--text-bright); margin-bottom: 1.5rem; line-height: 1.1;
+  max-width: 900px; letter-spacing: -0.02em;
+}
+.section h2 em {
+  font-style: italic;
+  background: var(--gradient-brand);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.section h2 strong {
+  font-weight: 400; font-style: italic;
+  background: var(--gradient-aqua);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
 .section h3 { font-size: 1.05rem; font-weight: 600; color: var(--text-bright); margin: 2rem 0 0.75rem; }
 .section p, .section li { font-size: 1rem; color: var(--text-secondary); line-height: 1.75; margin-bottom: 1rem; max-width: 820px; }
 .section ul { padding-left: 1.25rem; margin-bottom: 1.5rem; }
 .section li { margin-bottom: 0.5rem; }
-.section li::marker { color: var(--purple-primary); }
-.section-lede { font-size: 1.1rem; color: var(--text-primary); max-width: 820px; margin-bottom: 2rem; line-height: 1.65; }
-
-/* Spine pull-quote */
-.spine {
-  margin: 2rem 0 0;
-  padding: 2rem 2.25rem;
-  border-left: 3px solid var(--blue-primary);
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.06), rgba(139, 92, 246, 0.04));
-  border-radius: 0 12px 12px 0;
+.section li::marker { color: var(--d3-light-blue); }
+.section-lede {
+  font-size: 1.15rem; color: var(--text-primary);
+  max-width: 820px; margin-bottom: 2.25rem; line-height: 1.65;
 }
-.spine-label { font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--blue-light); margin-bottom: 0.75rem; }
-.spine-quote { font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-size: 1.85rem; line-height: 1.25; color: var(--text-bright); }
 
-/* Pillar card */
-.pillar {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.06), rgba(139, 92, 246, 0.05));
-  border: 1px solid var(--border-accent);
-  border-radius: 14px;
-  padding: 2.25rem 2rem;
-  margin-top: 2rem;
+/* ─── Spine pull-quote ─── */
+.spine {
+  margin: 2.5rem 0 0; padding: 2.5rem 2.5rem;
+  border: 1px solid var(--border-accent); border-radius: 16px;
+  background:
+    linear-gradient(135deg, rgba(0, 174, 255, 0.07), rgba(115, 0, 255, 0.05)),
+    var(--bg-card);
+  position: relative; overflow: hidden;
   box-shadow: var(--shadow-elevated);
 }
-.pillar-tag { font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--cyan-accent); margin-bottom: 0.75rem; }
-.pillar-title { font-family: 'Instrument Serif', Georgia, serif; font-size: 2rem; line-height: 1.15; color: var(--text-bright); margin-bottom: 0.4rem; }
-.pillar-by { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 1.5rem; }
-.pillar-by b { color: var(--blue-light); font-weight: 500; }
-.pillar h4 { font-size: 0.78rem; font-weight: 600; color: var(--text-bright); margin: 1.25rem 0 0.5rem; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase; }
-.pillar ol { padding-left: 1.25rem; margin: 0.5rem 0 0.75rem; }
-.pillar ol li { margin-bottom: 0.35rem; color: var(--text-secondary); font-size: 0.95rem; line-height: 1.65; }
-.pillar ol li::marker { color: var(--cyan-accent); font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; }
-
-/* Rain table */
-.rain-table { width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 2rem; background: var(--bg-card); border: 1px solid var(--border-mid); border-radius: 12px; overflow: hidden; }
-.rain-table th, .rain-table td { padding: 1rem 1.1rem; text-align: left; border-bottom: 1px solid var(--border-subtle); vertical-align: top; }
-.rain-table tr:last-child td { border-bottom: none; }
-.rain-table th { font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-muted); background: rgba(99, 140, 255, 0.04); font-weight: 500; }
-.rain-table td { font-size: 0.92rem; color: var(--text-secondary); line-height: 1.55; }
-.rain-table td.num { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--purple-light); width: 4%; }
-.rain-table td.author { color: var(--text-bright); font-weight: 500; width: 18%; }
-.rain-table td.author small { display: block; color: var(--text-muted); font-weight: 400; font-size: 0.78rem; margin-top: 0.15rem; }
-.rain-table td.title { font-family: 'Instrument Serif', Georgia, serif; font-style: italic; color: var(--text-primary); font-size: 1.02rem; width: 38%; line-height: 1.3; }
-.rain-table td.job { width: 40%; }
-.rain-table tr.optional td { opacity: 0.7; background: rgba(99, 140, 255, 0.015); }
-.rain-table tr.optional td.num::after { content: ' ·'; color: var(--amber-accent); }
-
-/* Schedule grid */
-.schedule { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 2.5rem; }
-.week-card { background: var(--bg-card); border: 1px solid var(--border-mid); border-radius: 10px; padding: 1.25rem 1.25rem 1.4rem; }
-.week-card-h { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--purple-primary); margin-bottom: 0.85rem; }
-.week-card-row { font-size: 0.85rem; color: var(--text-secondary); padding: 0.4rem 0; border-bottom: 1px dashed var(--border-subtle); display: flex; gap: 0.6rem; }
-.week-card-row:last-child { border-bottom: none; }
-.week-card-row b { color: var(--blue-light); font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; font-weight: 500; min-width: 26px; }
-
-/* Pushback cards */
-.push-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-top: 2rem; }
-.push-card { background: var(--bg-card); border: 1px solid var(--border-mid); border-left: 3px solid var(--amber-accent); border-radius: 10px; padding: 1.5rem 1.5rem 1.4rem; }
-.push-h { font-family: 'Instrument Serif', Georgia, serif; font-size: 1.35rem; line-height: 1.2; color: var(--text-bright); margin-bottom: 0.65rem; }
-.push-p { font-size: 0.9rem; color: var(--text-secondary); line-height: 1.65; margin: 0; }
-
-/* Production block (the meta-loop) */
-.prod {
-  margin-top: 2rem;
-  padding: 1.75rem 2rem;
-  background: var(--bg-card);
-  border: 1px solid var(--border-mid);
-  border-radius: 12px;
+.spine::before {
+  content: ''; position: absolute; top: -50%; right: -30%;
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(0, 255, 255, 0.08) 0%, transparent 60%);
+  pointer-events: none;
 }
-.prod-h { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--cyan-accent); margin-bottom: 1rem; }
-.prod ul { padding-left: 0; list-style: none; margin: 0; }
-.prod li { font-size: 0.95rem; color: var(--text-secondary); padding: 0.45rem 0; border-bottom: 1px dashed var(--border-subtle); }
-.prod li:last-child { border-bottom: none; }
-.prod li b { color: var(--blue-light); font-weight: 500; font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; letter-spacing: 0.05em; }
+.spine-label {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.6rem;
+  letter-spacing: 0.2em; text-transform: uppercase; color: var(--d3-aqua);
+  margin-bottom: 1rem; position: relative;
+}
+.spine-quote {
+  font-family: 'Instrument Serif', Georgia, serif; font-style: italic;
+  font-size: clamp(1.6rem, 3vw, 2.2rem); line-height: 1.2;
+  color: var(--text-bright); position: relative; max-width: 900px;
+}
+.spine-quote em {
+  font-style: italic;
+  background: var(--gradient-aqua);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
 
-/* Today block */
+/* ─── Thread visualization ─── */
+.thread {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem;
+  margin-top: 2.5rem; position: relative;
+}
+.thread::before {
+  content: ''; position: absolute; top: 50%; left: 5%; right: 5%; height: 1px;
+  background: linear-gradient(90deg,
+    transparent, var(--d3-light-blue) 20%,
+    var(--d3-light-blue) 80%, transparent);
+  opacity: 0.3; z-index: 0;
+}
+.beat {
+  background: var(--bg-card); border: 1px solid var(--border-mid);
+  border-radius: 14px; padding: 1.75rem 1.5rem 1.5rem;
+  position: relative; z-index: 1;
+  transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+  display: flex; flex-direction: column;
+}
+.beat:hover {
+  transform: translateY(-4px); border-color: var(--border-accent);
+  box-shadow: var(--shadow-elevated);
+}
+.beat-status {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.55rem;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  padding: 0.3rem 0.6rem; border-radius: 4px;
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  align-self: flex-start; margin-bottom: 1rem;
+}
+.beat-status.shipped { background: rgba(52, 211, 153, 0.15); color: #6ee7b7; border: 1px solid rgba(52, 211, 153, 0.3); }
+.beat-status.shipped::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: #6ee7b7; }
+.beat-status.draft   { background: rgba(0, 255, 255, 0.12); color: var(--d3-aqua); border: 1px solid rgba(0, 255, 255, 0.3); }
+.beat-status.draft::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: var(--d3-aqua); animation: pulse-dot 2s ease-in-out infinite; }
+
+.beat-num {
+  font-family: 'Instrument Serif', Georgia, serif; font-style: italic;
+  font-size: 4rem; line-height: 0.8; opacity: 0.18;
+  background: var(--gradient-aqua);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+  position: absolute; top: 1rem; right: 1.25rem;
+}
+.beat-tag {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.62rem;
+  letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-muted);
+  margin-bottom: 0.4rem;
+}
+.beat-h {
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-size: 1.65rem; line-height: 1.15; color: var(--text-bright);
+  margin-bottom: 0.5rem; min-height: 3.6rem;
+}
+.beat-byline {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.7rem;
+  color: var(--d3-light-blue); margin-bottom: 1rem;
+  letter-spacing: 0.04em;
+}
+.beat-byline b { color: var(--d3-pale-blue); font-weight: 500; }
+.beat-quote {
+  font-size: 0.9rem; color: var(--text-secondary);
+  font-style: italic; line-height: 1.55; margin-bottom: 1.25rem;
+  border-left: 2px solid var(--d3-light-blue); padding-left: 0.85rem;
+}
+.beat-link {
+  margin-top: auto;
+  font-family: 'JetBrains Mono', monospace; font-size: 0.68rem;
+  color: var(--d3-light-blue); text-decoration: none;
+  letter-spacing: 0.05em; padding-top: 0.85rem; border-top: 1px dashed var(--border-mid);
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  transition: color 0.2s ease, gap 0.2s ease;
+}
+.beat-link:hover { color: var(--d3-aqua); gap: 0.65rem; }
+.beat-link::after { content: '→'; font-size: 0.85rem; transition: transform 0.2s ease; }
+.beat-link:hover::after { transform: translateX(2px); }
+
+/* ─── Three-beat spine cards ─── */
+.three-beats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; margin-top: 2.5rem; }
+.beat-card {
+  background: var(--bg-card); border: 1px solid var(--border-mid);
+  border-radius: 14px; padding: 2rem 1.75rem; position: relative; overflow: hidden;
+  transition: all 0.3s ease;
+}
+.beat-card:hover { transform: translateY(-3px); border-color: var(--border-accent); box-shadow: var(--shadow-elevated); }
+.beat-card-num {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.62rem;
+  letter-spacing: 0.18em; color: var(--d3-aqua); margin-bottom: 0.75rem;
+}
+.beat-card-h {
+  font-family: 'Instrument Serif', Georgia, serif; font-style: italic;
+  font-size: 2.2rem; line-height: 1; margin-bottom: 1rem;
+  background: var(--gradient-aqua);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.beat-card-p { font-size: 0.95rem; color: var(--text-secondary); line-height: 1.6; }
+.beat-card-attr {
+  margin-top: 1.25rem; padding-top: 1rem; border-top: 1px dashed var(--border-mid);
+  font-family: 'JetBrains Mono', monospace; font-size: 0.6rem;
+  letter-spacing: 0.1em; color: var(--text-muted);
+}
+.beat-card-attr b { color: var(--d3-light-blue); font-weight: 500; }
+
+/* ─── Pillar preview card ─── */
+.pillar-preview {
+  background:
+    linear-gradient(135deg, rgba(0, 255, 255, 0.06), rgba(0, 174, 255, 0.04)),
+    var(--bg-card);
+  border: 1px solid var(--border-accent); border-radius: 18px;
+  padding: 2.5rem; margin-top: 2.5rem; position: relative;
+  box-shadow: var(--shadow-glow);
+}
+.pillar-flag {
+  position: absolute; top: -1px; left: 2.5rem;
+  font-family: 'JetBrains Mono', monospace; font-size: 0.6rem;
+  letter-spacing: 0.18em; text-transform: uppercase; color: var(--d3-blue-black);
+  padding: 0.4rem 0.9rem; border-radius: 0 0 6px 6px;
+  background: var(--gradient-aqua); font-weight: 600;
+}
+.pillar-h {
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-size: 2rem; line-height: 1.15; color: var(--text-bright); margin: 1rem 0 0.4rem;
+}
+.pillar-byline {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.7rem;
+  letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 1.5rem;
+}
+.pillar-byline b { color: var(--d3-light-blue); font-weight: 500; }
+.pillar-arc { padding: 1.5rem 0; }
+.pillar-arc h4 {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.65rem;
+  letter-spacing: 0.18em; text-transform: uppercase; color: var(--d3-aqua);
+  margin-bottom: 0.85rem;
+}
+.pillar-arc ol { padding-left: 1.4rem; margin: 0; }
+.pillar-arc ol li {
+  margin-bottom: 0.55rem; color: var(--text-secondary);
+  font-size: 0.95rem; line-height: 1.65;
+}
+.pillar-arc ol li::marker { color: var(--d3-aqua); font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; }
+.pillar-arc ol li b { color: var(--text-bright); font-weight: 500; }
+.pillar-cta {
+  display: inline-flex; align-items: center; gap: 0.55rem;
+  margin-top: 1.5rem; padding: 0.85rem 1.4rem; border-radius: 8px;
+  background: var(--gradient-aqua); color: var(--d3-blue-black);
+  font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 0.92rem;
+  text-decoration: none; transition: all 0.2s ease;
+  box-shadow: 0 4px 20px rgba(0, 255, 255, 0.25);
+}
+.pillar-cta:hover { transform: translateY(-1px); box-shadow: 0 6px 28px rgba(0, 255, 255, 0.4); }
+.pillar-cta::after { content: '→'; font-size: 1rem; }
+
+/* ─── Rain table (blog posts) ─── */
+.rain-grid { display: grid; grid-template-columns: 1fr; gap: 0.8rem; margin-top: 2.25rem; }
+.rain-row {
+  display: grid; grid-template-columns: 50px 200px 1fr 110px; gap: 1.25rem;
+  background: var(--bg-card); border: 1px solid var(--border-subtle);
+  border-radius: 10px; padding: 1.1rem 1.4rem;
+  align-items: center;
+  transition: all 0.25s ease;
+}
+.rain-row:hover {
+  border-color: var(--border-accent); background: var(--bg-card-hover);
+  transform: translateX(4px);
+}
+.rain-row .rrnum {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.7rem;
+  letter-spacing: 0.05em; color: var(--d3-aqua);
+}
+.rain-row .rrauthor {
+  color: var(--text-bright); font-weight: 500; font-size: 0.95rem;
+}
+.rain-row .rrauthor small { display: block; color: var(--text-muted); font-weight: 400; font-size: 0.74rem; margin-top: 0.15rem; }
+.rain-row .rrtitle {
+  font-family: 'Instrument Serif', Georgia, serif; font-style: italic;
+  color: var(--text-primary); font-size: 1.02rem; line-height: 1.35;
+}
+.rain-row .rrtitle small { display: block; color: var(--text-secondary); font-style: normal; font-family: 'DM Sans', sans-serif; font-size: 0.8rem; margin-top: 0.3rem; line-height: 1.5; }
+.rain-row .rrstatus {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.55rem;
+  letter-spacing: 0.15em; text-transform: uppercase;
+  padding: 0.3rem 0.55rem; border-radius: 4px;
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  justify-self: end;
+}
+.rain-row .rrstatus.shipped { background: rgba(52, 211, 153, 0.12); color: #6ee7b7; border: 1px solid rgba(52, 211, 153, 0.25); }
+.rain-row .rrstatus.shipped::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: #6ee7b7; }
+.rain-row .rrstatus.draft   { background: rgba(0, 255, 255, 0.10); color: var(--d3-aqua); border: 1px solid rgba(0, 255, 255, 0.25); }
+.rain-row .rrstatus.draft::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: var(--d3-aqua); }
+.rain-row .rrstatus.briefed { background: rgba(0, 174, 255, 0.10); color: var(--d3-light-blue); border: 1px solid rgba(0, 174, 255, 0.25); }
+.rain-row .rrstatus.briefed::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: var(--d3-light-blue); }
+.rain-row .rrstatus.optional { background: rgba(251, 191, 36, 0.08); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.2); }
+.rain-row .rrstatus.optional::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: #fbbf24; }
+
+/* ─── KB tile grid (interactive) ─── */
+.kb-controls {
+  display: flex; gap: 0.6rem; flex-wrap: wrap; align-items: center;
+  margin: 2rem 0 1.5rem;
+}
+.kb-tabs { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+.kb-tab {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.68rem;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 0.5rem 0.95rem; border-radius: 7px;
+  border: 1px solid var(--border-mid); background: var(--bg-card);
+  color: var(--text-secondary); cursor: pointer; transition: all 0.2s ease;
+  white-space: nowrap;
+}
+.kb-tab:hover { border-color: var(--border-accent); color: var(--text-primary); }
+.kb-tab.active {
+  background: var(--gradient-aqua); color: var(--d3-blue-black);
+  border-color: transparent; font-weight: 600;
+  box-shadow: 0 4px 16px rgba(0, 255, 255, 0.3);
+}
+.kb-tab .count {
+  display: inline-block; margin-left: 0.4rem; padding: 0.1rem 0.4rem;
+  background: rgba(0, 0, 0, 0.18); border-radius: 8px;
+  font-size: 0.62rem;
+}
+.kb-search {
+  flex: 1; min-width: 220px;
+  font-family: 'DM Sans', sans-serif; font-size: 0.92rem;
+  padding: 0.6rem 0.95rem; border-radius: 7px;
+  border: 1px solid var(--border-mid); background: var(--bg-card);
+  color: var(--text-primary); transition: all 0.2s ease;
+}
+.kb-search:focus { outline: none; border-color: var(--d3-light-blue); box-shadow: 0 0 0 3px rgba(0, 174, 255, 0.15); }
+.kb-search::placeholder { color: var(--text-muted); }
+
+.kb-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem; margin-top: 0.5rem;
+}
+.kb-tile {
+  background: var(--bg-card); border: 1px solid var(--border-subtle);
+  border-radius: 12px; padding: 1.4rem 1.4rem 1.25rem;
+  cursor: pointer; transition: all 0.25s ease;
+  display: flex; flex-direction: column; gap: 0.85rem;
+  position: relative; overflow: hidden;
+}
+.kb-tile::before {
+  content: ''; position: absolute; top: 0; left: 0; width: 3px; height: 0;
+  background: var(--gradient-aqua); transition: height 0.3s ease;
+}
+.kb-tile:hover {
+  transform: translateY(-3px); border-color: var(--border-accent);
+  background: var(--bg-card-hover); box-shadow: var(--shadow-elevated);
+}
+.kb-tile:hover::before { height: 100%; }
+.kb-tile.expanded {
+  grid-column: span 2; transform: none;
+  border-color: var(--d3-light-blue); background: var(--bg-card-hover);
+}
+.kb-tile.expanded::before { height: 100%; }
+.kb-tile.hidden { display: none; }
+
+.kb-tile-cat {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.55rem;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  align-self: flex-start; padding: 0.25rem 0.55rem; border-radius: 4px;
+}
+.kb-tile-cat[data-cat="squad"]    { background: rgba(0, 174, 255, 0.12); color: var(--d3-light-blue); }
+.kb-tile-cat[data-cat="buying"]   { background: rgba(0, 255, 255, 0.12); color: var(--d3-aqua); }
+.kb-tile-cat[data-cat="lifecycle"]{ background: rgba(115, 0, 255, 0.18); color: #c4a8ff; }
+.kb-tile-cat[data-cat="customer"] { background: rgba(255, 183, 255, 0.14); color: #ffb7ff; }
+
+.kb-tile-q {
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-size: 1.15rem; line-height: 1.25; color: var(--text-bright);
+  font-style: italic;
+}
+.kb-tile-meta {
+  display: flex; gap: 0.85rem; align-items: center;
+  font-family: 'JetBrains Mono', monospace; font-size: 0.6rem;
+  letter-spacing: 0.08em; color: var(--text-muted);
+  margin-top: auto;
+}
+.kb-tile-meta b { color: var(--d3-light-blue); font-weight: 500; }
+
+.kb-preview {
+  display: none; padding: 1rem 0 0; border-top: 1px dashed var(--border-mid);
+  margin-top: 0.5rem;
+  font-size: 0.88rem; color: var(--text-secondary); line-height: 1.6;
+}
+.kb-tile.expanded .kb-preview { display: block; animation: fadeUp 0.3s ease forwards; }
+
+.kb-empty {
+  padding: 3rem 1rem; text-align: center; color: var(--text-muted);
+  font-size: 0.9rem; grid-column: 1 / -1;
+}
+
+/* ─── Cadence schedule ─── */
+.schedule { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 2.5rem; }
+.week-card {
+  background: var(--bg-card); border: 1px solid var(--border-mid);
+  border-radius: 12px; padding: 1.4rem 1.4rem 1.5rem;
+  transition: all 0.25s ease;
+}
+.week-card:hover { border-color: var(--border-accent); transform: translateY(-2px); }
+.week-card-h {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.65rem;
+  letter-spacing: 0.18em; text-transform: uppercase; color: var(--d3-aqua);
+  margin-bottom: 0.95rem; padding-bottom: 0.6rem; border-bottom: 1px solid var(--border-subtle);
+}
+.week-card-row {
+  font-size: 0.86rem; color: var(--text-secondary);
+  padding: 0.45rem 0; display: flex; gap: 0.6rem;
+}
+.week-card-row b {
+  color: var(--d3-light-blue); font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem; font-weight: 500; min-width: 28px;
+}
+
+/* ─── Pushback cards ─── */
+.push-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-top: 2rem; }
+.push-card {
+  background: var(--bg-card); border: 1px solid var(--border-mid);
+  border-left: 3px solid #fbbf24; border-radius: 12px;
+  padding: 1.6rem 1.6rem 1.5rem;
+  transition: all 0.25s ease;
+}
+.push-card:hover { transform: translateY(-2px); border-left-color: var(--d3-aqua); }
+.push-h {
+  font-family: 'Instrument Serif', Georgia, serif; font-size: 1.4rem;
+  line-height: 1.2; color: var(--text-bright); margin-bottom: 0.7rem;
+}
+.push-p { font-size: 0.92rem; color: var(--text-secondary); line-height: 1.65; margin: 0; }
+
+/* ─── Production block ─── */
+.prod {
+  margin-top: 2rem; padding: 2rem 2.25rem;
+  background: var(--bg-card); border: 1px solid var(--border-mid); border-radius: 14px;
+}
+.prod-h {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.65rem;
+  letter-spacing: 0.18em; text-transform: uppercase; color: var(--d3-aqua);
+  margin-bottom: 1.25rem;
+}
+.prod ul { padding-left: 0; list-style: none; margin: 0; }
+.prod li {
+  font-size: 0.95rem; color: var(--text-secondary);
+  padding: 0.65rem 0; border-bottom: 1px dashed var(--border-subtle);
+}
+.prod li:last-child { border-bottom: none; }
+.prod li b {
+  color: var(--d3-light-blue); font-weight: 500;
+  font-family: 'JetBrains Mono', monospace; font-size: 0.78rem;
+  letter-spacing: 0.04em; margin-right: 0.5rem;
+}
+
+/* ─── Today/asks block ─── */
 .today { margin-top: 2rem; counter-reset: today; }
-.today-row { display: flex; gap: 1.25rem; padding: 1rem 0; border-bottom: 1px dashed var(--border-mid); align-items: flex-start; }
+.today-row {
+  display: flex; gap: 1.5rem; padding: 1.1rem 0;
+  border-bottom: 1px dashed var(--border-mid); align-items: flex-start;
+}
 .today-row:last-child { border-bottom: none; }
-.today-row::before { counter-increment: today; content: counter(today, decimal-leading-zero); font-family: 'JetBrains Mono', monospace; font-size: 0.95rem; color: var(--purple-light); min-width: 28px; padding-top: 0.1rem; }
+.today-row::before {
+  counter-increment: today; content: counter(today, decimal-leading-zero);
+  font-family: 'JetBrains Mono', monospace; font-size: 1rem;
+  background: var(--gradient-aqua);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+  min-width: 32px; padding-top: 0.05rem; font-weight: 600;
+}
 .today-text { font-size: 0.97rem; color: var(--text-secondary); line-height: 1.65; }
 .today-text b { color: var(--text-bright); font-weight: 500; }
-
-/* CTA */
-.cta-block {
-  margin-top: 2.5rem;
-  padding: 2.75rem 2.5rem;
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.08), rgba(139, 92, 246, 0.08)), var(--bg-card);
-  border: 1px solid var(--border-accent);
-  border-radius: 14px;
-  text-align: center;
-  box-shadow: var(--shadow-elevated);
+.today-text code {
+  color: var(--d3-aqua); font-family: 'JetBrains Mono', monospace;
+  font-size: 0.86rem; background: rgba(0, 255, 255, 0.08);
+  padding: 0.1rem 0.45rem; border-radius: 4px;
 }
-.cta-h { font-family: 'Instrument Serif', Georgia, serif; font-size: 1.85rem; line-height: 1.15; color: var(--text-bright); margin-bottom: 0.75rem; max-width: 700px; margin-left: auto; margin-right: auto; }
-.cta-h em { font-style: italic; background: var(--gradient-brand); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-.cta-p { font-size: 1rem; color: var(--text-secondary); max-width: 620px; margin: 0 auto 1.5rem; line-height: 1.65; }
+
+/* ─── CTA ─── */
+.cta-block {
+  margin-top: 3rem; padding: 3rem 2.75rem;
+  background:
+    linear-gradient(135deg, rgba(0, 174, 255, 0.10), rgba(115, 0, 255, 0.08)),
+    var(--bg-card);
+  border: 1px solid var(--border-accent); border-radius: 18px;
+  text-align: center; box-shadow: var(--shadow-elevated);
+  position: relative; overflow: hidden;
+}
+.cta-block::before {
+  content: ''; position: absolute; top: -50%; left: -20%;
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(0, 255, 255, 0.10) 0%, transparent 60%);
+  pointer-events: none;
+}
+.cta-h {
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-size: clamp(1.8rem, 3.5vw, 2.2rem); line-height: 1.15;
+  color: var(--text-bright); margin-bottom: 0.8rem;
+  max-width: 760px; margin-left: auto; margin-right: auto;
+  position: relative;
+}
+.cta-h em {
+  font-style: italic;
+  background: var(--gradient-aqua);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.cta-p {
+  font-size: 1.05rem; color: var(--text-secondary);
+  max-width: 640px; margin: 0 auto 2rem; line-height: 1.65;
+  position: relative;
+}
+.cta-block .cta-link {
+  display: inline-flex; align-items: center; gap: 0.6rem;
+  padding: 1rem 1.85rem; border-radius: 10px;
+  background: var(--gradient-aqua); color: var(--d3-blue-black);
+  font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 1rem;
+  text-decoration: none; transition: all 0.2s ease;
+  box-shadow: 0 6px 24px rgba(0, 255, 255, 0.3); position: relative;
+}
+.cta-block .cta-link:hover { transform: translateY(-2px); box-shadow: 0 10px 36px rgba(0, 255, 255, 0.45); }
+.cta-block .cta-link::after { content: '→'; font-size: 1.1rem; }
+.cta-foot {
+  margin-top: 1.5rem; font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem; letter-spacing: 0.12em; color: var(--text-muted);
+  text-transform: uppercase; position: relative;
+}
 
 /* Footer */
-.foot { padding: 3rem 0 2rem; border-top: 1px solid var(--border-subtle); font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; letter-spacing: 0.1em; color: var(--text-muted); text-align: center; }
+.foot {
+  padding: 4rem 0 2.5rem; border-top: 1px solid var(--border-subtle);
+  font-family: 'JetBrains Mono', monospace; font-size: 0.62rem;
+  letter-spacing: 0.14em; color: var(--text-muted); text-align: center;
+}
+.foot b { color: var(--d3-light-blue); font-weight: 600; }
 
-/* Editor styles */
+/* ─── Editor styles (preserved) ─── */
 [data-block-id] { cursor: pointer; transition: outline 0.15s ease, outline-offset 0.15s ease; outline: 2px dashed transparent; outline-offset: 3px; border-radius: 3px; }
-[data-block-id]:hover { outline-color: rgba(59, 130, 246, 0.35); }
-[data-block-id].editing { outline: 2px solid var(--blue-primary) !important; outline-offset: 4px; background: rgba(59, 130, 246, 0.04) !important; }
+[data-block-id]:hover { outline-color: rgba(0, 174, 255, 0.35); }
+[data-block-id].editing { outline: 2px solid var(--d3-light-blue) !important; outline-offset: 4px; background: rgba(0, 174, 255, 0.05) !important; }
 [data-block-id].deleted { opacity: 0; max-height: 0; overflow: hidden; padding: 0 !important; margin: 0 !important; border: none !important; pointer-events: none; transition: opacity 0.3s, max-height 0.3s; }
 body.show-deleted [data-block-id].deleted { opacity: 0.35; max-height: 500px; overflow: visible; text-decoration: line-through; pointer-events: auto; padding: revert !important; margin: revert !important; position: relative; }
-body.show-deleted [data-block-id].deleted::after { content: 'DELETED'; position: absolute; top: -6px; right: -6px; font-family: 'JetBrains Mono', monospace; font-size: 0.5rem; letter-spacing: 0.1em; color: var(--rose-accent); background: rgba(251, 113, 133, 0.15); padding: 0.1rem 0.4rem; border-radius: 3px; text-decoration: none; }
+body.show-deleted [data-block-id].deleted::after { content: 'DELETED'; position: absolute; top: -6px; right: -6px; font-family: 'JetBrains Mono', monospace; font-size: 0.5rem; letter-spacing: 0.1em; color: #fb7185; background: rgba(251, 113, 133, 0.15); padding: 0.1rem 0.4rem; border-radius: 3px; text-decoration: none; }
 .edit-toolbar { position: fixed; z-index: 9999; display: flex; gap: 0.35rem; padding: 0.4rem; background: var(--bg-elevated); border: 1px solid var(--border-accent); border-radius: 8px; box-shadow: 0 8px 32px rgba(0,0,0,0.5); animation: toolbar-in 0.15s ease; }
 @keyframes toolbar-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
 .edit-toolbar button { font-family: 'JetBrains Mono', monospace; font-size: 0.62rem; letter-spacing: 0.05em; text-transform: uppercase; padding: 0.35rem 0.7rem; border: 1px solid transparent; border-radius: 5px; cursor: pointer; transition: all 0.15s ease; white-space: nowrap; }
-.edit-toolbar .btn-save { background: rgba(52, 211, 153, 0.15); color: var(--green-accent); border-color: rgba(52, 211, 153, 0.3); }
+.edit-toolbar .btn-save { background: rgba(52, 211, 153, 0.15); color: #34d399; border-color: rgba(52, 211, 153, 0.3); }
 .edit-toolbar .btn-save:hover { background: rgba(52, 211, 153, 0.25); }
 .edit-toolbar .btn-cancel { background: rgba(148, 163, 184, 0.1); color: var(--text-secondary); border-color: rgba(148, 163, 184, 0.2); }
 .edit-toolbar .btn-cancel:hover { background: rgba(148, 163, 184, 0.2); }
-.edit-toolbar .btn-delete { background: rgba(251, 113, 133, 0.1); color: var(--rose-accent); border-color: rgba(251, 113, 133, 0.2); }
+.edit-toolbar .btn-delete { background: rgba(251, 113, 133, 0.1); color: #fb7185; border-color: rgba(251, 113, 133, 0.2); }
 .edit-toolbar .btn-delete:hover { background: rgba(251, 113, 133, 0.2); }
-.edit-toolbar .btn-restore { background: rgba(59, 130, 246, 0.15); color: var(--blue-light); border-color: rgba(59, 130, 246, 0.3); }
-.edit-toolbar .btn-restore:hover { background: rgba(59, 130, 246, 0.25); }
-@keyframes save-flash { 0% { outline-color: var(--green-accent); } 100% { outline-color: transparent; } }
+.edit-toolbar .btn-restore { background: rgba(0, 174, 255, 0.15); color: var(--d3-light-blue); border-color: rgba(0, 174, 255, 0.3); }
+.edit-toolbar .btn-restore:hover { background: rgba(0, 174, 255, 0.25); }
+@keyframes save-flash { 0% { outline-color: #34d399; } 100% { outline-color: transparent; } }
 [data-block-id].just-saved { animation: save-flash 0.8s ease; }
-.changes-trigger { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 998; font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; letter-spacing: 0.05em; padding: 0.5rem 1rem; border-radius: 8px; border: 1px solid var(--border-mid); background: var(--bg-elevated); color: var(--text-secondary); cursor: pointer; transition: all 0.2s ease; box-shadow: 0 4px 16px rgba(0,0,0,0.4); }
+.changes-trigger { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 998; font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; letter-spacing: 0.05em; padding: 0.55rem 1.1rem; border-radius: 8px; border: 1px solid var(--border-mid); background: var(--bg-elevated); color: var(--text-secondary); cursor: pointer; transition: all 0.2s ease; box-shadow: 0 4px 16px rgba(0,0,0,0.4); }
 .changes-trigger:hover { border-color: var(--border-accent); color: var(--text-primary); }
-.changes-trigger.has-changes { border-color: rgba(59, 130, 246, 0.4); color: var(--blue-light); }
-.changes-panel { position: fixed; bottom: 4rem; right: 1.5rem; z-index: 997; width: 360px; max-height: 60vh; background: var(--bg-card); border: 1px solid var(--border-accent); border-radius: 12px; box-shadow: 0 8px 40px rgba(0,0,0,0.6); display: none; flex-direction: column; overflow: hidden; animation: panel-in 0.2s ease; }
-.changes-panel.open { display: flex; }
+.changes-trigger.has-changes { border-color: rgba(0, 174, 255, 0.4); color: var(--d3-light-blue); }
+.changes-panel { position: fixed; bottom: 4.2rem; right: 1.5rem; z-index: 997; width: 360px; max-height: 60vh; background: var(--bg-card); border: 1px solid var(--border-accent); border-radius: 12px; box-shadow: 0 8px 40px rgba(0,0,0,0.6); display: none; flex-direction: column; overflow: hidden; }
+.changes-panel.open { display: flex; animation: panel-in 0.2s ease; }
 @keyframes panel-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-.changes-panel-header { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-subtle); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+.changes-panel-header { padding: 0.85rem 1rem; border-bottom: 1px solid var(--border-subtle); display: flex; align-items: center; justify-content: space-between; }
 .changes-panel-title { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); }
-.changes-panel-actions { display: flex; gap: 0.5rem; align-items: center; }
 .changes-panel-actions button { font-family: 'JetBrains Mono', monospace; font-size: 0.55rem; letter-spacing: 0.05em; text-transform: uppercase; padding: 0.25rem 0.5rem; border-radius: 4px; border: 1px solid transparent; cursor: pointer; transition: all 0.15s ease; }
 .btn-show-deleted { background: rgba(251, 113, 133, 0.08); color: var(--text-muted); border-color: rgba(251, 113, 133, 0.15); }
-.btn-show-deleted:hover, .btn-show-deleted.active { background: rgba(251, 113, 133, 0.15); color: var(--rose-accent); border-color: rgba(251, 113, 133, 0.3); }
+.btn-show-deleted:hover, .btn-show-deleted.active { background: rgba(251, 113, 133, 0.15); color: #fb7185; border-color: rgba(251, 113, 133, 0.3); }
 .changes-panel-body { overflow-y: auto; padding: 0.5rem; flex: 1; }
 .changes-panel-empty { padding: 2rem 1rem; text-align: center; font-size: 0.8rem; color: var(--text-muted); }
 .change-item { display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0.6rem; border-radius: 6px; margin-bottom: 0.25rem; transition: background 0.15s; }
-.change-item:hover { background: rgba(99, 140, 255, 0.05); }
+.change-item:hover { background: rgba(0, 174, 255, 0.06); }
 .change-badge { font-family: 'JetBrains Mono', monospace; font-size: 0.5rem; letter-spacing: 0.05em; text-transform: uppercase; padding: 0.15rem 0.35rem; border-radius: 3px; flex-shrink: 0; font-weight: 600; }
-.change-badge.edited { background: rgba(59, 130, 246, 0.12); color: var(--blue-light); }
-.change-badge.deleted-badge { background: rgba(251, 113, 133, 0.12); color: var(--rose-accent); }
+.change-badge.edited { background: rgba(0, 174, 255, 0.15); color: var(--d3-light-blue); }
+.change-badge.deleted-badge { background: rgba(251, 113, 133, 0.15); color: #fb7185; }
 .change-label { font-size: 0.72rem; color: var(--text-secondary); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; }
 .change-label:hover { color: var(--text-primary); }
-.change-reset { font-family: 'JetBrains Mono', monospace; font-size: 0.5rem; letter-spacing: 0.05em; text-transform: uppercase; padding: 0.2rem 0.4rem; border-radius: 3px; border: 1px solid rgba(251, 191, 36, 0.2); background: rgba(251, 191, 36, 0.08); color: var(--amber-accent); cursor: pointer; flex-shrink: 0; transition: all 0.15s; }
+.change-reset { font-family: 'JetBrains Mono', monospace; font-size: 0.5rem; letter-spacing: 0.05em; text-transform: uppercase; padding: 0.2rem 0.4rem; border-radius: 3px; border: 1px solid rgba(251, 191, 36, 0.2); background: rgba(251, 191, 36, 0.08); color: #fbbf24; cursor: pointer; flex-shrink: 0; transition: all 0.15s; }
 .change-reset:hover { background: rgba(251, 191, 36, 0.18); }
 
+/* Print + responsive */
 @media print {
   body { background: #fff; color: #111; }
   body::before, body::after { display: none; }
-  .doc-nav, .changes-trigger, .changes-panel, .edit-toolbar, .edit-status { display: none !important; }
+  .doc-nav, .changes-trigger, .changes-panel, .edit-toolbar, .edit-status, .kb-controls { display: none !important; }
   .page-wrapper { max-width: 100%; padding: 0 1cm; }
   .hero { padding: 2cm 0 1cm; }
   .section { padding: 1.5cm 0; break-inside: avoid; }
@@ -263,15 +728,13 @@ body.show-deleted [data-block-id].deleted::after { content: 'DELETED'; position:
   .hero h1, h2, h3, h4 { color: #111 !important; }
   [data-block-id] { outline: none !important; cursor: default; }
 }
-@media (max-width: 768px) {
-  .hero h1 { font-size: 2.4rem; }
-  .hero-subtitle { font-size: 1rem; }
-  .section h2 { font-size: 1.75rem; }
-  .schedule { grid-template-columns: 1fr; }
+@media (max-width: 900px) {
+  .thread, .three-beats, .schedule { grid-template-columns: 1fr; }
   .push-grid { grid-template-columns: 1fr; }
-  .rain-table th, .rain-table td { padding: 0.7rem 0.6rem; font-size: 0.8rem; }
-  .rain-table td.title { font-size: 0.92rem; }
-  .cta-block { padding: 2rem 1.25rem; }
+  .rain-row { grid-template-columns: 1fr; gap: 0.5rem; }
+  .rain-row .rrstatus { justify-self: start; }
+  .kb-tile.expanded { grid-column: span 1; }
+  .pillar-preview { padding: 1.75rem 1.25rem; }
 }
 </style>
 </head>
@@ -281,10 +744,10 @@ body.show-deleted [data-block-id].deleted::after { content: 'DELETED'; position:
   <!-- Nav -->
   <nav class="doc-nav">
     <div class="nav-inner">
-      <div class="nav-brand">Data<span>#</span>3 &mdash; AI Practice</div>
+      <div class="nav-brand">DATA<b>#</b>3 &middot; AI PRACTICE &middot; CAMPAIGN PROPOSAL</div>
       <div class="nav-right">
         <span class="edit-status" id="editStatus"></span>
-        <div class="nav-status">Internal &middot; Working Draft</div>
+        <div class="nav-status">Working Draft &middot; v0.2</div>
       </div>
     </div>
   </nav>
@@ -292,240 +755,430 @@ body.show-deleted [data-block-id].deleted::after { content: 'DELETED'; position:
   <!-- Hero -->
   <header class="hero">
     <div class="hero-eyebrow" data-block-id="hero-eyebrow">Knowledge Centre &middot; MSFT &times; AI</div>
-    <h1 data-block-id="hero-h1">A content <em>rain</em>, not a post.</h1>
-    <p class="hero-subtitle" data-block-id="hero-sub">Scott asked Mark and Matt for a Knowledge Centre piece. Amanda asked for as much as we can publish, fast. This is the proposal: a multi-author, multi-week series with one editorial spine &mdash; written for customers, reusable by sales, and proof-of-pattern for the squad model itself.</p>
+    <h1>
+      <span class="build" data-block-id="hero-build">Build it.</span>
+      <span class="ship" data-block-id="hero-ship">Ship it.</span>
+      <span class="boring" data-block-id="hero-boring">Make it boring.</span>
+    </h1>
+    <p class="hero-subtitle" data-block-id="hero-sub">The campaign isn&rsquo;t starting. <b>It&rsquo;s two posts in.</b> Adam called it on March&nbsp;4. Jack said how on April&nbsp;27. Scott&rsquo;s up next. Here&rsquo;s where it goes from here &mdash; the spine, the pillar, the rain, and the always-on KB layer underneath.</p>
     <div class="hero-meta">
-      <span data-block-id="hero-meta-1"><b>Length</b> &middot; 6 weeks</span>
-      <span data-block-id="hero-meta-2"><b>Posts</b> &middot; 9 (1 pillar + 8 follow-ups)</span>
-      <span data-block-id="hero-meta-3"><b>Authors</b> &middot; 7 named voices</span>
-      <span data-block-id="hero-meta-4"><b>Cadence</b> &middot; Tue + Thu</span>
-      <span data-block-id="hero-meta-5"><b>Audience</b> &middot; Customers + sales reps</span>
+      <span data-block-id="hero-m1"><b>2</b> already published</span>
+      <span data-block-id="hero-m2"><b>8</b> follow-up posts</span>
+      <span data-block-id="hero-m3"><b>20</b> KB articles</span>
+      <span data-block-id="hero-m4"><b>7</b> named voices</span>
+      <span data-block-id="hero-m5"><b>6</b> weeks to land</span>
     </div>
   </header>
 
-  <!-- Section 01: The spine -->
-  <section class="section">
-    <div class="section-num">01 &mdash; The editorial spine</div>
-    <h2 data-block-id="s1-h2">One sentence the whole rain <em>hangs off</em>.</h2>
-    <p class="section-lede" data-block-id="s1-lede">A single article gets buried. A series with a spine gives sales a reusable library. Every author in the rain answers one piece of the same question.</p>
+  <!-- Section 00 — The thread already started -->
+  <section class="section reveal">
+    <div class="section-num">00 &middot; The thread already started</div>
+    <h2 data-block-id="s0-h2">Two posts in. <em>Same byline. Same Knowledge Centre. Same domain.</em></h2>
+    <p class="section-lede" data-block-id="s0-lede">Jack&rsquo;s April&nbsp;27 piece references Adam&rsquo;s March&nbsp;4 piece. They argue the same thing in two different voices. The third reply hasn&rsquo;t been written yet. That&rsquo;s the gap this campaign fills.</p>
 
-    <div class="spine">
-      <div class="spine-label" data-block-id="s1-spine-label">Working spine &middot; the campaign banner</div>
-      <p class="spine-quote" data-block-id="s1-spine-quote">&ldquo;You can&rsquo;t buy AI like you buy a project.&rdquo;</p>
-    </div>
+    <div class="thread">
+      <article class="beat">
+        <div class="beat-status shipped" data-block-id="b1-status">Shipped &middot; Mar 4, 2026</div>
+        <div class="beat-num">01</div>
+        <div class="beat-tag" data-block-id="b1-tag">Build it &middot; the call</div>
+        <h3 class="beat-h" data-block-id="b1-h">2026: The Year of the Agentic AI Builder</h3>
+        <div class="beat-byline" data-block-id="b1-by">By <b>Adam Rappaport</b> &middot; AI Specialist</div>
+        <p class="beat-quote" data-block-id="b1-quote">&ldquo;Twelve months. That&rsquo;s how long it took for &lsquo;talk to AI and it writes your code&rsquo; to go from breakthrough to baseline.&rdquo;</p>
+        <a class="beat-link" href="https://www.data3.com/knowledge-centre/blog/2026-the-year-of-the-agentic-ai-builder/" target="_blank" rel="noopener">Read on data3.com</a>
+      </article>
 
-    <h3 data-block-id="s1-h3-hooks">Why this spine, faithful to the call</h3>
-    <ul>
-      <li data-block-id="s1-hook-1"><b style="color:var(--text-bright);font-weight:500">Matt&rsquo;s hook</b> &mdash; speed to value through a scrum-based, multi-disciplinary squad.</li>
-      <li data-block-id="s1-hook-2"><b style="color:var(--text-bright);font-weight:500">Mark&rsquo;s hook</b> &mdash; what entices a customer to read this is &ldquo;how do I quickly realise value with AI agents?&rdquo;, not &ldquo;a new operating model exists&rdquo;.</li>
-      <li data-block-id="s1-hook-3"><b style="color:var(--text-bright);font-weight:500">Mentis&rsquo;s hook</b> &mdash; the squad is the product. The squad is what you buy.</li>
-      <li data-block-id="s1-hook-4"><b style="color:var(--text-bright);font-weight:500">Scott&rsquo;s hook</b> &mdash; capability-as-a-service. The Windows 97 moment for AI &mdash; the moment the buying model has to change too.</li>
-      <li data-block-id="s1-hook-5"><b style="color:var(--text-bright);font-weight:500">Sales utility</b> &mdash; a reusable objection-handler library, mapped post-by-post to the question it answers.</li>
-    </ul>
-  </section>
+      <article class="beat">
+        <div class="beat-status shipped" data-block-id="b2-status">Shipped &middot; Apr 27, 2026</div>
+        <div class="beat-num">02</div>
+        <div class="beat-tag" data-block-id="b2-tag">Make it boring &middot; the standard</div>
+        <h3 class="beat-h" data-block-id="b2-h">Building Australia&rsquo;s Most Boring AI</h3>
+        <div class="beat-byline" data-block-id="b2-by">By <b>Jack Latrobe</b> &middot; Solutions Architect</div>
+        <p class="beat-quote" data-block-id="b2-quote">&ldquo;Useful, sticks around for a while, has a real impact on the way people do their work.&rdquo;</p>
+        <a class="beat-link" href="https://www.data3.com/knowledge-centre/blog/building-australias-most-boring-ai/" target="_blank" rel="noopener">Read on data3.com</a>
+      </article>
 
-  <!-- Section 02: The pillar -->
-  <section class="section">
-    <div class="section-num">02 &mdash; The pillar &middot; Scotty opens</div>
-    <h2 data-block-id="s2-h2">The Windows 97 moment for AI &mdash; <em>and the buying model has to change too</em>.</h2>
-    <p class="section-lede" data-block-id="s2-lede">Scott opens the rain. He&rsquo;s the most credible voice to put the &ldquo;97 moment&rdquo; stake in the ground &mdash; and the rest of the rain answers the questions his post will provoke.</p>
-
-    <div class="pillar">
-      <div class="pillar-tag" data-block-id="s2-pillar-tag">Pillar Post &middot; ~900 words &middot; Week 1 Tuesday</div>
-      <h3 class="pillar-title" data-block-id="s2-pillar-title">It&rsquo;s the Windows 97 moment for AI &mdash; and the buying model has to change too</h3>
-      <div class="pillar-by" data-block-id="s2-pillar-by">By <b>Scott Gosling</b> &middot; Microsoft Practice Manager, Data#3</div>
-
-      <h4>The five beats</h4>
-      <ol>
-        <li data-block-id="s2-beat-1"><b style="color:var(--text-primary);font-weight:500">Win97 wasn&rsquo;t about an OS.</b> It was the moment computing stopped being a project and started being an operating reality. Office 97. The browser. Email-by-default. Companies that treated it as &ldquo;an IT thing&rdquo; got eaten.</li>
-        <li data-block-id="s2-beat-2"><b style="color:var(--text-primary);font-weight:500">AI is doing it again, faster.</b> Microsoft&rsquo;s data: 82% of leaders expect agents in 12&ndash;18 months. MIT: 95% of GenAI projects fail. Both true at once.</li>
-        <li data-block-id="s2-beat-3"><b style="color:var(--text-primary);font-weight:500">The reason for the failure rate isn&rsquo;t models or data.</b> It&rsquo;s the buying model. Customers are still buying AI like a 2018 ERP project &mdash; scope, SOW, fractional resources, 9-month plan.</li>
-        <li data-block-id="s2-beat-4"><b style="color:var(--text-primary);font-weight:500">We&rsquo;re moving with it.</b> Data#3 is shifting AI services to capability-as-a-service. You don&rsquo;t buy hours. You buy a team, by the sprint, with a defined outcome.</li>
-        <li data-block-id="s2-beat-5"><b style="color:var(--text-primary);font-weight:500">Reading list.</b> Links to the rest of the rain &mdash; eight posts answering the practical questions this raises.</li>
-      </ol>
+      <article class="beat">
+        <div class="beat-status draft" data-block-id="b3-status">Coming next &middot; ~May 2026</div>
+        <div class="beat-num">03</div>
+        <div class="beat-tag" data-block-id="b3-tag">Ship it &middot; the shift</div>
+        <h3 class="beat-h" data-block-id="b3-h">It&rsquo;s the Windows&nbsp;97 moment for AI</h3>
+        <div class="beat-byline" data-block-id="b3-by">By <b>Scott Gosling</b> &middot; Microsoft Practice Manager</div>
+        <p class="beat-quote" data-block-id="b3-quote">&ldquo;Adam said build. Jack said build it boring. Here&rsquo;s why you can&rsquo;t buy it the old way anymore.&rdquo;</p>
+        <a class="beat-link" href="/scott-pillar">Read v0.1 draft</a>
+      </article>
     </div>
   </section>
 
-  <!-- Section 03: The rain -->
-  <section class="section">
-    <div class="section-num">03 &mdash; The rain &middot; 8 follow-up posts</div>
-    <h2 data-block-id="s3-h2">Eight short posts. Seven named voices. <em>One job each.</em></h2>
-    <p class="section-lede" data-block-id="s3-lede">Each follow-up runs 500&ndash;800 words. Each links to Scotty&rsquo;s pillar and the AI Squad landing page. Each post does one job &mdash; a single customer question, a single sales objection, a single proof point.</p>
+  <!-- Section 01 — The spine -->
+  <section class="section reveal">
+    <div class="section-num">01 &middot; The spine</div>
+    <h2 data-block-id="s1-h2">Three beats. Read in <em>any order</em>. The argument holds.</h2>
+    <p class="section-lede" data-block-id="s1-lede">A spine isn&rsquo;t a slogan. It&rsquo;s the load-bearing argument every author in the campaign extends from a different angle. This one fits the work, the published voice, and the customer.</p>
 
-    <table class="rain-table">
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>Author</th>
-          <th>Working title</th>
-          <th>Job it does</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td class="num">01</td>
-          <td class="author" data-block-id="r1-author">Mark Pattie<small>Modern Work Solution Lead</small></td>
-          <td class="title" data-block-id="r1-title">From waterfall to working in a fortnight: why Modern Work delivery had to change</td>
-          <td class="job" data-block-id="r1-job">Earned-authority piece. Mark owns the lifecycle / ETO. Frames the shift as a delivery evolution, not marketing. Hooks customers tired of 9-month projects.</td>
-        </tr>
-        <tr>
-          <td class="num">02</td>
-          <td class="author" data-block-id="r2-author">Mentis<small>AI Practice Manager</small></td>
-          <td class="title" data-block-id="r2-title">The squad is the product. A team. By the sprint.</td>
-          <td class="job" data-block-id="r2-job">Lifts the AI Squad page into long form. 1&middot;1&middot;2 explained. &ldquo;Same four faces every sprint.&rdquo; What a sprint actually delivers on Day 9. Strongest single read for a CIO.</td>
-        </tr>
-        <tr>
-          <td class="num">03</td>
-          <td class="author" data-block-id="r3-author">Mentis<small>AI Practice Manager</small></td>
-          <td class="title" data-block-id="r3-title">What you actually get in 10 working days</td>
-          <td class="job" data-block-id="r3-job">The proof post. Day-by-day walkthrough of a real sprint. Demystifies. Counters &ldquo;AI is just demos.&rdquo; The post Jack will use in his next sales call.</td>
-        </tr>
-        <tr>
-          <td class="num">04</td>
-          <td class="author" data-block-id="r4-author">Jack LaTrobe<small>VIC Squad Principal</small></td>
-          <td class="title" data-block-id="r4-title">What I learned shipping AI from the inside of a squad</td>
-          <td class="job" data-block-id="r4-job">First-person delivery voice. Real war stories &mdash; MYD3, scoping calls, the 1-0-4 vs 1-1-2 reality. Anti-corporate tone. Highest shareability of the rain.</td>
-        </tr>
-        <tr>
-          <td class="num">05</td>
-          <td class="author" data-block-id="r5-author">Richard<small>Security Practice Manager</small></td>
-          <td class="title" data-block-id="r5-title">Agents don&rsquo;t fail at the model layer. They fail at the governance layer.</td>
-          <td class="job" data-block-id="r5-job">Counter-balances the speed message with the de-risk message. Lands AI-TRiSM, Agent 365, Purview as a wrap, not a SKU. Required reading for any nervous CISO.</td>
-        </tr>
-        <tr>
-          <td class="num">06</td>
-          <td class="author" data-block-id="r6-author">Dave Summers<small>Agent Smith / AI-augmented delivery</small></td>
-          <td class="title" data-block-id="r6-title">How a 4-person squad ships like 8: the Agent Smith dividend</td>
-          <td class="job" data-block-id="r6-job">The differentiator post. Why our squads punch above their weight &mdash; Claude/agent-augmented delivery patterns. Defends the rate card. Dave gets to be the technical hero.</td>
-        </tr>
-        <tr>
-          <td class="num">07</td>
-          <td class="author" data-block-id="r7-author">Matt Gooden<small>AI Practice Director</small></td>
-          <td class="title" data-block-id="r7-title">The unit economics of capability-as-a-service: what &ldquo;four sprints&rdquo; actually means</td>
-          <td class="job" data-block-id="r7-job">Commercial-model post for procurement / CFO. Not the spreadsheet &mdash; the vocabulary. &ldquo;That integration will be four sprints.&rdquo; Removes friction from the buying conversation.</td>
-        </tr>
-        <tr>
-          <td class="num">08</td>
-          <td class="author" data-block-id="r8-author">Alenka Caserman<small>Analytics Solution Architect</small></td>
-          <td class="title" data-block-id="r8-title">We&rsquo;ve been doing this for a year. We called it Data Factory.</td>
-          <td class="job" data-block-id="r8-job">Cross-practice authority. Validates the pattern with track record &mdash; 70% effort reduction, 6-week engagements, customers love it. &ldquo;We&rsquo;re not inventing. We&rsquo;re extending.&rdquo;</td>
-        </tr>
-        <tr class="optional">
-          <td class="num">09</td>
-          <td class="author" data-block-id="r9-author">Suzanne Maroc<small>Business Apps Lead &middot; optional</small></td>
-          <td class="title" data-block-id="r9-title">Why Functional Consultants belong on Scaled Sprints</td>
-          <td class="job" data-block-id="r9-job">Roles inside the squad. Practical &mdash; helps customers understand who they get when. Optional add-on if the rain runs longer.</td>
-        </tr>
-        <tr class="optional">
-          <td class="num">10</td>
-          <td class="author" data-block-id="r10-author">Mentis<small>wrap-up &middot; optional</small></td>
-          <td class="title" data-block-id="r10-title">The 8 questions every customer asks about AI right now</td>
-          <td class="job" data-block-id="r10-job">The governance-gap question set, packaged as a sales reference card. The reusable artefact at the end of the rain.</td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="three-beats">
+      <div class="beat-card">
+        <div class="beat-card-num" data-block-id="s1-c1-n">BEAT 01</div>
+        <h3 class="beat-card-h" data-block-id="s1-c1-h">Build it.</h3>
+        <p class="beat-card-p" data-block-id="s1-c1-p">Agentic AI is the new baseline. The crucible is here. Build now, lead, or lag &mdash; the gap between &ldquo;reads about it&rdquo; and &ldquo;ships with it&rdquo; is widening fast.</p>
+        <div class="beat-card-attr" data-block-id="s1-c1-a">From <b>Adam &middot; Mar&nbsp;4</b></div>
+      </div>
+      <div class="beat-card">
+        <div class="beat-card-num" data-block-id="s1-c2-n">BEAT 02</div>
+        <h3 class="beat-card-h" data-block-id="s1-c2-h">Make it boring.</h3>
+        <p class="beat-card-p" data-block-id="s1-c2-p">Useful, reliable, measurable. Sticks around. Has real impact. Boring is the highest compliment AI can earn &mdash; and the highest bar most projects fail.</p>
+        <div class="beat-card-attr" data-block-id="s1-c2-a">From <b>Jack &middot; Apr&nbsp;27</b></div>
+      </div>
+      <div class="beat-card">
+        <div class="beat-card-num" data-block-id="s1-c3-n">BEAT 03</div>
+        <h3 class="beat-card-h" data-block-id="s1-c3-h">Ship it.</h3>
+        <p class="beat-card-p" data-block-id="s1-c3-p">Capability-as-a-service. The Windows&nbsp;97 moment. The buying model has to change too &mdash; you can&rsquo;t deliver boring AI through the old project shape.</p>
+        <div class="beat-card-attr" data-block-id="s1-c3-a">From <b>Scott &middot; ~May</b></div>
+      </div>
+    </div>
   </section>
 
-  <!-- Section 04: Cadence -->
-  <section class="section">
-    <div class="section-num">04 &mdash; Cadence &middot; the rain pattern</div>
-    <h2 data-block-id="s4-h2">Six weeks. Two drops a week. <em>Every Tuesday and Thursday.</em></h2>
-    <p class="section-lede" data-block-id="s4-lede">Each post links to the pillar, the AI Squad landing page, and the next one in the rain. Sales gets a one-pager mapping each post to the customer objection it answers.</p>
+  <!-- Section 02 — Pillar preview -->
+  <section class="section reveal" id="pillar">
+    <div class="section-num">02 &middot; Pillar v0.1 &middot; ready for Scott&rsquo;s pen</div>
+    <h2 data-block-id="s2-h2">Scott&rsquo;s reply to the thread &mdash; <em>drafted, ready to react to</em>.</h2>
+    <p class="section-lede" data-block-id="s2-lede">A draft already exists. Scott edits to his voice and we publish. The point isn&rsquo;t a perfect first cut &mdash; it&rsquo;s a frame he can argue with in one sitting.</p>
+
+    <div class="pillar-preview">
+      <div class="pillar-flag">PILLAR &middot; v0.1 DRAFT</div>
+      <h3 class="pillar-h" data-block-id="s2-p-h">It&rsquo;s the Windows&nbsp;97 moment for AI &mdash; and the buying model has to change too</h3>
+      <div class="pillar-byline" data-block-id="s2-p-by">By <b>Scott Gosling</b> &middot; Microsoft Practice Manager &middot; Data#3</div>
+
+      <div class="pillar-arc">
+        <h4>The five beats of the article</h4>
+        <ol>
+          <li data-block-id="s2-p-1"><b>Win97 wasn&rsquo;t about an OS.</b> It was the moment computing stopped being a project and started being an operating reality. Companies that treated it as &ldquo;an IT thing&rdquo; got eaten.</li>
+          <li data-block-id="s2-p-2"><b>AI is doing it again, faster.</b> 82% of leaders expect agents in 12&ndash;18 months. 95% of GenAI projects fail to ship. Both true at the same time.</li>
+          <li data-block-id="s2-p-3"><b>The bottleneck isn&rsquo;t models. It&rsquo;s the buying model.</b> Customers are still procuring AI like a 2018 ERP project &mdash; scope, SOW, fractional resources, 9-month plan.</li>
+          <li data-block-id="s2-p-4"><b>Boring AI needs a boring buying model.</b> Capability-as-a-service. Same team, by the sprint, with a defined outcome. The repetition is the point.</li>
+          <li data-block-id="s2-p-5"><b>Reading list.</b> Links to the rest of the rain &mdash; eight short replies answering the practical questions this raises.</li>
+        </ol>
+      </div>
+
+      <a class="pillar-cta" href="/scott-pillar">Open the v0.1 draft</a>
+    </div>
+  </section>
+
+  <!-- Section 03 — Blog rain -->
+  <section class="section reveal">
+    <div class="section-num">03 &middot; The blog rain &middot; what comes next</div>
+    <h2 data-block-id="s3-h2">Eight short replies. Seven named voices. <em>One job each.</em></h2>
+    <p class="section-lede" data-block-id="s3-lede">Each post is a reply to the thread &mdash; not a fresh pronouncement. Builds on Adam, Jack, or Scott. Links to two or three KB articles below. Each runs 500&ndash;800 words.</p>
+
+    <div class="rain-grid">
+      <div class="rain-row">
+        <div class="rrnum">P01</div>
+        <div class="rrauthor" data-block-id="r1-a">Scott Gosling<small>Microsoft Practice Manager</small></div>
+        <div class="rrtitle" data-block-id="r1-t">It&rsquo;s the Windows&nbsp;97 moment for AI &mdash; and the buying model has to change too<small>The pillar reply. Sets up everything else.</small></div>
+        <div class="rrstatus draft">Drafted</div>
+      </div>
+      <div class="rain-row">
+        <div class="rrnum">P02</div>
+        <div class="rrauthor" data-block-id="r2-a">Adam Rappaport<small>AI Specialist</small></div>
+        <div class="rrtitle" data-block-id="r2-t">Six weeks in the crucible: what we&rsquo;ve learned since March 4<small>Sequel to the original call. Recurring Adam voice on data3.com.</small></div>
+        <div class="rrstatus briefed">Briefed</div>
+      </div>
+      <div class="rain-row">
+        <div class="rrnum">P03</div>
+        <div class="rrauthor" data-block-id="r3-a">Jack Latrobe<small>Solutions Architect</small></div>
+        <div class="rrtitle" data-block-id="r3-t">Boring AI shipped: ten working days inside a squad<small>The proof piece. Day-by-day walkthrough. Counters &ldquo;AI is just demos&rdquo;.</small></div>
+        <div class="rrstatus briefed">Briefed</div>
+      </div>
+      <div class="rain-row">
+        <div class="rrnum">P04</div>
+        <div class="rrauthor" data-block-id="r4-a">Mark Pattie<small>Modern Work Solution Lead</small></div>
+        <div class="rrtitle" data-block-id="r4-t">Boring is what fortnightly looks like<small>Ratifies Jack&rsquo;s standard from the Modern Work delivery angle. Earned authority.</small></div>
+        <div class="rrstatus briefed">Briefed</div>
+      </div>
+      <div class="rain-row">
+        <div class="rrnum">P05</div>
+        <div class="rrauthor" data-block-id="r5-a">Richard Dornhart<small>Security Practice Manager</small></div>
+        <div class="rrtitle" data-block-id="r5-t">Boring AI doesn&rsquo;t fail at the model layer. It fails at governance.<small>The CISO post. AI-TRiSM, Agent 365, Purview as wrap, not SKU.</small></div>
+        <div class="rrstatus briefed">Briefed</div>
+      </div>
+      <div class="rain-row">
+        <div class="rrnum">P06</div>
+        <div class="rrauthor" data-block-id="r6-a">Dave Summers<small>Agent Smith / AI-augmented delivery</small></div>
+        <div class="rrtitle" data-block-id="r6-t">How a 4-person squad ships like 8: the boring multiplier<small>Why our squads punch above their weight. Defends the rate card.</small></div>
+        <div class="rrstatus briefed">Briefed</div>
+      </div>
+      <div class="rain-row">
+        <div class="rrnum">P07</div>
+        <div class="rrauthor" data-block-id="r7-a">Matt Gooden<small>AI Practice Director</small></div>
+        <div class="rrtitle" data-block-id="r7-t">What &ldquo;four sprints&rdquo; actually means<small>Commercial-model post for procurement / CFO. The vocabulary, not the spreadsheet.</small></div>
+        <div class="rrstatus briefed">Briefed</div>
+      </div>
+      <div class="rain-row">
+        <div class="rrnum">P08</div>
+        <div class="rrauthor" data-block-id="r8-a">Alenka Caserman<small>Analytics Solution Architect</small></div>
+        <div class="rrtitle" data-block-id="r8-t">We&rsquo;ve been doing boring for a year. We called it Data Factory.<small>Cross-practice precedent. 70% effort reduction. &ldquo;Not inventing &mdash; extending.&rdquo;</small></div>
+        <div class="rrstatus briefed">Briefed</div>
+      </div>
+      <div class="rain-row">
+        <div class="rrnum">P09</div>
+        <div class="rrauthor" data-block-id="r9-a">Adam Rappaport<small>AI Specialist &middot; wrap</small></div>
+        <div class="rrtitle" data-block-id="r9-t">The eight questions every customer asks before buying AI<small>Sales reference card &mdash; the governance gap question set, distilled.</small></div>
+        <div class="rrstatus optional">Optional</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 04 — KB layer -->
+  <section class="section reveal" id="kb">
+    <div class="section-num">04 &middot; The KB layer &middot; always-on</div>
+    <h2 data-block-id="s4-h2">20 questions. <em>Always-on answers.</em></h2>
+    <p class="section-lede" data-block-id="s4-lede">The blog rain promotes. The KB articles convert. Short, evergreen, brand-voice, ~200 words each. Sourced from what customers actually Google. Every blog post links to three KB articles. Sales links to them in every email.</p>
+
+    <div class="kb-controls">
+      <div class="kb-tabs" id="kbTabs">
+        <button class="kb-tab active" data-cat="all">All<span class="count" id="cnt-all">20</span></button>
+        <button class="kb-tab" data-cat="squad">Squad Model<span class="count" id="cnt-squad">7</span></button>
+        <button class="kb-tab" data-cat="buying">Buying Model<span class="count" id="cnt-buying">5</span></button>
+        <button class="kb-tab" data-cat="lifecycle">Lifecycle<span class="count" id="cnt-lifecycle">4</span></button>
+        <button class="kb-tab" data-cat="customer">Customer Questions<span class="count" id="cnt-customer">4</span></button>
+      </div>
+      <input class="kb-search" id="kbSearch" type="text" placeholder="Search KB articles..." />
+    </div>
+
+    <div class="kb-grid" id="kbGrid">
+      <!-- Squad Model (7) -->
+      <article class="kb-tile" data-cat="squad">
+        <span class="kb-tile-cat" data-cat="squad">Squad Model</span>
+        <h3 class="kb-tile-q">What is an AI Squad?</h3>
+        <div class="kb-tile-meta"><b>~250w</b> &middot; Planned</div>
+        <p class="kb-preview">A four-person dedicated team that delivers AI work for one customer at a time. One Mentor, one Lead, two Shadows. Same faces every sprint. Owns the outcome end-to-end.</p>
+      </article>
+      <article class="kb-tile" data-cat="squad">
+        <span class="kb-tile-cat" data-cat="squad">Squad Model</span>
+        <h3 class="kb-tile-q">What is a sprint and what does it deliver?</h3>
+        <div class="kb-tile-meta"><b>~220w</b> &middot; Planned</div>
+        <p class="kb-preview">Ten working days. Same four people. One defined outcome. Fixed sprint price. Demo on Day 9. Retro on Day 10. Repeatable until the work is done.</p>
+      </article>
+      <article class="kb-tile" data-cat="squad">
+        <span class="kb-tile-cat" data-cat="squad">Squad Model</span>
+        <h3 class="kb-tile-q">What is a 1&middot;1&middot;2 squad?</h3>
+        <div class="kb-tile-meta"><b>~210w</b> &middot; Planned</div>
+        <p class="kb-preview">One Principal mentoring across two squads (25%). One full-time Lead driving the engagement. Two full-time Shadows building. The minimum viable AI delivery shape.</p>
+      </article>
+      <article class="kb-tile" data-cat="squad">
+        <span class="kb-tile-cat" data-cat="squad">Squad Model</span>
+        <h3 class="kb-tile-q">Mentor vs Lead vs Shadow &mdash; who does what?</h3>
+        <div class="kb-tile-meta"><b>~280w</b> &middot; Planned</div>
+        <p class="kb-preview">Mentor governs quality and risk. Lead drives the engagement and is the customer&rsquo;s daily contact. Shadows build, learn the patterns, graduate up.</p>
+      </article>
+      <article class="kb-tile" data-cat="squad">
+        <span class="kb-tile-cat" data-cat="squad">Squad Model</span>
+        <h3 class="kb-tile-q">Lean Sprint vs Scaled Sprint &mdash; which do I need?</h3>
+        <div class="kb-tile-meta"><b>~250w</b> &middot; Planned</div>
+        <p class="kb-preview">Lean is one sprint &mdash; an explore. Scaled is 3&ndash;6 sprints &mdash; a build. Most engagements start lean, then graduate to scaled when value is proven.</p>
+      </article>
+      <article class="kb-tile" data-cat="squad">
+        <span class="kb-tile-cat" data-cat="squad">Squad Model</span>
+        <h3 class="kb-tile-q">How does the squad model differ from staff augmentation?</h3>
+        <div class="kb-tile-meta"><b>~260w</b> &middot; Planned</div>
+        <p class="kb-preview">Staff aug rents you fractions of consultants. The squad sells you a whole team that owns an outcome. You buy sprints, not hours. You track delivery, not timesheets.</p>
+      </article>
+      <article class="kb-tile" data-cat="squad">
+        <span class="kb-tile-cat" data-cat="squad">Squad Model</span>
+        <h3 class="kb-tile-q">What is a Factory Pod and when do I need one?</h3>
+        <div class="kb-tile-meta"><b>~240w</b> &middot; Planned</div>
+        <p class="kb-preview">A specific delivery pattern within the squad model. 6&ndash;12 weeks. 1&ndash;8 use cases. Use it when you need scaled, repeatable agent build &mdash; not exploratory work.</p>
+      </article>
+
+      <!-- Buying Model (5) -->
+      <article class="kb-tile" data-cat="buying">
+        <span class="kb-tile-cat" data-cat="buying">Buying Model</span>
+        <h3 class="kb-tile-q">What is capability-as-a-service?</h3>
+        <div class="kb-tile-meta"><b>~280w</b> &middot; Planned</div>
+        <p class="kb-preview">A way of buying AI delivery without scoping a project up front. You buy a team, by the sprint, with a defined outcome. Predictable price. Predictable cadence. Real outcomes.</p>
+      </article>
+      <article class="kb-tile" data-cat="buying">
+        <span class="kb-tile-cat" data-cat="buying">Buying Model</span>
+        <h3 class="kb-tile-q">How is AI work priced at Data#3?</h3>
+        <div class="kb-tile-meta"><b>~230w</b> &middot; Planned</div>
+        <p class="kb-preview">By the sprint, not by the hour. One sprint = ten working days = a fixed price. Scope a project by counting sprints, not heads.</p>
+      </article>
+      <article class="kb-tile" data-cat="buying">
+        <span class="kb-tile-cat" data-cat="buying">Buying Model</span>
+        <h3 class="kb-tile-q">What is an AAF Pilot?</h3>
+        <div class="kb-tile-meta"><b>~270w</b> &middot; Planned</div>
+        <p class="kb-preview">Agentic AI Foundation Pilot &mdash; Data#3 funds up to $20K of professional services on a $40K&ndash;$120K engagement. De-risks the first sprint while you prove the value.</p>
+      </article>
+      <article class="kb-tile" data-cat="buying">
+        <span class="kb-tile-cat" data-cat="buying">Buying Model</span>
+        <h3 class="kb-tile-q">What is the Azure Frontier Offer (AFO)?</h3>
+        <div class="kb-tile-meta"><b>~260w</b> &middot; Planned</div>
+        <p class="kb-preview">Microsoft-funded AI delivery &mdash; up to US$500K of services on up to US$1M Azure consumption. Covers Fabric, Foundry, Azure DB workloads.</p>
+      </article>
+      <article class="kb-tile" data-cat="buying">
+        <span class="kb-tile-cat" data-cat="buying">Buying Model</span>
+        <h3 class="kb-tile-q">How do I de-risk our first AI engagement?</h3>
+        <div class="kb-tile-meta"><b>~290w</b> &middot; Planned</div>
+        <p class="kb-preview">Stack the funding (AAF + AFO), start with one sprint, choose a low-stakes use case with a clear owner. If sprint one ships value, sprint two earns the right to follow.</p>
+      </article>
+
+      <!-- Lifecycle (4) -->
+      <article class="kb-tile" data-cat="lifecycle">
+        <span class="kb-tile-cat" data-cat="lifecycle">Lifecycle</span>
+        <h3 class="kb-tile-q">What is Envision &rarr; Transform &rarr; Operate?</h3>
+        <div class="kb-tile-meta"><b>~280w</b> &middot; Planned</div>
+        <p class="kb-preview">Mark Pattie&rsquo;s lifecycle frame. Three phases. Six sub-phases. Customers can land at any maturity level &mdash; you don&rsquo;t have to start at the beginning.</p>
+      </article>
+      <article class="kb-tile" data-cat="lifecycle">
+        <span class="kb-tile-cat" data-cat="lifecycle">Lifecycle</span>
+        <h3 class="kb-tile-q">What governance controls should I expect from day one?</h3>
+        <div class="kb-tile-meta"><b>~310w</b> &middot; Planned</div>
+        <p class="kb-preview">Guardrails on inputs and outputs. AI-TRiSM patterns. Agent 365 observability. Purview labelling. Defender + Entra integration. Governance is a wrap, not a SKU.</p>
+      </article>
+      <article class="kb-tile" data-cat="lifecycle">
+        <span class="kb-tile-cat" data-cat="lifecycle">Lifecycle</span>
+        <h3 class="kb-tile-q">How is Agent 365 used at Data#3?</h3>
+        <div class="kb-tile-meta"><b>~250w</b> &middot; Planned</div>
+        <p class="kb-preview">As the cross-seam observability spine. We onboard agents through Agent 365 from day one, so governance and lifecycle controls don&rsquo;t bolt on later &mdash; they ship with the build.</p>
+      </article>
+      <article class="kb-tile" data-cat="lifecycle">
+        <span class="kb-tile-cat" data-cat="lifecycle">Lifecycle</span>
+        <h3 class="kb-tile-q">What is the AI Factory Readiness Assessment?</h3>
+        <div class="kb-tile-meta"><b>~240w</b> &middot; Planned</div>
+        <p class="kb-preview">A one-week front-door engagement. Maps your environment to ETO phases. Outputs a sprint-by-sprint roadmap and a defensible CFO-grade business case.</p>
+      </article>
+
+      <!-- Customer Questions (4) -->
+      <article class="kb-tile" data-cat="customer">
+        <span class="kb-tile-cat" data-cat="customer">Customer Question</span>
+        <h3 class="kb-tile-q">Where do I start with AI?</h3>
+        <div class="kb-tile-meta"><b>~220w</b> &middot; Planned</div>
+        <p class="kb-preview">Pick one painful, repeatable task. One owner. One agent. Ten days. If it ships value, do it again. If it doesn&rsquo;t, you&rsquo;ve learned cheaply. That&rsquo;s where everyone starts.</p>
+      </article>
+      <article class="kb-tile" data-cat="customer">
+        <span class="kb-tile-cat" data-cat="customer">Customer Question</span>
+        <h3 class="kb-tile-q">Who owns AI internally?</h3>
+        <div class="kb-tile-meta"><b>~240w</b> &middot; Planned</div>
+        <p class="kb-preview">A Product Owner who can sign off on outcomes. A Business SME who knows the work. An IT/Data Steward who owns access. The squad fills the rest.</p>
+      </article>
+      <article class="kb-tile" data-cat="customer">
+        <span class="kb-tile-cat" data-cat="customer">Customer Question</span>
+        <h3 class="kb-tile-q">How do I avoid agent sprawl?</h3>
+        <div class="kb-tile-meta"><b>~250w</b> &middot; Planned</div>
+        <p class="kb-preview">Centralise agent registration through Agent 365. Govern at the platform layer, not the agent layer. Treat new agents like new applications &mdash; with onboarding, ownership, retirement.</p>
+      </article>
+      <article class="kb-tile" data-cat="customer">
+        <span class="kb-tile-cat" data-cat="customer">Customer Question</span>
+        <h3 class="kb-tile-q">What happens when the agent gives the wrong answer?</h3>
+        <div class="kb-tile-meta"><b>~260w</b> &middot; Planned</div>
+        <p class="kb-preview">A boring agent has a defined failure mode &mdash; it knows what it doesn&rsquo;t know. Human-in-the-loop on high-stakes calls. Confidence scoring. Eval datasets. Telemetry on every interaction.</p>
+      </article>
+    </div>
+
+    <div class="kb-empty" id="kbEmpty" style="display:none">No KB articles match that filter. Try a different category or search term.</div>
+  </section>
+
+  <!-- Section 05 — Cadence -->
+  <section class="section reveal">
+    <div class="section-num">05 &middot; Cadence</div>
+    <h2 data-block-id="s5-h2">Six weeks. Two drops a week. <em>Tuesday and Thursday.</em></h2>
+    <p class="section-lede" data-block-id="s5-lede">Each post links to the pillar, to the &ldquo;already-shipped&rdquo; pieces, and to two or three KB articles. Sales gets a one-pager mapping each post to the customer objection it answers.</p>
 
     <div class="schedule">
       <div class="week-card">
-        <div class="week-card-h" data-block-id="s4-w1-h">Week 1</div>
-        <div class="week-card-row" data-block-id="s4-w1-tue"><b>Tue</b> Scotty pillar &mdash; Win97</div>
-        <div class="week-card-row" data-block-id="s4-w1-thu"><b>Thu</b> Mentis &mdash; Squad is the product</div>
+        <div class="week-card-h">Week 1</div>
+        <div class="week-card-row" data-block-id="s5-w1-tue"><b>Tue</b>Scott pillar &mdash; Win97 / Ship It</div>
+        <div class="week-card-row" data-block-id="s5-w1-thu"><b>Thu</b>Adam &mdash; Six weeks in the crucible</div>
       </div>
       <div class="week-card">
-        <div class="week-card-h" data-block-id="s4-w2-h">Week 2</div>
-        <div class="week-card-row" data-block-id="s4-w2-tue"><b>Tue</b> Mark &mdash; Waterfall &rarr; fortnight</div>
-        <div class="week-card-row" data-block-id="s4-w2-thu"><b>Thu</b> Mentis &mdash; What you get in 10 days</div>
+        <div class="week-card-h">Week 2</div>
+        <div class="week-card-row" data-block-id="s5-w2-tue"><b>Tue</b>Jack &mdash; Boring AI shipped</div>
+        <div class="week-card-row" data-block-id="s5-w2-thu"><b>Thu</b>Mark &mdash; Boring is fortnightly</div>
       </div>
       <div class="week-card">
-        <div class="week-card-h" data-block-id="s4-w3-h">Week 3</div>
-        <div class="week-card-row" data-block-id="s4-w3-tue"><b>Tue</b> Jack &mdash; Inside a squad</div>
-        <div class="week-card-row" data-block-id="s4-w3-thu"><b>Thu</b> Richard &mdash; Governance gap</div>
+        <div class="week-card-h">Week 3</div>
+        <div class="week-card-row" data-block-id="s5-w3-tue"><b>Tue</b>Richard &mdash; Governance gap</div>
+        <div class="week-card-row" data-block-id="s5-w3-thu"><b>Thu</b>Dave Summers &mdash; Boring multiplier</div>
       </div>
       <div class="week-card">
-        <div class="week-card-h" data-block-id="s4-w4-h">Week 4</div>
-        <div class="week-card-row" data-block-id="s4-w4-tue"><b>Tue</b> Dave Summers &mdash; Agent Smith dividend</div>
-        <div class="week-card-row" data-block-id="s4-w4-thu"><b>Thu</b> Matt &mdash; &ldquo;Four sprints&rdquo;</div>
+        <div class="week-card-h">Week 4</div>
+        <div class="week-card-row" data-block-id="s5-w4-tue"><b>Tue</b>Matt &mdash; &ldquo;Four sprints&rdquo;</div>
+        <div class="week-card-row" data-block-id="s5-w4-thu"><b>Thu</b>Alenka &mdash; Data Factory precedent</div>
       </div>
       <div class="week-card">
-        <div class="week-card-h" data-block-id="s4-w5-h">Week 5</div>
-        <div class="week-card-row" data-block-id="s4-w5-tue"><b>Tue</b> Alenka &mdash; Data Factory precedent</div>
-        <div class="week-card-row" data-block-id="s4-w5-thu"><b>Thu</b> Mentis wrap &mdash; 8 questions</div>
+        <div class="week-card-h">Week 5</div>
+        <div class="week-card-row" data-block-id="s5-w5-tue"><b>Tue</b>Adam wrap &mdash; 8 questions</div>
+        <div class="week-card-row" data-block-id="s5-w5-thu"><b>Thu</b>KB tile drop &mdash; Squad &amp; Buying batches</div>
       </div>
       <div class="week-card">
-        <div class="week-card-h" data-block-id="s4-w6-h">Week 6</div>
-        <div class="week-card-row" data-block-id="s4-w6-tue"><b>Tue</b> Cross-link to landing page</div>
-        <div class="week-card-row" data-block-id="s4-w6-thu"><b>Thu</b> Sales pack drop</div>
+        <div class="week-card-h">Week 6</div>
+        <div class="week-card-row" data-block-id="s5-w6-tue"><b>Tue</b>KB tile drop &mdash; Lifecycle &amp; Customer batches</div>
+        <div class="week-card-row" data-block-id="s5-w6-thu"><b>Thu</b>Sales pack drop &middot; deep-link map</div>
       </div>
     </div>
   </section>
 
-  <!-- Section 05: Pushbacks -->
-  <section class="section">
-    <div class="section-num">05 &mdash; Two angles to push back on Amanda</div>
-    <h2 data-block-id="s5-h2">Where I&rsquo;d argue with the brief, <em>respectfully</em>.</h2>
-    <p class="section-lede" data-block-id="s5-lede">The original ask was &ldquo;a Knowledge Centre post or series of posts.&rdquo; If we want this to land &mdash; not get buried &mdash; two things matter more than the brief reads.</p>
+  <!-- Section 06 — Pushback -->
+  <section class="section reveal">
+    <div class="section-num">06 &middot; Two angles to argue with the brief</div>
+    <h2 data-block-id="s6-h2">Where I&rsquo;d push back on Amanda &mdash; <em>respectfully</em>.</h2>
+    <p class="section-lede" data-block-id="s6-lede">The original ask was &ldquo;a Knowledge Centre post or series of posts.&rdquo; If we want this to land &mdash; not get buried &mdash; two things matter more than the brief reads.</p>
 
     <div class="push-grid">
       <div class="push-card">
-        <h3 class="push-h" data-block-id="s5-push1-h">One-and-done won&rsquo;t beat the noise.</h3>
-        <p class="push-p" data-block-id="s5-push1-p">Microsoft&rsquo;s partners are out-publishing us 10:1 on AI. A single article gets indexed and forgotten. A spine gives sales a reusable library &mdash; that&rsquo;s the bigger prize than any single post.</p>
+        <h3 class="push-h" data-block-id="s6-p1-h">One-and-done won&rsquo;t beat the noise.</h3>
+        <p class="push-p" data-block-id="s6-p1-p">Microsoft&rsquo;s partners are out-publishing us 10:1 on AI. A single article gets indexed and forgotten. A spine plus an always-on KB layer gives sales a reusable library. That&rsquo;s the bigger prize than any single post.</p>
       </div>
       <div class="push-card">
-        <h3 class="push-h" data-block-id="s5-push2-h">The hook is &ldquo;speed to value with proof&rdquo; &mdash; not &ldquo;new model&rdquo;.</h3>
-        <p class="push-p" data-block-id="s5-push2-p">Mark nailed this in the call. Every post must clear the &ldquo;so what?&rdquo; bar in the first paragraph. Lead with methodology &rarr; we lose. Lead with &ldquo;this customer went live in 10 working days and here&rsquo;s what we shipped&rdquo; &rarr; we win.</p>
+        <h3 class="push-h" data-block-id="s6-p2-h">The hook is &ldquo;speed-to-value with proof,&rdquo; not &ldquo;new model.&rdquo;</h3>
+        <p class="push-p" data-block-id="s6-p2-p">Mark nailed this in the call. Every post must clear the &ldquo;so what?&rdquo; bar in the first paragraph. Lead with methodology and we lose. Lead with &ldquo;this customer went live in ten working days and here&rsquo;s what we shipped&rdquo; and we win.</p>
       </div>
     </div>
   </section>
 
-  <!-- Section 06: Production model -->
-  <section class="section">
-    <div class="section-num">06 &mdash; The production model</div>
-    <h2 data-block-id="s6-h2">Same harness we already use. <em>The way we make it is the proof.</em></h2>
-    <p class="section-lede" data-block-id="s6-lede">The production model for the rain <em>is</em> the model we&rsquo;re selling. Squad + sprint + Claude. Scotty&rsquo;s pillar can literally say so.</p>
+  <!-- Section 07 — Production -->
+  <section class="section reveal">
+    <div class="section-num">07 &middot; The production model</div>
+    <h2 data-block-id="s7-h2">Same harness we already use. <em>The way we make it is the proof.</em></h2>
+    <p class="section-lede" data-block-id="s7-lede">The production model for the rain <em>is</em> the model we&rsquo;re selling. Squad + sprint + Claude. Scott&rsquo;s pillar can literally say so.</p>
 
     <div class="prod">
-      <div class="prod-h" data-block-id="s6-prod-h">How each post gets made</div>
+      <div class="prod-h">How each post and KB article gets made</div>
       <ul>
-        <li data-block-id="s6-prod-1"><b>Drafting</b> &mdash; I draft each post with Claude against the d3-brain vault. 80% there in an afternoon per piece.</li>
-        <li data-block-id="s6-prod-2"><b>Voice ownership</b> &mdash; the named author edits to their voice before publish. Non-negotiable. Ghost-written posts under Mark&rsquo;s or Richard&rsquo;s name read flat &mdash; they&rsquo;ll know.</li>
-        <li data-block-id="s6-prod-3"><b>Living drafts</b> &mdash; ship as inline-editable HTML (this page&rsquo;s pattern). Amanda, the named author, and reviewers edit in-browser. NeonDB-backed. Cuts review cycle from days to hours.</li>
-        <li data-block-id="s6-prod-4"><b>Proof point built in</b> &mdash; we&rsquo;re using the squad model to ship the campaign about the squad model. The pillar can say &ldquo;this very page was built this way&rdquo; with a link to this draft.</li>
+        <li data-block-id="s7-p1"><b>DRAFT</b>Claude draft against the d3-brain vault. Eighty percent of the way there in an afternoon per piece.</li>
+        <li data-block-id="s7-p2"><b>VOICE</b>Named author edits to their own voice before publish. Non-negotiable. Ghost-written posts under Mark&rsquo;s or Richard&rsquo;s name read flat &mdash; they&rsquo;ll know.</li>
+        <li data-block-id="s7-p3"><b>REVIEW</b>Inline editable HTML on this domain. NeonDB-backed. Reviewers edit in-browser. Cuts review cycle from days to hours.</li>
+        <li data-block-id="s7-p4"><b>PUBLISH</b>Each piece lands in data3.com Knowledge Centre under the existing /blog and /kb buckets. Cross-linked back here.</li>
+        <li data-block-id="s7-p5"><b>PROOF</b>The campaign about boring AI is itself shipped boring &mdash; predictable cadence, repeatable patterns, evergreen library. Scott&rsquo;s pillar can name this loop in the closing paragraph.</li>
       </ul>
     </div>
   </section>
 
-  <!-- Section 07: Today -->
-  <section class="section">
-    <div class="section-num">07 &mdash; What I&rsquo;d do today, on greenlight</div>
-    <h2 data-block-id="s7-h2">Four moves. <em>This week.</em></h2>
-    <p class="section-lede" data-block-id="s7-lede">Concrete, low-friction, and sequenced so v0.1 of the pillar lands in front of Scott before he has time to scope-creep it.</p>
+  <!-- Section 08 — Today -->
+  <section class="section reveal">
+    <div class="section-num">08 &middot; What I&rsquo;d do today, on greenlight</div>
+    <h2 data-block-id="s8-h2">Four moves. <em>This week.</em></h2>
+    <p class="section-lede" data-block-id="s8-lede">Concrete, low-friction, sequenced so v0.1 of Scott&rsquo;s pillar lands in front of him before the brief gets re-litigated.</p>
 
     <div class="today">
-      <div class="today-row"><div class="today-text" data-block-id="s7-t1"><b>Get Amanda&rsquo;s sign-off</b> on the spine and the 9-post outline. One Teams thread. Yes / change-this / no.</div></div>
-      <div class="today-row"><div class="today-text" data-block-id="s7-t2"><b>Lock authors</b> &mdash; Scotty, Mark, Richard, Jack, Dave Summers, Matt, Alenka &mdash; in a single Teams thread. Short ask, working titles, &ldquo;I&rsquo;ll send a Claude-drafted v0.1 to react to&rdquo;. Low pressure, high momentum.</div></div>
-      <div class="today-row"><div class="today-text" data-block-id="s7-t3"><b>Draft Scotty&rsquo;s pillar v0.1 by Friday</b> &mdash; plus my two posts. Once those land, the rest cascade.</div></div>
-      <div class="today-row"><div class="today-text" data-block-id="s7-t4"><b>Stand up <code style="color:var(--cyan-accent);font-family:'JetBrains Mono',monospace;font-size:0.88rem">/knowledge-centre/</code></b> as the working canvas. Each draft = an editable page. Link from the AI Practice landing page when ready.</div></div>
+      <div class="today-row"><div class="today-text" data-block-id="s8-t1"><b>Send Amanda the link to this page.</b> One Teams thread. Yes / change-this / no. The argument is on the page so the conversation is anchored.</div></div>
+      <div class="today-row"><div class="today-text" data-block-id="s8-t2"><b>Send Scott the v0.1 pillar draft.</b> <code>/scott-pillar</code> &mdash; he reacts in his voice. Editable in-browser, saved automatically. No deck. No meeting yet.</div></div>
+      <div class="today-row"><div class="today-text" data-block-id="s8-t3"><b>Lock the seven authors</b> &mdash; Mark, Richard, Jack, Dave Summers, Matt, Alenka, Adam &mdash; in a single Teams thread. Working titles, &ldquo;I&rsquo;ll send a Claude-drafted v0.1 to react to.&rdquo; Low pressure, high momentum.</div></div>
+      <div class="today-row"><div class="today-text" data-block-id="s8-t4"><b>Stand up <code>/knowledge-centre/</code></b> as the editable canvas for every draft. Each post is a page. Edits saved live. Reviewers come and go without a Word doc in sight.</div></div>
     </div>
   </section>
 
-  <!-- Section 08: CTA -->
-  <section class="section">
-    <div class="section-num">08 &mdash; Decision point</div>
+  <!-- Section 09 — Decision -->
+  <section class="section reveal">
+    <div class="section-num">09 &middot; Decision point</div>
     <div class="cta-block">
-      <h2 class="cta-h" data-block-id="s8-h">Greenlight the rain? <em>Or argue with the spine first?</em></h2>
-      <p class="cta-p" data-block-id="s8-p">The fastest way to test whether the &ldquo;Win97 &rarr; squad-as-product&rdquo; arc holds up under Scott&rsquo;s pen is to draft his pillar post as v0.1 and put it in front of him to react to. Say the word.</p>
-      <p class="cta-p" data-block-id="s8-p2" style="font-family:'JetBrains Mono',monospace;font-size:0.7rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted)">Click any text on this page to edit. Edits save automatically.</p>
+      <h2 class="cta-h" data-block-id="s9-h">Greenlight Scott&rsquo;s pillar? <em>Or argue with the spine first?</em></h2>
+      <p class="cta-p" data-block-id="s9-p">The fastest way to test whether the &ldquo;Build it &middot; Ship it &middot; Make it boring&rdquo; arc holds is to put the v0.1 of Scott&rsquo;s pillar in his hands. He edits it to his voice or he tells us where the spine breaks. Either result moves us forward.</p>
+      <a class="cta-link" href="/scott-pillar">Read Scott&rsquo;s v0.1 pillar</a>
+      <div class="cta-foot" data-block-id="s9-foot">Click any text on this page to edit. Edits save automatically.</div>
     </div>
   </section>
 
-  <footer class="foot" data-block-id="foot">Data<span style="color:var(--blue-primary);font-weight:600">#</span>3 AI Practice &middot; Knowledge Centre Rain &middot; Internal Working Draft</footer>
+  <footer class="foot" data-block-id="foot">DATA<b>#</b>3 &middot; AI Practice &middot; Boring AI Campaign &middot; Working Draft v0.2 &middot; <span style="color:var(--text-secondary)">Adam Rappaport</span></footer>
 
 </div>
 
@@ -542,8 +1195,74 @@ body.show-deleted [data-block-id].deleted::after { content: 'DELETED'; position:
 </div>
 
 <script>
+/* ─── Section reveal on scroll ─── */
 (function() {
-  const PAGE_ID = 'kb-rain';
+  if (!('IntersectionObserver' in window)) {
+    document.querySelectorAll('.reveal').forEach(function(el) { el.classList.add('in-view'); });
+    return;
+  }
+  var io = new IntersectionObserver(function(entries) {
+    entries.forEach(function(e) {
+      if (e.isIntersecting) { e.target.classList.add('in-view'); io.unobserve(e.target); }
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -60px 0px' });
+  document.querySelectorAll('.reveal').forEach(function(el) { io.observe(el); });
+})();
+
+/* ─── KB tile filtering + search + expand ─── */
+(function() {
+  var tabs = document.querySelectorAll('#kbTabs .kb-tab');
+  var search = document.getElementById('kbSearch');
+  var grid = document.getElementById('kbGrid');
+  var empty = document.getElementById('kbEmpty');
+  var tiles = grid.querySelectorAll('.kb-tile');
+  var activeCat = 'all';
+  var activeQuery = '';
+
+  function applyFilters() {
+    var visibleCount = 0;
+    tiles.forEach(function(tile) {
+      var cat = tile.getAttribute('data-cat');
+      var q = (tile.querySelector('.kb-tile-q').textContent + ' ' + tile.querySelector('.kb-preview').textContent).toLowerCase();
+      var catMatch = (activeCat === 'all' || cat === activeCat);
+      var qMatch = (!activeQuery || q.indexOf(activeQuery) !== -1);
+      if (catMatch && qMatch) {
+        tile.classList.remove('hidden');
+        visibleCount++;
+      } else {
+        tile.classList.add('hidden');
+        tile.classList.remove('expanded');
+      }
+    });
+    empty.style.display = visibleCount === 0 ? 'block' : 'none';
+  }
+
+  tabs.forEach(function(tab) {
+    tab.addEventListener('click', function() {
+      tabs.forEach(function(t) { t.classList.remove('active'); });
+      tab.classList.add('active');
+      activeCat = tab.getAttribute('data-cat');
+      applyFilters();
+    });
+  });
+
+  search.addEventListener('input', function() {
+    activeQuery = search.value.trim().toLowerCase();
+    applyFilters();
+  });
+
+  tiles.forEach(function(tile) {
+    tile.addEventListener('click', function(e) {
+      // don't trigger on edit clicks (the editable infrastructure handles those)
+      if (e.target.closest('[data-block-id]')) return;
+      tile.classList.toggle('expanded');
+    });
+  });
+})();
+
+/* ─── Inline edit infrastructure (NeonDB-backed) ─── */
+(function() {
+  const PAGE_ID = 'boring-ai';
   const API = '/api/page-edits';
 
   const originals = {};
@@ -555,7 +1274,6 @@ body.show-deleted [data-block-id].deleted::after { content: 'DELETED'; position:
   let activeBlock = null;
   let originalContent = '';
   let toolbar = null;
-
   const statusEl = document.getElementById('editStatus');
 
   function showStatus(type, text) {
@@ -633,23 +1351,21 @@ body.show-deleted [data-block-id].deleted::after { content: 'DELETED'; position:
     showStatus('saving', 'Saving...');
     try {
       var res = await fetch(API, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        method: 'PUT', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ page_id: PAGE_ID, block_id: blockId, content: content, deleted: deleted })
       });
       if (!res.ok) throw new Error('Save failed');
       showStatus('saved', 'Saved');
       editsMap[blockId] = { content: content, deleted: deleted, updated_at: new Date().toISOString() };
       renderChangesPanel();
-    } catch (e) { showStatus('error', 'Error saving'); console.error('Save failed:', e); }
+    } catch (e) { showStatus('error', 'Error saving'); console.error(e); }
   }
 
   async function resetBlock(blockId) {
     showStatus('saving', 'Resetting...');
     try {
       var res = await fetch(API, {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
+        method: 'DELETE', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ page_id: PAGE_ID, block_id: blockId })
       });
       if (!res.ok) throw new Error('Reset failed');
@@ -661,7 +1377,7 @@ body.show-deleted [data-block-id].deleted::after { content: 'DELETED'; position:
         el.classList.remove('deleted');
       }
       renderChangesPanel();
-    } catch (e) { showStatus('error', 'Reset failed'); console.error('Reset failed:', e); }
+    } catch (e) { showStatus('error', 'Reset failed'); console.error(e); }
   }
 
   function createToolbar() {
@@ -674,10 +1390,9 @@ body.show-deleted [data-block-id].deleted::after { content: 'DELETED'; position:
   function positionToolbar(el) {
     if (!toolbar) return;
     var rect = el.getBoundingClientRect();
-    var toolbarHeight = 40;
-    var top = rect.top - toolbarHeight - 8;
+    var top = rect.top - 48;
     var left = rect.left;
-    if (rect.top < toolbarHeight + 20) top = rect.bottom + 8;
+    if (rect.top < 60) top = rect.bottom + 8;
     var maxLeft = window.innerWidth - 340;
     if (left > maxLeft) left = maxLeft;
     if (left < 8) left = 8;
@@ -699,13 +1414,13 @@ body.show-deleted [data-block-id].deleted::after { content: 'DELETED'; position:
       tb.innerHTML =
         '<button class="btn-restore" onclick="window._editRestore()">Restore</button>' +
         '<button class="btn-cancel" onclick="window._editCancel()">Cancel</button>' +
-        '<button class="btn-delete" style="background:rgba(251,191,36,0.1);color:var(--amber-accent);border-color:rgba(251,191,36,0.2)" onclick="window._editReset()">Reset to Original</button>';
+        '<button class="btn-delete" style="background:rgba(251,191,36,0.1);color:#fbbf24;border-color:rgba(251,191,36,0.2)" onclick="window._editReset()">Reset to Original</button>';
     } else {
       var buttons =
         '<button class="btn-save" onclick="window._editSave()">Save</button>' +
         '<button class="btn-cancel" onclick="window._editCancel()">Cancel</button>' +
         '<button class="btn-delete" onclick="window._editDelete()">Delete</button>';
-      if (hasBeenEdited) buttons += '<button class="btn-delete" style="background:rgba(251,191,36,0.1);color:var(--amber-accent);border-color:rgba(251,191,36,0.2)" onclick="window._editReset()">Reset</button>';
+      if (hasBeenEdited) buttons += '<button class="btn-delete" style="background:rgba(251,191,36,0.1);color:#fbbf24;border-color:rgba(251,191,36,0.2)" onclick="window._editReset()">Reset</button>';
       tb.innerHTML = buttons;
     }
     positionToolbar(el);
@@ -768,20 +1483,17 @@ body.show-deleted [data-block-id].deleted::after { content: 'DELETED'; position:
 
   document.addEventListener('click', function(e) {
     if (e.target.closest('.changes-trigger')) {
-      document.getElementById('changesPanel').classList.toggle('open');
-      return;
+      document.getElementById('changesPanel').classList.toggle('open'); return;
     }
     if (e.target.closest('.changes-panel')) {
       if (e.target.id === 'showDeletedBtn' || e.target.closest('#showDeletedBtn')) {
         document.body.classList.toggle('show-deleted');
-        document.getElementById('showDeletedBtn').classList.toggle('active');
-        return;
+        document.getElementById('showDeletedBtn').classList.toggle('active'); return;
       }
       var resetBtn = e.target.closest('[data-reset]');
       if (resetBtn) {
         if (activeBlock) cancelEdit();
-        resetBlock(resetBtn.getAttribute('data-reset'));
-        return;
+        resetBlock(resetBtn.getAttribute('data-reset')); return;
       }
       var gotoLabel = e.target.closest('[data-goto]');
       if (gotoLabel) {
@@ -799,8 +1511,7 @@ body.show-deleted [data-block-id].deleted::after { content: 'DELETED'; position:
     var block = e.target.closest('[data-block-id]');
     if (activeBlock && !block) {
       if (e.target.closest('.edit-toolbar')) return;
-      cancelEdit();
-      return;
+      cancelEdit(); return;
     }
     if (block && block !== activeBlock) {
       document.getElementById('changesPanel').classList.remove('open');
@@ -819,6 +1530,5 @@ body.show-deleted [data-block-id].deleted::after { content: 'DELETED'; position:
   loadEdits();
 })();
 </script>
-
 </body>
 </html>

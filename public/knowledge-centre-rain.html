@@ -109,7 +109,7 @@ body::after {
 .edit-status.error  { display: inline-flex; color: #fb7185; background: rgba(251, 113, 133, 0.12); }
 
 /* ─── Hero ─── */
-.hero { padding: 8rem 0 6rem; position: relative; }
+.hero { padding: 5rem 0 6rem; position: relative; scroll-margin-top: 110px; }
 .hero-eyebrow {
   font-family: 'JetBrains Mono', monospace; font-size: 0.65rem;
   letter-spacing: 0.3em; text-transform: uppercase; color: var(--d3-light-blue);
@@ -152,27 +152,60 @@ body::after {
 }
 .hero-subtitle b { color: var(--text-bright); font-weight: 500; }
 
+/* ─── Sticky pill-nav (hero meta) ─── */
+.hero-meta-bar {
+  position: sticky; top: 49px; z-index: 50;
+  margin: 0 -2rem;
+  padding: 0.65rem 2rem;
+  background: rgba(0, 0, 24, 0.88);
+  -webkit-backdrop-filter: blur(20px) saturate(1.5);
+  backdrop-filter: blur(20px) saturate(1.5);
+  border-bottom: 1px solid var(--border-subtle);
+  opacity: 0; animation: fadeUp 0.7s 1.2s ease-out forwards;
+}
 .hero-meta {
-  margin-top: 3rem; display: flex; gap: 0.75rem; flex-wrap: wrap;
+  max-width: 1180px; margin: 0 auto;
+  display: flex; gap: 0.5rem; flex-wrap: wrap;
   font-family: 'JetBrains Mono', monospace; font-size: 0.62rem;
   letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-muted);
-  opacity: 0; animation: fadeUp 0.7s 1.2s ease-out forwards;
+  align-items: center;
 }
 .hero-meta-link { text-decoration: none; color: inherit; display: inline-block; }
 .hero-meta span {
-  padding: 0.55rem 0.95rem; border: 1px solid var(--border-mid); border-radius: 6px;
+  padding: 0.45rem 0.85rem; border: 1px solid var(--border-mid); border-radius: 6px;
   background: rgba(0, 174, 255, 0.03); transition: all 0.2s ease;
-  display: inline-block;
+  display: inline-block; white-space: nowrap;
 }
 .hero-meta-link:hover span {
   border-color: var(--border-accent);
-  background: rgba(0, 174, 255, 0.08);
+  background: rgba(0, 174, 255, 0.12);
+  color: var(--text-primary);
   transform: translateY(-1px);
 }
 .hero-meta span b { color: var(--d3-light-blue); font-weight: 500; }
 
+/* Top-of-page button on the left of the pill nav */
+.top-button {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 32px; height: 32px; border-radius: 6px;
+  border: 1px solid var(--border-mid);
+  background: rgba(0, 174, 255, 0.05);
+  color: var(--d3-light-blue);
+  cursor: pointer; transition: all 0.2s ease;
+  margin-right: 0.4rem;
+  flex-shrink: 0;
+  text-decoration: none;
+}
+.top-button:hover {
+  border-color: var(--border-accent);
+  background: rgba(0, 174, 255, 0.18);
+  color: var(--d3-aqua);
+  transform: translateY(-1px);
+}
+.top-button svg { display: block; }
+
 /* ─── Sections ─── */
-.section { padding: 6rem 0; border-top: 1px solid var(--border-subtle); position: relative; scroll-margin-top: 80px; }
+.section { padding: 6rem 0; border-top: 1px solid var(--border-subtle); position: relative; scroll-margin-top: 110px; }
 .section.reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.8s ease, transform 0.8s ease; }
 .section.reveal.in-view { opacity: 1; transform: translateY(0); }
 
@@ -804,8 +837,22 @@ body.locked .edit-toolbar { display: none !important; }
     </div>
   </nav>
 
+  <!-- Sticky pill nav (the campaign meta as quick-jump nav) -->
+  <div class="hero-meta-bar" id="metaBar">
+    <div class="hero-meta">
+      <a class="top-button" href="#top" aria-label="Back to top" title="Back to top">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5"/><path d="m5 12 7-7 7 7"/></svg>
+      </a>
+      <a class="hero-meta-link" href="#thread"><span data-block-id="hero-m1"><b>2</b> already published</span></a>
+      <a class="hero-meta-link" href="#rain"><span data-block-id="hero-m2"><b>10</b> follow-up posts</span></a>
+      <a class="hero-meta-link" href="#kb"><span data-block-id="hero-m3"><b>20</b> KB articles</span></a>
+      <a class="hero-meta-link" href="#rain"><span data-block-id="hero-m4"><b>9</b> named voices</span></a>
+      <a class="hero-meta-link" href="#cadence"><span data-block-id="hero-m5"><b>6</b> weeks to land</span></a>
+    </div>
+  </div>
+
   <!-- Hero -->
-  <header class="hero">
+  <header class="hero" id="top">
     <div class="hero-eyebrow" data-block-id="hero-eyebrow">Knowledge Centre &middot; MSFT &times; AI</div>
     <h1>
       <span class="build" data-block-id="hero-build">Build it.</span>
@@ -813,13 +860,6 @@ body.locked .edit-toolbar { display: none !important; }
       <span class="boring" data-block-id="hero-boring">Make it boring.</span>
     </h1>
     <p class="hero-subtitle" data-block-id="hero-sub">The campaign isn&rsquo;t starting. <b>It&rsquo;s two posts in.</b> Adam called it on March&nbsp;4. Jack said how on April&nbsp;27. Scott&rsquo;s up next. Here&rsquo;s where it goes from here &mdash; the spine, the pillar, the rain, and the always-on KB layer underneath.</p>
-    <div class="hero-meta">
-      <a class="hero-meta-link" href="#thread"><span data-block-id="hero-m1"><b>2</b> already published</span></a>
-      <a class="hero-meta-link" href="#rain"><span data-block-id="hero-m2"><b>10</b> follow-up posts</span></a>
-      <a class="hero-meta-link" href="#kb"><span data-block-id="hero-m3"><b>20</b> KB articles</span></a>
-      <a class="hero-meta-link" href="#rain"><span data-block-id="hero-m4"><b>9</b> named voices</span></a>
-      <a class="hero-meta-link" href="#cadence"><span data-block-id="hero-m5"><b>6</b> weeks to land</span></a>
-    </div>
   </header>
 
   <!-- Section 00 — The thread already started -->

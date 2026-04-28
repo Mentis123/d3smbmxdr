@@ -23,7 +23,8 @@
       var btn = document.getElementById('lockToggle');
       if (btn) btn.setAttribute('aria-pressed', locked ? 'true' : 'false');
     }
-    if (localStorage.getItem(LOCK_KEY) === 'locked') applyLock(true);
+    var urlLocked = new URLSearchParams(window.location.search).has('locked');
+    if (urlLocked || localStorage.getItem(LOCK_KEY) === 'locked') applyLock(true);
 
     const originals = {};
     document.querySelectorAll('[data-block-id]').forEach(function(el) {

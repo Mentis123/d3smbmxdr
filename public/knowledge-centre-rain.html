@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Knowledge Centre Rain &mdash; MSFT &times; AI | Data#3</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap');
+
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+
+:root {
+  --bg-deep: #060913;
+  --bg-surface: #0c1021;
+  --bg-card: #111628;
+  --bg-card-hover: #161d36;
+  --bg-elevated: #1a2242;
+  --border-subtle: rgba(99, 140, 255, 0.08);
+  --border-mid: rgba(99, 140, 255, 0.15);
+  --border-accent: rgba(99, 140, 255, 0.3);
+  --blue-primary: #3b82f6;
+  --blue-light: #60a5fa;
+  --blue-bright: #93bbfd;
+  --purple-primary: #8b5cf6;
+  --purple-light: #a78bfa;
+  --cyan-accent: #22d3ee;
+  --green-accent: #34d399;
+  --amber-accent: #fbbf24;
+  --rose-accent: #fb7185;
+  --magenta-accent: #e879f9;
+  --text-primary: #e8ecf4;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --text-bright: #f1f5f9;
+  --gradient-brand: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  --shadow-card: 0 1px 3px rgba(0,0,0,0.4), 0 0 0 1px var(--border-subtle);
+  --shadow-elevated: 0 4px 24px rgba(0,0,0,0.5), 0 0 0 1px var(--border-subtle);
+}
+
+html { scroll-behavior: smooth; font-size: 15px; }
+body {
+  font-family: 'DM Sans', -apple-system, sans-serif;
+  background: var(--bg-deep);
+  color: var(--text-primary);
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+body::before {
+  content: ''; position: fixed; top: -50%; left: -50%;
+  width: 200%; height: 200%;
+  background:
+    radial-gradient(ellipse at 25% 15%, rgba(59, 130, 246, 0.05) 0%, transparent 50%),
+    radial-gradient(ellipse at 75% 85%, rgba(139, 92, 246, 0.04) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 50%, rgba(34, 211, 238, 0.015) 0%, transparent 40%);
+  pointer-events: none; z-index: 0;
+}
+body::after {
+  content: ''; position: fixed; inset: 0;
+  background-image:
+    linear-gradient(rgba(99, 140, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(99, 140, 255, 0.02) 1px, transparent 1px);
+  background-size: 60px 60px;
+  pointer-events: none; z-index: 0;
+}
+.page-wrapper { position: relative; z-index: 1; max-width: 1120px; margin: 0 auto; padding: 0 2rem; }
+
+/* Nav */
+.doc-nav {
+  position: sticky; top: 0; z-index: 100;
+  backdrop-filter: blur(20px) saturate(1.4);
+  -webkit-backdrop-filter: blur(20px) saturate(1.4);
+  background: rgba(6, 9, 19, 0.85);
+  border-bottom: 1px solid var(--border-subtle);
+  padding: 0.75rem 2rem; margin: 0 -2rem;
+}
+.nav-inner { max-width: 1120px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; }
+.nav-brand { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-muted); }
+.nav-brand span { color: var(--blue-primary); font-weight: 600; }
+.nav-right { display: flex; align-items: center; gap: 0.75rem; }
+.nav-status { display: flex; align-items: center; gap: 0.5rem; font-size: 0.7rem; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.08em; text-transform: uppercase; color: var(--cyan-accent); }
+.nav-status::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--cyan-accent); animation: pulse-dot 2s ease-in-out infinite; }
+@keyframes pulse-dot { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+/* Edit status */
+.edit-status { display: none; align-items: center; gap: 0.4rem; font-size: 0.65rem; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.08em; text-transform: uppercase; padding: 0.25rem 0.6rem; border-radius: 4px; }
+.edit-status.saving { display: inline-flex; color: var(--blue-light); background: rgba(59, 130, 246, 0.1); }
+.edit-status.saved  { display: inline-flex; color: var(--green-accent); background: rgba(52, 211, 153, 0.1); }
+.edit-status.error  { display: inline-flex; color: var(--rose-accent); background: rgba(251, 113, 133, 0.1); }
+
+/* Hero */
+.hero { padding: 7rem 0 5rem; position: relative; }
+.hero-eyebrow { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--blue-primary); margin-bottom: 1.75rem; display: flex; align-items: center; gap: 0.75rem; }
+.hero-eyebrow::before { content: ''; width: 32px; height: 1px; background: var(--gradient-brand); }
+.hero h1 { font-family: 'Instrument Serif', Georgia, serif; font-size: 4rem; font-weight: 400; line-height: 1.05; letter-spacing: -0.025em; color: var(--text-bright); margin-bottom: 1.75rem; max-width: 880px; }
+.hero h1 em { font-style: italic; background: var(--gradient-brand); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.hero-subtitle { font-size: 1.2rem; color: var(--text-secondary); max-width: 760px; line-height: 1.65; }
+.hero-meta { margin-top: 2.5rem; display: flex; gap: 1.25rem; flex-wrap: wrap; font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted); }
+.hero-meta span { padding: 0.4rem 0.75rem; border: 1px solid var(--border-mid); border-radius: 6px; }
+.hero-meta span b { color: var(--blue-light); font-weight: 500; }
+
+/* Sections */
+.section { padding: 5rem 0; border-top: 1px solid var(--border-subtle); }
+.section-num { font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--purple-primary); margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem; }
+.section-num::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, var(--border-mid), transparent); }
+.section h2 { font-family: 'Instrument Serif', Georgia, serif; font-size: 2.4rem; font-weight: 400; color: var(--text-bright); margin-bottom: 1.5rem; line-height: 1.12; max-width: 820px; }
+.section h2 em { font-style: italic; background: var(--gradient-brand); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.section h3 { font-size: 1.05rem; font-weight: 600; color: var(--text-bright); margin: 2rem 0 0.75rem; }
+.section p, .section li { font-size: 1rem; color: var(--text-secondary); line-height: 1.75; margin-bottom: 1rem; max-width: 820px; }
+.section ul { padding-left: 1.25rem; margin-bottom: 1.5rem; }
+.section li { margin-bottom: 0.5rem; }
+.section li::marker { color: var(--purple-primary); }
+.section-lede { font-size: 1.1rem; color: var(--text-primary); max-width: 820px; margin-bottom: 2rem; line-height: 1.65; }
+
+/* Spine pull-quote */
+.spine {
+  margin: 2rem 0 0;
+  padding: 2rem 2.25rem;
+  border-left: 3px solid var(--blue-primary);
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.06), rgba(139, 92, 246, 0.04));
+  border-radius: 0 12px 12px 0;
+}
+.spine-label { font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--blue-light); margin-bottom: 0.75rem; }
+.spine-quote { font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-size: 1.85rem; line-height: 1.25; color: var(--text-bright); }
+
+/* Pillar card */
+.pillar {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.06), rgba(139, 92, 246, 0.05));
+  border: 1px solid var(--border-accent);
+  border-radius: 14px;
+  padding: 2.25rem 2rem;
+  margin-top: 2rem;
+  box-shadow: var(--shadow-elevated);
+}
+.pillar-tag { font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--cyan-accent); margin-bottom: 0.75rem; }
+.pillar-title { font-family: 'Instrument Serif', Georgia, serif; font-size: 2rem; line-height: 1.15; color: var(--text-bright); margin-bottom: 0.4rem; }
+.pillar-by { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 1.5rem; }
+.pillar-by b { color: var(--blue-light); font-weight: 500; }
+.pillar h4 { font-size: 0.78rem; font-weight: 600; color: var(--text-bright); margin: 1.25rem 0 0.5rem; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase; }
+.pillar ol { padding-left: 1.25rem; margin: 0.5rem 0 0.75rem; }
+.pillar ol li { margin-bottom: 0.35rem; color: var(--text-secondary); font-size: 0.95rem; line-height: 1.65; }
+.pillar ol li::marker { color: var(--cyan-accent); font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; }
+
+/* Rain table */
+.rain-table { width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 2rem; background: var(--bg-card); border: 1px solid var(--border-mid); border-radius: 12px; overflow: hidden; }
+.rain-table th, .rain-table td { padding: 1rem 1.1rem; text-align: left; border-bottom: 1px solid var(--border-subtle); vertical-align: top; }
+.rain-table tr:last-child td { border-bottom: none; }
+.rain-table th { font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-muted); background: rgba(99, 140, 255, 0.04); font-weight: 500; }
+.rain-table td { font-size: 0.92rem; color: var(--text-secondary); line-height: 1.55; }
+.rain-table td.num { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--purple-light); width: 4%; }
+.rain-table td.author { color: var(--text-bright); font-weight: 500; width: 18%; }
+.rain-table td.author small { display: block; color: var(--text-muted); font-weight: 400; font-size: 0.78rem; margin-top: 0.15rem; }
+.rain-table td.title { font-family: 'Instrument Serif', Georgia, serif; font-style: italic; color: var(--text-primary); font-size: 1.02rem; width: 38%; line-height: 1.3; }
+.rain-table td.job { width: 40%; }
+.rain-table tr.optional td { opacity: 0.7; background: rgba(99, 140, 255, 0.015); }
+.rain-table tr.optional td.num::after { content: ' ·'; color: var(--amber-accent); }
+
+/* Schedule grid */
+.schedule { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 2.5rem; }
+.week-card { background: var(--bg-card); border: 1px solid var(--border-mid); border-radius: 10px; padding: 1.25rem 1.25rem 1.4rem; }
+.week-card-h { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--purple-primary); margin-bottom: 0.85rem; }
+.week-card-row { font-size: 0.85rem; color: var(--text-secondary); padding: 0.4rem 0; border-bottom: 1px dashed var(--border-subtle); display: flex; gap: 0.6rem; }
+.week-card-row:last-child { border-bottom: none; }
+.week-card-row b { color: var(--blue-light); font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; font-weight: 500; min-width: 26px; }
+
+/* Pushback cards */
+.push-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-top: 2rem; }
+.push-card { background: var(--bg-card); border: 1px solid var(--border-mid); border-left: 3px solid var(--amber-accent); border-radius: 10px; padding: 1.5rem 1.5rem 1.4rem; }
+.push-h { font-family: 'Instrument Serif', Georgia, serif; font-size: 1.35rem; line-height: 1.2; color: var(--text-bright); margin-bottom: 0.65rem; }
+.push-p { font-size: 0.9rem; color: var(--text-secondary); line-height: 1.65; margin: 0; }
+
+/* Production block (the meta-loop) */
+.prod {
+  margin-top: 2rem;
+  padding: 1.75rem 2rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-mid);
+  border-radius: 12px;
+}
+.prod-h { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--cyan-accent); margin-bottom: 1rem; }
+.prod ul { padding-left: 0; list-style: none; margin: 0; }
+.prod li { font-size: 0.95rem; color: var(--text-secondary); padding: 0.45rem 0; border-bottom: 1px dashed var(--border-subtle); }
+.prod li:last-child { border-bottom: none; }
+.prod li b { color: var(--blue-light); font-weight: 500; font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; letter-spacing: 0.05em; }
+
+/* Today block */
+.today { margin-top: 2rem; counter-reset: today; }
+.today-row { display: flex; gap: 1.25rem; padding: 1rem 0; border-bottom: 1px dashed var(--border-mid); align-items: flex-start; }
+.today-row:last-child { border-bottom: none; }
+.today-row::before { counter-increment: today; content: counter(today, decimal-leading-zero); font-family: 'JetBrains Mono', monospace; font-size: 0.95rem; color: var(--purple-light); min-width: 28px; padding-top: 0.1rem; }
+.today-text { font-size: 0.97rem; color: var(--text-secondary); line-height: 1.65; }
+.today-text b { color: var(--text-bright); font-weight: 500; }
+
+/* CTA */
+.cta-block {
+  margin-top: 2.5rem;
+  padding: 2.75rem 2.5rem;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.08), rgba(139, 92, 246, 0.08)), var(--bg-card);
+  border: 1px solid var(--border-accent);
+  border-radius: 14px;
+  text-align: center;
+  box-shadow: var(--shadow-elevated);
+}
+.cta-h { font-family: 'Instrument Serif', Georgia, serif; font-size: 1.85rem; line-height: 1.15; color: var(--text-bright); margin-bottom: 0.75rem; max-width: 700px; margin-left: auto; margin-right: auto; }
+.cta-h em { font-style: italic; background: var(--gradient-brand); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.cta-p { font-size: 1rem; color: var(--text-secondary); max-width: 620px; margin: 0 auto 1.5rem; line-height: 1.65; }
+
+/* Footer */
+.foot { padding: 3rem 0 2rem; border-top: 1px solid var(--border-subtle); font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; letter-spacing: 0.1em; color: var(--text-muted); text-align: center; }
+
+/* Editor styles */
+[data-block-id] { cursor: pointer; transition: outline 0.15s ease, outline-offset 0.15s ease; outline: 2px dashed transparent; outline-offset: 3px; border-radius: 3px; }
+[data-block-id]:hover { outline-color: rgba(59, 130, 246, 0.35); }
+[data-block-id].editing { outline: 2px solid var(--blue-primary) !important; outline-offset: 4px; background: rgba(59, 130, 246, 0.04) !important; }
+[data-block-id].deleted { opacity: 0; max-height: 0; overflow: hidden; padding: 0 !important; margin: 0 !important; border: none !important; pointer-events: none; transition: opacity 0.3s, max-height 0.3s; }
+body.show-deleted [data-block-id].deleted { opacity: 0.35; max-height: 500px; overflow: visible; text-decoration: line-through; pointer-events: auto; padding: revert !important; margin: revert !important; position: relative; }
+body.show-deleted [data-block-id].deleted::after { content: 'DELETED'; position: absolute; top: -6px; right: -6px; font-family: 'JetBrains Mono', monospace; font-size: 0.5rem; letter-spacing: 0.1em; color: var(--rose-accent); background: rgba(251, 113, 133, 0.15); padding: 0.1rem 0.4rem; border-radius: 3px; text-decoration: none; }
+.edit-toolbar { position: fixed; z-index: 9999; display: flex; gap: 0.35rem; padding: 0.4rem; background: var(--bg-elevated); border: 1px solid var(--border-accent); border-radius: 8px; box-shadow: 0 8px 32px rgba(0,0,0,0.5); animation: toolbar-in 0.15s ease; }
+@keyframes toolbar-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+.edit-toolbar button { font-family: 'JetBrains Mono', monospace; font-size: 0.62rem; letter-spacing: 0.05em; text-transform: uppercase; padding: 0.35rem 0.7rem; border: 1px solid transparent; border-radius: 5px; cursor: pointer; transition: all 0.15s ease; white-space: nowrap; }
+.edit-toolbar .btn-save { background: rgba(52, 211, 153, 0.15); color: var(--green-accent); border-color: rgba(52, 211, 153, 0.3); }
+.edit-toolbar .btn-save:hover { background: rgba(52, 211, 153, 0.25); }
+.edit-toolbar .btn-cancel { background: rgba(148, 163, 184, 0.1); color: var(--text-secondary); border-color: rgba(148, 163, 184, 0.2); }
+.edit-toolbar .btn-cancel:hover { background: rgba(148, 163, 184, 0.2); }
+.edit-toolbar .btn-delete { background: rgba(251, 113, 133, 0.1); color: var(--rose-accent); border-color: rgba(251, 113, 133, 0.2); }
+.edit-toolbar .btn-delete:hover { background: rgba(251, 113, 133, 0.2); }
+.edit-toolbar .btn-restore { background: rgba(59, 130, 246, 0.15); color: var(--blue-light); border-color: rgba(59, 130, 246, 0.3); }
+.edit-toolbar .btn-restore:hover { background: rgba(59, 130, 246, 0.25); }
+@keyframes save-flash { 0% { outline-color: var(--green-accent); } 100% { outline-color: transparent; } }
+[data-block-id].just-saved { animation: save-flash 0.8s ease; }
+.changes-trigger { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 998; font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; letter-spacing: 0.05em; padding: 0.5rem 1rem; border-radius: 8px; border: 1px solid var(--border-mid); background: var(--bg-elevated); color: var(--text-secondary); cursor: pointer; transition: all 0.2s ease; box-shadow: 0 4px 16px rgba(0,0,0,0.4); }
+.changes-trigger:hover { border-color: var(--border-accent); color: var(--text-primary); }
+.changes-trigger.has-changes { border-color: rgba(59, 130, 246, 0.4); color: var(--blue-light); }
+.changes-panel { position: fixed; bottom: 4rem; right: 1.5rem; z-index: 997; width: 360px; max-height: 60vh; background: var(--bg-card); border: 1px solid var(--border-accent); border-radius: 12px; box-shadow: 0 8px 40px rgba(0,0,0,0.6); display: none; flex-direction: column; overflow: hidden; animation: panel-in 0.2s ease; }
+.changes-panel.open { display: flex; }
+@keyframes panel-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.changes-panel-header { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-subtle); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+.changes-panel-title { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); }
+.changes-panel-actions { display: flex; gap: 0.5rem; align-items: center; }
+.changes-panel-actions button { font-family: 'JetBrains Mono', monospace; font-size: 0.55rem; letter-spacing: 0.05em; text-transform: uppercase; padding: 0.25rem 0.5rem; border-radius: 4px; border: 1px solid transparent; cursor: pointer; transition: all 0.15s ease; }
+.btn-show-deleted { background: rgba(251, 113, 133, 0.08); color: var(--text-muted); border-color: rgba(251, 113, 133, 0.15); }
+.btn-show-deleted:hover, .btn-show-deleted.active { background: rgba(251, 113, 133, 0.15); color: var(--rose-accent); border-color: rgba(251, 113, 133, 0.3); }
+.changes-panel-body { overflow-y: auto; padding: 0.5rem; flex: 1; }
+.changes-panel-empty { padding: 2rem 1rem; text-align: center; font-size: 0.8rem; color: var(--text-muted); }
+.change-item { display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0.6rem; border-radius: 6px; margin-bottom: 0.25rem; transition: background 0.15s; }
+.change-item:hover { background: rgba(99, 140, 255, 0.05); }
+.change-badge { font-family: 'JetBrains Mono', monospace; font-size: 0.5rem; letter-spacing: 0.05em; text-transform: uppercase; padding: 0.15rem 0.35rem; border-radius: 3px; flex-shrink: 0; font-weight: 600; }
+.change-badge.edited { background: rgba(59, 130, 246, 0.12); color: var(--blue-light); }
+.change-badge.deleted-badge { background: rgba(251, 113, 133, 0.12); color: var(--rose-accent); }
+.change-label { font-size: 0.72rem; color: var(--text-secondary); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; }
+.change-label:hover { color: var(--text-primary); }
+.change-reset { font-family: 'JetBrains Mono', monospace; font-size: 0.5rem; letter-spacing: 0.05em; text-transform: uppercase; padding: 0.2rem 0.4rem; border-radius: 3px; border: 1px solid rgba(251, 191, 36, 0.2); background: rgba(251, 191, 36, 0.08); color: var(--amber-accent); cursor: pointer; flex-shrink: 0; transition: all 0.15s; }
+.change-reset:hover { background: rgba(251, 191, 36, 0.18); }
+
+@media print {
+  body { background: #fff; color: #111; }
+  body::before, body::after { display: none; }
+  .doc-nav, .changes-trigger, .changes-panel, .edit-toolbar, .edit-status { display: none !important; }
+  .page-wrapper { max-width: 100%; padding: 0 1cm; }
+  .hero { padding: 2cm 0 1cm; }
+  .section { padding: 1.5cm 0; break-inside: avoid; }
+  * { color: #222 !important; }
+  .hero h1, h2, h3, h4 { color: #111 !important; }
+  [data-block-id] { outline: none !important; cursor: default; }
+}
+@media (max-width: 768px) {
+  .hero h1 { font-size: 2.4rem; }
+  .hero-subtitle { font-size: 1rem; }
+  .section h2 { font-size: 1.75rem; }
+  .schedule { grid-template-columns: 1fr; }
+  .push-grid { grid-template-columns: 1fr; }
+  .rain-table th, .rain-table td { padding: 0.7rem 0.6rem; font-size: 0.8rem; }
+  .rain-table td.title { font-size: 0.92rem; }
+  .cta-block { padding: 2rem 1.25rem; }
+}
+</style>
+</head>
+<body>
+<div class="page-wrapper">
+
+  <!-- Nav -->
+  <nav class="doc-nav">
+    <div class="nav-inner">
+      <div class="nav-brand">Data<span>#</span>3 &mdash; AI Practice</div>
+      <div class="nav-right">
+        <span class="edit-status" id="editStatus"></span>
+        <div class="nav-status">Internal &middot; Working Draft</div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <header class="hero">
+    <div class="hero-eyebrow" data-block-id="hero-eyebrow">Knowledge Centre &middot; MSFT &times; AI</div>
+    <h1 data-block-id="hero-h1">A content <em>rain</em>, not a post.</h1>
+    <p class="hero-subtitle" data-block-id="hero-sub">Scott asked Mark and Matt for a Knowledge Centre piece. Amanda asked for as much as we can publish, fast. This is the proposal: a multi-author, multi-week series with one editorial spine &mdash; written for customers, reusable by sales, and proof-of-pattern for the squad model itself.</p>
+    <div class="hero-meta">
+      <span data-block-id="hero-meta-1"><b>Length</b> &middot; 6 weeks</span>
+      <span data-block-id="hero-meta-2"><b>Posts</b> &middot; 9 (1 pillar + 8 follow-ups)</span>
+      <span data-block-id="hero-meta-3"><b>Authors</b> &middot; 7 named voices</span>
+      <span data-block-id="hero-meta-4"><b>Cadence</b> &middot; Tue + Thu</span>
+      <span data-block-id="hero-meta-5"><b>Audience</b> &middot; Customers + sales reps</span>
+    </div>
+  </header>
+
+  <!-- Section 01: The spine -->
+  <section class="section">
+    <div class="section-num">01 &mdash; The editorial spine</div>
+    <h2 data-block-id="s1-h2">One sentence the whole rain <em>hangs off</em>.</h2>
+    <p class="section-lede" data-block-id="s1-lede">A single article gets buried. A series with a spine gives sales a reusable library. Every author in the rain answers one piece of the same question.</p>
+
+    <div class="spine">
+      <div class="spine-label" data-block-id="s1-spine-label">Working spine &middot; the campaign banner</div>
+      <p class="spine-quote" data-block-id="s1-spine-quote">&ldquo;You can&rsquo;t buy AI like you buy a project.&rdquo;</p>
+    </div>
+
+    <h3 data-block-id="s1-h3-hooks">Why this spine, faithful to the call</h3>
+    <ul>
+      <li data-block-id="s1-hook-1"><b style="color:var(--text-bright);font-weight:500">Matt&rsquo;s hook</b> &mdash; speed to value through a scrum-based, multi-disciplinary squad.</li>
+      <li data-block-id="s1-hook-2"><b style="color:var(--text-bright);font-weight:500">Mark&rsquo;s hook</b> &mdash; what entices a customer to read this is &ldquo;how do I quickly realise value with AI agents?&rdquo;, not &ldquo;a new operating model exists&rdquo;.</li>
+      <li data-block-id="s1-hook-3"><b style="color:var(--text-bright);font-weight:500">Mentis&rsquo;s hook</b> &mdash; the squad is the product. The squad is what you buy.</li>
+      <li data-block-id="s1-hook-4"><b style="color:var(--text-bright);font-weight:500">Scott&rsquo;s hook</b> &mdash; capability-as-a-service. The Windows 97 moment for AI &mdash; the moment the buying model has to change too.</li>
+      <li data-block-id="s1-hook-5"><b style="color:var(--text-bright);font-weight:500">Sales utility</b> &mdash; a reusable objection-handler library, mapped post-by-post to the question it answers.</li>
+    </ul>
+  </section>
+
+  <!-- Section 02: The pillar -->
+  <section class="section">
+    <div class="section-num">02 &mdash; The pillar &middot; Scotty opens</div>
+    <h2 data-block-id="s2-h2">The Windows 97 moment for AI &mdash; <em>and the buying model has to change too</em>.</h2>
+    <p class="section-lede" data-block-id="s2-lede">Scott opens the rain. He&rsquo;s the most credible voice to put the &ldquo;97 moment&rdquo; stake in the ground &mdash; and the rest of the rain answers the questions his post will provoke.</p>
+
+    <div class="pillar">
+      <div class="pillar-tag" data-block-id="s2-pillar-tag">Pillar Post &middot; ~900 words &middot; Week 1 Tuesday</div>
+      <h3 class="pillar-title" data-block-id="s2-pillar-title">It&rsquo;s the Windows 97 moment for AI &mdash; and the buying model has to change too</h3>
+      <div class="pillar-by" data-block-id="s2-pillar-by">By <b>Scott Gosling</b> &middot; Microsoft Practice Manager, Data#3</div>
+
+      <h4>The five beats</h4>
+      <ol>
+        <li data-block-id="s2-beat-1"><b style="color:var(--text-primary);font-weight:500">Win97 wasn&rsquo;t about an OS.</b> It was the moment computing stopped being a project and started being an operating reality. Office 97. The browser. Email-by-default. Companies that treated it as &ldquo;an IT thing&rdquo; got eaten.</li>
+        <li data-block-id="s2-beat-2"><b style="color:var(--text-primary);font-weight:500">AI is doing it again, faster.</b> Microsoft&rsquo;s data: 82% of leaders expect agents in 12&ndash;18 months. MIT: 95% of GenAI projects fail. Both true at once.</li>
+        <li data-block-id="s2-beat-3"><b style="color:var(--text-primary);font-weight:500">The reason for the failure rate isn&rsquo;t models or data.</b> It&rsquo;s the buying model. Customers are still buying AI like a 2018 ERP project &mdash; scope, SOW, fractional resources, 9-month plan.</li>
+        <li data-block-id="s2-beat-4"><b style="color:var(--text-primary);font-weight:500">We&rsquo;re moving with it.</b> Data#3 is shifting AI services to capability-as-a-service. You don&rsquo;t buy hours. You buy a team, by the sprint, with a defined outcome.</li>
+        <li data-block-id="s2-beat-5"><b style="color:var(--text-primary);font-weight:500">Reading list.</b> Links to the rest of the rain &mdash; eight posts answering the practical questions this raises.</li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- Section 03: The rain -->
+  <section class="section">
+    <div class="section-num">03 &mdash; The rain &middot; 8 follow-up posts</div>
+    <h2 data-block-id="s3-h2">Eight short posts. Seven named voices. <em>One job each.</em></h2>
+    <p class="section-lede" data-block-id="s3-lede">Each follow-up runs 500&ndash;800 words. Each links to Scotty&rsquo;s pillar and the AI Squad landing page. Each post does one job &mdash; a single customer question, a single sales objection, a single proof point.</p>
+
+    <table class="rain-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Author</th>
+          <th>Working title</th>
+          <th>Job it does</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="num">01</td>
+          <td class="author" data-block-id="r1-author">Mark Pattie<small>Modern Work Solution Lead</small></td>
+          <td class="title" data-block-id="r1-title">From waterfall to working in a fortnight: why Modern Work delivery had to change</td>
+          <td class="job" data-block-id="r1-job">Earned-authority piece. Mark owns the lifecycle / ETO. Frames the shift as a delivery evolution, not marketing. Hooks customers tired of 9-month projects.</td>
+        </tr>
+        <tr>
+          <td class="num">02</td>
+          <td class="author" data-block-id="r2-author">Mentis<small>AI Practice Manager</small></td>
+          <td class="title" data-block-id="r2-title">The squad is the product. A team. By the sprint.</td>
+          <td class="job" data-block-id="r2-job">Lifts the AI Squad page into long form. 1&middot;1&middot;2 explained. &ldquo;Same four faces every sprint.&rdquo; What a sprint actually delivers on Day 9. Strongest single read for a CIO.</td>
+        </tr>
+        <tr>
+          <td class="num">03</td>
+          <td class="author" data-block-id="r3-author">Mentis<small>AI Practice Manager</small></td>
+          <td class="title" data-block-id="r3-title">What you actually get in 10 working days</td>
+          <td class="job" data-block-id="r3-job">The proof post. Day-by-day walkthrough of a real sprint. Demystifies. Counters &ldquo;AI is just demos.&rdquo; The post Jack will use in his next sales call.</td>
+        </tr>
+        <tr>
+          <td class="num">04</td>
+          <td class="author" data-block-id="r4-author">Jack LaTrobe<small>VIC Squad Principal</small></td>
+          <td class="title" data-block-id="r4-title">What I learned shipping AI from the inside of a squad</td>
+          <td class="job" data-block-id="r4-job">First-person delivery voice. Real war stories &mdash; MYD3, scoping calls, the 1-0-4 vs 1-1-2 reality. Anti-corporate tone. Highest shareability of the rain.</td>
+        </tr>
+        <tr>
+          <td class="num">05</td>
+          <td class="author" data-block-id="r5-author">Richard<small>Security Practice Manager</small></td>
+          <td class="title" data-block-id="r5-title">Agents don&rsquo;t fail at the model layer. They fail at the governance layer.</td>
+          <td class="job" data-block-id="r5-job">Counter-balances the speed message with the de-risk message. Lands AI-TRiSM, Agent 365, Purview as a wrap, not a SKU. Required reading for any nervous CISO.</td>
+        </tr>
+        <tr>
+          <td class="num">06</td>
+          <td class="author" data-block-id="r6-author">Dave Summers<small>Agent Smith / AI-augmented delivery</small></td>
+          <td class="title" data-block-id="r6-title">How a 4-person squad ships like 8: the Agent Smith dividend</td>
+          <td class="job" data-block-id="r6-job">The differentiator post. Why our squads punch above their weight &mdash; Claude/agent-augmented delivery patterns. Defends the rate card. Dave gets to be the technical hero.</td>
+        </tr>
+        <tr>
+          <td class="num">07</td>
+          <td class="author" data-block-id="r7-author">Matt Gooden<small>AI Practice Director</small></td>
+          <td class="title" data-block-id="r7-title">The unit economics of capability-as-a-service: what &ldquo;four sprints&rdquo; actually means</td>
+          <td class="job" data-block-id="r7-job">Commercial-model post for procurement / CFO. Not the spreadsheet &mdash; the vocabulary. &ldquo;That integration will be four sprints.&rdquo; Removes friction from the buying conversation.</td>
+        </tr>
+        <tr>
+          <td class="num">08</td>
+          <td class="author" data-block-id="r8-author">Alenka Caserman<small>Analytics Solution Architect</small></td>
+          <td class="title" data-block-id="r8-title">We&rsquo;ve been doing this for a year. We called it Data Factory.</td>
+          <td class="job" data-block-id="r8-job">Cross-practice authority. Validates the pattern with track record &mdash; 70% effort reduction, 6-week engagements, customers love it. &ldquo;We&rsquo;re not inventing. We&rsquo;re extending.&rdquo;</td>
+        </tr>
+        <tr class="optional">
+          <td class="num">09</td>
+          <td class="author" data-block-id="r9-author">Suzanne Maroc<small>Business Apps Lead &middot; optional</small></td>
+          <td class="title" data-block-id="r9-title">Why Functional Consultants belong on Scaled Sprints</td>
+          <td class="job" data-block-id="r9-job">Roles inside the squad. Practical &mdash; helps customers understand who they get when. Optional add-on if the rain runs longer.</td>
+        </tr>
+        <tr class="optional">
+          <td class="num">10</td>
+          <td class="author" data-block-id="r10-author">Mentis<small>wrap-up &middot; optional</small></td>
+          <td class="title" data-block-id="r10-title">The 8 questions every customer asks about AI right now</td>
+          <td class="job" data-block-id="r10-job">The governance-gap question set, packaged as a sales reference card. The reusable artefact at the end of the rain.</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- Section 04: Cadence -->
+  <section class="section">
+    <div class="section-num">04 &mdash; Cadence &middot; the rain pattern</div>
+    <h2 data-block-id="s4-h2">Six weeks. Two drops a week. <em>Every Tuesday and Thursday.</em></h2>
+    <p class="section-lede" data-block-id="s4-lede">Each post links to the pillar, the AI Squad landing page, and the next one in the rain. Sales gets a one-pager mapping each post to the customer objection it answers.</p>
+
+    <div class="schedule">
+      <div class="week-card">
+        <div class="week-card-h" data-block-id="s4-w1-h">Week 1</div>
+        <div class="week-card-row" data-block-id="s4-w1-tue"><b>Tue</b> Scotty pillar &mdash; Win97</div>
+        <div class="week-card-row" data-block-id="s4-w1-thu"><b>Thu</b> Mentis &mdash; Squad is the product</div>
+      </div>
+      <div class="week-card">
+        <div class="week-card-h" data-block-id="s4-w2-h">Week 2</div>
+        <div class="week-card-row" data-block-id="s4-w2-tue"><b>Tue</b> Mark &mdash; Waterfall &rarr; fortnight</div>
+        <div class="week-card-row" data-block-id="s4-w2-thu"><b>Thu</b> Mentis &mdash; What you get in 10 days</div>
+      </div>
+      <div class="week-card">
+        <div class="week-card-h" data-block-id="s4-w3-h">Week 3</div>
+        <div class="week-card-row" data-block-id="s4-w3-tue"><b>Tue</b> Jack &mdash; Inside a squad</div>
+        <div class="week-card-row" data-block-id="s4-w3-thu"><b>Thu</b> Richard &mdash; Governance gap</div>
+      </div>
+      <div class="week-card">
+        <div class="week-card-h" data-block-id="s4-w4-h">Week 4</div>
+        <div class="week-card-row" data-block-id="s4-w4-tue"><b>Tue</b> Dave Summers &mdash; Agent Smith dividend</div>
+        <div class="week-card-row" data-block-id="s4-w4-thu"><b>Thu</b> Matt &mdash; &ldquo;Four sprints&rdquo;</div>
+      </div>
+      <div class="week-card">
+        <div class="week-card-h" data-block-id="s4-w5-h">Week 5</div>
+        <div class="week-card-row" data-block-id="s4-w5-tue"><b>Tue</b> Alenka &mdash; Data Factory precedent</div>
+        <div class="week-card-row" data-block-id="s4-w5-thu"><b>Thu</b> Mentis wrap &mdash; 8 questions</div>
+      </div>
+      <div class="week-card">
+        <div class="week-card-h" data-block-id="s4-w6-h">Week 6</div>
+        <div class="week-card-row" data-block-id="s4-w6-tue"><b>Tue</b> Cross-link to landing page</div>
+        <div class="week-card-row" data-block-id="s4-w6-thu"><b>Thu</b> Sales pack drop</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 05: Pushbacks -->
+  <section class="section">
+    <div class="section-num">05 &mdash; Two angles to push back on Amanda</div>
+    <h2 data-block-id="s5-h2">Where I&rsquo;d argue with the brief, <em>respectfully</em>.</h2>
+    <p class="section-lede" data-block-id="s5-lede">The original ask was &ldquo;a Knowledge Centre post or series of posts.&rdquo; If we want this to land &mdash; not get buried &mdash; two things matter more than the brief reads.</p>
+
+    <div class="push-grid">
+      <div class="push-card">
+        <h3 class="push-h" data-block-id="s5-push1-h">One-and-done won&rsquo;t beat the noise.</h3>
+        <p class="push-p" data-block-id="s5-push1-p">Microsoft&rsquo;s partners are out-publishing us 10:1 on AI. A single article gets indexed and forgotten. A spine gives sales a reusable library &mdash; that&rsquo;s the bigger prize than any single post.</p>
+      </div>
+      <div class="push-card">
+        <h3 class="push-h" data-block-id="s5-push2-h">The hook is &ldquo;speed to value with proof&rdquo; &mdash; not &ldquo;new model&rdquo;.</h3>
+        <p class="push-p" data-block-id="s5-push2-p">Mark nailed this in the call. Every post must clear the &ldquo;so what?&rdquo; bar in the first paragraph. Lead with methodology &rarr; we lose. Lead with &ldquo;this customer went live in 10 working days and here&rsquo;s what we shipped&rdquo; &rarr; we win.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 06: Production model -->
+  <section class="section">
+    <div class="section-num">06 &mdash; The production model</div>
+    <h2 data-block-id="s6-h2">Same harness we already use. <em>The way we make it is the proof.</em></h2>
+    <p class="section-lede" data-block-id="s6-lede">The production model for the rain <em>is</em> the model we&rsquo;re selling. Squad + sprint + Claude. Scotty&rsquo;s pillar can literally say so.</p>
+
+    <div class="prod">
+      <div class="prod-h" data-block-id="s6-prod-h">How each post gets made</div>
+      <ul>
+        <li data-block-id="s6-prod-1"><b>Drafting</b> &mdash; I draft each post with Claude against the d3-brain vault. 80% there in an afternoon per piece.</li>
+        <li data-block-id="s6-prod-2"><b>Voice ownership</b> &mdash; the named author edits to their voice before publish. Non-negotiable. Ghost-written posts under Mark&rsquo;s or Richard&rsquo;s name read flat &mdash; they&rsquo;ll know.</li>
+        <li data-block-id="s6-prod-3"><b>Living drafts</b> &mdash; ship as inline-editable HTML (this page&rsquo;s pattern). Amanda, the named author, and reviewers edit in-browser. NeonDB-backed. Cuts review cycle from days to hours.</li>
+        <li data-block-id="s6-prod-4"><b>Proof point built in</b> &mdash; we&rsquo;re using the squad model to ship the campaign about the squad model. The pillar can say &ldquo;this very page was built this way&rdquo; with a link to this draft.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- Section 07: Today -->
+  <section class="section">
+    <div class="section-num">07 &mdash; What I&rsquo;d do today, on greenlight</div>
+    <h2 data-block-id="s7-h2">Four moves. <em>This week.</em></h2>
+    <p class="section-lede" data-block-id="s7-lede">Concrete, low-friction, and sequenced so v0.1 of the pillar lands in front of Scott before he has time to scope-creep it.</p>
+
+    <div class="today">
+      <div class="today-row"><div class="today-text" data-block-id="s7-t1"><b>Get Amanda&rsquo;s sign-off</b> on the spine and the 9-post outline. One Teams thread. Yes / change-this / no.</div></div>
+      <div class="today-row"><div class="today-text" data-block-id="s7-t2"><b>Lock authors</b> &mdash; Scotty, Mark, Richard, Jack, Dave Summers, Matt, Alenka &mdash; in a single Teams thread. Short ask, working titles, &ldquo;I&rsquo;ll send a Claude-drafted v0.1 to react to&rdquo;. Low pressure, high momentum.</div></div>
+      <div class="today-row"><div class="today-text" data-block-id="s7-t3"><b>Draft Scotty&rsquo;s pillar v0.1 by Friday</b> &mdash; plus my two posts. Once those land, the rest cascade.</div></div>
+      <div class="today-row"><div class="today-text" data-block-id="s7-t4"><b>Stand up <code style="color:var(--cyan-accent);font-family:'JetBrains Mono',monospace;font-size:0.88rem">/knowledge-centre/</code></b> as the working canvas. Each draft = an editable page. Link from the AI Practice landing page when ready.</div></div>
+    </div>
+  </section>
+
+  <!-- Section 08: CTA -->
+  <section class="section">
+    <div class="section-num">08 &mdash; Decision point</div>
+    <div class="cta-block">
+      <h2 class="cta-h" data-block-id="s8-h">Greenlight the rain? <em>Or argue with the spine first?</em></h2>
+      <p class="cta-p" data-block-id="s8-p">The fastest way to test whether the &ldquo;Win97 &rarr; squad-as-product&rdquo; arc holds up under Scott&rsquo;s pen is to draft his pillar post as v0.1 and put it in front of him to react to. Say the word.</p>
+      <p class="cta-p" data-block-id="s8-p2" style="font-family:'JetBrains Mono',monospace;font-size:0.7rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted)">Click any text on this page to edit. Edits save automatically.</p>
+    </div>
+  </section>
+
+  <footer class="foot" data-block-id="foot">Data<span style="color:var(--blue-primary);font-weight:600">#</span>3 AI Practice &middot; Knowledge Centre Rain &middot; Internal Working Draft</footer>
+
+</div>
+
+<!-- Changes Panel -->
+<button class="changes-trigger" id="changesTrigger">Changes (0)</button>
+<div class="changes-panel" id="changesPanel">
+  <div class="changes-panel-header">
+    <span class="changes-panel-title">Change History</span>
+    <div class="changes-panel-actions">
+      <button class="btn-show-deleted" id="showDeletedBtn">Show Deleted</button>
+    </div>
+  </div>
+  <div class="changes-panel-body" id="changesList"></div>
+</div>
+
+<script>
+(function() {
+  const PAGE_ID = 'kb-rain';
+  const API = '/api/page-edits';
+
+  const originals = {};
+  document.querySelectorAll('[data-block-id]').forEach(function(el) {
+    originals[el.getAttribute('data-block-id')] = el.innerHTML;
+  });
+
+  let editsMap = {};
+  let activeBlock = null;
+  let originalContent = '';
+  let toolbar = null;
+
+  const statusEl = document.getElementById('editStatus');
+
+  function showStatus(type, text) {
+    statusEl.className = 'edit-status ' + type;
+    statusEl.textContent = text;
+    if (type === 'saved') setTimeout(function() { statusEl.className = 'edit-status'; }, 2000);
+  }
+
+  async function loadEdits() {
+    try {
+      var res = await fetch(API + '?page_id=' + encodeURIComponent(PAGE_ID));
+      if (!res.ok) return;
+      var data = await res.json();
+      editsMap = data.edits || {};
+      applyEdits();
+      renderChangesPanel();
+    } catch (e) { console.error('Failed to load edits:', e); }
+  }
+
+  function applyEdits() {
+    for (var blockId in editsMap) {
+      var edit = editsMap[blockId];
+      var el = document.querySelector('[data-block-id="' + blockId + '"]');
+      if (!el) continue;
+      if (edit.content !== null && edit.content !== undefined) el.innerHTML = edit.content;
+      if (edit.deleted) el.classList.add('deleted'); else el.classList.remove('deleted');
+    }
+  }
+
+  function getChangeCounts() {
+    var edited = 0, deleted = 0;
+    for (var k in editsMap) { if (editsMap[k].deleted) deleted++; else edited++; }
+    return { edited: edited, deleted: deleted, total: edited + deleted };
+  }
+
+  function renderChangesPanel() {
+    var counts = getChangeCounts();
+    var trigger = document.getElementById('changesTrigger');
+    var parts = [];
+    if (counts.edited) parts.push(counts.edited + ' edited');
+    if (counts.deleted) parts.push(counts.deleted + ' deleted');
+    trigger.textContent = counts.total > 0 ? 'Changes (' + parts.join(', ') + ')' : 'No Changes';
+    trigger.classList.toggle('has-changes', counts.total > 0);
+    var sdBtn = document.getElementById('showDeletedBtn');
+    sdBtn.textContent = counts.deleted > 0 ? 'Show Deleted (' + counts.deleted + ')' : 'Show Deleted';
+    var list = document.getElementById('changesList');
+    if (counts.total === 0) {
+      list.innerHTML = '<div class="changes-panel-empty">No changes yet.<br>Click any text to edit it.</div>';
+      return;
+    }
+    var html = '';
+    var entries = Object.keys(editsMap).sort();
+    for (var i = 0; i < entries.length; i++) {
+      var bid = entries[i];
+      var edit = editsMap[bid];
+      var isDel = edit.deleted;
+      var badgeClass = isDel ? 'deleted-badge' : 'edited';
+      var badgeText = isDel ? 'Del' : 'Edit';
+      var el = document.querySelector('[data-block-id="' + bid + '"]');
+      var label = bid;
+      if (el) {
+        var text = el.textContent.trim();
+        label = text.length > 40 ? text.substring(0, 40) + '...' : (text || bid);
+      }
+      html += '<div class="change-item">' +
+        '<span class="change-badge ' + badgeClass + '">' + badgeText + '</span>' +
+        '<span class="change-label" data-goto="' + bid + '" title="' + bid + '">' + label.replace(/</g, '&lt;') + '</span>' +
+        '<button class="change-reset" data-reset="' + bid + '">Reset</button>' +
+        '</div>';
+    }
+    list.innerHTML = html;
+  }
+
+  async function saveEdit(blockId, content, deleted) {
+    showStatus('saving', 'Saving...');
+    try {
+      var res = await fetch(API, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ page_id: PAGE_ID, block_id: blockId, content: content, deleted: deleted })
+      });
+      if (!res.ok) throw new Error('Save failed');
+      showStatus('saved', 'Saved');
+      editsMap[blockId] = { content: content, deleted: deleted, updated_at: new Date().toISOString() };
+      renderChangesPanel();
+    } catch (e) { showStatus('error', 'Error saving'); console.error('Save failed:', e); }
+  }
+
+  async function resetBlock(blockId) {
+    showStatus('saving', 'Resetting...');
+    try {
+      var res = await fetch(API, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ page_id: PAGE_ID, block_id: blockId })
+      });
+      if (!res.ok) throw new Error('Reset failed');
+      showStatus('saved', 'Reset to original');
+      delete editsMap[blockId];
+      var el = document.querySelector('[data-block-id="' + blockId + '"]');
+      if (el && originals[blockId] !== undefined) {
+        el.innerHTML = originals[blockId];
+        el.classList.remove('deleted');
+      }
+      renderChangesPanel();
+    } catch (e) { showStatus('error', 'Reset failed'); console.error('Reset failed:', e); }
+  }
+
+  function createToolbar() {
+    if (toolbar) toolbar.remove();
+    toolbar = document.createElement('div');
+    toolbar.className = 'edit-toolbar';
+    document.body.appendChild(toolbar);
+    return toolbar;
+  }
+  function positionToolbar(el) {
+    if (!toolbar) return;
+    var rect = el.getBoundingClientRect();
+    var toolbarHeight = 40;
+    var top = rect.top - toolbarHeight - 8;
+    var left = rect.left;
+    if (rect.top < toolbarHeight + 20) top = rect.bottom + 8;
+    var maxLeft = window.innerWidth - 340;
+    if (left > maxLeft) left = maxLeft;
+    if (left < 8) left = 8;
+    toolbar.style.top = top + 'px';
+    toolbar.style.left = left + 'px';
+  }
+  function enterEdit(el) {
+    if (activeBlock) cancelEdit();
+    activeBlock = el;
+    originalContent = el.innerHTML;
+    el.classList.add('editing');
+    el.setAttribute('contenteditable', 'true');
+    el.focus();
+    var blockId = el.getAttribute('data-block-id');
+    var isDeleted = el.classList.contains('deleted');
+    var hasBeenEdited = blockId in editsMap;
+    var tb = createToolbar();
+    if (isDeleted) {
+      tb.innerHTML =
+        '<button class="btn-restore" onclick="window._editRestore()">Restore</button>' +
+        '<button class="btn-cancel" onclick="window._editCancel()">Cancel</button>' +
+        '<button class="btn-delete" style="background:rgba(251,191,36,0.1);color:var(--amber-accent);border-color:rgba(251,191,36,0.2)" onclick="window._editReset()">Reset to Original</button>';
+    } else {
+      var buttons =
+        '<button class="btn-save" onclick="window._editSave()">Save</button>' +
+        '<button class="btn-cancel" onclick="window._editCancel()">Cancel</button>' +
+        '<button class="btn-delete" onclick="window._editDelete()">Delete</button>';
+      if (hasBeenEdited) buttons += '<button class="btn-delete" style="background:rgba(251,191,36,0.1);color:var(--amber-accent);border-color:rgba(251,191,36,0.2)" onclick="window._editReset()">Reset</button>';
+      tb.innerHTML = buttons;
+    }
+    positionToolbar(el);
+  }
+  function cancelEdit() {
+    if (!activeBlock) return;
+    activeBlock.innerHTML = originalContent;
+    activeBlock.classList.remove('editing');
+    activeBlock.removeAttribute('contenteditable');
+    activeBlock = null; originalContent = '';
+    if (toolbar) { toolbar.remove(); toolbar = null; }
+  }
+  async function doSave() {
+    if (!activeBlock) return;
+    var blockId = activeBlock.getAttribute('data-block-id');
+    var content = activeBlock.innerHTML;
+    activeBlock.classList.remove('editing');
+    activeBlock.removeAttribute('contenteditable');
+    activeBlock.classList.add('just-saved');
+    setTimeout(function() { var el = document.querySelector('[data-block-id="' + blockId + '"]'); if (el) el.classList.remove('just-saved'); }, 800);
+    if (toolbar) { toolbar.remove(); toolbar = null; }
+    activeBlock = null; originalContent = '';
+    await saveEdit(blockId, content, false);
+  }
+  async function doDelete() {
+    if (!activeBlock) return;
+    var blockId = activeBlock.getAttribute('data-block-id');
+    var content = activeBlock.innerHTML;
+    activeBlock.classList.remove('editing');
+    activeBlock.removeAttribute('contenteditable');
+    activeBlock.classList.add('deleted');
+    if (toolbar) { toolbar.remove(); toolbar = null; }
+    activeBlock = null; originalContent = '';
+    await saveEdit(blockId, content, true);
+  }
+  async function doRestore() {
+    if (!activeBlock) return;
+    var blockId = activeBlock.getAttribute('data-block-id');
+    var content = activeBlock.innerHTML;
+    activeBlock.classList.remove('editing', 'deleted');
+    activeBlock.removeAttribute('contenteditable');
+    if (toolbar) { toolbar.remove(); toolbar = null; }
+    activeBlock = null; originalContent = '';
+    await saveEdit(blockId, content, false);
+  }
+  async function doReset() {
+    if (!activeBlock) return;
+    var blockId = activeBlock.getAttribute('data-block-id');
+    activeBlock.classList.remove('editing');
+    activeBlock.removeAttribute('contenteditable');
+    if (toolbar) { toolbar.remove(); toolbar = null; }
+    activeBlock = null; originalContent = '';
+    await resetBlock(blockId);
+  }
+  window._editSave = doSave;
+  window._editCancel = cancelEdit;
+  window._editDelete = doDelete;
+  window._editRestore = doRestore;
+  window._editReset = doReset;
+
+  document.addEventListener('click', function(e) {
+    if (e.target.closest('.changes-trigger')) {
+      document.getElementById('changesPanel').classList.toggle('open');
+      return;
+    }
+    if (e.target.closest('.changes-panel')) {
+      if (e.target.id === 'showDeletedBtn' || e.target.closest('#showDeletedBtn')) {
+        document.body.classList.toggle('show-deleted');
+        document.getElementById('showDeletedBtn').classList.toggle('active');
+        return;
+      }
+      var resetBtn = e.target.closest('[data-reset]');
+      if (resetBtn) {
+        if (activeBlock) cancelEdit();
+        resetBlock(resetBtn.getAttribute('data-reset'));
+        return;
+      }
+      var gotoLabel = e.target.closest('[data-goto]');
+      if (gotoLabel) {
+        var bid = gotoLabel.getAttribute('data-goto');
+        var target = document.querySelector('[data-block-id="' + bid + '"]');
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          target.classList.add('just-saved');
+          setTimeout(function() { target.classList.remove('just-saved'); }, 1000);
+        }
+        return;
+      }
+      return;
+    }
+    var block = e.target.closest('[data-block-id]');
+    if (activeBlock && !block) {
+      if (e.target.closest('.edit-toolbar')) return;
+      cancelEdit();
+      return;
+    }
+    if (block && block !== activeBlock) {
+      document.getElementById('changesPanel').classList.remove('open');
+      enterEdit(block);
+    }
+  });
+  document.addEventListener('keydown', function(e) {
+    if (!activeBlock) return;
+    if (e.key === 'Escape') { e.preventDefault(); cancelEdit(); }
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); doSave(); }
+  });
+  function onReposition() { if (activeBlock && toolbar) positionToolbar(activeBlock); }
+  window.addEventListener('scroll', onReposition, { passive: true });
+  window.addEventListener('resize', onReposition, { passive: true });
+
+  loadEdits();
+})();
+</script>
+
+</body>
+</html>

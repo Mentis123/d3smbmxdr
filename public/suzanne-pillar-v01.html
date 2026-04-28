@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Treat your agents like a workforce &mdash; v0.1 draft | Data#3</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap');
+
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root {
+  --bg-deep: #000018;
+  --bg-card: #0a0f24;
+  --bg-elevated: #131b3c;
+  --border-subtle: rgba(0, 174, 255, 0.08);
+  --border-mid: rgba(0, 174, 255, 0.15);
+  --border-accent: rgba(0, 174, 255, 0.3);
+  --d3-blue-black: #000025;
+  --d3-light-blue: #00AEFF;
+  --d3-pale-blue: #78DCFF;
+  --d3-aqua: #00FFFF;
+  --d3-purple: #7300FF;
+  --d3-magenta: #FF00FF;
+  --text-primary: #e8ecf4;
+  --text-secondary: #a8b3cc;
+  --text-muted: #6e7894;
+  --text-bright: #ffffff;
+  --gradient-aqua: linear-gradient(135deg, #00FFFF, #00AEFF);
+  --gradient-brand: linear-gradient(135deg, #00AEFF, #7300FF);
+  --gradient-warm: linear-gradient(135deg, #FF00FF, #7300FF);
+}
+html { scroll-behavior: smooth; font-size: 16px; }
+body {
+  font-family: 'DM Sans', -apple-system, sans-serif;
+  background: var(--bg-deep); color: var(--text-primary);
+  line-height: 1.7; -webkit-font-smoothing: antialiased; overflow-x: hidden;
+}
+body::before {
+  content: ''; position: fixed; top: -50%; left: -50%;
+  width: 200%; height: 200%; pointer-events: none; z-index: 0;
+  background:
+    radial-gradient(ellipse at 20% 10%, rgba(255, 0, 255, 0.04) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 90%, rgba(0, 174, 255, 0.06) 0%, transparent 55%);
+}
+
+.wrap { position: relative; z-index: 1; max-width: 760px; margin: 0 auto; padding: 0 1.5rem; }
+.full { max-width: 1100px; margin: 0 auto; padding: 0 1.5rem; }
+
+/* Nav */
+.doc-nav {
+  position: sticky; top: 0; z-index: 100;
+  backdrop-filter: blur(24px) saturate(1.5);
+  -webkit-backdrop-filter: blur(24px) saturate(1.5);
+  background: rgba(0, 0, 24, 0.78);
+  border-bottom: 1px solid var(--border-subtle);
+  padding: 0.85rem 1.5rem;
+}
+.nav-inner { max-width: 1100px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; }
+.nav-brand { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-muted); }
+.nav-brand b { color: var(--d3-light-blue); font-weight: 600; }
+.nav-back {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.7rem;
+  letter-spacing: 0.1em; color: var(--d3-light-blue); text-decoration: none;
+  display: inline-flex; align-items: center; gap: 0.4rem;
+}
+.nav-back:hover { color: var(--d3-aqua); }
+.nav-back::before { content: '←'; font-size: 1rem; }
+
+.draft-banner {
+  background: linear-gradient(135deg, rgba(255, 0, 255, 0.08), rgba(0, 174, 255, 0.06));
+  border-bottom: 1px solid var(--border-accent);
+  padding: 0.7rem 1.5rem; text-align: center;
+  font-family: 'JetBrains Mono', monospace; font-size: 0.65rem;
+  letter-spacing: 0.18em; text-transform: uppercase; color: var(--d3-aqua);
+}
+.draft-banner b { color: var(--text-bright); font-weight: 500; }
+.draft-banner span { color: var(--text-muted); margin-left: 0.6rem; }
+
+.edit-status { display: none; align-items: center; gap: 0.4rem; font-size: 0.62rem; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase; padding: 0.3rem 0.7rem; border-radius: 5px; }
+.edit-status.saving { display: inline-flex; color: var(--d3-light-blue); background: rgba(0, 174, 255, 0.12); }
+.edit-status.saved  { display: inline-flex; color: #34d399; background: rgba(52, 211, 153, 0.12); }
+.edit-status.error  { display: inline-flex; color: #fb7185; background: rgba(251, 113, 133, 0.12); }
+
+/* Article header */
+.art-header { padding: 4.5rem 0 2.5rem; }
+.art-eyebrow {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.65rem;
+  letter-spacing: 0.25em; text-transform: uppercase; color: var(--d3-aqua);
+  margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.75rem;
+}
+.art-eyebrow::before { content: ''; width: 32px; height: 1px; background: var(--gradient-warm); }
+.art-title {
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-size: clamp(2.4rem, 5vw, 3.6rem); font-weight: 400;
+  line-height: 1.1; color: var(--text-bright); letter-spacing: -0.02em;
+  margin-bottom: 1.25rem;
+}
+.art-title em {
+  font-style: italic;
+  background: var(--gradient-warm);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.art-deck {
+  font-size: 1.2rem; color: var(--text-secondary); line-height: 1.55;
+  font-style: italic; max-width: 680px; margin-bottom: 2rem;
+}
+.art-meta {
+  display: flex; gap: 1.25rem; align-items: center; flex-wrap: wrap;
+  padding-top: 1.5rem; border-top: 1px solid var(--border-subtle);
+  font-family: 'JetBrains Mono', monospace; font-size: 0.7rem;
+  letter-spacing: 0.06em; color: var(--text-muted);
+}
+.art-meta b { color: var(--d3-light-blue); font-weight: 500; }
+
+/* Body */
+.art-body { padding: 1rem 0 3rem; }
+.art-body p {
+  font-size: 1.12rem; color: var(--text-primary);
+  line-height: 1.75; margin-bottom: 1.4rem;
+}
+.art-body p.lede {
+  font-size: 1.32rem; color: var(--text-bright); line-height: 1.55;
+  margin-bottom: 2rem; font-weight: 400;
+}
+.art-body p.lede::first-letter {
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-size: 4rem; font-weight: 400; line-height: 0.85;
+  float: left; margin: 0.05em 0.15em 0 -0.05em;
+  background: var(--gradient-warm);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.art-body h2 {
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-size: 1.85rem; line-height: 1.2; color: var(--text-bright);
+  margin: 3rem 0 1rem; letter-spacing: -0.01em;
+}
+.art-body h2 em {
+  font-style: italic;
+  background: var(--gradient-brand);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.art-body blockquote {
+  margin: 2rem 0; padding: 1.5rem 1.75rem;
+  border-left: 3px solid var(--d3-magenta);
+  background: rgba(255, 0, 255, 0.04);
+  border-radius: 0 10px 10px 0;
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-style: italic; font-size: 1.4rem; line-height: 1.4;
+  color: var(--text-bright);
+}
+.art-body strong { color: var(--text-bright); font-weight: 600; }
+.art-body a {
+  color: var(--d3-light-blue); text-decoration: underline;
+  text-decoration-color: rgba(0, 174, 255, 0.4); text-underline-offset: 3px;
+  transition: color 0.2s;
+}
+.art-body a:hover { color: var(--d3-aqua); }
+
+/* Job-card visual (the metaphor) */
+.jobcard {
+  margin: 2.5rem 0; padding: 1.75rem 1.75rem 1.5rem;
+  background: var(--bg-card); border: 1px solid var(--border-mid);
+  border-radius: 14px; position: relative;
+}
+.jobcard::before {
+  content: 'AGENT JOB DESCRIPTION'; position: absolute; top: -10px; left: 1.4rem;
+  font-family: 'JetBrains Mono', monospace; font-size: 0.55rem;
+  letter-spacing: 0.2em; padding: 0.25rem 0.6rem;
+  background: var(--bg-deep); color: var(--d3-magenta); border-radius: 4px;
+}
+.jobcard dl { display: grid; grid-template-columns: 130px 1fr; gap: 0.5rem 1rem; margin: 0.6rem 0 0; }
+.jobcard dt {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.62rem;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-muted);
+  align-self: center;
+}
+.jobcard dd { font-size: 0.92rem; color: var(--text-primary); margin: 0; line-height: 1.5; }
+.jobcard dd b { color: var(--d3-pale-blue); font-weight: 500; }
+
+/* Numbered "hiring loop" list */
+.hire-loop { margin: 2rem 0; padding: 0; list-style: none; counter-reset: loop; }
+.hire-loop li {
+  counter-increment: loop;
+  padding: 1rem 1rem 1rem 3rem; position: relative;
+  border-left: 1px solid var(--border-mid);
+  margin-left: 1rem;
+}
+.hire-loop li:last-child { border-left-color: transparent; }
+.hire-loop li::before {
+  content: counter(loop, decimal-leading-zero);
+  position: absolute; left: -1.1rem; top: 0.85rem;
+  width: 2.2rem; height: 2.2rem; border-radius: 50%;
+  background: var(--bg-card); border: 1px solid var(--border-accent);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'JetBrains Mono', monospace; font-size: 0.72rem;
+  color: var(--d3-aqua); font-weight: 600;
+}
+.hire-loop li b { color: var(--text-bright); font-weight: 600; display: block; margin-bottom: 0.25rem; font-size: 1.02rem; }
+.hire-loop li p { font-size: 0.95rem; color: var(--text-secondary); margin: 0; line-height: 1.6; }
+
+/* Reading list */
+.reading-list {
+  margin: 3rem 0 1rem; padding: 2rem; border-radius: 14px;
+  background: var(--bg-card); border: 1px solid var(--border-mid);
+}
+.reading-list h3 {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.72rem;
+  letter-spacing: 0.18em; text-transform: uppercase; color: var(--d3-aqua);
+  margin-bottom: 1.25rem;
+}
+.reading-list ul { list-style: none; padding: 0; margin: 0; }
+.reading-list li {
+  padding: 0.75rem 0; border-bottom: 1px dashed var(--border-subtle);
+  font-size: 0.95rem; color: var(--text-secondary);
+}
+.reading-list li:last-child { border-bottom: none; }
+.reading-list li a { color: var(--text-bright); text-decoration: none; font-weight: 500; }
+.reading-list li a:hover { color: var(--d3-aqua); }
+.reading-list li small { display: block; color: var(--text-muted); font-size: 0.78rem; margin-top: 0.2rem; }
+
+/* End slug */
+.end-slug {
+  text-align: center; margin: 2.5rem 0 1rem;
+  font-family: 'JetBrains Mono', monospace; font-size: 0.7rem;
+  letter-spacing: 0.3em; color: var(--text-muted);
+}
+.end-slug::before, .end-slug::after { content: '◇'; margin: 0 0.6rem; color: var(--d3-magenta); }
+
+/* Foot */
+.foot {
+  padding: 3rem 0 2rem; border-top: 1px solid var(--border-subtle);
+  font-family: 'JetBrains Mono', monospace; font-size: 0.62rem;
+  letter-spacing: 0.14em; color: var(--text-muted); text-align: center;
+  margin-top: 2rem;
+}
+.foot b { color: var(--d3-light-blue); font-weight: 600; }
+
+/* Editor styles */
+[data-block-id] { cursor: pointer; transition: outline 0.15s ease; outline: 2px dashed transparent; outline-offset: 3px; border-radius: 3px; }
+[data-block-id]:hover { outline-color: rgba(0, 174, 255, 0.35); }
+[data-block-id].editing { outline: 2px solid var(--d3-light-blue) !important; outline-offset: 4px; background: rgba(0, 174, 255, 0.05) !important; }
+[data-block-id].deleted { opacity: 0; max-height: 0; overflow: hidden; padding: 0 !important; margin: 0 !important; border: none !important; pointer-events: none; transition: opacity 0.3s, max-height 0.3s; }
+body.show-deleted [data-block-id].deleted { opacity: 0.35; max-height: 500px; overflow: visible; text-decoration: line-through; pointer-events: auto; padding: revert !important; margin: revert !important; position: relative; }
+.edit-toolbar { position: fixed; z-index: 9999; display: flex; gap: 0.35rem; padding: 0.4rem; background: var(--bg-elevated); border: 1px solid var(--border-accent); border-radius: 8px; box-shadow: 0 8px 32px rgba(0,0,0,0.5); }
+.edit-toolbar button { font-family: 'JetBrains Mono', monospace; font-size: 0.62rem; letter-spacing: 0.05em; text-transform: uppercase; padding: 0.35rem 0.7rem; border: 1px solid transparent; border-radius: 5px; cursor: pointer; transition: all 0.15s ease; white-space: nowrap; }
+.edit-toolbar .btn-save { background: rgba(52, 211, 153, 0.15); color: #34d399; border-color: rgba(52, 211, 153, 0.3); }
+.edit-toolbar .btn-cancel { background: rgba(148, 163, 184, 0.1); color: var(--text-secondary); border-color: rgba(148, 163, 184, 0.2); }
+.edit-toolbar .btn-delete { background: rgba(251, 113, 133, 0.1); color: #fb7185; border-color: rgba(251, 113, 133, 0.2); }
+.edit-toolbar .btn-restore { background: rgba(0, 174, 255, 0.15); color: var(--d3-light-blue); border-color: rgba(0, 174, 255, 0.3); }
+@keyframes save-flash { 0% { outline-color: #34d399; } 100% { outline-color: transparent; } }
+[data-block-id].just-saved { animation: save-flash 0.8s ease; }
+.changes-trigger { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 998; font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; letter-spacing: 0.05em; padding: 0.55rem 1.1rem; border-radius: 8px; border: 1px solid var(--border-mid); background: var(--bg-elevated); color: var(--text-secondary); cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 16px rgba(0,0,0,0.4); }
+.changes-trigger.has-changes { border-color: rgba(0, 174, 255, 0.4); color: var(--d3-light-blue); }
+.changes-panel { position: fixed; bottom: 4.2rem; right: 1.5rem; z-index: 997; width: 340px; max-height: 60vh; background: var(--bg-card); border: 1px solid var(--border-accent); border-radius: 12px; box-shadow: 0 8px 40px rgba(0,0,0,0.6); display: none; flex-direction: column; overflow: hidden; }
+.changes-panel.open { display: flex; }
+.changes-panel-header { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-subtle); display: flex; align-items: center; justify-content: space-between; }
+.changes-panel-title { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); }
+.changes-panel-actions button { font-family: 'JetBrains Mono', monospace; font-size: 0.55rem; letter-spacing: 0.05em; text-transform: uppercase; padding: 0.25rem 0.5rem; border-radius: 4px; border: 1px solid transparent; cursor: pointer; }
+.btn-show-deleted { background: rgba(251, 113, 133, 0.08); color: var(--text-muted); border-color: rgba(251, 113, 133, 0.15); }
+.changes-panel-body { overflow-y: auto; padding: 0.5rem; flex: 1; }
+.changes-panel-empty { padding: 2rem 1rem; text-align: center; font-size: 0.8rem; color: var(--text-muted); }
+.change-item { display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0.6rem; border-radius: 6px; margin-bottom: 0.25rem; }
+.change-badge { font-family: 'JetBrains Mono', monospace; font-size: 0.5rem; letter-spacing: 0.05em; text-transform: uppercase; padding: 0.15rem 0.35rem; border-radius: 3px; flex-shrink: 0; font-weight: 600; }
+.change-badge.edited { background: rgba(0, 174, 255, 0.15); color: var(--d3-light-blue); }
+.change-badge.deleted-badge { background: rgba(251, 113, 133, 0.15); color: #fb7185; }
+.change-label { font-size: 0.72rem; color: var(--text-secondary); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; }
+.change-reset { font-family: 'JetBrains Mono', monospace; font-size: 0.5rem; letter-spacing: 0.05em; text-transform: uppercase; padding: 0.2rem 0.4rem; border-radius: 3px; border: 1px solid rgba(251, 191, 36, 0.2); background: rgba(251, 191, 36, 0.08); color: #fbbf24; cursor: pointer; flex-shrink: 0; }
+
+@media print {
+  body { background: #fff; color: #111; }
+  body::before { display: none; }
+  .doc-nav, .draft-banner, .changes-trigger, .changes-panel, .edit-toolbar, .edit-status { display: none !important; }
+  * { color: #222 !important; }
+}
+@media (max-width: 720px) {
+  .art-body p.lede::first-letter { font-size: 3rem; }
+  .jobcard dl { grid-template-columns: 1fr; gap: 0.1rem 0; }
+  .jobcard dt { margin-top: 0.6rem; }
+}
+</style>
+</head>
+<body>
+
+<div class="draft-banner">
+  <b>v0.1 DRAFT</b> &middot; for Suzanne Maroc to react to <span>Click any paragraph to edit. Edits save automatically.</span>
+</div>
+
+<nav class="doc-nav">
+  <div class="nav-inner">
+    <a class="nav-back" href="/knowledge-centre-rain">Back to campaign</a>
+    <div class="nav-brand">DATA<b>#</b>3 KNOWLEDGE CENTRE</div>
+    <span class="edit-status" id="editStatus"></span>
+  </div>
+</nav>
+
+<div class="full">
+  <header class="art-header">
+    <div class="wrap" style="padding:0">
+      <div class="art-eyebrow" data-block-id="art-eyebrow">Microsoft &middot; Business Applications &middot; Agentic AI</div>
+      <h1 class="art-title" data-block-id="art-title">Treat your agents <em>like a workforce</em></h1>
+      <p class="art-deck" data-block-id="art-deck">Adam said build. Jack said make it boring. Here&rsquo;s the part nobody&rsquo;s saying out loud: agents aren&rsquo;t tools you install. They&rsquo;re people you hire.</p>
+      <div class="art-meta">
+        <span data-block-id="art-byline">By <b>Suzanne Maroc</b> &middot; Solution Sales Specialist for Business Applications, Data#3</span>
+        <span data-block-id="art-readtime">5 min read</span>
+        <span data-block-id="art-date">Draft &middot; Week 3 of the Boring AI series</span>
+      </div>
+    </div>
+  </header>
+</div>
+
+<main class="wrap">
+  <article class="art-body">
+
+    <p class="lede" data-block-id="p-lede">When you bring someone new onto your team, you don&rsquo;t just turn them on. You write a job description. You interview against it. You give them tools, access, and a manager. You set expectations. You measure performance. Eventually &mdash; gracefully &mdash; you part ways. Most organisations have spent fifty years getting good at this. So why are we deploying AI agents like applications?</p>
+
+    <p data-block-id="p-1">My colleagues have been writing about this from two angles already. <a href="https://www.data3.com/knowledge-centre/blog/2026-the-year-of-the-agentic-ai-builder/">Adam Rappaport called 2026 the year to build with AI</a>. <a href="https://www.data3.com/knowledge-centre/blog/building-australias-most-boring-ai/">Jack Latrobe followed up with what good looks like &mdash; boring</a>: useful, reliable, sticks around, has real impact. This piece is about the part of building boring AI nobody&rsquo;s talking about yet.</p>
+
+    <p data-block-id="p-2"><strong>You&rsquo;re not buying software. You&rsquo;re hiring a workforce.</strong></p>
+
+    <h2 data-block-id="h2-shift">The shift isn&rsquo;t subtle</h2>
+
+    <p data-block-id="p-shift-1">A copilot is a tool you use. An agent is a worker you supervise. The difference matters because everything that follows &mdash; governance, role design, cost, accountability &mdash; falls out of which mental model you start with.</p>
+
+    <p data-block-id="p-shift-2">A tool gets installed. A teammate gets onboarded. A tool gets a licence. A teammate gets a role. A tool gets uninstalled when the project ends. A teammate gets retired when their job is done.</p>
+
+    <p data-block-id="p-shift-3">If you&rsquo;re going to put dozens of agents into your organisation in the next 18 months &mdash; and Microsoft&rsquo;s data says you are &mdash; the question stops being &ldquo;which AI tools should we license?&rdquo; and starts being <em>&ldquo;how do we run a workforce that&rsquo;s half human, half agent?&rdquo;</em></p>
+
+    <h2 data-block-id="h2-jd">Every agent should have a job description</h2>
+
+    <p data-block-id="p-jd-1">In Business Applications we&rsquo;ve been writing employee records for years. Every person in your D365 system has a role, a reporting line, a set of permissions, performance metrics, a lifecycle status. We don&rsquo;t bristle at this for humans. It&rsquo;s common sense. It&rsquo;s just how organisations work.</p>
+
+    <p data-block-id="p-jd-2">Most agents shipped today have none of that. They&rsquo;re running production work with no documented role, no defined success metric, no clear owner, no retirement plan. It&rsquo;s the same problem as shadow IT &mdash; just faster.</p>
+
+    <p data-block-id="p-jd-3">A boring agent &mdash; one that sticks around and earns its keep &mdash; looks more like this:</p>
+
+    <div class="jobcard">
+      <dl>
+        <dt data-block-id="jd-role-l">Role</dt>
+        <dd data-block-id="jd-role-v"><b>Case Triage Officer</b> &middot; classifies inbound service requests and routes to the right team</dd>
+        <dt data-block-id="jd-reports-l">Reports to</dt>
+        <dd data-block-id="jd-reports-v"><b>Customer Service Lead</b> &middot; daily review of escalated cases</dd>
+        <dt data-block-id="jd-access-l">Access</dt>
+        <dd data-block-id="jd-access-v">Service Cloud read-only · Knowledge base · Routing rules · No customer PII at full resolution</dd>
+        <dt data-block-id="jd-success-l">Success metric</dt>
+        <dd data-block-id="jd-success-v">Routing accuracy &gt;90% · Time to triage &lt;45 seconds · Escalation rate within tolerance</dd>
+        <dt data-block-id="jd-status-l">Lifecycle</dt>
+        <dd data-block-id="jd-status-v">Onboarded 2026-05-01 &middot; Probation review 2026-05-31 &middot; Annual recontract</dd>
+      </dl>
+    </div>
+
+    <p data-block-id="p-jd-4">It&rsquo;s not radical. It&rsquo;s the kind of structure HR has been using since the 1970s. The interesting part isn&rsquo;t that we&rsquo;re inventing it for agents. It&rsquo;s that we&rsquo;ve been deploying agents <em>without</em> it.</p>
+
+    <h2 data-block-id="h2-loop"><em>The hiring loop</em>, applied to agents</h2>
+
+    <p data-block-id="p-loop-1">Every team I&rsquo;ve sat with already runs a hiring loop. Apply the same five steps to your next agent and most of the &ldquo;agent governance&rdquo; conversations get smaller, not bigger.</p>
+
+    <ol class="hire-loop">
+      <li><b data-block-id="lp-1-h">Write the job description.</b><p data-block-id="lp-1-p">What outcome do you need delivered? What systems do they need to touch? What does success look like in numbers? If you can&rsquo;t answer those, you don&rsquo;t need an agent yet &mdash; you need a clearer business problem.</p></li>
+      <li><b data-block-id="lp-2-h">Interview against it.</b><p data-block-id="lp-2-p">Run the agent against real cases before it&rsquo;s let near production. Eval datasets. Smell tests. The same instinctive &ldquo;does this person actually understand the job?&rdquo; check you do for human candidates.</p></li>
+      <li><b data-block-id="lp-3-h">Onboard them.</b><p data-block-id="lp-3-p">Register the agent in Agent 365. Connect it to the data sources it needs &mdash; and only those. Give it guardrails on what it&rsquo;s allowed to decide alone vs what it must escalate.</p></li>
+      <li><b data-block-id="lp-4-h">Probation period.</b><p data-block-id="lp-4-p">First 90 days under direct human supervision. Performance tracked weekly. Iterate on the job description, the access, the prompts. Most agents need a probation just like most hires do.</p></li>
+      <li><b data-block-id="lp-5-h">Promote, retain, or retire.</b><p data-block-id="lp-5-p">Once the agent proves itself, expand its remit or hire another. When its role is no longer needed, retire it cleanly. Don&rsquo;t leave it running because nobody remembers to turn it off &mdash; that&rsquo;s how agent sprawl starts.</p></li>
+    </ol>
+
+    <h2 data-block-id="h2-gov">Governance falls out for free</h2>
+
+    <p data-block-id="p-gov-1">Here&rsquo;s the trick I didn&rsquo;t expect when I started thinking this way: the moment you treat agents as a workforce, AI governance stops being a separate, scary, top-down thing and starts being a set of muscles you already have.</p>
+
+    <blockquote data-block-id="bq-1">
+      &ldquo;Access management is a workforce muscle. Role assignment is a workforce muscle. Performance review is a workforce muscle. Retirement is a workforce muscle. We don&rsquo;t need new categories &mdash; we need to apply the ones we&rsquo;ve had for fifty years.&rdquo;
+    </blockquote>
+
+    <p data-block-id="p-gov-2">When the CISO asks &ldquo;how do we govern these agents?&rdquo; the answer is &ldquo;the same way we govern our people, applied to a different kind of worker.&rdquo; That&rsquo;s a much shorter conversation than the one most security teams are currently having.</p>
+
+    <h2 data-block-id="h2-where">Where to start &mdash; one role, one agent, ten days</h2>
+
+    <p data-block-id="p-where-1">You don&rsquo;t need to design your whole agent workforce in one go. The opposite, in fact. Pick <strong>one role</strong> in your organisation that&rsquo;s painful, repetitive, well-understood. Write the job description. Stand up one agent. Onboard it through Agent 365 the same way you&rsquo;d onboard a new hire. Run it for a sprint &mdash; ten working days. Measure outcomes against the job description.</p>
+
+    <p data-block-id="p-where-2">If it works, hire another. If it doesn&rsquo;t, retire it cleanly and try a different role. The workforce grows the same way every workforce grows: one good hire at a time.</p>
+
+    <h2 data-block-id="h2-close">The boring part is the point</h2>
+
+    <p data-block-id="p-close-1">There&rsquo;s a temptation, with anything new and exciting, to invent a new framework for it. Resist it. The hiring frame works because it&rsquo;s old. Onboarding works because it&rsquo;s old. Performance reviews work because they&rsquo;re old. The boring AI Jack wrote about isn&rsquo;t boring because the technology is dull &mdash; it&rsquo;s boring because the management around it should feel familiar.</p>
+
+    <p data-block-id="p-close-2">Build it &mdash; Adam&rsquo;s call. Make it boring &mdash; Jack&rsquo;s standard. Hire it like you&rsquo;d hire any other teammate &mdash; that&rsquo;s the bit I&rsquo;d add. Next week, my colleague Scott Gosling will pick up the thread with the question this raises: <em>once you&rsquo;re hiring agents, how does the way you buy AI delivery have to change too?</em></p>
+
+    <p data-block-id="p-close-3">Spoiler: it does.</p>
+
+    <div class="end-slug">END</div>
+
+    <div class="reading-list">
+      <h3>The boring AI thread</h3>
+      <ul>
+        <li>
+          <a href="https://www.data3.com/knowledge-centre/blog/2026-the-year-of-the-agentic-ai-builder/" target="_blank" rel="noopener">2026: The Year of the Agentic AI Builder</a>
+          <small>Adam Rappaport &middot; March 4, 2026 &middot; The call</small>
+        </li>
+        <li>
+          <a href="https://www.data3.com/knowledge-centre/blog/building-australias-most-boring-ai/" target="_blank" rel="noopener">Building Australia&rsquo;s Most Boring AI</a>
+          <small>Jack Latrobe &middot; April 27, 2026 &middot; The standard</small>
+        </li>
+        <li>
+          <a href="#" style="color:var(--d3-magenta)">Treat your agents like a workforce</a>
+          <small>Suzanne Maroc &middot; Week 3 &middot; The workforce frame &middot; <em>this article</em></small>
+        </li>
+        <li>
+          <a href="/scott-pillar">It&rsquo;s the Windows 97 moment for AI</a>
+          <small>Scott Gosling &middot; Week 1 &middot; The shift in how you buy &middot; v0.1 draft</small>
+        </li>
+      </ul>
+    </div>
+  </article>
+</main>
+
+<div class="full">
+  <footer class="foot" data-block-id="foot">DATA<b>#</b>3 &middot; Knowledge Centre &middot; Boring AI Series &middot; Suzanne&rsquo;s pillar v0.1 &middot; <span style="color:var(--text-secondary)">For Suzanne&rsquo;s pen</span></footer>
+</div>
+
+<button class="changes-trigger" id="changesTrigger">Changes (0)</button>
+<div class="changes-panel" id="changesPanel">
+  <div class="changes-panel-header">
+    <span class="changes-panel-title">Change History</span>
+    <div class="changes-panel-actions">
+      <button class="btn-show-deleted" id="showDeletedBtn">Show Deleted</button>
+    </div>
+  </div>
+  <div class="changes-panel-body" id="changesList"></div>
+</div>
+
+<script>
+(function() {
+  const PAGE_ID = 'suzanne-pillar';
+  const API = '/api/page-edits';
+  const originals = {};
+  document.querySelectorAll('[data-block-id]').forEach(function(el) {
+    originals[el.getAttribute('data-block-id')] = el.innerHTML;
+  });
+  let editsMap = {};
+  let activeBlock = null; let originalContent = ''; let toolbar = null;
+  const statusEl = document.getElementById('editStatus');
+  function showStatus(type, text) {
+    statusEl.className = 'edit-status ' + type;
+    statusEl.textContent = text;
+    if (type === 'saved') setTimeout(function() { statusEl.className = 'edit-status'; }, 2000);
+  }
+  async function loadEdits() {
+    try {
+      var res = await fetch(API + '?page_id=' + encodeURIComponent(PAGE_ID));
+      if (!res.ok) return;
+      var data = await res.json();
+      editsMap = data.edits || {};
+      applyEdits(); renderChangesPanel();
+    } catch (e) { console.error(e); }
+  }
+  function applyEdits() {
+    for (var blockId in editsMap) {
+      var edit = editsMap[blockId];
+      var el = document.querySelector('[data-block-id="' + blockId + '"]');
+      if (!el) continue;
+      if (edit.content !== null && edit.content !== undefined) el.innerHTML = edit.content;
+      if (edit.deleted) el.classList.add('deleted'); else el.classList.remove('deleted');
+    }
+  }
+  function getChangeCounts() {
+    var edited = 0, deleted = 0;
+    for (var k in editsMap) { if (editsMap[k].deleted) deleted++; else edited++; }
+    return { edited: edited, deleted: deleted, total: edited + deleted };
+  }
+  function renderChangesPanel() {
+    var counts = getChangeCounts();
+    var trigger = document.getElementById('changesTrigger');
+    var parts = [];
+    if (counts.edited) parts.push(counts.edited + ' edited');
+    if (counts.deleted) parts.push(counts.deleted + ' deleted');
+    trigger.textContent = counts.total > 0 ? 'Changes (' + parts.join(', ') + ')' : 'No Changes';
+    trigger.classList.toggle('has-changes', counts.total > 0);
+    var sdBtn = document.getElementById('showDeletedBtn');
+    sdBtn.textContent = counts.deleted > 0 ? 'Show Deleted (' + counts.deleted + ')' : 'Show Deleted';
+    var list = document.getElementById('changesList');
+    if (counts.total === 0) {
+      list.innerHTML = '<div class="changes-panel-empty">No changes yet.<br>Click any paragraph to edit it.</div>';
+      return;
+    }
+    var html = ''; var entries = Object.keys(editsMap).sort();
+    for (var i = 0; i < entries.length; i++) {
+      var bid = entries[i]; var edit = editsMap[bid]; var isDel = edit.deleted;
+      var badgeClass = isDel ? 'deleted-badge' : 'edited';
+      var badgeText = isDel ? 'Del' : 'Edit';
+      var el = document.querySelector('[data-block-id="' + bid + '"]');
+      var label = bid;
+      if (el) { var text = el.textContent.trim(); label = text.length > 40 ? text.substring(0, 40) + '...' : (text || bid); }
+      html += '<div class="change-item">' +
+        '<span class="change-badge ' + badgeClass + '">' + badgeText + '</span>' +
+        '<span class="change-label" data-goto="' + bid + '" title="' + bid + '">' + label.replace(/</g, '&lt;') + '</span>' +
+        '<button class="change-reset" data-reset="' + bid + '">Reset</button>' +
+        '</div>';
+    }
+    list.innerHTML = html;
+  }
+  async function saveEdit(blockId, content, deleted) {
+    showStatus('saving', 'Saving...');
+    try {
+      var res = await fetch(API, { method: 'PUT', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ page_id: PAGE_ID, block_id: blockId, content: content, deleted: deleted }) });
+      if (!res.ok) throw new Error('Save failed');
+      showStatus('saved', 'Saved');
+      editsMap[blockId] = { content: content, deleted: deleted, updated_at: new Date().toISOString() };
+      renderChangesPanel();
+    } catch (e) { showStatus('error', 'Error saving'); console.error(e); }
+  }
+  async function resetBlock(blockId) {
+    showStatus('saving', 'Resetting...');
+    try {
+      var res = await fetch(API, { method: 'DELETE', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ page_id: PAGE_ID, block_id: blockId }) });
+      if (!res.ok) throw new Error('Reset failed');
+      showStatus('saved', 'Reset to original');
+      delete editsMap[blockId];
+      var el = document.querySelector('[data-block-id="' + blockId + '"]');
+      if (el && originals[blockId] !== undefined) { el.innerHTML = originals[blockId]; el.classList.remove('deleted'); }
+      renderChangesPanel();
+    } catch (e) { showStatus('error', 'Reset failed'); console.error(e); }
+  }
+  function createToolbar() { if (toolbar) toolbar.remove(); toolbar = document.createElement('div'); toolbar.className = 'edit-toolbar'; document.body.appendChild(toolbar); return toolbar; }
+  function positionToolbar(el) {
+    if (!toolbar) return;
+    var rect = el.getBoundingClientRect();
+    var top = rect.top - 48; var left = rect.left;
+    if (rect.top < 60) top = rect.bottom + 8;
+    var maxLeft = window.innerWidth - 340;
+    if (left > maxLeft) left = maxLeft; if (left < 8) left = 8;
+    toolbar.style.top = top + 'px'; toolbar.style.left = left + 'px';
+  }
+  function enterEdit(el) {
+    if (activeBlock) cancelEdit();
+    activeBlock = el; originalContent = el.innerHTML;
+    el.classList.add('editing'); el.setAttribute('contenteditable', 'true'); el.focus();
+    var blockId = el.getAttribute('data-block-id');
+    var isDeleted = el.classList.contains('deleted');
+    var hasBeenEdited = blockId in editsMap;
+    var tb = createToolbar();
+    if (isDeleted) {
+      tb.innerHTML = '<button class="btn-restore" onclick="window._editRestore()">Restore</button><button class="btn-cancel" onclick="window._editCancel()">Cancel</button><button class="btn-delete" style="background:rgba(251,191,36,0.1);color:#fbbf24;border-color:rgba(251,191,36,0.2)" onclick="window._editReset()">Reset to Original</button>';
+    } else {
+      var buttons = '<button class="btn-save" onclick="window._editSave()">Save</button><button class="btn-cancel" onclick="window._editCancel()">Cancel</button><button class="btn-delete" onclick="window._editDelete()">Delete</button>';
+      if (hasBeenEdited) buttons += '<button class="btn-delete" style="background:rgba(251,191,36,0.1);color:#fbbf24;border-color:rgba(251,191,36,0.2)" onclick="window._editReset()">Reset</button>';
+      tb.innerHTML = buttons;
+    }
+    positionToolbar(el);
+  }
+  function cancelEdit() { if (!activeBlock) return; activeBlock.innerHTML = originalContent; activeBlock.classList.remove('editing'); activeBlock.removeAttribute('contenteditable'); activeBlock = null; originalContent = ''; if (toolbar) { toolbar.remove(); toolbar = null; } }
+  async function doSave() {
+    if (!activeBlock) return;
+    var blockId = activeBlock.getAttribute('data-block-id');
+    var content = activeBlock.innerHTML;
+    activeBlock.classList.remove('editing'); activeBlock.removeAttribute('contenteditable'); activeBlock.classList.add('just-saved');
+    setTimeout(function() { var el = document.querySelector('[data-block-id="' + blockId + '"]'); if (el) el.classList.remove('just-saved'); }, 800);
+    if (toolbar) { toolbar.remove(); toolbar = null; }
+    activeBlock = null; originalContent = '';
+    await saveEdit(blockId, content, false);
+  }
+  async function doDelete() {
+    if (!activeBlock) return;
+    var blockId = activeBlock.getAttribute('data-block-id');
+    var content = activeBlock.innerHTML;
+    activeBlock.classList.remove('editing'); activeBlock.removeAttribute('contenteditable'); activeBlock.classList.add('deleted');
+    if (toolbar) { toolbar.remove(); toolbar = null; }
+    activeBlock = null; originalContent = '';
+    await saveEdit(blockId, content, true);
+  }
+  async function doRestore() {
+    if (!activeBlock) return;
+    var blockId = activeBlock.getAttribute('data-block-id');
+    var content = activeBlock.innerHTML;
+    activeBlock.classList.remove('editing', 'deleted'); activeBlock.removeAttribute('contenteditable');
+    if (toolbar) { toolbar.remove(); toolbar = null; }
+    activeBlock = null; originalContent = '';
+    await saveEdit(blockId, content, false);
+  }
+  async function doReset() {
+    if (!activeBlock) return;
+    var blockId = activeBlock.getAttribute('data-block-id');
+    activeBlock.classList.remove('editing'); activeBlock.removeAttribute('contenteditable');
+    if (toolbar) { toolbar.remove(); toolbar = null; }
+    activeBlock = null; originalContent = '';
+    await resetBlock(blockId);
+  }
+  window._editSave = doSave; window._editCancel = cancelEdit; window._editDelete = doDelete; window._editRestore = doRestore; window._editReset = doReset;
+  document.addEventListener('click', function(e) {
+    if (e.target.closest('.changes-trigger')) { document.getElementById('changesPanel').classList.toggle('open'); return; }
+    if (e.target.closest('.changes-panel')) {
+      if (e.target.id === 'showDeletedBtn' || e.target.closest('#showDeletedBtn')) { document.body.classList.toggle('show-deleted'); document.getElementById('showDeletedBtn').classList.toggle('active'); return; }
+      var resetBtn = e.target.closest('[data-reset]'); if (resetBtn) { if (activeBlock) cancelEdit(); resetBlock(resetBtn.getAttribute('data-reset')); return; }
+      var gotoLabel = e.target.closest('[data-goto]'); if (gotoLabel) { var bid = gotoLabel.getAttribute('data-goto'); var target = document.querySelector('[data-block-id="' + bid + '"]'); if (target) { target.scrollIntoView({ behavior: 'smooth', block: 'center' }); target.classList.add('just-saved'); setTimeout(function() { target.classList.remove('just-saved'); }, 1000); } return; }
+      return;
+    }
+    var block = e.target.closest('[data-block-id]');
+    if (activeBlock && !block) { if (e.target.closest('.edit-toolbar')) return; cancelEdit(); return; }
+    if (block && block !== activeBlock) { document.getElementById('changesPanel').classList.remove('open'); enterEdit(block); }
+  });
+  document.addEventListener('keydown', function(e) {
+    if (!activeBlock) return;
+    if (e.key === 'Escape') { e.preventDefault(); cancelEdit(); }
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); doSave(); }
+  });
+  function onReposition() { if (activeBlock && toolbar) positionToolbar(activeBlock); }
+  window.addEventListener('scroll', onReposition, { passive: true });
+  window.addEventListener('resize', onReposition, { passive: true });
+  loadEdits();
+})();
+</script>
+</body>
+</html>

@@ -35,6 +35,10 @@ const nextConfig = {
         source: '/scott-pillar',
         destination: '/scott-pillar-v01.html',
       },
+      {
+        source: '/suzanne-pillar',
+        destination: '/suzanne-pillar-v01.html',
+      },
     ]
   },
 }

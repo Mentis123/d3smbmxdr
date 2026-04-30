@@ -33,7 +33,15 @@ const nextConfig = {
       },
       {
         source: '/scott-pillar',
+        destination: '/scott-pillar-v02.html',
+      },
+      {
+        source: '/scott-pillar-v01',
         destination: '/scott-pillar-v01.html',
+      },
+      {
+        source: '/scott-pillar-v02',
+        destination: '/scott-pillar-v02.html',
       },
       {
         source: '/suzanne-pillar',
@@ -45,7 +53,7 @@ const nextConfig = {
       },
       {
         source: '/knowledge-centre/scott-pillar',
-        destination: '/scott-pillar-v01.html',
+        destination: '/scott-pillar-v02.html',
       },
       {
         source: '/knowledge-centre/suzanne-pillar',

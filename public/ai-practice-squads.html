@@ -764,12 +764,154 @@ body.show-deleted [data-block-id].deleted::after {
     </div>
   </section>
 
-  <!-- Section 04: Economics -->
+  <!-- Section 04: Packaged Agentic Sprints (the customer-facing offer) -->
   <section class="section">
-    <div class="section-num">04 &mdash; The Economics</div>
+    <div class="section-num">04 &mdash; How Customers Buy</div>
+    <h2 data-block-id="spo-h2"><em>Packaged Agentic Sprints</em> &mdash; drawdown buckets at three tiers</h2>
+
+    <p data-block-id="spo-p1">
+      The squad is how we deliver. The Sprint is what the customer buys. Customers buy in <em>drawdown buckets of Sprints</em> &mdash; commit capacity, not scope. One Sprint = two weeks of squad capacity. Three tiers, with volume discount as the bucket grows.
+    </p>
+
+    <div class="econ-grid">
+      <div class="econ-card">
+        <h4 data-block-id="spo-s-title">S &mdash; Land</h4>
+        <div class="econ-sub" data-block-id="spo-s-sub">1 Sprint &middot; 2 weeks</div>
+        <div class="econ-row">
+          <span class="econ-label">Price (AUD)</span>
+          <span class="econ-value" data-block-id="spo-s-price">$35,000</span>
+        </div>
+        <div class="econ-row">
+          <span class="econ-label">USD anchor</span>
+          <span class="econ-value" data-block-id="spo-s-usd">~$25,000 USD</span>
+        </div>
+        <div class="econ-row">
+          <span class="econ-label">Discount</span>
+          <span class="econ-value" data-block-id="spo-s-disc">&mdash;</span>
+        </div>
+        <div class="econ-row">
+          <span class="econ-label">Why this tier</span>
+          <span class="econ-value accent" data-block-id="spo-s-why">MS-funded entry</span>
+        </div>
+      </div>
+
+      <div class="econ-card">
+        <h4 data-block-id="spo-m-title">M &mdash; Build</h4>
+        <div class="econ-sub" data-block-id="spo-m-sub">5 Sprints &middot; 10 weeks</div>
+        <div class="econ-row">
+          <span class="econ-label">Price (AUD)</span>
+          <span class="econ-value" data-block-id="spo-m-price">$150,000</span>
+        </div>
+        <div class="econ-row">
+          <span class="econ-label">List (5 &times; $35k)</span>
+          <span class="econ-value" data-block-id="spo-m-list">$175,000</span>
+        </div>
+        <div class="econ-row">
+          <span class="econ-label">Discount</span>
+          <span class="econ-value" data-block-id="spo-m-disc">~14%</span>
+        </div>
+        <div class="econ-row">
+          <span class="econ-label">Why this tier</span>
+          <span class="econ-value accent" data-block-id="spo-m-why">First real outcome</span>
+        </div>
+      </div>
+
+      <div class="econ-card">
+        <h4 data-block-id="spo-l-title">L &mdash; Expand</h4>
+        <div class="econ-sub" data-block-id="spo-l-sub">10 Sprints &middot; 20 weeks</div>
+        <div class="econ-row">
+          <span class="econ-label">Price (AUD)</span>
+          <span class="econ-value" data-block-id="spo-l-price">$250,000</span>
+        </div>
+        <div class="econ-row">
+          <span class="econ-label">List (10 &times; $35k)</span>
+          <span class="econ-value" data-block-id="spo-l-list">$350,000</span>
+        </div>
+        <div class="econ-row">
+          <span class="econ-label">Discount</span>
+          <span class="econ-value" data-block-id="spo-l-disc">~29%</span>
+        </div>
+        <div class="econ-row">
+          <span class="econ-label">Why this tier</span>
+          <span class="econ-value accent" data-block-id="spo-l-why">Key-account commit</span>
+        </div>
+      </div>
+    </div>
+
+    <h3 data-block-id="spo-h3-build">What's in a Sprint &mdash; the rate-build</h3>
+    <p data-block-id="spo-p2">
+      A Sprint = 2 weeks / 10 working days of squad capacity. The customer is billed for two roles inside the Sprint: the Principal (Mentor) at ~half-time, and the Senior (Lead) at full-time. The two Shadows on the squad work the engagement &mdash; they're not on the customer's invoice.
+    </p>
+
+    <table class="compare-table">
+      <thead>
+        <tr>
+          <th>Role</th>
+          <th>Days / week</th>
+          <th>Day rate (AUD)</th>
+          <th>Per week</th>
+          <th>Per Sprint (2 weeks)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td data-block-id="spo-rb-p-role">Principal &mdash; shared, variable</td>
+          <td data-block-id="spo-rb-p-days">2.5</td>
+          <td data-block-id="spo-rb-p-rate">$2,400</td>
+          <td data-block-id="spo-rb-p-week">$6,000</td>
+          <td data-block-id="spo-rb-p-sprint">$12,000</td>
+        </tr>
+        <tr>
+          <td data-block-id="spo-rb-s-role">Senior &mdash; full-time</td>
+          <td data-block-id="spo-rb-s-days">5.0</td>
+          <td data-block-id="spo-rb-s-rate">$1,920</td>
+          <td data-block-id="spo-rb-s-week">$9,600</td>
+          <td data-block-id="spo-rb-s-sprint">$19,200</td>
+        </tr>
+        <tr>
+          <td class="highlight" data-block-id="spo-rb-total-role">Rate-build total</td>
+          <td data-block-id="spo-rb-total-days">7.5</td>
+          <td data-block-id="spo-rb-total-rate">blended</td>
+          <td class="highlight" data-block-id="spo-rb-total-week">$15,600</td>
+          <td class="highlight" data-block-id="spo-rb-total-sprint">$31,200</td>
+        </tr>
+        <tr>
+          <td class="highlight" data-block-id="spo-rb-sell-role">Sold at</td>
+          <td data-block-id="spo-rb-sell-days">&mdash;</td>
+          <td data-block-id="spo-rb-sell-rate">&mdash;</td>
+          <td data-block-id="spo-rb-sell-week">&mdash;</td>
+          <td class="highlight" data-block-id="spo-rb-sell-sprint">$35,000</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout">
+      <div class="callout-label">Why $35k is the load-bearing number</div>
+      <p data-block-id="spo-callout-ms">
+        $35,000 AUD &asymp; $25,000 USD &mdash; the smallest Microsoft co-funded engagement bucket. The S tier is sized to slot inside MS partner funding without friction. With MS funding, the customer's first Sprint with us costs them nothing out of pocket. That's the wedge into a key account.
+      </p>
+    </div>
+
+    <h3 data-block-id="spo-h3-shadows">What the customer gets vs what they pay for</h3>
+    <p data-block-id="spo-p3">
+      The squad on the engagement is the full <strong>1-1-2 cell</strong>: Principal, Senior, two Shadows. The customer is billed for ~1.5 FTE (Principal half-time + Senior full-time). The Shadows do real work on the customer's problem and are absorbed as <em>practice investment</em> in the talent pipeline. The customer gets a four-person team and pays for one-and-a-half FTE. The practice grows tomorrow's Leads on live customer engagements without an external hiring spend.
+    </p>
+
+    <div class="callout">
+      <div class="callout-label">The land-and-expand mechanic</div>
+      <p data-block-id="spo-callout-le">
+        S funded by Microsoft gets us into the account. M and L are the expand path &mdash; the discount is the incentive to commit drawdown rather than buy Sprint-by-Sprint. Top-down (BA-owned annual programs) and bottom-up (Packaged Sprints into individual workloads) reach the same accounts from two directions. Massive piece of the selling-this puzzle.
+      </p>
+    </div>
+  </section>
+
+  <!-- Section 05: Internal Economics (rack-rate ceiling) -->
+  <section class="section">
+    <div class="section-num">05 &mdash; The Economics</div>
     <h2 data-block-id="s4-h2"><span class="provisional">Provisional</span>Unit economics at <em>rack rate</em></h2>
 
-    <p data-block-id="s4-p1">The delivery model uses standard Data#3 rack rates. 10-day sprints, 22 productive sprints per year. GP at 29% minimum (standard gross profit at rack).</p>
+    <p data-block-id="s4-p1">These are the <em>rack-rate ceilings</em> &mdash; what a Sprint would cost if every squad member billed at full rate every day. The customer-facing offer (above) is built on top: the Packaged Agentic Sprint sells at $35k by billing only the Principal (half-time) and Senior (full-time), with the two Shadows absorbed as practice investment. Rack rate matters because it's how we model max margin headroom and the financial model behind the practice. 10-day sprints, 22 productive sprints per year. GP at 29% minimum.</p>
+
 
     <div class="econ-grid">
       <div class="econ-card">
@@ -805,9 +947,9 @@ body.show-deleted [data-block-id].deleted::after {
     </p>
   </section>
 
-  <!-- Section 05: Growth -->
+  <!-- Section 06: Growth -->
   <section class="section">
-    <div class="section-num">05 &mdash; The Growth Model</div>
+    <div class="section-num">06 &mdash; The Growth Model</div>
     <h2 data-block-id="s5-h2">Self-funding, <em>demand-led</em></h2>
 
     <p data-block-id="s5-p1">
@@ -846,9 +988,9 @@ body.show-deleted [data-block-id].deleted::after {
     </div>
   </section>
 
-  <!-- Section 06: Multi-Squad -->
+  <!-- Section 07: Multi-Squad -->
   <section class="section">
-    <div class="section-num">06 &mdash; Multi-Squad Economics</div>
+    <div class="section-num">07 &mdash; Multi-Squad Economics</div>
     <h2 data-block-id="s6-h2">The leverage at <em>scale</em></h2>
 
     <p data-block-id="s6-p1">The Principal sharing across squads is the Cell model's leverage point. One high-cost person guaranteeing quality across multiple squads while juniors carry the delivery.</p>
@@ -901,9 +1043,9 @@ body.show-deleted [data-block-id].deleted::after {
     </table>
   </section>
 
-  <!-- Section 07: Position -->
+  <!-- Section 08: Position -->
   <section class="section">
-    <div class="section-num">07 &mdash; Our Position</div>
+    <div class="section-num">08 &mdash; Our Position</div>
     <h2 data-block-id="s7-h2">Why we're <em>on board</em></h2>
 
     <p data-block-id="s7-p1">

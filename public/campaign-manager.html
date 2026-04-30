@@ -372,6 +372,192 @@ body::after {
   border-top: 1px dashed var(--border-mid);
   font-size: 0.88rem; color: var(--text-secondary); line-height: 1.55;
 }
+
+/* ─── Per-campaign panel content swap ─── */
+.panel-content { display: block; }
+.panel-empty-only { display: none; }
+body.cm-non-msft .panel-msft-only { display: none; }
+body.cm-non-msft .panel-empty-only { display: block; }
+
+/* ─── Campaign context bar (workspace mode) ─── */
+.cm-context {
+  background: linear-gradient(180deg, rgba(0,174,255,0.10), rgba(0,0,24,0.6));
+  border-bottom: 1px solid var(--border-accent);
+  padding: 0.95rem 1.5rem;
+  display: none;
+  animation: ctxSlide 0.3s ease;
+  position: relative; z-index: 1;
+}
+body.cm-in-workspace .cm-context { display: flex; }
+@keyframes ctxSlide {
+  from { transform: translateY(-12px); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+.cm-context-inner {
+  max-width: 1300px; margin: 0 auto; width: 100%;
+  display: flex; align-items: center; gap: 1.1rem; flex-wrap: wrap;
+}
+.cm-context-back {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.7rem;
+  letter-spacing: 0.14em; color: var(--d3-light-blue);
+  text-decoration: none; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  padding: 0.45rem 0.85rem; border-radius: 6px;
+  border: 1px solid transparent; transition: all 0.2s ease;
+  background: none;
+}
+.cm-context-back:hover {
+  background: rgba(0, 174, 255, 0.1);
+  border-color: rgba(0, 174, 255, 0.3);
+  color: var(--d3-aqua);
+}
+.cm-context-back::before { content: '← '; font-size: 0.95rem; }
+.cm-context-divider { width: 1px; height: 20px; background: var(--border-mid); }
+.cm-context-name {
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-style: italic; font-size: 1.15rem; color: var(--text-bright);
+  flex: 0 0 auto;
+}
+.cm-context-eye {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.6rem;
+  letter-spacing: 0.16em; text-transform: uppercase; color: var(--text-muted);
+}
+.cm-context-status {
+  margin-left: auto;
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  font-family: 'JetBrains Mono', monospace; font-size: 0.62rem;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  padding: 0.32rem 0.7rem; border-radius: 14px;
+}
+.cm-context-status.creation { background: rgba(0,255,255,0.10); color: var(--d3-aqua); border: 1px solid rgba(0,255,255,0.28); }
+.cm-context-status.draft { background: rgba(168,179,204,0.10); color: var(--text-secondary); border: 1px solid rgba(168,179,204,0.22); }
+.cm-context-status.intake { background: rgba(115,0,255,0.16); color: #c4a8ff; border: 1px solid rgba(115,0,255,0.32); }
+
+/* ─── Empty / Populated state cards ─── */
+.empty-state {
+  display: grid; gap: 1rem;
+  padding: 3.5rem 2rem 3rem;
+  text-align: center;
+  background: var(--bg-card);
+  border: 1px dashed var(--border-mid);
+  border-radius: 14px;
+  margin-top: 1.5rem;
+  position: relative; overflow: hidden;
+}
+.empty-state.is-locked { opacity: 0.55; pointer-events: none; }
+.empty-state.is-populated {
+  border-style: solid;
+  border-color: rgba(52, 211, 153, 0.32);
+  background: linear-gradient(180deg, rgba(52,211,153,0.04), var(--bg-card));
+  text-align: left;
+  padding: 2rem;
+}
+.empty-state::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: var(--gradient-aqua); opacity: 0.6;
+}
+.empty-state.is-populated::before { background: linear-gradient(90deg, #34d399, #00FFFF); opacity: 1; }
+.empty-state-icon {
+  width: 64px; height: 64px; border-radius: 50%;
+  margin: 0 auto;
+  background: linear-gradient(135deg, rgba(0,255,255,0.12), rgba(0,174,255,0.06));
+  border: 1px solid rgba(0,174,255,0.32);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-size: 2rem; color: var(--d3-aqua); font-style: italic;
+}
+.empty-state.is-populated .empty-state-icon {
+  margin: 0 0 1rem;
+  background: linear-gradient(135deg, rgba(52,211,153,0.18), rgba(0,255,255,0.08));
+  border-color: rgba(52,211,153,0.5);
+  color: #34d399;
+}
+.empty-state.is-locked .empty-state-icon {
+  background: rgba(168,179,204,0.06);
+  border-color: rgba(168,179,204,0.18);
+  color: var(--text-muted);
+}
+.empty-state-h {
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-size: 1.85rem; line-height: 1.2; color: var(--text-bright);
+  margin: 0;
+}
+.empty-state-h em {
+  font-style: italic;
+  background: var(--gradient-aqua);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.empty-state-p {
+  font-size: 0.95rem; color: var(--text-secondary); line-height: 1.6;
+  max-width: 520px; margin: 0 auto;
+}
+.empty-state.is-populated .empty-state-p { max-width: none; }
+.empty-state-actions {
+  display: flex; gap: 0.7rem; flex-wrap: wrap; justify-content: center;
+  margin-top: 0.4rem;
+}
+.empty-state.is-populated .empty-state-actions { justify-content: flex-start; }
+.empty-state-foot {
+  margin-top: 0.9rem; padding-top: 1rem;
+  border-top: 1px dashed var(--border-mid);
+  font-family: 'JetBrains Mono', monospace; font-size: 0.62rem;
+  letter-spacing: 0.12em; color: var(--text-muted); text-transform: uppercase;
+}
+.empty-state.is-populated .empty-state-foot { text-transform: none; letter-spacing: 0.02em; font-family: 'DM Sans', sans-serif; font-size: 0.85rem; color: var(--text-secondary); }
+
+.empty-sample-list {
+  list-style: none; padding: 0; margin: 1rem 0 0;
+  display: grid; gap: 0.45rem;
+}
+.empty-sample-list li {
+  padding: 0.7rem 0.95rem;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: 7px;
+  font-size: 0.88rem; color: var(--text-primary);
+  display: flex; align-items: center; gap: 0.7rem;
+}
+.empty-sample-list li::before {
+  content: '✓'; color: #34d399;
+  font-family: 'JetBrains Mono', monospace; font-size: 0.85rem;
+  flex-shrink: 0;
+}
+.empty-sample-tag {
+  margin-left: auto;
+  font-family: 'JetBrains Mono', monospace; font-size: 0.55rem;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.empty-state.is-generating {
+  pointer-events: none;
+  border-color: var(--d3-aqua) !important;
+  background: linear-gradient(180deg, rgba(0,255,255,0.06), var(--bg-card));
+}
+.empty-state.is-generating .empty-state-icon {
+  animation: spin 1.4s linear infinite;
+  border-color: var(--d3-aqua);
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.empty-dropzone {
+  margin: 1rem auto 0;
+  max-width: 460px;
+  padding: 1.6rem 1.4rem;
+  border: 2px dashed rgba(0, 174, 255, 0.36);
+  border-radius: 10px;
+  background: rgba(0, 174, 255, 0.04);
+  font-size: 0.85rem; color: var(--text-secondary);
+}
+.empty-dropzone b { color: var(--d3-light-blue); }
+
+.panel.active { animation: panelFadeIn 0.25s ease; }
+@keyframes panelFadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
 .cm-flag {
   position: absolute; top: 0; right: 0;
   font-family: 'JetBrains Mono', monospace; font-size: 0.55rem;
@@ -951,6 +1137,19 @@ body::after {
     </div>
   </header>
 
+  <!-- ─── Campaign context bar (workspace mode) ─── -->
+  <div class="cm-context" id="cmContext" role="region" aria-label="Active campaign context">
+    <div class="cm-context-inner">
+      <button class="cm-context-back" id="cmContextBack" type="button">All campaigns</button>
+      <div class="cm-context-divider"></div>
+      <div>
+        <div class="cm-context-eye" id="cmContextEye">campaign &middot; Microsoft Practice</div>
+        <div class="cm-context-name" id="cmContextName">Agentic AI &middot; Knowledge Centre</div>
+      </div>
+      <span class="cm-context-status creation" id="cmContextStatus">Content Creation</span>
+    </div>
+  </div>
+
   <!-- ─── Tab nav ─── -->
   <div class="tabs-bar">
     <div class="tabs" role="tablist">
@@ -977,7 +1176,7 @@ body::after {
     <div class="empty-banner" id="emptyCampaignBanner" style="display:none;">
       <div class="empty-banner-icon">●</div>
       <div class="empty-banner-text">
-        <b><span class="empty-banner-name">New campaign</span></b> is now active &mdash; it&rsquo;s empty. The other tabs (FAQs, themes, content plan, calendar) currently still show <em>Microsoft Knowledge Centre</em> data as a working reference. Per-campaign panels are <b>Phase&nbsp;2</b> &mdash; see the note at the bottom of this page.
+        <b><span class="empty-banner-name">New campaign</span></b> is active. Click into it (or use the tabs) to see the empty workspace for this campaign &mdash; sources, FAQs, themes, SMEs, content plan, calendar. Click <em>Microsoft</em> to swap back to the reference campaign.
       </div>
       <button class="btn-ghost empty-banner-reset" onclick="clearAllUserCampaigns()">Clear created campaigns</button>
     </div>
@@ -1091,39 +1290,44 @@ body::after {
       <div class="phase-notes-h">Phasing &middot; what works today vs what&rsquo;s next</div>
       <div class="phase-grid">
         <div class="phase-card phase-now">
-          <div class="phase-tag">Phase 1 &middot; live now</div>
+          <div class="phase-tag">Phase 1 + 2 &middot; live now</div>
           <ul>
-            <li>Add Campaign creates a real card in the dashboard</li>
-            <li>Persists in <code>localStorage</code> across reloads</li>
-            <li>Switch active campaign by clicking any card</li>
-            <li>Microsoft campaign panels (FAQs, themes, content plan, calendar, governance, exports) are fully populated as a working reference</li>
+            <li>Add Campaign creates a real card in the dashboard, persists across reloads</li>
+            <li>Switch active campaign by clicking any card &mdash; visual swap, dropdown sync, banner update</li>
+            <li>Per-campaign workspace: empty states for every panel, with simulated AI generation</li>
+            <li>Sticky context bar shows active campaign + back button when in workspace</li>
+            <li>Click &ldquo;Generate&rdquo; on any empty state &rarr; 1.2s loading &rarr; populated state with sample preview</li>
+            <li>Each campaign&rsquo;s populated state persists per-campaign &mdash; switching back shows what was generated</li>
+            <li>Microsoft campaign panels remain the rich working reference</li>
           </ul>
         </div>
         <div class="phase-card phase-next">
-          <div class="phase-tag">Phase 2 &middot; per-campaign panels</div>
+          <div class="phase-tag">Phase 3 &middot; real data</div>
           <ul>
-            <li>FAQ / theme / SME / content / calendar panels read from the active campaign instead of showing Microsoft data</li>
-            <li>Source-intake tab actually parses uploaded material (Claude API extraction)</li>
-            <li>Empty-state UX inside each panel for fresh campaigns</li>
-            <li>Per-campaign edit history in NeonDB (same pattern as the editable pages)</li>
+            <li>Source intake actually parses uploaded files (PDFs, transcripts, decks)</li>
+            <li>FAQ / theme / SME / content panels render real per-campaign data, not just empty/sample states</li>
+            <li>Per-campaign edit history in NeonDB (same pattern as editable pillar pages)</li>
+            <li>Export tiles wired to active campaign instead of always-Microsoft</li>
+            <li>Replace the &ldquo;simulate&rdquo; buttons with real AI calls (or keep them as &ldquo;ask Claude in chat&rdquo; mode for now)</li>
           </ul>
         </div>
         <div class="phase-card phase-later">
-          <div class="phase-tag">Phase 3 &middot; production</div>
+          <div class="phase-tag">Phase 4 &middot; production</div>
           <ul>
-            <li>Auth + multi-user (Garrett / Amanda / Jared roles)</li>
-            <li>Real AI loops: FAQ extraction, theme clustering, 5-beat proposals, v0.1 drafts</li>
-            <li>Round-trip with the editable-page infrastructure for in-browser SME edits</li>
-            <li>Export pipeline integrated with Marketing&rsquo;s sign-off workflow</li>
+            <li>Auth + multi-user (Garrett / Amanda / Jared roles, named SMEs, guest reviewers)</li>
+            <li>Real Claude API integration: FAQ extraction, theme clustering, 5-beat proposals, v0.1 drafts</li>
+            <li>Round-trip with the editable-page infrastructure for in-browser SME voice edits</li>
+            <li>Export pipeline integrated with Marketing&rsquo;s sign-off workflow + data3.com Knowledge Centre publishing</li>
           </ul>
         </div>
       </div>
-      <p class="phase-foot">Build pace: Phase 2 is ~1&ndash;2 days of focused work. Phase 3 needs a real scope conversation &mdash; backend, auth, AI integration cost. Decision point: does this stay a pitch artifact or become an internal tool?</p>
+      <p class="phase-foot">Build pace: Phase 3 is ~1&ndash;2 days for the data layer (file parsing simulated, empty/sample UI replaced with real renderers). Phase 4 needs a real scope conversation &mdash; backend persistence, auth, AI integration cost. <b>Decision point:</b> does this stay a pitch artifact (lean on simulated AI + chat-with-Claude for content), or become an internal tool with backend?</p>
     </div>
   </section>
 
   <!-- ─── 2. OVERVIEW ─── -->
   <section class="panel" data-panel="overview">
+    <div class="panel-content panel-msft-only">
     <div class="panel-num">02 &middot; campaign overview</div>
     <h2>Agentic AI &middot; <em>Microsoft Knowledge Centre</em></h2>
     <p class="lede">Build it. Ship it. Make it boring. The campaign that argues agentic AI is the new baseline &mdash; from the people delivering it. <b>Adam called it on Mar&nbsp;4. Jack said how on Apr&nbsp;27. Scott&rsquo;s up next.</b></p>
@@ -1173,10 +1377,13 @@ body::after {
     </div>
     <div class="progress" style="height:6px; margin-top:0.4rem;"><span style="width:60%"></span></div>
     <p class="lede" style="margin-top:1rem;">Source material gathered &middot; FAQs generated &middot; SMEs mapped &middot; content plan drafted &middot; editorial calendar approved &middot; <b>9 of 33 pieces in flight</b>. Next: SME review of P05 &amp; P06.</p>
+    </div>
+    <div class="panel-content panel-empty-only" data-empty-for="overview"></div>
   </section>
 
   <!-- ─── 3. SOURCE ─── -->
   <section class="panel" data-panel="source">
+    <div class="panel-content panel-msft-only">
     <div class="panel-num">03 &middot; source material intake</div>
     <h2>What feeds the campaign.</h2>
     <p class="lede">Source material is what the FAQ generator reads to extract themes, customer pain points, suggested SME owners, and CTAs. Drop in URLs, paste text, upload decks &mdash; the system pulls signal from all of it.</p>
@@ -1218,10 +1425,13 @@ Customers ask the same eight questions before buying AI — distilled in P10.</t
         </div>
       </div>
     </div>
+    </div>
+    <div class="panel-content panel-empty-only" data-empty-for="source"></div>
   </section>
 
   <!-- ─── 4. FAQs ─── -->
   <section class="panel" data-panel="faqs">
+    <div class="panel-content panel-msft-only">
     <div class="panel-num">04 &middot; faq builder</div>
     <h2>20 FAQs. <em>Four themes.</em> One spine answered from every angle.</h2>
     <p class="lede">Generated from source material, edited by hand, approved one by one. Each FAQ targets a real customer question, maps to a primary SME, and seeds at least one content piece below. <b>Default target: 20 core FAQs &mdash; matching the existing Microsoft campaign model.</b></p>
@@ -1388,10 +1598,13 @@ Customers ask the same eight questions before buying AI — distilled in P10.</t
         <div class="faq-actions"><button class="icon-btn approve" title="Approve">✓</button><button class="icon-btn reject" title="Reject">✕</button><button class="icon-btn" title="Edit">✎</button></div>
       </div>
     </div>
+    </div>
+    <div class="panel-content panel-empty-only" data-empty-for="faqs"></div>
   </section>
 
   <!-- ─── 5. THEMES ─── -->
   <section class="panel" data-panel="themes">
+    <div class="panel-content panel-msft-only">
     <div class="panel-num">05 &middot; theme manager</div>
     <h2>Four themes. <em>One spine answered four ways.</em></h2>
     <p class="lede">Themes are how the FAQ set is organised &mdash; and how the rain of follow-up posts knows what to extend. Each theme has a messaging priority, an SME owner, and a content target.</p>
@@ -1422,10 +1635,13 @@ Customers ask the same eight questions before buying AI — distilled in P10.</t
         <div class="theme-stats"><span><b>4</b> FAQs</span><span><b>3</b> SMEs</span><span><b>2</b> blog posts</span></div>
       </div>
     </div>
+    </div>
+    <div class="panel-content panel-empty-only" data-empty-for="themes"></div>
   </section>
 
   <!-- ─── 6. SMEs ─── -->
   <section class="panel" data-panel="smes">
+    <div class="panel-content panel-msft-only">
     <div class="panel-num">06 &middot; sme manager</div>
     <h2>Nine named voices. <em>One spine each.</em></h2>
     <p class="lede">Every SME on the roster has agreed to a byline, an area of expertise, and a specific reply to the spine. The hard part &mdash; finding people who&rsquo;ll publicly attach their name &mdash; is already done.</p>
@@ -1477,10 +1693,13 @@ Customers ask the same eight questions before buying AI — distilled in P10.</t
         <div class="sme-meta"><span><b>2</b> FAQs owned</span><span><b>1</b> blog post</span></div>
       </div>
     </div>
+    </div>
+    <div class="panel-content panel-empty-only" data-empty-for="smes"></div>
   </section>
 
   <!-- ─── 7. MAPPING ─── -->
   <section class="panel" data-panel="mapping">
+    <div class="panel-content panel-msft-only">
     <div class="panel-num">07 &middot; faq-to-sme mapping</div>
     <h2>Who answers what. <em>Suggested by AI, confirmed by you.</em></h2>
     <p class="lede">Every FAQ has a Primary SME (owns the answer), one or more Supporting SMEs (contribute angle/example), and a Reviewer (signs off voice fidelity). Suggestions come from expertise tags, source material, and prior campaign participation.</p>
@@ -1517,10 +1736,13 @@ Customers ask the same eight questions before buying AI — distilled in P10.</t
       </table>
     </div>
     <p class="lede" style="margin-top:1.5rem; font-size:0.85rem;"><b>Coverage check:</b> every FAQ has at least one Primary &middot; every SME owns 1&ndash;3 FAQs &middot; no single SME has more than 3 Primary assignments. <button class="btn-aqua" onclick="toast('Re-balanced 2 mappings: SQ4 from Jack (3) → Mark (2). Coverage stays even.')">Auto-balance load</button></p>
+    </div>
+    <div class="panel-content panel-empty-only" data-empty-for="mapping"></div>
   </section>
 
   <!-- ─── 8. CONTENT PLANNER ─── -->
   <section class="panel" data-panel="content">
+    <div class="panel-content panel-msft-only">
     <div class="panel-num">08 &middot; content planner</div>
     <h2>33 pieces. <em>One plan.</em></h2>
     <p class="lede">Every FAQ links to one or more content pieces. Every content piece links back to one or more FAQs. The plan is generated automatically from the spine + FAQ set + SME map &mdash; then edited by hand.</p>
@@ -1562,10 +1784,13 @@ Customers ask the same eight questions before buying AI — distilled in P10.</t
       <div class="list-row content"><div class="cnum">K08</div><div><span class="ctype kb">KB</span></div><div class="ctitle">Where do I start with AI? <small>~250w &middot; from FAQ CU1</small></div><div class="cdate">May 14<small>publish</small></div><div class="show-md"><span class="status-pill ready">Ready</span></div><div class="show-md"><span style="font-family:'JetBrains Mono',monospace; font-size:0.62rem; color:var(--text-muted);">Adam</span></div></div>
       <div class="list-row content" style="opacity:0.7;"><div class="cnum">K09–K20</div><div><span class="ctype kb">KB</span></div><div class="ctitle">+ 12 more KB articles<small>SQ4–7, BU3–5, LC3, LC4, CU2, CU3, CU4 &middot; ~210–290w each</small></div><div class="cdate">May 21 → Jul 16<small>staggered</small></div><div class="show-md"><span class="status-pill draft">Planned</span></div><div class="show-md"><span style="font-family:'JetBrains Mono',monospace; font-size:0.62rem; color:var(--text-muted);">9 SMEs</span></div></div>
     </div>
+    </div>
+    <div class="panel-content panel-empty-only" data-empty-for="content"></div>
   </section>
 
   <!-- ─── 9. CALENDAR ─── -->
   <section class="panel" data-panel="calendar">
+    <div class="panel-content panel-msft-only">
     <div class="panel-num">09 &middot; editorial calendar</div>
     <h2>One drop a week. <em>For twelve weeks.</em></h2>
     <p class="lede">Generated from the content plan. Sustainable cadence Amanda asked for. Each week pairs one blog drop with two or three KB articles &mdash; the rain promotes, the KB converts.</p>
@@ -1660,6 +1885,8 @@ Customers ask the same eight questions before buying AI — distilled in P10.</t
         </div>
       </div>
     </div>
+    </div>
+    <div class="panel-content panel-empty-only" data-empty-for="calendar"></div>
   </section>
 
   <!-- ─── 10. WORKFLOW ─── -->
@@ -1689,6 +1916,7 @@ Customers ask the same eight questions before buying AI — distilled in P10.</t
 
   <!-- ─── 11. EXPORT ─── -->
   <section class="panel" data-panel="export">
+    <div class="panel-content panel-msft-only">
     <div class="panel-num">11 &middot; export &amp; brief</div>
     <h2>Ship it elsewhere. <em>One click.</em></h2>
     <p class="lede">Export the campaign plan as a CSV for the spreadsheet crowd, a Markdown brief for the docs crowd, a CMS-ready outline for the publishing crowd, or a one-page PDF for the steerco crowd. <b>Single source of truth &mdash; many surfaces.</b></p>
@@ -1704,6 +1932,8 @@ Customers ask the same eight questions before buying AI — distilled in P10.</t
       <div class="export-tile" onclick="toast('Sales enablement summary generated. 1 page, 6 talking points.')"><div class="export-icon">▼ DOC</div><div class="export-h">Sales enablement</div><div class="export-p">One-pager for sellers &middot; talking points + KB links + objection handling.</div></div>
       <div class="export-tile" onclick="toast('Saved current campaign as new template "Microsoft Knowledge Centre v1.0".')"><div class="export-icon">★</div><div class="export-h">Save as template</div><div class="export-p">Lock this structure as a reusable template for the next campaign.</div></div>
     </div>
+    </div>
+    <div class="panel-content panel-empty-only" data-empty-for="export"></div>
   </section>
 
   <!-- ─── Footer ─── -->
@@ -1809,11 +2039,16 @@ Customers ask the same eight questions before buying AI — distilled in P10.</t
     });
   });
 
-  // Campaign selector
+  // Campaign selector — switch active campaign on change
   var selector = document.getElementById('campaignSelector');
   selector.addEventListener('change', function() {
     var v = selector.value;
-    if (v && v !== 'msft') {
+    if (!v) return;
+    if (typeof CM !== 'undefined' && CM.data[v]) {
+      CM.setActive(v);
+      // Stay on whatever tab the user is on; just the data swap to the new campaign
+    } else {
+      // Fallback (legacy) — open modal for unknown values
       openModal();
       selector.value = 'msft';
     }
@@ -1998,26 +2233,7 @@ function hydrateStoredCampaigns() {
     setActiveCampaignBanner(activeStored);
   }
 }
-// Allow Microsoft card to be reactivated when demoted (user-created campaign is currently active)
-(function bindMsftReactivation() {
-  var msft = document.querySelector('.campaign-card[data-cmid="msft"]');
-  if (!msft) return;
-  msft.addEventListener('click', function(e) {
-    if (!msft.classList.contains('template-cm')) return; // active or unchanged — let original handler run
-    e.stopImmediatePropagation();
-    demoteActiveCard();
-    msft.classList.remove('template-cm');
-    msft.classList.add('active-cm');
-    if (!msft.querySelector('.cm-flag')) {
-      msft.insertAdjacentHTML('afterbegin', '<span class="cm-flag">★ Active</span>');
-    }
-    var stored = loadStoredCampaigns();
-    stored.forEach(function(s) { s.isActive = false; });
-    saveStoredCampaigns(stored);
-    setActiveCampaignBanner(null);
-    toast('Microsoft Knowledge Centre is active.');
-  }, true);
-})();
+// (Microsoft reactivation now handled via CM.setActive in the Phase 2 block below.)
 function clearAllUserCampaigns() {
   document.querySelectorAll('.campaign-card.cm-user').forEach(function(c) { c.remove(); });
   var sel = document.getElementById('campaignSelector');
@@ -2041,6 +2257,591 @@ function clearAllUserCampaigns() {
   toast('Cleared all created campaigns. Microsoft campaign is active again.');
 }
 hydrateStoredCampaigns();
+
+/* ════════════════════════════════════════════════════════════════
+   PHASE 2 · per-campaign state, empty states, simulated generation
+   ════════════════════════════════════════════════════════════════ */
+var CM_STATE_KEY = 'cm-state-v2';
+var CM = {
+  data: {
+    msft: {
+      name: 'Agentic AI &middot; Knowledge Centre',
+      eye: 'campaign &middot; Microsoft Practice',
+      status: 'creation', statusLabel: 'Content Creation',
+      template: 'Microsoft',
+      populated: { source: true, faqs: true, themes: true, smes: true, content: true, calendar: true },
+      counts: { sources: 12, faqs: 20, themes: 4, smes: 9, content: 33, weeks: 12 },
+    }
+  },
+  activeId: 'msft',
+
+  loadAll: function() {
+    try {
+      var s = JSON.parse(localStorage.getItem(CM_STATE_KEY) || '{}');
+      if (s.campaigns) for (var k in s.campaigns) if (k !== 'msft') this.data[k] = s.campaigns[k];
+      if (s.activeId && this.data[s.activeId]) this.activeId = s.activeId;
+    } catch(e) {}
+  },
+  saveAll: function() {
+    var out = { activeId: this.activeId, campaigns: {} };
+    for (var k in this.data) if (k !== 'msft') out.campaigns[k] = this.data[k];
+    try { localStorage.setItem(CM_STATE_KEY, JSON.stringify(out)); } catch(e) {}
+  },
+  ensureCampaign: function(id, fallback) {
+    if (!this.data[id]) {
+      this.data[id] = fallback || {
+        name: 'Untitled', eye: 'campaign &middot; custom',
+        status: 'intake', statusLabel: 'Source intake', template: 'Blank',
+        populated: { source:false, faqs:false, themes:false, smes:false, content:false, calendar:false },
+        counts: { sources:0, faqs:0, themes:0, smes:0, content:0, weeks:0 },
+      };
+    }
+  },
+  add: function(opts) {
+    this.data[opts.id] = {
+      name: opts.name, eye: opts.eyebrow || 'campaign',
+      status: 'intake', statusLabel: 'Source intake',
+      template: opts.template || 'Blank',
+      populated: { source:false, faqs:false, themes:false, smes:false, content:false, calendar:false },
+      counts: { sources:0, faqs:0, themes:0, smes:0, content:0, weeks:0 },
+    };
+    this.activeId = opts.id;
+    this.saveAll();
+  },
+  setActive: function(id) {
+    if (!this.data[id]) return;
+    this.activeId = id;
+    // Visual: demote all active cards, promote this one
+    document.querySelectorAll('.campaign-card.active-cm').forEach(function(c) {
+      if (c.getAttribute('data-cmid') !== id) {
+        c.classList.remove('active-cm');
+        c.classList.add('template-cm');
+        var f = c.querySelector('.cm-flag'); if (f) f.remove();
+      }
+    });
+    var card = document.querySelector('.campaign-card[data-cmid="' + id + '"]');
+    if (card) {
+      card.classList.remove('template-cm');
+      card.classList.add('active-cm');
+      if (!card.querySelector('.cm-flag')) {
+        card.insertAdjacentHTML('afterbegin', '<span class="cm-flag">★ Active</span>');
+      }
+    }
+    // Banner: clear when msft is active, show when user campaign is active
+    if (id === 'msft') {
+      setActiveCampaignBanner(null);
+    } else {
+      setActiveCampaignBanner({ name: this.data[id].name });
+    }
+    // Sync legacy stored isActive flags
+    try {
+      var stored = JSON.parse(localStorage.getItem(CAMPAIGN_STORE_KEY) || '[]');
+      stored.forEach(function(s) { s.isActive = (s.id === id); });
+      localStorage.setItem(CAMPAIGN_STORE_KEY, JSON.stringify(stored));
+    } catch(e) {}
+    this.saveAll();
+    this.applyActive();
+  },
+  current: function() { return this.data[this.activeId]; },
+  isMsft: function() { return this.activeId === 'msft'; },
+  applyActive: function() {
+    document.body.classList.toggle('cm-msft-active', this.isMsft());
+    document.body.classList.toggle('cm-non-msft', !this.isMsft());
+    this.updateContextBar();
+    this.renderEmptyStates();
+    this.updateTabCounts();
+    if (!this.isMsft()) this.updateDashboardCard(this.activeId);
+    // Sync dropdown selection
+    var sel = document.getElementById('campaignSelector');
+    if (sel && sel.value !== this.activeId) {
+      var hasOption = !!sel.querySelector('option[value="' + this.activeId + '"]');
+      if (hasOption) sel.value = this.activeId;
+    }
+  },
+  updateContextBar: function() {
+    var c = this.current();
+    var name = document.getElementById('cmContextName');
+    var eye = document.getElementById('cmContextEye');
+    var st = document.getElementById('cmContextStatus');
+    if (name) name.innerHTML = c.name;
+    if (eye) eye.innerHTML = c.eye;
+    if (st) {
+      st.textContent = c.statusLabel || 'Source intake';
+      st.className = 'cm-context-status ' + (c.status || 'intake');
+    }
+  },
+  updateTabCounts: function() {
+    var msftDefaults = { faqs: 20, themes: 4, smes: 9, content: 33 };
+    var c = this.current();
+    ['faqs','themes','smes','content'].forEach(function(name) {
+      var btn = document.querySelector('.tab[data-tab="' + name + '"]');
+      if (!btn) return;
+      var ct = btn.querySelector('.ct');
+      var n = CM.isMsft() ? msftDefaults[name] : (c.counts[name] || 0);
+      if (n > 0) {
+        if (!ct) { ct = document.createElement('span'); ct.className = 'ct'; btn.appendChild(ct); }
+        ct.textContent = n;
+      } else if (ct) {
+        ct.remove();
+      }
+    });
+  },
+  updateDashboardCard: function(id) {
+    if (id === 'msft') return;
+    var card = document.querySelector('.campaign-card[data-cmid="' + id + '"]');
+    if (!card) return;
+    var c = this.data[id]; if (!c) return;
+    var cells = card.querySelectorAll('.cm-meta-cell b');
+    if (cells.length >= 3) {
+      cells[0].textContent = c.counts.faqs;
+      cells[1].textContent = c.counts.smes;
+      cells[2].textContent = c.counts.content;
+    }
+    var pill = card.querySelector('.status-pill');
+    if (pill) {
+      pill.textContent = c.statusLabel;
+      pill.className = 'status-pill ' + (c.status || 'draft');
+    }
+    var pct = (c.populated.source?10:0)+(c.populated.faqs?20:0)+(c.populated.themes?15:0)+(c.populated.smes?20:0)+(c.populated.content?20:0)+(c.populated.calendar?15:0);
+    var pBar = card.querySelector('.progress > span');
+    if (pBar) pBar.style.width = pct + '%';
+  },
+  renderEmptyStates: function() {
+    if (this.isMsft()) return;
+    var c = this.current();
+    document.querySelectorAll('.panel-empty-only').forEach(function(div) {
+      div.innerHTML = renderEmptyForPanel(div.getAttribute('data-empty-for'), c);
+    });
+  },
+  generate: function(panelName) {
+    var c = this.current();
+    var emptyDiv = document.querySelector('.panel.active .panel-empty-only .empty-state');
+    if (emptyDiv) emptyDiv.classList.add('is-generating');
+    var delay = 1100 + Math.random() * 700;
+    setTimeout(function() {
+      if (panelName === 'source')   { c.populated.source = true;   c.counts.sources = 4 + Math.floor(Math.random()*3); }
+      if (panelName === 'faqs')     { c.populated.faqs = true;     c.counts.faqs = 8 + Math.floor(Math.random()*4); }
+      if (panelName === 'themes')   { c.populated.themes = true;   c.counts.themes = 3 + Math.floor(Math.random()*2); }
+      if (panelName === 'smes')     { c.populated.smes = true;     c.counts.smes = 5 + Math.floor(Math.random()*3); }
+      if (panelName === 'content')  { c.populated.content = true;  c.counts.content = 10 + Math.floor(Math.random()*6); }
+      if (panelName === 'calendar') { c.populated.calendar = true; c.counts.weeks = 12; }
+      // Update status as completion grows
+      if (c.populated.content && c.populated.smes) { c.status = 'creation'; c.statusLabel = 'Content Creation'; }
+      else if (c.populated.faqs) { c.status = 'draft'; c.statusLabel = 'FAQ review'; }
+      else if (c.populated.source) { c.status = 'draft'; c.statusLabel = 'Source review'; }
+      CM.saveAll();
+      CM.applyActive();
+      toast('✓ Generated ' + panelName + ' &mdash; ' + (c.counts[panelName] || c.counts.sources || c.counts.weeks) + ' items');
+    }, delay);
+  },
+  goTab: function(name) {
+    var t = document.querySelector('.tab[data-tab="' + name + '"]');
+    if (t) t.click();
+  },
+  simulate: function(name) { this.generate(name); },
+};
+
+/* ─── Empty-state rendering ─── */
+function emptyStateHtml(opts) {
+  var icon = opts.icon || '○';
+  var stateClass = opts.populated ? 'is-populated' : (opts.locked ? 'is-locked' : '');
+  var actions = (opts.actions || []).filter(Boolean).map(function(a) {
+    var cls = a.primary ? 'btn-primary' : 'btn-ghost';
+    return '<button class="' + cls + '" onclick="' + (a.onclick || '') + '">' + a.label + '</button>';
+  }).join('');
+  var sample = '';
+  if (opts.sample && opts.sample.length) {
+    sample = '<ul class="empty-sample-list">' + opts.sample.map(function(s) {
+      return '<li>' + s.text + (s.tag ? '<span class="empty-sample-tag">' + s.tag + '</span>' : '') + '</li>';
+    }).join('') + '</ul>';
+  }
+  return '<div class="empty-state ' + stateClass + '">' +
+    '<div class="empty-state-icon">' + icon + '</div>' +
+    '<h2 class="empty-state-h">' + opts.title + '</h2>' +
+    '<p class="empty-state-p">' + opts.body + '</p>' +
+    (opts.dropzone || '') +
+    (actions ? '<div class="empty-state-actions">' + actions + '</div>' : '') +
+    sample +
+    (opts.foot ? '<p class="empty-state-foot">' + opts.foot + '</p>' : '') +
+  '</div>';
+}
+
+function getSampleFaqs(template) {
+  var by = {
+    'Security &amp; Sovereign AI': [
+      {q:'What governance controls should I expect from day one?', tag:'lifecycle'},
+      {q:'How do I avoid agent sprawl?', tag:'customer'},
+      {q:'Where does sovereign AI sit in our delivery?', tag:'lifecycle'},
+      {q:'What happens when an agent gives the wrong answer?', tag:'customer'},
+    ],
+    'Copilot for the Frontline': [
+      {q:'How do we get Copilot from licensed to actually used?', tag:'adoption'},
+      {q:'What does daily Copilot look like for frontline workers?', tag:'adoption'},
+      {q:'How do we measure ROI on Copilot deployment?', tag:'value'},
+    ],
+    'AI Readiness': [
+      {q:'Where do I start with AI?', tag:'customer'},
+      {q:'Who owns AI internally?', tag:'customer'},
+      {q:'What is an AI Factory Readiness Assessment?', tag:'lifecycle'},
+    ],
+    'Modern Workplace': [
+      {q:'What does a Copilot rollout actually look like?', tag:'adoption'},
+      {q:'How do we run hybrid work with AI in the loop?', tag:'adoption'},
+      {q:'What\'s the minimum baseline for ready-to-Copilot?', tag:'readiness'},
+    ],
+    'Azure Infrastructure': [
+      {q:'What\'s the difference between Azure Frontier and a normal landing zone?', tag:'platform'},
+      {q:'How do we right-size Azure for AI workloads?', tag:'finops'},
+      {q:'When is sovereign Azure the right call?', tag:'sovereign'},
+    ],
+    'Data &amp; Analytics': [
+      {q:'How do we go from Power BI to Fabric?', tag:'platform'},
+      {q:'What does a Data Factory engagement look like?', tag:'delivery'},
+      {q:'How do we get our data ready for AI agents?', tag:'readiness'},
+    ],
+    'Business Applications': [
+      {q:'How do we treat agents like a workforce?', tag:'governance'},
+      {q:'What does Dynamics + Copilot look like end-to-end?', tag:'adoption'},
+      {q:'How do we onboard, supervise, and retire agents?', tag:'lifecycle'},
+    ],
+  };
+  return by[template] || [
+    {q:'What is the customer trying to accomplish?', tag:'discovery'},
+    {q:'Where does this fit in their roadmap?', tag:'discovery'},
+    {q:'Who owns the outcome?', tag:'ownership'},
+    {q:'How do we measure success?', tag:'metrics'},
+  ];
+}
+
+function renderOverviewEmpty(c) {
+  var hasAny = c.populated.source || c.populated.faqs;
+  if (hasAny) {
+    return emptyStateHtml({
+      icon: '★', populated: true,
+      title: c.name,
+      body: '<b>' + c.template + '</b> campaign &middot; in progress. ' + c.counts.faqs + ' FAQs &middot; ' + c.counts.themes + ' themes &middot; ' + c.counts.smes + ' SMEs &middot; ' + c.counts.content + ' content pieces planned.',
+      foot: 'Open the FAQs, Themes, SMEs, or Content tabs to see what&rsquo;s been generated. The Microsoft tab is the reference for what mature looks like.',
+    });
+  }
+  return emptyStateHtml({
+    icon: '✦',
+    title: 'A fresh <em>campaign</em> awaits',
+    body: 'No source material yet. Upload meeting transcripts, slide decks, or paste raw text. The agent will extract themes, candidate FAQs, and propose SME ownership &mdash; all reviewable before anything ships.',
+    actions: [{ label: 'Add source material →', primary: true, onclick: "CM.goTab('source')" }],
+    foot: 'Average time from intake to first FAQ proposal · ~12 minutes',
+  });
+}
+function renderSourceEmpty(c) {
+  if (c.populated.source) {
+    return emptyStateHtml({
+      icon: '✓', populated: true,
+      title: c.counts.sources + ' sources ingested',
+      body: 'Source material parsed. ' + c.counts.sources + ' documents processed &middot; ~' + (c.counts.sources*60) + ' candidate FAQs extracted &middot; awaiting clustering and SME review.',
+      sample: [
+        {text: 'Meeting transcript &middot; campaign kickoff', tag: 'parsed'},
+        {text: 'Slide deck &middot; ' + c.template, tag: 'parsed'},
+        {text: 'Customer email thread &middot; pain points', tag: 'parsed'},
+      ],
+      actions: [
+        { label: 'Add more sources', onclick: "CM.simulate('source')" },
+        { label: 'Generate FAQs →', primary: true, onclick: "CM.goTab('faqs')" },
+      ],
+    });
+  }
+  return emptyStateHtml({
+    icon: '↑',
+    title: 'Drop in <em>source material</em>',
+    body: 'Upload meeting transcripts, slide decks, blog drafts, customer emails. The agent will read them, extract candidate FAQs, and propose themes &mdash; ready for SME review.',
+    dropzone: '<div class="empty-dropzone">Drag files here · paste raw text · or <b>simulate ingestion</b> below</div>',
+    actions: [{ label: 'Simulate upload (3 sources)', primary: true, onclick: "CM.simulate('source')" }],
+    foot: 'In Phase 3 this uses real Claude API · today it simulates',
+  });
+}
+function renderFaqsEmpty(c) {
+  if (c.populated.faqs) {
+    return emptyStateHtml({
+      icon: '✓', populated: true,
+      title: c.counts.faqs + ' FAQs generated',
+      body: 'Auto-clustered into ' + (c.counts.themes || 'pending') + ' themes. SME assignment is the next step.',
+      sample: getSampleFaqs(c.template).slice(0, 4).map(function(f) { return { text: f.q, tag: f.tag }; }),
+      actions: [
+        { label: 'Re-generate', onclick: "CM.simulate('faqs')" },
+        { label: 'Assign SMEs →', primary: true, onclick: "CM.goTab('smes')" },
+      ],
+      foot: 'Sample shown above &middot; the Microsoft tab has the full 20-FAQ working format',
+    });
+  }
+  var hasSource = c.populated.source;
+  return emptyStateHtml({
+    icon: '?',
+    title: 'No <em>FAQs</em> yet',
+    body: hasSource
+      ? 'You have source material. The agent can propose a starter FAQ set drawn from those documents &mdash; usually 8&ndash;12 candidate questions to refine.'
+      : 'FAQs emerge from source material. Either upload sources first, or let the agent propose a starter set based on the campaign theme.',
+    actions: [
+      { label: hasSource ? 'Generate FAQs from sources' : 'Generate starter FAQs', primary: true, onclick: "CM.simulate('faqs')" },
+      hasSource ? null : { label: 'Add source material first →', onclick: "CM.goTab('source')" },
+    ],
+  });
+}
+function renderThemesEmpty(c) {
+  if (c.populated.themes) {
+    var themes = [
+      {text: c.template + ' &middot; core capability', tag: 'pillar'},
+      {text: 'Buying / commercial model', tag: 'pillar'},
+      {text: 'Lifecycle and governance', tag: 'pillar'},
+      {text: 'Customer questions', tag: 'pillar'},
+    ].slice(0, c.counts.themes);
+    return emptyStateHtml({
+      icon: '✓', populated: true,
+      title: c.counts.themes + ' themes clustered',
+      body: 'Themes group related FAQs into pillars that can each anchor one or more posts.',
+      sample: themes,
+    });
+  }
+  if (!c.populated.faqs) {
+    return emptyStateHtml({
+      icon: '⊝', locked: true,
+      title: 'Themes appear once <em>FAQs</em> exist',
+      body: 'Themes emerge from clustering related FAQs. Generate FAQs first.',
+      actions: [{ label: 'Go to FAQs →', onclick: "CM.goTab('faqs')" }],
+    });
+  }
+  return emptyStateHtml({
+    icon: '◇',
+    title: 'Cluster <em>FAQs</em> into themes',
+    body: 'You have FAQs but no theme grouping yet. The agent can cluster them based on semantic similarity &mdash; usually 3&ndash;5 thematic pillars.',
+    actions: [{ label: 'Auto-cluster from FAQs', primary: true, onclick: "CM.simulate('themes')" }],
+  });
+}
+function renderSmesEmpty(c) {
+  if (c.populated.smes) {
+    return emptyStateHtml({
+      icon: '✓', populated: true,
+      title: c.counts.smes + ' SMEs assigned',
+      body: 'Each FAQ has a primary owner, support, and reviewer. Coverage is balanced &mdash; no single SME holds more than 3 primary assignments.',
+      sample: [
+        {text: 'Adam Rappaport &middot; 3 FAQs (Primary)', tag: 'AI lead'},
+        {text: 'Suzanne Maroc &middot; 2 FAQs (Primary)', tag: 'BizApps'},
+        {text: 'Richard Dornhart &middot; 2 FAQs (Primary)', tag: 'Security'},
+      ].slice(0, Math.min(c.counts.smes, 3)),
+      actions: [
+        { label: 'Re-balance load', onclick: "CM.simulate('smes')" },
+        { label: 'Draft content plan →', primary: true, onclick: "CM.goTab('content')" },
+      ],
+    });
+  }
+  if (!c.populated.faqs) {
+    return emptyStateHtml({
+      icon: '⊝', locked: true,
+      title: 'SMEs after <em>FAQs</em>',
+      body: 'Assign SMEs once your FAQ set is in place.',
+      actions: [{ label: 'Generate FAQs first →', onclick: "CM.goTab('faqs')" }],
+    });
+  }
+  return emptyStateHtml({
+    icon: '⌘',
+    title: 'Pick your <em>named voices</em>',
+    body: 'Each FAQ needs a primary owner, support, and reviewer. The agent can suggest assignments based on the D#3 directory and prior content history.',
+    actions: [{ label: 'Auto-assign from D#3 directory', primary: true, onclick: "CM.simulate('smes')" }],
+  });
+}
+function renderMappingEmpty(c) {
+  if (c.populated.faqs && c.populated.smes) {
+    return emptyStateHtml({
+      icon: '✓', populated: true,
+      title: 'Coverage map &middot; ' + c.counts.faqs + ' FAQs × ' + c.counts.smes + ' SMEs',
+      body: 'Every FAQ has at least one primary owner &middot; load is balanced across SMEs &middot; no single SME holds more than 3 primary assignments.',
+      foot: 'The Microsoft tab shows the full visual mapping grid.',
+    });
+  }
+  return emptyStateHtml({
+    icon: '⊝', locked: true,
+    title: 'Map appears with <em>FAQs + SMEs</em>',
+    body: 'Once both FAQs and SMEs are populated, this view shows who owns what and flags load imbalances.',
+  });
+}
+function renderContentEmpty(c) {
+  if (c.populated.content) {
+    return emptyStateHtml({
+      icon: '✓', populated: true,
+      title: c.counts.content + ' content pieces planned',
+      body: 'Mix of pillar posts, follow-up replies, and KB articles. Each piece linked to a primary FAQ &middot; SME owner &middot; due date.',
+      sample: [
+        {text: 'P01 &middot; Pillar reply (~1300w) — week 1', tag: 'briefed'},
+        {text: 'P02 &middot; ' + c.template + ' angle (~700w) — week 2', tag: 'briefed'},
+        {text: 'KB articles × ' + Math.max(c.counts.content - 10, 6) + ' (~250w ea) — rolling', tag: 'planned'},
+      ],
+      actions: [{ label: 'Generate calendar →', primary: true, onclick: "CM.simulate('calendar')" }],
+    });
+  }
+  if (!c.populated.smes) {
+    return emptyStateHtml({
+      icon: '⊝', locked: true,
+      title: 'Plan needs <em>FAQs + SMEs</em>',
+      body: 'The content plan is the bridge from FAQs+SMEs to actual blog posts. It generates after both are in place.',
+    });
+  }
+  return emptyStateHtml({
+    icon: '✎',
+    title: 'Draft the <em>content plan</em>',
+    body: 'Convert FAQs + SME map into a content plan: pillar posts, follow-up replies, and KB articles, each with primary owner and target word count.',
+    actions: [{ label: 'Draft content plan', primary: true, onclick: "CM.simulate('content')" }],
+  });
+}
+function renderCalendarEmpty(c) {
+  if (c.populated.calendar) {
+    return emptyStateHtml({
+      icon: '✓', populated: true,
+      title: c.counts.weeks + '-week editorial calendar',
+      body: 'Cadence: 1 drop/week (sustainable pilot). Each week has a content piece + the KB articles that ship alongside it.',
+      sample: [
+        {text: 'Week 1 &middot; Pillar reply ships', tag: 'planned'},
+        {text: 'Week 2 &middot; Follow-up post', tag: 'planned'},
+        {text: 'Week ' + c.counts.weeks + ' &middot; Wrap + sales pack', tag: 'planned'},
+      ],
+      foot: 'The Microsoft tab shows the full week-by-week breakdown.',
+    });
+  }
+  if (!c.populated.content) {
+    return emptyStateHtml({
+      icon: '⊝', locked: true,
+      title: 'Calendar needs <em>content plan</em>',
+      body: 'The editorial calendar maps content to weeks. Generate from the content plan first.',
+    });
+  }
+  return emptyStateHtml({
+    icon: '☷',
+    title: 'Generate the <em>calendar</em>',
+    body: 'Map the content plan to a weekly cadence. Default: 1 drop/week over 12 weeks. Adjustable.',
+    actions: [{ label: 'Generate 12-week calendar', primary: true, onclick: "CM.simulate('calendar')" }],
+  });
+}
+function renderExportEmpty(c) {
+  var hasAny = c.populated.faqs || c.populated.content;
+  if (hasAny) {
+    return emptyStateHtml({
+      icon: '↓', populated: true,
+      title: 'Exports ready',
+      body: 'CSV / Markdown / PDF exports of FAQs, content plan, and editorial calendar. Same formats as the Microsoft campaign &mdash; per-campaign export wiring is Phase 3.',
+      foot: 'For now, open the Microsoft tab to use the export tiles &mdash; the format reference is identical.',
+    });
+  }
+  return emptyStateHtml({
+    icon: '↓', locked: true,
+    title: 'Nothing to <em>export</em> yet',
+    body: 'Exports activate when FAQs, content plan, or calendar exist. Generate something first.',
+    actions: [{ label: 'Go to FAQs →', onclick: "CM.goTab('faqs')" }],
+  });
+}
+
+function renderEmptyForPanel(name, c) {
+  var renderers = {
+    overview: renderOverviewEmpty, source: renderSourceEmpty,
+    faqs: renderFaqsEmpty, themes: renderThemesEmpty,
+    smes: renderSmesEmpty, mapping: renderMappingEmpty,
+    content: renderContentEmpty, calendar: renderCalendarEmpty,
+    export: renderExportEmpty,
+  };
+  var fn = renderers[name];
+  return fn ? fn(c) : '';
+}
+
+/* ─── Workspace mode toggle (sticky context bar) ─── */
+function updateWorkspaceMode() {
+  var activePanel = document.querySelector('.panel.active');
+  if (!activePanel) return;
+  var name = activePanel.getAttribute('data-panel');
+  document.body.classList.toggle('cm-in-workspace', name !== 'dashboard');
+  document.body.classList.toggle('cm-in-dashboard', name === 'dashboard');
+}
+document.querySelectorAll('.tab').forEach(function(t) {
+  t.addEventListener('click', function() { setTimeout(updateWorkspaceMode, 10); });
+});
+var cmCtxBack = document.getElementById('cmContextBack');
+if (cmCtxBack) cmCtxBack.addEventListener('click', function() { CM.goTab('dashboard'); });
+
+/* ─── Card click → enter workspace (capture phase, takes over from original IIFE handler) ─── */
+function bindCardWorkspaceEntry(card) {
+  if (card._cmEntryBound) return;
+  card._cmEntryBound = true;
+  card.addEventListener('click', function(e) {
+    var id = card.getAttribute('data-cmid');
+    if (!id || !CM.data[id]) return; // template card (e.g. security/copilot) — let original handler open the modal
+    e.stopImmediatePropagation();
+    if (card.classList.contains('active-cm')) {
+      // Already active → just enter the workspace
+      CM.goTab('overview');
+      return;
+    }
+    // Demoted card → reactivate + enter workspace
+    CM.setActive(id);
+    setTimeout(function() { CM.goTab('overview'); }, 80);
+  }, true); // capture phase
+}
+document.querySelectorAll('.campaign-card').forEach(bindCardWorkspaceEntry);
+
+/* ─── Patch injectCampaignCard to bind workspace-entry click ─── */
+var _origInject = injectCampaignCard;
+injectCampaignCard = function(c) {
+  var card = _origInject(c);
+  bindCardWorkspaceEntry(card);
+  // Ensure CM has this campaign too
+  CM.ensureCampaign(c.id, {
+    name: c.name, eye: c.eyebrow,
+    status: 'intake', statusLabel: 'Source intake',
+    template: c.template || (c.eyebrow && c.eyebrow.indexOf('custom') !== -1 ? 'Blank' : (c.name || 'Blank')),
+    populated: { source:false, faqs:false, themes:false, smes:false, content:false, calendar:false },
+    counts: { sources:0, faqs:0, themes:0, smes:0, content:0, weeks:0 },
+  });
+  return card;
+};
+
+/* ─── Patch useTemplate to also set CM state ─── */
+var _origUseTemplate = useTemplate;
+useTemplate = function(name) {
+  closeModal();
+  var isBlank = (name === 'Blank campaign');
+  var id = 'usr-' + Date.now().toString(36);
+  var displayName = isBlank ? 'New empty campaign' : name;
+  var eyebrow = isBlank ? 'campaign &middot; custom' : 'campaign &middot; ' + name;
+  var desc = isBlank
+    ? 'Empty campaign — upload source material and let the agent extract themes, FAQs, and a content plan.'
+    : 'Template scaffold — refine the spine, customise FAQs, swap SMEs, then run the same workflow.';
+  var c = { id:id, name:displayName, eyebrow:eyebrow, desc:desc, created:'Just created', isActive:true, template: isBlank ? 'Blank' : name };
+  demoteActiveCard();
+  injectCampaignCard(c);
+  CM.add({ id:id, name:displayName, eyebrow:eyebrow, template: isBlank ? 'Blank' : name });
+  var stored = loadStoredCampaigns();
+  stored.forEach(function(s) { s.isActive = false; });
+  stored.unshift(c);
+  saveStoredCampaigns(stored);
+  setActiveCampaignBanner(c);
+  CM.applyActive();
+  toast('Created &ldquo;' + escHtml(displayName) + '&rdquo;. Opening workspace...');
+  setTimeout(function() { CM.goTab('overview'); }, 600);
+};
+
+/* (Microsoft reactivation handled by bindCardWorkspaceEntry above.) */
+
+/* ─── Hydrate CM with any user-created campaign cards already in the DOM ─── */
+document.querySelectorAll('.campaign-card.cm-user').forEach(function(card) {
+  var id = card.getAttribute('data-cmid');
+  var name = (card.querySelector('.cm-h') || {}).textContent || 'Untitled';
+  var eyebrow = (card.querySelector('.cm-eye') || {}).textContent || 'campaign';
+  CM.ensureCampaign(id, {
+    name: name, eye: eyebrow,
+    status: 'intake', statusLabel: 'Source intake',
+    template: 'Blank',
+    populated: { source:false, faqs:false, themes:false, smes:false, content:false, calendar:false },
+    counts: { sources:0, faqs:0, themes:0, smes:0, content:0, weeks:0 },
+  });
+});
+
+/* ─── Initial activation ─── */
+CM.loadAll();
+CM.applyActive();
+updateWorkspaceMode();
 
 // ─── Toast ───
 var toastEl = document.getElementById('toast');

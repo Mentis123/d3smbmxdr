@@ -28,6 +28,10 @@ const nextConfig = {
         destination: '/knowledge-centre-rain.html',
       },
       {
+        source: '/marketing-pilot',
+        destination: '/marketing-pilot.html',
+      },
+      {
         source: '/boring-ai',
         destination: '/knowledge-centre-rain.html',
       },

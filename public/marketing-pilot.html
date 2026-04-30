@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI-augmented authoring &mdash; marketing pilot proposal | Data#3</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap');
+
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root {
+  --bg-deep: #000018;
+  --bg-card: #0a0f24;
+  --bg-elevated: #131b3c;
+  --bg-card-hover: #0f1530;
+  --border-subtle: rgba(0, 174, 255, 0.08);
+  --border-mid: rgba(0, 174, 255, 0.15);
+  --border-accent: rgba(0, 174, 255, 0.3);
+  --d3-blue-black: #000025;
+  --d3-light-blue: #00AEFF;
+  --d3-pale-blue: #78DCFF;
+  --d3-aqua: #00FFFF;
+  --d3-purple: #7300FF;
+  --text-primary: #e8ecf4;
+  --text-secondary: #a8b3cc;
+  --text-muted: #6e7894;
+  --text-bright: #ffffff;
+  --gradient-aqua: linear-gradient(135deg, #00FFFF, #00AEFF);
+  --gradient-brand: linear-gradient(135deg, #00AEFF, #7300FF);
+}
+html { scroll-behavior: smooth; font-size: 16px; scroll-snap-type: y mandatory; }
+body {
+  font-family: 'DM Sans', -apple-system, sans-serif;
+  background: var(--bg-deep); color: var(--text-primary);
+  line-height: 1.55; -webkit-font-smoothing: antialiased; overflow-x: hidden;
+}
+body::before {
+  content: ''; position: fixed; top: -50%; left: -50%;
+  width: 200%; height: 200%; pointer-events: none; z-index: 0;
+  background:
+    radial-gradient(ellipse at 25% 15%, rgba(0, 174, 255, 0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 75% 85%, rgba(115, 0, 255, 0.06) 0%, transparent 55%);
+}
+
+/* ─── Slide framing ─── */
+.slide {
+  scroll-snap-align: start;
+  min-height: 100vh;
+  display: flex; flex-direction: column; justify-content: center;
+  padding: 5rem 1.5rem 4rem;
+  position: relative; z-index: 1;
+}
+.slide-inner { max-width: 1100px; margin: 0 auto; width: 100%; }
+
+.slide-num {
+  position: absolute; top: 1.75rem; left: 1.75rem;
+  font-family: 'JetBrains Mono', monospace; font-size: 0.62rem;
+  letter-spacing: 0.22em; color: var(--text-muted);
+}
+.slide-num b { color: var(--d3-aqua); font-weight: 500; }
+
+.eyebrow {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.7rem;
+  letter-spacing: 0.22em; text-transform: uppercase; color: var(--d3-aqua);
+  margin-bottom: 1.4rem;
+  display: flex; align-items: center; gap: 0.85rem;
+}
+.eyebrow::before { content: ''; width: 36px; height: 1px; background: var(--gradient-aqua); }
+
+h1.slide-title {
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-size: clamp(2.6rem, 6vw, 4.4rem); font-weight: 400;
+  line-height: 1.05; color: var(--text-bright); letter-spacing: -0.025em;
+  margin-bottom: 1.25rem;
+}
+h1.slide-title em {
+  font-style: italic;
+  background: var(--gradient-aqua);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+h2.slide-h {
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-size: clamp(2rem, 4.4vw, 3.2rem); font-weight: 400;
+  line-height: 1.1; color: var(--text-bright); letter-spacing: -0.02em;
+  margin-bottom: 1.4rem;
+}
+h2.slide-h em {
+  font-style: italic;
+  background: var(--gradient-aqua);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.slide-deck {
+  font-size: clamp(1.05rem, 1.6vw, 1.25rem);
+  color: var(--text-secondary); line-height: 1.6;
+  max-width: 760px; margin-bottom: 2rem;
+}
+.slide-deck strong { color: var(--text-bright); font-weight: 500; }
+
+.byline {
+  margin-top: 2.5rem;
+  font-family: 'JetBrains Mono', monospace; font-size: 0.7rem;
+  letter-spacing: 0.1em; color: var(--text-muted);
+  display: flex; gap: 1.25rem; flex-wrap: wrap;
+  padding-top: 1.5rem; border-top: 1px solid var(--border-subtle);
+}
+.byline b { color: var(--d3-light-blue); font-weight: 500; }
+
+/* ─── Card grids ─── */
+.card-grid-3 {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.1rem;
+  margin-top: 1.5rem;
+}
+.card-grid-2 {
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.1rem;
+  margin-top: 1.5rem;
+}
+@media (max-width: 820px) {
+  .card-grid-3, .card-grid-2 { grid-template-columns: 1fr; }
+}
+
+.card {
+  background: var(--bg-card); border: 1px solid var(--border-mid);
+  border-radius: 12px; padding: 1.4rem 1.5rem;
+  transition: all 0.2s ease;
+}
+.card:hover { border-color: var(--border-accent); transform: translateY(-2px); }
+.card-num {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.62rem;
+  letter-spacing: 0.18em; color: var(--d3-aqua);
+  margin-bottom: 0.75rem;
+}
+.card-h {
+  font-family: 'Instrument Serif', Georgia, serif; font-style: italic;
+  font-size: 1.5rem; line-height: 1.2; color: var(--text-bright);
+  margin-bottom: 0.7rem;
+}
+.card-p {
+  font-size: 0.95rem; color: var(--text-secondary); line-height: 1.55;
+}
+.card-p b { color: var(--text-bright); font-weight: 500; }
+.card-recommended {
+  border-color: var(--d3-aqua);
+  background: linear-gradient(135deg, rgba(0,255,255,0.06), rgba(0,174,255,0.03));
+}
+.card-recommended .card-num { color: var(--d3-aqua); }
+.card-recommended .card-num::after {
+  content: '   ★ recommended';
+  color: var(--d3-aqua);
+  letter-spacing: 0.12em;
+}
+
+/* ─── Workflow flow ─── */
+.flow {
+  display: grid; grid-template-columns: repeat(6, 1fr); gap: 0.5rem;
+  margin-top: 1.5rem;
+}
+@media (max-width: 920px) {
+  .flow { grid-template-columns: repeat(2, 1fr); gap: 0.7rem; }
+}
+.flow-step {
+  background: var(--bg-card); border: 1px solid var(--border-mid);
+  border-radius: 10px; padding: 1rem 0.85rem;
+  position: relative;
+}
+.flow-step-n {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.55rem;
+  letter-spacing: 0.18em; color: var(--d3-aqua);
+  margin-bottom: 0.45rem;
+}
+.flow-step-h {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem; font-weight: 500;
+  letter-spacing: 0.05em; text-transform: uppercase;
+  color: var(--text-bright); margin-bottom: 0.55rem;
+}
+.flow-step-p {
+  font-size: 0.82rem; color: var(--text-secondary); line-height: 1.5;
+}
+.flow-step-p b { color: var(--d3-light-blue); font-weight: 500; }
+.flow-step.ai {
+  background: linear-gradient(135deg, rgba(115,0,255,0.10), rgba(0,174,255,0.04));
+  border-color: rgba(115,0,255,0.32);
+}
+.flow-step.ai .flow-step-n { color: #c4a8ff; }
+
+.flow-legend {
+  display: flex; gap: 1.4rem; flex-wrap: wrap;
+  margin-top: 1.1rem; padding-top: 1rem;
+  border-top: 1px dashed var(--border-mid);
+  font-family: 'JetBrains Mono', monospace; font-size: 0.62rem;
+  letter-spacing: 0.1em; color: var(--text-muted);
+  text-transform: uppercase;
+}
+.flow-legend span { display: inline-flex; align-items: center; gap: 0.45rem; }
+.flow-legend i { width: 9px; height: 9px; border-radius: 2px; display: inline-block; font-style: normal; }
+.flow-legend i.human { background: var(--d3-light-blue); }
+.flow-legend i.ai-marker { background: #c4a8ff; }
+
+/* ─── Pyramid stack visual ─── */
+.stack {
+  display: grid; gap: 0.55rem;
+  margin-top: 1.5rem; max-width: 880px;
+}
+.stack-row {
+  display: grid; grid-template-columns: 130px 1fr; gap: 1.2rem;
+  align-items: center;
+  padding: 1.05rem 1.3rem;
+  background: var(--bg-card); border: 1px solid var(--border-mid);
+  border-radius: 10px;
+  transition: all 0.2s ease;
+}
+.stack-row:hover { border-color: var(--border-accent); transform: translateX(4px); }
+.stack-tag {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.62rem;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  padding: 0.3rem 0.55rem; border-radius: 4px; text-align: center;
+  background: rgba(0,174,255,0.12); color: var(--d3-light-blue);
+}
+.stack-row.spine .stack-tag { background: rgba(0,255,255,0.12); color: var(--d3-aqua); }
+.stack-row.pillar .stack-tag { background: rgba(115,0,255,0.18); color: #c4a8ff; }
+.stack-row.kb .stack-tag { background: rgba(255,183,255,0.14); color: #ffb7ff; }
+.stack-text {
+  font-size: 0.97rem; color: var(--text-secondary); line-height: 1.5;
+}
+.stack-text b { color: var(--text-bright); font-weight: 500; }
+@media (max-width: 720px) {
+  .stack-row { grid-template-columns: 1fr; gap: 0.5rem; }
+  .stack-tag { justify-self: start; }
+}
+
+/* ─── Pilot success criteria ─── */
+.metrics {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;
+  margin-top: 1.5rem;
+}
+@media (max-width: 820px) { .metrics { grid-template-columns: 1fr; } }
+.metric {
+  background: var(--bg-card); border: 1px solid var(--border-mid);
+  border-radius: 12px; padding: 1.4rem 1.5rem 1.5rem;
+  position: relative; overflow: hidden;
+}
+.metric::before {
+  content: ''; position: absolute; top: 0; left: 0;
+  width: 3px; height: 100%; background: var(--gradient-aqua);
+}
+.metric-tag {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.6rem;
+  letter-spacing: 0.18em; text-transform: uppercase; color: var(--d3-aqua);
+  margin-bottom: 0.7rem;
+}
+.metric-headline {
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-size: 1.55rem; line-height: 1.2; color: var(--text-bright);
+  font-style: italic; margin-bottom: 0.65rem;
+}
+.metric-p {
+  font-size: 0.92rem; color: var(--text-secondary); line-height: 1.55;
+}
+.metric-p b { color: var(--text-bright); font-weight: 500; }
+
+/* ─── Non-negotiables list ─── */
+.bedrock {
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.85rem;
+  margin-top: 1.5rem;
+}
+@media (max-width: 720px) { .bedrock { grid-template-columns: 1fr; } }
+.bedrock-item {
+  display: grid; grid-template-columns: 36px 1fr; gap: 0.95rem;
+  padding: 1rem 1.15rem;
+  background: var(--bg-card); border: 1px solid var(--border-mid);
+  border-radius: 10px;
+}
+.bedrock-icon {
+  width: 32px; height: 32px; border-radius: 8px;
+  background: rgba(0,255,255,0.10);
+  border: 1px solid rgba(0,255,255,0.3);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'JetBrains Mono', monospace; font-size: 0.85rem;
+  color: var(--d3-aqua); font-weight: 600;
+}
+.bedrock-text b {
+  display: block; color: var(--text-bright);
+  font-weight: 500; margin-bottom: 0.25rem; font-size: 0.98rem;
+}
+.bedrock-text small {
+  display: block; color: var(--text-secondary);
+  font-size: 0.86rem; line-height: 1.5;
+}
+
+/* ─── Asks block ─── */
+.asks { display: grid; gap: 0.7rem; margin-top: 1.5rem; max-width: 860px; }
+.ask {
+  display: grid; grid-template-columns: 38px 1fr; gap: 1rem;
+  padding: 1.1rem 1.35rem;
+  background: var(--bg-card); border: 1px solid var(--border-mid);
+  border-radius: 10px;
+}
+.ask-num {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: var(--gradient-aqua); color: var(--d3-blue-black);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'JetBrains Mono', monospace; font-weight: 600;
+  font-size: 0.8rem;
+}
+.ask-text b {
+  display: block; color: var(--text-bright);
+  font-weight: 500; font-size: 1.05rem; margin-bottom: 0.3rem;
+}
+.ask-text small {
+  display: block; color: var(--text-secondary);
+  font-size: 0.9rem; line-height: 1.55;
+}
+
+/* ─── Pull-quote (closing) ─── */
+.pull-quote {
+  margin-top: 2rem; padding: 1.75rem 2rem;
+  border-left: 3px solid var(--d3-aqua);
+  background: linear-gradient(90deg, rgba(0,255,255,0.05), transparent 80%);
+  border-radius: 0 12px 12px 0;
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-style: italic; font-size: 1.4rem; line-height: 1.4;
+  color: var(--text-bright); max-width: 760px;
+}
+.pull-quote cite {
+  display: block; margin-top: 1rem;
+  font-family: 'JetBrains Mono', monospace; font-size: 0.7rem;
+  letter-spacing: 0.1em; color: var(--text-muted);
+  font-style: normal; text-transform: uppercase;
+}
+
+/* ─── Side dot nav ─── */
+.dotnav {
+  position: fixed; right: 1.4rem; top: 50%;
+  transform: translateY(-50%);
+  z-index: 50;
+  display: flex; flex-direction: column; gap: 0.65rem;
+  padding: 0.85rem 0.5rem;
+  background: rgba(0,0,24,0.5);
+  -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+  border: 1px solid var(--border-subtle);
+  border-radius: 100px;
+}
+.dotnav a {
+  width: 9px; height: 9px; border-radius: 50%;
+  background: rgba(168,179,204,0.3);
+  transition: all 0.2s ease;
+  display: block;
+}
+.dotnav a:hover { background: var(--d3-light-blue); transform: scale(1.3); }
+.dotnav a.active { background: var(--d3-aqua); box-shadow: 0 0 10px rgba(0,255,255,0.6); }
+@media (max-width: 720px) { .dotnav { right: 0.7rem; } }
+
+/* ─── Top sticky brand ─── */
+.brand {
+  position: fixed; top: 1.4rem; right: 1.6rem; z-index: 40;
+  font-family: 'JetBrains Mono', monospace; font-size: 0.62rem;
+  letter-spacing: 0.18em; color: var(--text-muted);
+  text-transform: uppercase;
+}
+.brand b { color: var(--d3-light-blue); font-weight: 600; }
+@media (max-width: 720px) { .brand { display: none; } }
+
+/* ─── Print ─── */
+@media print {
+  body { background: #fff; color: #111; }
+  body::before, .dotnav, .brand { display: none !important; }
+  .slide { min-height: auto; padding: 1.5rem 0; page-break-after: always; }
+  * { color: #222 !important; }
+  h1.slide-title em, h2.slide-h em { -webkit-text-fill-color: #007BC3 !important; }
+  .card, .flow-step, .stack-row, .metric, .bedrock-item, .ask { border-color: #999 !important; background: #fff !important; }
+}
+</style>
+</head>
+<body>
+
+<div class="brand">DATA<b>#</b>3 &middot; AI PRACTICE</div>
+
+<nav class="dotnav" aria-label="Slide navigation">
+  <a href="#s1" data-slide="1" title="Title"></a>
+  <a href="#s2" data-slide="2" title="The current shape"></a>
+  <a href="#s3" data-slide="3" title="The proposal"></a>
+  <a href="#s4" data-slide="4" title="The workflow"></a>
+  <a href="#s5" data-slide="5" title="Cadence"></a>
+  <a href="#s6" data-slide="6" title="What we're piloting"></a>
+  <a href="#s7" data-slide="7" title="Non-negotiables"></a>
+  <a href="#s8" data-slide="8" title="Next steps"></a>
+</nav>
+
+<!-- ─── SLIDE 1 — TITLE ─── -->
+<section class="slide" id="s1">
+  <div class="slide-num"><b>01</b> &nbsp;/ &nbsp;08</div>
+  <div class="slide-inner">
+    <div class="eyebrow">AI Practice &times; Marketing &middot; Pilot proposal</div>
+    <h1 class="slide-title">AI-augmented authoring &mdash; <em>without breaking the byline</em></h1>
+    <p class="slide-deck">A Microsoft-funded marketing pilot. Nine named Data#3 voices. One spine, a rain of replies, and an always-on KB layer underneath. <strong>AI does the lift, humans keep the byline, marketing stays in the loop.</strong> Built to be a template for other practices once it works here.</p>
+    <div class="byline">
+      <span>By <b>Adam Rappaport</b> &middot; Agentic AI Practice</span>
+      <span>For <b>Amanda Gower</b> / Garrett / Kerri</span>
+      <span>April 2026</span>
+    </div>
+  </div>
+</section>
+
+<!-- ─── SLIDE 2 — THE CURRENT SHAPE ─── -->
+<section class="slide" id="s2">
+  <div class="slide-num"><b>02</b> &nbsp;/ &nbsp;08 &nbsp;&middot; &nbsp;the current shape</div>
+  <div class="slide-inner">
+    <h2 class="slide-h">We have the voices. We have the funding. <em>We don&rsquo;t have a publishing model.</em></h2>
+    <p class="slide-deck">Three things are true at the same time &mdash; and only the third is broken.</p>
+
+    <div class="card-grid-3">
+      <div class="card">
+        <div class="card-num">01 &middot; voices ready</div>
+        <h3 class="card-h">Nine D#3 SMEs willing to byline</h3>
+        <p class="card-p">Scott, Mark, Matt, Jack, Adam, Suzanne, Richard, Dave, Alenka. <b>The hard part &mdash; finding people who&rsquo;ll publicly attach their name &mdash; is already done.</b></p>
+      </div>
+      <div class="card">
+        <div class="card-num">02 &middot; microsoft will fund it</div>
+        <h3 class="card-h">Sits inside the agentic AI campaign envelope</h3>
+        <p class="card-p">Marketing dollars are accessible through the Microsoft partner motion. <b>Time-cost is a budget input, not a budget exit.</b></p>
+      </div>
+      <div class="card">
+        <div class="card-num">03 &middot; the gap</div>
+        <h3 class="card-h">MS partners are out-publishing us 10:1 on AI</h3>
+        <p class="card-p">Adam&rsquo;s March piece + Jack&rsquo;s April piece is a thread of two. <b>Marketing&rsquo;s normal capacity can&rsquo;t run nine simultaneous bylines through a normal review chain in a sensible window.</b></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── SLIDE 3 — THE PROPOSAL ─── -->
+<section class="slide" id="s3">
+  <div class="slide-num"><b>03</b> &nbsp;/ &nbsp;08 &nbsp;&middot; &nbsp;the proposal</div>
+  <div class="slide-inner">
+    <h2 class="slide-h">A spine, a rain, and an <em>always-on</em> KB layer.</h2>
+    <p class="slide-deck">Stop thinking of this as &ldquo;a post or series of posts.&rdquo; Think of it as a four-layer publishing structure where every layer multiplies the value of the others.</p>
+
+    <div class="stack">
+      <div class="stack-row spine">
+        <div class="stack-tag">Spine</div>
+        <div class="stack-text"><b>One load-bearing argument every author replies to.</b> Build it &middot; Ship it &middot; Make it boring. Three beats from Adam, Scott, and Jack. Holds in any reading order.</div>
+      </div>
+      <div class="stack-row pillar">
+        <div class="stack-tag">Pillar</div>
+        <div class="stack-text"><b>Scott&rsquo;s &ldquo;Win97&rdquo; piece anchors the thread.</b> The buying-model argument that grounds the rest. Ready as v0.5 today.</div>
+      </div>
+      <div class="stack-row">
+        <div class="stack-tag">Rain</div>
+        <div class="stack-text"><b>Ten short replies. Nine named voices.</b> 500&ndash;800 words each. Every post extends the spine from a different angle &mdash; CISO, BizApps, Modern Work, CFO, Analytics, BizApps. Each links into the KB layer below.</div>
+      </div>
+      <div class="stack-row kb">
+        <div class="stack-tag">KB layer</div>
+        <div class="stack-text"><b>20 always-on, ~200-word answers</b> to what customers actually Google. Sourced from real questions. Sales links to them in every email. The blog rain promotes; the KB articles convert.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── SLIDE 4 — THE WORKFLOW ─── -->
+<section class="slide" id="s4">
+  <div class="slide-num"><b>04</b> &nbsp;/ &nbsp;08 &nbsp;&middot; &nbsp;the workflow</div>
+  <div class="slide-inner">
+    <h2 class="slide-h">Six steps. <em>Human at every gate.</em></h2>
+    <p class="slide-deck">The author owns the idea. The author edits to voice. The author signs the byline. AI sits in the middle, where the lift is.</p>
+
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-step-n">01</div>
+        <div class="flow-step-h">Idea</div>
+        <div class="flow-step-p">Author tells me what they want to write about. <b>Scott decides, not Claude.</b></div>
+      </div>
+      <div class="flow-step ai">
+        <div class="flow-step-n">02 &middot; AI</div>
+        <div class="flow-step-h">Draft v0.1</div>
+        <div class="flow-step-p">Claude turns the idea into a structured first draft. <b>Hours, not days.</b></div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-step-n">03</div>
+        <div class="flow-step-h">Voice edit</div>
+        <div class="flow-step-p">Author edits to their voice in-browser. <b>Non-negotiable.</b> Ghost-written posts read flat.</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-step-n">04</div>
+        <div class="flow-step-h">Marketing</div>
+        <div class="flow-step-p">Amanda layers the &ldquo;why D#3&rdquo; CTA, brand alignment, landing-page links. <b>Marketing in the loop on every piece.</b></div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-step-n">05</div>
+        <div class="flow-step-h">Editorial</div>
+        <div class="flow-step-p">Jared (or assigned editor) signs off. Same governance bar as today. <b>No back doors.</b></div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-step-n">06</div>
+        <div class="flow-step-h">Publish</div>
+        <div class="flow-step-p">Lands on data3.com Knowledge Centre under existing /blog and /kb buckets. <b>Standard pipes.</b></div>
+      </div>
+    </div>
+
+    <div class="flow-legend">
+      <span><i class="human"></i> Human gate</span>
+      <span><i class="ai-marker"></i> AI-assisted step</span>
+      <span>Five of six steps are humans. The middle one is the lift.</span>
+    </div>
+  </div>
+</section>
+
+<!-- ─── SLIDE 5 — CADENCE ─── -->
+<section class="slide" id="s5">
+  <div class="slide-num"><b>05</b> &nbsp;/ &nbsp;08 &nbsp;&middot; &nbsp;cadence</div>
+  <div class="slide-inner">
+    <h2 class="slide-h">Two cadences. Same outcome. <em>Different effort distribution.</em></h2>
+    <p class="slide-deck">Both deliver the same nine bylines + KB layer. The difference is how marketing review pressure distributes week-by-week, and how aggressively we want to test the workflow.</p>
+
+    <div class="card-grid-2">
+      <div class="card">
+        <div class="card-num">option A &middot; fast trial</div>
+        <h3 class="card-h">6 weeks, 2 drops/week</h3>
+        <p class="card-p">12 drops, Tuesday + Thursday. Faster signal. <b>Higher marketing review pressure per week.</b> Best as a test mode for half-year campaigns once the workflow is proven, not as the first run.</p>
+      </div>
+      <div class="card card-recommended">
+        <div class="card-num">option B &middot; sustained pilot</div>
+        <h3 class="card-h">12 weeks, 1 drop/week</h3>
+        <p class="card-p">12 drops, weekly. <b>Sustainable cadence Amanda asked for.</b> Each piece gets full marketing + editorial review time. Becomes the template other D#3 practices (security, modern work, analytics) can apply.</p>
+      </div>
+    </div>
+
+    <p class="slide-deck" style="margin-top: 2rem;">Recommendation: <b>Option B for the pilot itself</b>. Reserve Option A as the ramp pattern for the second campaign once the workflow has earned trust.</p>
+  </div>
+</section>
+
+<!-- ─── SLIDE 6 — WHAT WE'RE PILOTING ─── -->
+<section class="slide" id="s6">
+  <div class="slide-num"><b>06</b> &nbsp;/ &nbsp;08 &nbsp;&middot; &nbsp;what we&rsquo;re piloting</div>
+  <div class="slide-inner">
+    <h2 class="slide-h">What success <em>looks like</em>.</h2>
+    <p class="slide-deck">Three testable outcomes. If all three land, we have a workflow other practices can adopt. If any of them break, we&rsquo;ve learned cheaply &mdash; and the byline still belongs to a human, not an algorithm.</p>
+
+    <div class="metrics">
+      <div class="metric">
+        <div class="metric-tag">Outcome 01</div>
+        <div class="metric-headline">Time-to-published collapses.</div>
+        <p class="metric-p">Idea &rarr; published byline in <b>under two weeks per piece</b>, vs. the current six-to-ten-week window. The compression comes from the AI draft step, not from cutting any human gate.</p>
+      </div>
+      <div class="metric">
+        <div class="metric-tag">Outcome 02</div>
+        <div class="metric-headline">Marketing workload reshapes.</div>
+        <p class="metric-p">Amanda spends <b>~1 hour per piece</b> on the CTA + brand layer instead of 4&ndash;6 hours rewriting. Same governance, less typing. Capacity freed up for landing-page work and the bigger campaign motion.</p>
+      </div>
+      <div class="metric">
+        <div class="metric-tag">Outcome 03</div>
+        <div class="metric-headline">Voice fidelity holds.</div>
+        <p class="metric-p">Author and reader both confirm the byline reads like the named author. <b>Internal voice-check before publish, customer feedback after.</b> If a piece reads like Claude, it doesn&rsquo;t ship.</p>
+      </div>
+    </div>
+
+    <p class="slide-deck" style="margin-top: 2rem;">Bonus: a reusable workflow template the security, modern work, and analytics practices can apply for their own thought-leadership campaigns &mdash; without re-inventing the operating model each time.</p>
+  </div>
+</section>
+
+<!-- ─── SLIDE 7 — NON-NEGOTIABLES ─── -->
+<section class="slide" id="s7">
+  <div class="slide-num"><b>07</b> &nbsp;/ &nbsp;08 &nbsp;&middot; &nbsp;non-negotiables</div>
+  <div class="slide-inner">
+    <h2 class="slide-h">What <em>doesn&rsquo;t</em> change.</h2>
+    <p class="slide-deck">If any of these four bend, the pilot stops. They&rsquo;re what makes &ldquo;AI-augmented&rdquo; defensible &mdash; from a brand standpoint, an ethics standpoint, and a customer-trust standpoint.</p>
+
+    <div class="bedrock">
+      <div class="bedrock-item">
+        <div class="bedrock-icon">01</div>
+        <div class="bedrock-text">
+          <b>The byline is the human&rsquo;s.</b>
+          <small>The named author edits to their own voice before publish, every time. AI never signs anything. Ghost-written posts read flat &mdash; readers know.</small>
+        </div>
+      </div>
+      <div class="bedrock-item">
+        <div class="bedrock-icon">02</div>
+        <div class="bedrock-text">
+          <b>Marketing is in the loop.</b>
+          <small>Every piece flows through Amanda for the &ldquo;why D#3&rdquo; CTA layer and brand alignment. No piece bypasses marketing &mdash; ever.</small>
+        </div>
+      </div>
+      <div class="bedrock-item">
+        <div class="bedrock-icon">03</div>
+        <div class="bedrock-text">
+          <b>Transparency about the workflow.</b>
+          <small>We say openly that AI helped draft, then the author finished. Customers value the honesty more than they punish the disclosure. This is also what positions us to talk credibly about responsible AI.</small>
+        </div>
+      </div>
+      <div class="bedrock-item">
+        <div class="bedrock-icon">04</div>
+        <div class="bedrock-text">
+          <b>Governance unchanged.</b>
+          <small>Jared editorial review, data3.com Knowledge Centre publishing standards, sign-off chain identical to current. The AI is in the draft step &mdash; not in the approval chain.</small>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── SLIDE 8 — NEXT STEPS ─── -->
+<section class="slide" id="s8">
+  <div class="slide-num"><b>08</b> &nbsp;/ &nbsp;08 &nbsp;&middot; &nbsp;next steps</div>
+  <div class="slide-inner">
+    <h2 class="slide-h">What I&rsquo;m <em>asking for</em>.</h2>
+    <p class="slide-deck">Three asks, in order. The first unlocks the second. The third is already in motion.</p>
+
+    <div class="asks">
+      <div class="ask">
+        <div class="ask-num">01</div>
+        <div class="ask-text">
+          <b>Garrett sign-off &mdash; campaign sits inside the agentic AI envelope.</b>
+          <small>Confirm this campaign qualifies for Microsoft funding under the FY27 H1 marketing plan. Amanda walks the proposal through; I&rsquo;m on standby for any technical question.</small>
+        </div>
+      </div>
+      <div class="ask">
+        <div class="ask-num">02</div>
+        <div class="ask-text">
+          <b>Amanda + me work the operating model.</b>
+          <small>Cadence (Option B), the marketing review choreography, the sales pack, the deep-link KB map. One working session. We come back with the rollout plan.</small>
+        </div>
+      </div>
+      <div class="ask">
+        <div class="ask-num">03</div>
+        <div class="ask-text">
+          <b>Three-piece launch trio for the landing page.</b>
+          <small>Adam already published. Jack already published. Scott&rsquo;s v0.5 in his hands now. Three live pieces ready when the landing page goes live (~mid-May), so the rain isn&rsquo;t starting from zero.</small>
+        </div>
+      </div>
+    </div>
+
+    <div class="pull-quote">
+      &ldquo;It&rsquo;s already happening. We&rsquo;re already doing it. Let&rsquo;s just actually test it on this one scenario.&rdquo;
+      <cite>&mdash; Amanda Gower &middot; campaign chat &middot; Apr 30 2026</cite>
+    </div>
+  </div>
+</section>
+
+<script>
+(function() {
+  // Active dot tracking via IntersectionObserver
+  var slides = document.querySelectorAll('.slide');
+  var dots = document.querySelectorAll('.dotnav a');
+  var slideToDot = {};
+  dots.forEach(function(d) { slideToDot[d.getAttribute('href').slice(1)] = d; });
+
+  var io = new IntersectionObserver(function(entries) {
+    entries.forEach(function(e) {
+      if (e.isIntersecting && e.intersectionRatio > 0.5) {
+        var id = e.target.id;
+        dots.forEach(function(d) { d.classList.remove('active'); });
+        if (slideToDot[id]) slideToDot[id].classList.add('active');
+      }
+    });
+  }, { threshold: [0.5] });
+  slides.forEach(function(s) { io.observe(s); });
+
+  // Keyboard nav: arrow keys, j/k, space
+  document.addEventListener('keydown', function(e) {
+    var current = -1;
+    for (var i = 0; i < slides.length; i++) {
+      var rect = slides[i].getBoundingClientRect();
+      if (rect.top >= -50 && rect.top <= window.innerHeight / 2) { current = i; break; }
+    }
+    if (current === -1) current = 0;
+    var target = -1;
+    if (e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === 'j' || (e.key === ' ' && !e.shiftKey)) target = current + 1;
+    else if (e.key === 'ArrowUp' || e.key === 'PageUp' || e.key === 'k' || (e.key === ' ' && e.shiftKey)) target = current - 1;
+    else if (e.key === 'Home') target = 0;
+    else if (e.key === 'End') target = slides.length - 1;
+    if (target >= 0 && target < slides.length) {
+      e.preventDefault();
+      slides[target].scrollIntoView({ behavior: 'smooth' });
+    }
+  });
+})();
+</script>
+
+</body>
+</html>

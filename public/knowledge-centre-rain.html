@@ -487,6 +487,12 @@ body::after {
   60%  { box-shadow: 0 0 0 14px rgba(0, 174, 255, 0); }
   100% { box-shadow: 0 0 0 0 rgba(0, 174, 255, 0); }
 }
+.rain-row.flash { animation: rainFlash 1.4s ease-out 1; }
+@keyframes rainFlash {
+  0%   { box-shadow: 0 0 0 0 rgba(0, 174, 255, 0.6); }
+  60%  { box-shadow: 0 0 0 14px rgba(0, 174, 255, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(0, 174, 255, 0); }
+}
 .rain-row .rrstatus {
   font-family: 'JetBrains Mono', monospace; font-size: 0.55rem;
   letter-spacing: 0.15em; text-transform: uppercase;
@@ -551,8 +557,40 @@ body::after {
   cursor: pointer; transition: background 0.2s ease, border-color 0.2s ease;
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto auto;
-  align-items: center; gap: 0.75rem;
+  grid-template-rows: auto auto;
+  align-items: center; column-gap: 0.75rem; row-gap: 0.35rem;
   position: relative; overflow: hidden;
+}
+.kb-authors {
+  grid-column: 2 / 4;
+  grid-row: 2;
+  display: flex; gap: 0.35rem; flex-wrap: wrap; align-items: center;
+  font-family: 'DM Sans', sans-serif;
+}
+.kb-authors-label {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.5rem;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--text-muted); margin-right: 0.1rem;
+}
+.kb-author-chip {
+  font-family: 'DM Sans', sans-serif; font-size: 0.7rem;
+  font-weight: 500;
+  padding: 0.18rem 0.5rem; border-radius: 4px;
+  text-decoration: none; cursor: pointer;
+  background: rgba(168, 179, 204, 0.08);
+  color: var(--text-secondary);
+  border: 1px solid rgba(168, 179, 204, 0.18);
+  transition: transform 0.15s ease, background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  white-space: nowrap;
+}
+.kb-author-chip:hover {
+  background: rgba(0, 174, 255, 0.12);
+  color: var(--d3-light-blue);
+  border-color: rgba(0, 174, 255, 0.32);
+  transform: translateY(-1px);
+}
+@media (max-width: 760px) {
+  .kb-authors { grid-column: 1 / -1; }
 }
 .kb-tile::before {
   content: ''; position: absolute; top: 0; left: 0; width: 3px; height: 0;
@@ -947,7 +985,7 @@ body.locked .edit-toolbar { display: none !important; }
         <div class="beat-tag" data-block-id="b3-tag">Ship it &middot; the shift</div>
         <h3 class="beat-h" data-block-id="b3-h">It&rsquo;s the Win97 moment for AI</h3>
         <div class="beat-byline" data-block-id="b3-by">By <b>Scott Gosling</b> &middot; Microsoft Practice Manager</div>
-        <p class="beat-quote" data-block-id="b3-quote">&ldquo;Adam said build. Jack said build it boring. The buying model has to change too &mdash; and Microsoft is putting real money behind the change.&rdquo;</p>
+        <p class="beat-quote" data-block-id="b3-quote">&ldquo;Adam said build. Jack said build it boring. The buying model has to change too &mdash; and for eligible customers, Microsoft helps fund the on-ramp.&rdquo;</p>
         <a class="beat-link" href="/scott-pillar">Read v0.5 draft</a>
       </article>
     </div>
@@ -975,7 +1013,7 @@ body.locked .edit-toolbar { display: none !important; }
       <div class="beat-card">
         <div class="beat-card-num" data-block-id="s1-c3-n">BEAT 03</div>
         <h3 class="beat-card-h" data-block-id="s1-c3-h">Ship it.</h3>
-        <p class="beat-card-p" data-block-id="s1-c3-p">Capability-as-a-service. The Windows&nbsp;97 moment. The buying model has to change too &mdash; you can&rsquo;t deliver boring AI through the old project shape.</p>
+        <p class="beat-card-p" data-block-id="s1-c3-p">Capability + capacity. The Win97 moment. <b>Drawdown, not SOW.</b> Packaged Agentic Sprints &mdash; and for eligible customers, Microsoft funds the on-ramp.</p>
         <div class="beat-card-attr" data-block-id="s1-c3-a">From <b>Scott &middot; ~May</b></div>
       </div>
     </div>
@@ -988,61 +1026,61 @@ body.locked .edit-toolbar { display: none !important; }
     <p class="section-lede" data-block-id="s3-lede">Each post is a reply to the thread &mdash; not a fresh pronouncement. Builds on Adam, Jack, or Scott. Links to two or three KB articles below. Each runs 500&ndash;800 words.</p>
 
     <div class="rain-grid">
-      <div class="rain-row">
+      <div class="rain-row" id="rain-p01">
         <div class="rrnum" data-block-id="r1-n">P01</div>
         <div class="rrauthor" data-block-id="r1-a">Scott Gosling<small>Microsoft Practice Manager</small></div>
         <div class="rrtitle" data-block-id="r1-t">It&rsquo;s the Win97 moment for AI &mdash; and the calendar is writing our plan for us<small>The pillar reply. Sets up everything else &mdash; drawdown beats SOW, Microsoft funds the on-ramp.</small><div class="rrkb"><span class="rrkb-label">KB targets</span><a class="kb-chip" data-cat="buying" href="#kb-bu1" title="What is capability-as-a-service?">BU1</a><a class="kb-chip" data-cat="buying" href="#kb-bu2" title="How is AI work priced at Data#3?">BU2</a><a class="kb-chip" data-cat="lifecycle" href="#kb-lc1" title="What is Envision &rarr; Transform &rarr; Operate?">LC1</a></div></div>
         <div class="rrstatus draft" data-block-id="r1-s">Drafted</div>
       </div>
-      <div class="rain-row">
+      <div class="rain-row" id="rain-p02">
         <div class="rrnum" data-block-id="r2-n">P02</div>
         <div class="rrauthor" data-block-id="r2-a">Adam Rappaport<small>AI Specialist</small></div>
         <div class="rrtitle" data-block-id="r2-t">Six weeks in the crucible: what we&rsquo;ve learned since March 4<small>Sequel to the original call. Recurring Adam voice on data3.com.</small><div class="rrkb"><span class="rrkb-label">KB targets</span><a class="kb-chip" data-cat="customer" href="#kb-cu1" title="Where do I start with AI?">CU1</a><a class="kb-chip" data-cat="lifecycle" href="#kb-lc4" title="What is the AI Factory Readiness Assessment?">LC4</a><a class="kb-chip" data-cat="buying" href="#kb-bu5" title="How do I de-risk our first AI engagement?">BU5</a></div></div>
         <div class="rrstatus briefed" data-block-id="r2-s">Briefed</div>
       </div>
-      <div class="rain-row">
+      <div class="rain-row" id="rain-p03">
         <div class="rrnum" data-block-id="r3-n">P03</div>
         <div class="rrauthor" data-block-id="r3-a">Jack Latrobe<small>Solutions Architect</small></div>
         <div class="rrtitle" data-block-id="r3-t">Boring AI shipped: ten working days inside a squad<small>The proof piece. Day-by-day walkthrough. Counters &ldquo;AI is just demos&rdquo;.</small><div class="rrkb"><span class="rrkb-label">KB targets</span><a class="kb-chip" data-cat="squad" href="#kb-sq1" title="What is an AI Squad?">SQ1</a><a class="kb-chip" data-cat="squad" href="#kb-sq2" title="What is a sprint and what does it deliver?">SQ2</a><a class="kb-chip" data-cat="squad" href="#kb-sq4" title="Mentor vs Lead vs Shadow &mdash; who does what?">SQ4</a></div></div>
         <div class="rrstatus briefed" data-block-id="r3-s">Briefed</div>
       </div>
-      <div class="rain-row">
+      <div class="rain-row" id="rain-p04">
         <div class="rrnum" data-block-id="r4-n">P04</div>
         <div class="rrauthor" data-block-id="r4-a">Mark Pattie<small>Modern Work Solution Lead</small></div>
         <div class="rrtitle" data-block-id="r4-t">Boring is what fortnightly looks like<small>Ratifies Jack&rsquo;s standard from the Modern Work delivery angle. Earned authority.</small><div class="rrkb"><span class="rrkb-label">KB targets</span><a class="kb-chip" data-cat="squad" href="#kb-sq2" title="What is a sprint and what does it deliver?">SQ2</a><a class="kb-chip" data-cat="squad" href="#kb-sq5" title="Lean Sprint vs Scaled Sprint &mdash; which do I need?">SQ5</a><a class="kb-chip" data-cat="lifecycle" href="#kb-lc1" title="What is Envision &rarr; Transform &rarr; Operate?">LC1</a></div></div>
         <div class="rrstatus briefed" data-block-id="r4-s">Briefed</div>
       </div>
-      <div class="rain-row">
+      <div class="rain-row" id="rain-p05">
         <div class="rrnum" data-block-id="r-suze-n">P05</div>
         <div class="rrauthor" data-block-id="r-suze-a">Suzanne Maroc<small>Solution Sales Specialist &middot; Business Applications</small></div>
         <div class="rrtitle" data-block-id="r-suze-t">Treat your agents like a workforce<small>BizApps-native frame. Hire, onboard, supervise, retire. Governance falls out naturally.</small><div class="rrkb"><span class="rrkb-label">KB targets</span><a class="kb-chip" data-cat="customer" href="#kb-cu2" title="Who owns AI internally?">CU2</a><a class="kb-chip" data-cat="customer" href="#kb-cu3" title="How do I avoid agent sprawl?">CU3</a><a class="kb-chip" data-cat="lifecycle" href="#kb-lc3" title="How is Agent 365 used at Data#3?">LC3</a></div></div>
         <div class="rrstatus draft" data-block-id="r-suze-s">Drafted</div>
       </div>
-      <div class="rain-row">
+      <div class="rain-row" id="rain-p06">
         <div class="rrnum" data-block-id="r5-n">P06</div>
         <div class="rrauthor" data-block-id="r5-a">Richard Dornhart<small>Security Practice Manager</small></div>
         <div class="rrtitle" data-block-id="r5-t">Boring AI doesn&rsquo;t fail at the model layer. It fails at governance.<small>The CISO post. AI-TRiSM, Agent 365, Purview as wrap, not SKU.</small><div class="rrkb"><span class="rrkb-label">KB targets</span><a class="kb-chip" data-cat="lifecycle" href="#kb-lc2" title="What governance controls should I expect from day one?">LC2</a><a class="kb-chip" data-cat="lifecycle" href="#kb-lc3" title="How is Agent 365 used at Data#3?">LC3</a><a class="kb-chip" data-cat="customer" href="#kb-cu4" title="What happens when the agent gives the wrong answer?">CU4</a></div></div>
         <div class="rrstatus briefed" data-block-id="r5-s">Briefed</div>
       </div>
-      <div class="rain-row">
+      <div class="rain-row" id="rain-p07">
         <div class="rrnum" data-block-id="r6-n">P07</div>
         <div class="rrauthor" data-block-id="r6-a">Dave Summers<small>Agent Smith / AI-augmented delivery</small></div>
         <div class="rrtitle" data-block-id="r6-t">How a 4-person squad ships like 8: the boring multiplier<small>Why our squads punch above their weight. Defends the rate card.</small><div class="rrkb"><span class="rrkb-label">KB targets</span><a class="kb-chip" data-cat="squad" href="#kb-sq3" title="What is a 1&middot;1&middot;2 squad?">SQ3</a><a class="kb-chip" data-cat="squad" href="#kb-sq6" title="How does the squad model differ from staff augmentation?">SQ6</a><a class="kb-chip" data-cat="squad" href="#kb-sq7" title="What is a Factory Pod and when do I need one?">SQ7</a></div></div>
         <div class="rrstatus briefed" data-block-id="r6-s">Briefed</div>
       </div>
-      <div class="rain-row">
+      <div class="rain-row" id="rain-p08">
         <div class="rrnum" data-block-id="r7-n">P08</div>
         <div class="rrauthor" data-block-id="r7-a">Matt Gooden<small>AI Practice Director</small></div>
         <div class="rrtitle" data-block-id="r7-t">What &ldquo;four sprints&rdquo; actually means<small>Commercial-model post for procurement / CFO. The vocabulary, not the spreadsheet.</small><div class="rrkb"><span class="rrkb-label">KB targets</span><a class="kb-chip" data-cat="buying" href="#kb-bu2" title="How is AI work priced at Data#3?">BU2</a><a class="kb-chip" data-cat="buying" href="#kb-bu1" title="What is capability-as-a-service?">BU1</a><a class="kb-chip" data-cat="squad" href="#kb-sq2" title="What is a sprint and what does it deliver?">SQ2</a></div></div>
         <div class="rrstatus briefed" data-block-id="r7-s">Briefed</div>
       </div>
-      <div class="rain-row">
+      <div class="rain-row" id="rain-p09">
         <div class="rrnum" data-block-id="r8-n">P09</div>
         <div class="rrauthor" data-block-id="r8-a">Alenka Caserman<small>Analytics Solution Architect</small></div>
         <div class="rrtitle" data-block-id="r8-t">We&rsquo;ve been doing boring for a year. We called it Data Factory.<small>Cross-practice precedent. 70% effort reduction. &ldquo;Not inventing &mdash; extending.&rdquo;</small><div class="rrkb"><span class="rrkb-label">KB targets</span><a class="kb-chip" data-cat="lifecycle" href="#kb-lc1" title="What is Envision &rarr; Transform &rarr; Operate?">LC1</a><a class="kb-chip" data-cat="squad" href="#kb-sq7" title="What is a Factory Pod and when do I need one?">SQ7</a><a class="kb-chip" data-cat="lifecycle" href="#kb-lc4" title="What is the AI Factory Readiness Assessment?">LC4</a></div></div>
         <div class="rrstatus briefed" data-block-id="r8-s">Briefed</div>
       </div>
-      <div class="rain-row">
+      <div class="rain-row" id="rain-p10">
         <div class="rrnum" data-block-id="r9-n">P10</div>
         <div class="rrauthor" data-block-id="r9-a">Adam Rappaport<small>AI Specialist &middot; wrap</small></div>
         <div class="rrtitle" data-block-id="r9-t">The eight questions every customer asks before buying AI<small>Sales reference card &mdash; the governance gap question set, distilled.</small><div class="rrkb"><span class="rrkb-label">KB targets</span><a class="kb-chip" data-cat="buying" href="#kb-bu3" title="What is an AAF Pilot?">BU3</a><a class="kb-chip" data-cat="buying" href="#kb-bu4" title="What is the Azure Frontier Offer (AFO)?">BU4</a><a class="kb-chip" data-cat="buying" href="#kb-bu5" title="How do I de-risk our first AI engagement?">BU5</a></div></div>
@@ -1100,42 +1138,49 @@ body.locked .edit-toolbar { display: none !important; }
         <span class="kb-tile-cat" data-cat="squad">Squad Model</span>
         <h3 class="kb-tile-q" data-block-id="kb-sq1-q">What is an AI Squad?</h3>
         <div class="kb-tile-meta" data-block-id="kb-sq1-m"><b>~250w</b> &middot; Planned</div>
+        <div class="kb-authors"><span class="kb-authors-label">Covered by</span><a class="kb-author-chip" href="#rain-p03" title="P03 &middot; Jack Latrobe &middot; Boring AI shipped: ten working days inside a squad">Jack</a></div>
         <p class="kb-preview" data-block-id="kb-sq1-p">A four-person dedicated team that delivers AI work for one customer at a time. One Mentor, one Lead, two Shadows. Same faces every sprint. Owns the outcome end-to-end.</p>
       </article>
       <article class="kb-tile" data-cat="squad" id="kb-sq2">
         <span class="kb-tile-cat" data-cat="squad">Squad Model</span>
         <h3 class="kb-tile-q" data-block-id="kb-sq2-q">What is a sprint and what does it deliver?</h3>
         <div class="kb-tile-meta" data-block-id="kb-sq2-m"><b>~220w</b> &middot; Planned</div>
+        <div class="kb-authors"><span class="kb-authors-label">Covered by</span><a class="kb-author-chip" href="#rain-p03" title="P03 &middot; Jack Latrobe &middot; Boring AI shipped: ten working days inside a squad">Jack</a><a class="kb-author-chip" href="#rain-p04" title="P04 &middot; Mark Pattie &middot; Boring is what fortnightly looks like">Mark</a><a class="kb-author-chip" href="#rain-p08" title="P08 &middot; Matt Gooden &middot; What &quot;four sprints&quot; actually means">Matt</a></div>
         <p class="kb-preview" data-block-id="kb-sq2-p">Ten working days. Same four people. One defined outcome. Fixed sprint price. Demo on Day 9. Retro on Day 10. Repeatable until the work is done.</p>
       </article>
       <article class="kb-tile" data-cat="squad" id="kb-sq3">
         <span class="kb-tile-cat" data-cat="squad">Squad Model</span>
         <h3 class="kb-tile-q" data-block-id="kb-sq3-q">What is a 1&middot;1&middot;2 squad?</h3>
         <div class="kb-tile-meta" data-block-id="kb-sq3-m"><b>~210w</b> &middot; Planned</div>
+        <div class="kb-authors"><span class="kb-authors-label">Covered by</span><a class="kb-author-chip" href="#rain-p07" title="P07 &middot; Dave Summers &middot; How a 4-person squad ships like 8: the boring multiplier">Dave</a></div>
         <p class="kb-preview" data-block-id="kb-sq3-p">One Principal mentoring across two squads (25%). One full-time Lead driving the engagement. Two full-time Shadows building. The minimum viable AI delivery shape.</p>
       </article>
       <article class="kb-tile" data-cat="squad" id="kb-sq4">
         <span class="kb-tile-cat" data-cat="squad">Squad Model</span>
         <h3 class="kb-tile-q" data-block-id="kb-sq4-q">Mentor vs Lead vs Shadow &mdash; who does what?</h3>
         <div class="kb-tile-meta" data-block-id="kb-sq4-m"><b>~280w</b> &middot; Planned</div>
+        <div class="kb-authors"><span class="kb-authors-label">Covered by</span><a class="kb-author-chip" href="#rain-p03" title="P03 &middot; Jack Latrobe &middot; Boring AI shipped: ten working days inside a squad">Jack</a></div>
         <p class="kb-preview" data-block-id="kb-sq4-p">Mentor governs quality and risk. Lead drives the engagement and is the customer&rsquo;s daily contact. Shadows build, learn the patterns, graduate up.</p>
       </article>
       <article class="kb-tile" data-cat="squad" id="kb-sq5">
         <span class="kb-tile-cat" data-cat="squad">Squad Model</span>
         <h3 class="kb-tile-q" data-block-id="kb-sq5-q">Lean Sprint vs Scaled Sprint &mdash; which do I need?</h3>
         <div class="kb-tile-meta" data-block-id="kb-sq5-m"><b>~250w</b> &middot; Planned</div>
+        <div class="kb-authors"><span class="kb-authors-label">Covered by</span><a class="kb-author-chip" href="#rain-p04" title="P04 &middot; Mark Pattie &middot; Boring is what fortnightly looks like">Mark</a></div>
         <p class="kb-preview" data-block-id="kb-sq5-p">Lean is one sprint &mdash; an explore. Scaled is 3&ndash;6 sprints &mdash; a build. Most engagements start lean, then graduate to scaled when value is proven.</p>
       </article>
       <article class="kb-tile" data-cat="squad" id="kb-sq6">
         <span class="kb-tile-cat" data-cat="squad">Squad Model</span>
         <h3 class="kb-tile-q" data-block-id="kb-sq6-q">How does the squad model differ from staff augmentation?</h3>
         <div class="kb-tile-meta" data-block-id="kb-sq6-m"><b>~260w</b> &middot; Planned</div>
+        <div class="kb-authors"><span class="kb-authors-label">Covered by</span><a class="kb-author-chip" href="#rain-p07" title="P07 &middot; Dave Summers &middot; How a 4-person squad ships like 8: the boring multiplier">Dave</a></div>
         <p class="kb-preview" data-block-id="kb-sq6-p">Staff aug rents you fractions of consultants. The squad sells you a whole team that owns an outcome. You buy sprints, not hours. You track delivery, not timesheets.</p>
       </article>
       <article class="kb-tile" data-cat="squad" id="kb-sq7">
         <span class="kb-tile-cat" data-cat="squad">Squad Model</span>
         <h3 class="kb-tile-q" data-block-id="kb-sq7-q">What is a Factory Pod and when do I need one?</h3>
         <div class="kb-tile-meta" data-block-id="kb-sq7-m"><b>~240w</b> &middot; Planned</div>
+        <div class="kb-authors"><span class="kb-authors-label">Covered by</span><a class="kb-author-chip" href="#rain-p07" title="P07 &middot; Dave Summers &middot; How a 4-person squad ships like 8: the boring multiplier">Dave</a><a class="kb-author-chip" href="#rain-p09" title="P09 &middot; Alenka Caserman &middot; We&rsquo;ve been doing boring for a year. We called it Data Factory.">Alenka</a></div>
         <p class="kb-preview" data-block-id="kb-sq7-p">A specific delivery pattern within the squad model. 6&ndash;12 weeks. 1&ndash;8 use cases. Use it when you need scaled, repeatable agent build &mdash; not exploratory work.</p>
       </article>
 
@@ -1144,30 +1189,35 @@ body.locked .edit-toolbar { display: none !important; }
         <span class="kb-tile-cat" data-cat="buying">Buying Model</span>
         <h3 class="kb-tile-q" data-block-id="kb-bu1-q">What is capability-as-a-service?</h3>
         <div class="kb-tile-meta" data-block-id="kb-bu1-m"><b>~280w</b> &middot; Planned</div>
+        <div class="kb-authors"><span class="kb-authors-label">Covered by</span><a class="kb-author-chip" href="#rain-p01" title="P01 &middot; Scott Gosling &middot; It&rsquo;s the Win97 moment for AI &mdash; and the calendar is writing our plan for us">Scott</a><a class="kb-author-chip" href="#rain-p08" title="P08 &middot; Matt Gooden &middot; What &quot;four sprints&quot; actually means">Matt</a></div>
         <p class="kb-preview" data-block-id="kb-bu1-p">A way of buying AI delivery without scoping a project up front. You buy a team, by the sprint, with a defined outcome. Predictable price. Predictable cadence. Real outcomes.</p>
       </article>
       <article class="kb-tile" data-cat="buying" id="kb-bu2">
         <span class="kb-tile-cat" data-cat="buying">Buying Model</span>
         <h3 class="kb-tile-q" data-block-id="kb-bu2-q">How is AI work priced at Data#3?</h3>
         <div class="kb-tile-meta" data-block-id="kb-bu2-m"><b>~230w</b> &middot; Planned</div>
+        <div class="kb-authors"><span class="kb-authors-label">Covered by</span><a class="kb-author-chip" href="#rain-p01" title="P01 &middot; Scott Gosling &middot; It&rsquo;s the Win97 moment for AI &mdash; and the calendar is writing our plan for us">Scott</a><a class="kb-author-chip" href="#rain-p08" title="P08 &middot; Matt Gooden &middot; What &quot;four sprints&quot; actually means">Matt</a></div>
         <p class="kb-preview" data-block-id="kb-bu2-p">By the sprint, not by the hour. One sprint = ten working days = a fixed price. Scope a project by counting sprints, not heads.</p>
       </article>
       <article class="kb-tile" data-cat="buying" id="kb-bu3">
         <span class="kb-tile-cat" data-cat="buying">Buying Model</span>
         <h3 class="kb-tile-q" data-block-id="kb-bu3-q">What is an AAF Pilot?</h3>
         <div class="kb-tile-meta" data-block-id="kb-bu3-m"><b>~270w</b> &middot; Planned</div>
+        <div class="kb-authors"><span class="kb-authors-label">Covered by</span><a class="kb-author-chip" href="#rain-p10" title="P10 &middot; Adam Rappaport (wrap) &middot; The eight questions every customer asks before buying AI">Adam (wrap)</a></div>
         <p class="kb-preview" data-block-id="kb-bu3-p">Agentic AI Foundation Pilot &mdash; Data#3 funds up to $20K of professional services on a $40K&ndash;$120K engagement. De-risks the first sprint while you prove the value.</p>
       </article>
       <article class="kb-tile" data-cat="buying" id="kb-bu4">
         <span class="kb-tile-cat" data-cat="buying">Buying Model</span>
         <h3 class="kb-tile-q" data-block-id="kb-bu4-q">What is the Azure Frontier Offer (AFO)?</h3>
         <div class="kb-tile-meta" data-block-id="kb-bu4-m"><b>~260w</b> &middot; Planned</div>
+        <div class="kb-authors"><span class="kb-authors-label">Covered by</span><a class="kb-author-chip" href="#rain-p10" title="P10 &middot; Adam Rappaport (wrap) &middot; The eight questions every customer asks before buying AI">Adam (wrap)</a></div>
         <p class="kb-preview" data-block-id="kb-bu4-p">Microsoft-funded AI delivery &mdash; up to US$500K of services on up to US$1M Azure consumption. Covers Fabric, Foundry, Azure DB workloads.</p>
       </article>
       <article class="kb-tile" data-cat="buying" id="kb-bu5">
         <span class="kb-tile-cat" data-cat="buying">Buying Model</span>
         <h3 class="kb-tile-q" data-block-id="kb-bu5-q">How do I de-risk our first AI engagement?</h3>
         <div class="kb-tile-meta" data-block-id="kb-bu5-m"><b>~290w</b> &middot; Planned</div>
+        <div class="kb-authors"><span class="kb-authors-label">Covered by</span><a class="kb-author-chip" href="#rain-p02" title="P02 &middot; Adam Rappaport &middot; Six weeks in the crucible: what we&rsquo;ve learned since March 4">Adam</a><a class="kb-author-chip" href="#rain-p10" title="P10 &middot; Adam Rappaport (wrap) &middot; The eight questions every customer asks before buying AI">Adam (wrap)</a></div>
         <p class="kb-preview" data-block-id="kb-bu5-p">Stack the funding (AAF + AFO), start with one sprint, choose a low-stakes use case with a clear owner. If sprint one ships value, sprint two earns the right to follow.</p>
       </article>
 
@@ -1176,24 +1226,28 @@ body.locked .edit-toolbar { display: none !important; }
         <span class="kb-tile-cat" data-cat="lifecycle">Lifecycle</span>
         <h3 class="kb-tile-q" data-block-id="kb-lc1-q">What is Envision &rarr; Transform &rarr; Operate?</h3>
         <div class="kb-tile-meta" data-block-id="kb-lc1-m"><b>~280w</b> &middot; Planned</div>
+        <div class="kb-authors"><span class="kb-authors-label">Covered by</span><a class="kb-author-chip" href="#rain-p01" title="P01 &middot; Scott Gosling &middot; It&rsquo;s the Win97 moment for AI &mdash; and the calendar is writing our plan for us">Scott</a><a class="kb-author-chip" href="#rain-p04" title="P04 &middot; Mark Pattie &middot; Boring is what fortnightly looks like">Mark</a><a class="kb-author-chip" href="#rain-p09" title="P09 &middot; Alenka Caserman &middot; We&rsquo;ve been doing boring for a year. We called it Data Factory.">Alenka</a></div>
         <p class="kb-preview" data-block-id="kb-lc1-p">Our lifecycle frame for AI engagements. Three phases. Six sub-phases. Customers can land at any maturity level &mdash; you don&rsquo;t have to start at the beginning.</p>
       </article>
       <article class="kb-tile" data-cat="lifecycle" id="kb-lc2">
         <span class="kb-tile-cat" data-cat="lifecycle">Lifecycle</span>
         <h3 class="kb-tile-q" data-block-id="kb-lc2-q">What governance controls should I expect from day one?</h3>
         <div class="kb-tile-meta" data-block-id="kb-lc2-m"><b>~310w</b> &middot; Planned</div>
+        <div class="kb-authors"><span class="kb-authors-label">Covered by</span><a class="kb-author-chip" href="#rain-p06" title="P06 &middot; Richard Dornhart &middot; Boring AI doesn&rsquo;t fail at the model layer. It fails at governance.">Richard</a></div>
         <p class="kb-preview" data-block-id="kb-lc2-p">Guardrails on inputs and outputs. AI-TRiSM patterns. Agent 365 observability. Purview labelling. Defender + Entra integration. Governance is a wrap, not a SKU.</p>
       </article>
       <article class="kb-tile" data-cat="lifecycle" id="kb-lc3">
         <span class="kb-tile-cat" data-cat="lifecycle">Lifecycle</span>
         <h3 class="kb-tile-q" data-block-id="kb-lc3-q">How is Agent 365 used at Data#3?</h3>
         <div class="kb-tile-meta" data-block-id="kb-lc3-m"><b>~250w</b> &middot; Planned</div>
+        <div class="kb-authors"><span class="kb-authors-label">Covered by</span><a class="kb-author-chip" href="#rain-p05" title="P05 &middot; Suzanne Maroc &middot; Treat your agents like a workforce">Suzanne</a><a class="kb-author-chip" href="#rain-p06" title="P06 &middot; Richard Dornhart &middot; Boring AI doesn&rsquo;t fail at the model layer. It fails at governance.">Richard</a></div>
         <p class="kb-preview" data-block-id="kb-lc3-p">As the cross-seam observability spine. We onboard agents through Agent 365 from day one, so governance and lifecycle controls don&rsquo;t bolt on later &mdash; they ship with the build.</p>
       </article>
       <article class="kb-tile" data-cat="lifecycle" id="kb-lc4">
         <span class="kb-tile-cat" data-cat="lifecycle">Lifecycle</span>
         <h3 class="kb-tile-q" data-block-id="kb-lc4-q">What is the AI Factory Readiness Assessment?</h3>
         <div class="kb-tile-meta" data-block-id="kb-lc4-m"><b>~240w</b> &middot; Planned</div>
+        <div class="kb-authors"><span class="kb-authors-label">Covered by</span><a class="kb-author-chip" href="#rain-p02" title="P02 &middot; Adam Rappaport &middot; Six weeks in the crucible: what we&rsquo;ve learned since March 4">Adam</a><a class="kb-author-chip" href="#rain-p09" title="P09 &middot; Alenka Caserman &middot; We&rsquo;ve been doing boring for a year. We called it Data Factory.">Alenka</a></div>
         <p class="kb-preview" data-block-id="kb-lc4-p">A one-week front-door engagement. Maps your environment to ETO phases. Outputs a sprint-by-sprint roadmap and a defensible CFO-grade business case.</p>
       </article>
 
@@ -1202,24 +1256,28 @@ body.locked .edit-toolbar { display: none !important; }
         <span class="kb-tile-cat" data-cat="customer">Customer Question</span>
         <h3 class="kb-tile-q" data-block-id="kb-cu1-q">Where do I start with AI?</h3>
         <div class="kb-tile-meta" data-block-id="kb-cu1-m"><b>~220w</b> &middot; Planned</div>
+        <div class="kb-authors"><span class="kb-authors-label">Covered by</span><a class="kb-author-chip" href="#rain-p02" title="P02 &middot; Adam Rappaport &middot; Six weeks in the crucible: what we&rsquo;ve learned since March 4">Adam</a></div>
         <p class="kb-preview" data-block-id="kb-cu1-p">Pick one painful, repeatable task. One owner. One agent. Ten days. If it ships value, do it again. If it doesn&rsquo;t, you&rsquo;ve learned cheaply. That&rsquo;s where everyone starts.</p>
       </article>
       <article class="kb-tile" data-cat="customer" id="kb-cu2">
         <span class="kb-tile-cat" data-cat="customer">Customer Question</span>
         <h3 class="kb-tile-q" data-block-id="kb-cu2-q">Who owns AI internally?</h3>
         <div class="kb-tile-meta" data-block-id="kb-cu2-m"><b>~240w</b> &middot; Planned</div>
+        <div class="kb-authors"><span class="kb-authors-label">Covered by</span><a class="kb-author-chip" href="#rain-p05" title="P05 &middot; Suzanne Maroc &middot; Treat your agents like a workforce">Suzanne</a></div>
         <p class="kb-preview" data-block-id="kb-cu2-p">A Product Owner who can sign off on outcomes. A Business SME who knows the work. An IT/Data Steward who owns access. The squad fills the rest.</p>
       </article>
       <article class="kb-tile" data-cat="customer" id="kb-cu3">
         <span class="kb-tile-cat" data-cat="customer">Customer Question</span>
         <h3 class="kb-tile-q" data-block-id="kb-cu3-q">How do I avoid agent sprawl?</h3>
         <div class="kb-tile-meta" data-block-id="kb-cu3-m"><b>~250w</b> &middot; Planned</div>
+        <div class="kb-authors"><span class="kb-authors-label">Covered by</span><a class="kb-author-chip" href="#rain-p05" title="P05 &middot; Suzanne Maroc &middot; Treat your agents like a workforce">Suzanne</a></div>
         <p class="kb-preview" data-block-id="kb-cu3-p">Centralise agent registration through Agent 365. Govern at the platform layer, not the agent layer. Treat new agents like new applications &mdash; with onboarding, ownership, retirement.</p>
       </article>
       <article class="kb-tile" data-cat="customer" id="kb-cu4">
         <span class="kb-tile-cat" data-cat="customer">Customer Question</span>
         <h3 class="kb-tile-q" data-block-id="kb-cu4-q">What happens when the agent gives the wrong answer?</h3>
         <div class="kb-tile-meta" data-block-id="kb-cu4-m"><b>~260w</b> &middot; Planned</div>
+        <div class="kb-authors"><span class="kb-authors-label">Covered by</span><a class="kb-author-chip" href="#rain-p06" title="P06 &middot; Richard Dornhart &middot; Boring AI doesn&rsquo;t fail at the model layer. It fails at governance.">Richard</a></div>
         <p class="kb-preview" data-block-id="kb-cu4-p">A boring agent has a defined failure mode &mdash; it knows what it doesn&rsquo;t know. Human-in-the-loop on high-stakes calls. Confidence scoring. Eval datasets. Telemetry on every interaction.</p>
       </article>
     </div>
@@ -1391,9 +1449,24 @@ body.locked .edit-toolbar { display: none !important; }
     tile.addEventListener('click', function(e) {
       // when unlocked, leave clicks on data-block-id elements to the editable infrastructure
       if (!document.body.classList.contains('locked') && e.target.closest('[data-block-id]')) return;
+      // let author-chip clicks navigate without toggling
+      if (e.target.closest('.kb-authors')) return;
       tile.classList.toggle('expanded');
     });
   });
+
+  /* flash target rain row when an author-chip anchor is followed */
+  function flashFromHash() {
+    var hash = window.location.hash;
+    if (!hash || hash.indexOf('#rain-p') !== 0) return;
+    var row = document.getElementById(hash.slice(1));
+    if (!row || !row.classList.contains('rain-row')) return;
+    row.classList.remove('flash');
+    void row.offsetWidth;
+    row.classList.add('flash');
+  }
+  window.addEventListener('hashchange', flashFromHash);
+  if (window.location.hash) setTimeout(flashFromHash, 50);
 
   /* expand target tile when a #kb-* anchor is followed (chip click or deep link) */
   function expandFromHash() {

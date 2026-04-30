@@ -432,6 +432,51 @@ body::after {
 .pillar-cta:hover { transform: translateY(-1px); box-shadow: 0 6px 28px rgba(0, 255, 255, 0.4); }
 .pillar-cta::after { content: '→'; font-size: 1rem; }
 
+/* ─── How-it-gets-made callout (link to /campaign-manager) ─── */
+.how-callout {
+  margin-top: 2.5rem;
+  padding: 1.5rem 1.6rem 1.4rem;
+  background: linear-gradient(135deg, rgba(0,174,255,0.06), rgba(115,0,255,0.05));
+  border: 1px solid var(--border-mid);
+  border-radius: 14px;
+  display: grid; gap: 1.1rem;
+}
+.how-callout-eyebrow {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.62rem;
+  letter-spacing: 0.22em; text-transform: uppercase; color: var(--d3-aqua);
+  display: flex; align-items: center; gap: 0.85rem;
+}
+.how-callout-eyebrow::before { content: ''; width: 28px; height: 1px; background: var(--gradient-aqua); }
+.how-callout-img {
+  display: block;
+  width: 100%; height: auto; max-width: 100%;
+  border-radius: 10px;
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-deep);
+}
+.how-callout-p {
+  font-size: 0.95rem; color: var(--text-secondary); line-height: 1.6;
+  margin: 0;
+}
+.how-callout-p b { color: var(--text-bright); font-weight: 500; }
+.how-callout-cta {
+  align-self: start;
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  padding: 0.65rem 1.1rem; border-radius: 8px;
+  background: rgba(0, 174, 255, 0.12);
+  border: 1px solid rgba(0, 174, 255, 0.32);
+  color: var(--d3-light-blue);
+  font-family: 'DM Sans', sans-serif; font-weight: 500; font-size: 0.88rem;
+  text-decoration: none; transition: all 0.2s ease;
+}
+.how-callout-cta:hover {
+  background: rgba(0, 174, 255, 0.2);
+  border-color: var(--d3-aqua);
+  color: var(--d3-aqua);
+  transform: translateY(-1px);
+}
+.how-callout-cta::after { content: '→'; font-size: 1rem; }
+
 /* ─── Rain table (blog posts) ─── */
 .rain-grid { display: grid; grid-template-columns: 1fr; gap: 0.8rem; margin-top: 2.25rem; }
 .rain-row {
@@ -1112,6 +1157,13 @@ body.locked .edit-toolbar { display: none !important; }
       </div>
 
       <a class="pillar-cta" href="/scott-pillar">Open the v0.6 draft</a>
+    </div>
+
+    <div class="how-callout">
+      <div class="how-callout-eyebrow">How a post like Scott&rsquo;s actually gets made</div>
+      <img class="how-callout-img" src="/how-agent-and-sme-make-a-post.png" alt="Eight-stage flow showing how the agent and the SME collaborate on a post: FAQs, SMEs identified, agent proposes 5-beat, workshop the 5-beat, agent drafts v0.1, SME edits to voice, publisher approval, marketing review. Five of eight gates are human." />
+      <p class="how-callout-p" data-block-id="how-callout-p">Scott didn&rsquo;t sit down and write 1,300 words from a blank page. The agent did the structural lift in the middle &mdash; proposed the five beats, drafted v0.1 against them, suggested the KB deep-links. <b>Five of eight gates are human</b>: Scott decides the angle, edits to his voice, the publisher signs off, marketing layers the &ldquo;why D#3&rdquo; CTA. The lift is in the middle. The signature stays human.</p>
+      <a class="how-callout-cta" href="/campaign-manager">See how the campaign manager runs this</a>
     </div>
   </section>
 

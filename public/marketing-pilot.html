@@ -153,11 +153,14 @@ h2.slide-h em {
 
 /* ─── Workflow flow ─── */
 .flow {
-  display: grid; grid-template-columns: repeat(6, 1fr); gap: 0.5rem;
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.55rem;
   margin-top: 1.5rem;
 }
-@media (max-width: 920px) {
+@media (max-width: 1100px) {
   .flow { grid-template-columns: repeat(2, 1fr); gap: 0.7rem; }
+}
+@media (max-width: 560px) {
+  .flow { grid-template-columns: 1fr; }
 }
 .flow-step {
   background: var(--bg-card); border: 1px solid var(--border-mid);
@@ -462,46 +465,56 @@ h2.slide-h em {
 <section class="slide" id="s4">
   <div class="slide-num"><b>04</b> &nbsp;/ &nbsp;08 &nbsp;&middot; &nbsp;the workflow</div>
   <div class="slide-inner">
-    <h2 class="slide-h">Six steps. <em>Human at every gate.</em></h2>
-    <p class="slide-deck">The author owns the idea. The author edits to voice. The author signs the byline. AI sits in the middle, where the lift is.</p>
+    <h2 class="slide-h">Eight stages. <em>Five of them human gates.</em></h2>
+    <p class="slide-deck">The agent does the structural lift in the middle &mdash; proposes the beats, drafts v0.1, threads the KB links. Humans bracket it: customer questions in, SME ownership, voice edit, publisher, marketing. The signature stays human.</p>
 
     <div class="flow">
       <div class="flow-step">
         <div class="flow-step-n">01</div>
-        <div class="flow-step-h">Idea</div>
-        <div class="flow-step-p">Author tells me what they want to write about. <b>Scott decides, not Claude.</b></div>
+        <div class="flow-step-h">FAQs</div>
+        <div class="flow-step-p">Twenty questions the customer actually asks &mdash; the KB layer. <b>Sourced from sales, not invented.</b></div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-step-n">02</div>
+        <div class="flow-step-h">SMEs identified</div>
+        <div class="flow-step-p">Each FAQ gets a primary owner, support, and reviewer. <b>Named voices, not anonymous content.</b></div>
       </div>
       <div class="flow-step ai">
-        <div class="flow-step-n">02 &middot; AI</div>
-        <div class="flow-step-h">Draft v0.1</div>
-        <div class="flow-step-p">Claude turns the idea into a structured first draft. <b>Hours, not days.</b></div>
+        <div class="flow-step-n">03 &middot; AI</div>
+        <div class="flow-step-h">Agent proposes 5-beat</div>
+        <div class="flow-step-p">First sketch &mdash; five beats that answer the question, drawn from existing FAQs. <b>Hours, not days.</b></div>
       </div>
-      <div class="flow-step">
-        <div class="flow-step-n">03</div>
-        <div class="flow-step-h">Voice edit</div>
-        <div class="flow-step-p">Author edits to their voice in-browser. <b>Non-negotiable.</b> Ghost-written posts read flat.</div>
+      <div class="flow-step ai">
+        <div class="flow-step-n">04 &middot; AI</div>
+        <div class="flow-step-h">Workshop the 5-beat</div>
+        <div class="flow-step-p">Refine with the SME until every beat earns its FAQ link. <b>The argument before the prose.</b></div>
       </div>
-      <div class="flow-step">
-        <div class="flow-step-n">04</div>
-        <div class="flow-step-h">Marketing</div>
-        <div class="flow-step-p">Amanda layers the &ldquo;why D#3&rdquo; CTA, brand alignment, landing-page links. <b>Marketing in the loop on every piece.</b></div>
-      </div>
-      <div class="flow-step">
-        <div class="flow-step-n">05</div>
-        <div class="flow-step-h">Editorial</div>
-        <div class="flow-step-p">Jared (or assigned editor) signs off. Same governance bar as today. <b>No back doors.</b></div>
+      <div class="flow-step ai">
+        <div class="flow-step-n">05 &middot; AI</div>
+        <div class="flow-step-h">Agent drafts v0.1</div>
+        <div class="flow-step-p">Prose grown from the beats, not from a blank page. <b>Structured first draft.</b></div>
       </div>
       <div class="flow-step">
         <div class="flow-step-n">06</div>
-        <div class="flow-step-h">Publish</div>
-        <div class="flow-step-p">Lands on data3.com Knowledge Centre under existing /blog and /kb buckets. <b>Standard pipes.</b></div>
+        <div class="flow-step-h">SME edits to voice</div>
+        <div class="flow-step-p">The author writes themselves back into the post. <b>Non-negotiable.</b> Ghost-written posts read flat.</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-step-n">07</div>
+        <div class="flow-step-h">Publisher approval</div>
+        <div class="flow-step-p">Jared (or assigned editor) signs off. <b>Editorial governance, same bar as today.</b> No back doors.</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-step-n">08</div>
+        <div class="flow-step-h">Marketing review</div>
+        <div class="flow-step-p">Amanda layers the &ldquo;why D#3&rdquo; CTA, brand alignment, KB deep-links. <b>Marketing in the loop on every piece.</b></div>
       </div>
     </div>
 
     <div class="flow-legend">
       <span><i class="human"></i> Human gate</span>
-      <span><i class="ai-marker"></i> AI-assisted step</span>
-      <span>Five of six steps are humans. The middle one is the lift.</span>
+      <span><i class="ai-marker"></i> AI-assist zone</span>
+      <span>Five of eight gates are human. The agent does the lift in the middle.</span>
     </div>
   </div>
 </section>

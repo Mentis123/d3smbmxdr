@@ -360,25 +360,23 @@ body.locked .edit-toolbar { display: none !important; }
 <main class="wrap">
   <article class="art-body">
 
-    <p class="lede" data-block-id="p-lede">When you bring someone new onto your team, you don&rsquo;t just turn them loose. You write a job description. You interview against it. You give them tools, access, and a manager. You set expectations. You measure performance. Eventually &mdash; gracefully &mdash; you part ways. Most organisations have spent fifty years getting good at this. So why are we deploying AI agents like applications?</p>
+    <p class="lede" data-block-id="p-lede">When you bring someone new onto your team, you don&rsquo;t just turn them loose. You write a job description. You give them tools, access, and a manager. You measure performance. Eventually &mdash; gracefully &mdash; you part ways. Organisations have spent fifty years getting good at this. So why are we deploying AI agents like applications?</p>
 
-    <p data-block-id="p-1">My colleagues have been writing about this from two angles already. <a href="https://www.data3.com/knowledge-centre/blog/2026-the-year-of-the-agentic-ai-builder/">Adam Rappaport called 2026 the year to build with AI</a>. <a href="https://www.data3.com/knowledge-centre/blog/building-australias-most-boring-ai/">Jack Latrobe followed up with what good looks like &mdash; boring</a>: useful, reliable, sticks around, has real impact. This piece is about the part of building boring AI nobody&rsquo;s talking about yet.</p>
+    <p data-block-id="p-1"><a href="https://www.data3.com/knowledge-centre/blog/2026-the-year-of-the-agentic-ai-builder/">Adam said build</a>. <a href="https://www.data3.com/knowledge-centre/blog/building-australias-most-boring-ai/">Jack said make it boring</a>. This piece is the part nobody&rsquo;s saying out loud yet.</p>
 
     <p data-block-id="p-2"><strong>You&rsquo;re not buying software. You&rsquo;re hiring a workforce.</strong></p>
 
     <h2 data-block-id="h2-shift">The shift isn&rsquo;t subtle</h2>
 
-    <p data-block-id="p-shift-1">A copilot is a tool you use. An agent is a worker you supervise. The difference matters because everything that follows &mdash; governance, role design, cost, accountability &mdash; falls out of which mental model you start with.</p>
+    <p data-block-id="p-shift-1">A copilot is a tool you use. An agent is a worker you supervise. Everything that follows &mdash; governance, role design, cost, accountability &mdash; falls out of which mental model you start with.</p>
 
-    <p data-block-id="p-shift-2">A tool gets installed. A teammate gets onboarded. A tool gets a licence. A teammate gets a role. A tool gets uninstalled when the project ends. A teammate gets retired when their job is done.</p>
+    <p data-block-id="p-shift-2">A tool gets installed and licensed. A teammate gets onboarded and given a role. A tool gets uninstalled. A teammate gets retired.</p>
 
-    <p data-block-id="p-shift-3">If you&rsquo;re going to put dozens of agents into your organisation in the next 18 months &mdash; and Microsoft&rsquo;s data says you are &mdash; the question stops being &ldquo;which AI tools should we license?&rdquo; and starts being <em>&ldquo;how do we run a workforce that&rsquo;s half human, half agent?&rdquo;</em></p>
+    <p data-block-id="p-shift-3">In the next 18 months you&rsquo;ll have dozens of agents in your org. The question stops being &ldquo;which AI tools should we license?&rdquo; and starts being <em>&ldquo;how do we run a workforce that&rsquo;s half human, half agent?&rdquo;</em></p>
 
     <h2 data-block-id="h2-jd">Every agent should have a job description</h2>
 
-    <p data-block-id="p-jd-1">In Business Applications we&rsquo;ve been writing employee records for years. Every person in your D365 system has a role, a reporting line, a set of permissions, performance metrics, a lifecycle status. We don&rsquo;t bristle at this for humans. It&rsquo;s common sense. It&rsquo;s just how organisations work.</p>
-
-    <p data-block-id="p-jd-2">Most agents shipped today have none of that. They&rsquo;re running production work with no documented role, no defined success metric, no clear owner, no retirement plan. It&rsquo;s the same problem as shadow IT &mdash; just faster.</p>
+    <p data-block-id="p-jd-1">In Business Applications we&rsquo;ve written employee records for years &mdash; role, reporting line, permissions, metrics, lifecycle status. Most agents shipped today have none of it. They run production work with no documented role, no clear owner, no retirement plan. Shadow IT, just faster.</p>
 
     <p data-block-id="p-jd-3">A boring agent &mdash; one that sticks around and earns its keep &mdash; looks more like this:</p>
 
@@ -397,41 +395,41 @@ body.locked .edit-toolbar { display: none !important; }
       </dl>
     </div>
 
-    <p data-block-id="p-jd-4">It&rsquo;s not radical. It&rsquo;s the kind of structure HR has been using since the 1970s. The interesting part isn&rsquo;t that we&rsquo;re inventing it for agents. It&rsquo;s that we&rsquo;ve been deploying agents <em>without</em> it.</p>
+    <p data-block-id="p-jd-4">It&rsquo;s not radical. HR has used this structure since the 1970s. The interesting part is that we&rsquo;ve been shipping agents <em>without</em> it.</p>
 
     <h2 data-block-id="h2-loop"><em>The hiring loop</em>, applied to agents</h2>
 
-    <p data-block-id="p-loop-1">Every team I&rsquo;ve sat with already runs a hiring loop. Apply the same five steps to your next agent and most of the &ldquo;agent governance&rdquo; conversations get smaller, not bigger.</p>
+    <p data-block-id="p-loop-1">Every team already runs a hiring loop. Apply the same five steps to your next agent and most &ldquo;agent governance&rdquo; conversations get smaller, not bigger.</p>
 
     <ol class="hire-loop">
-      <li><b data-block-id="lp-1-h">Write the job description.</b><p data-block-id="lp-1-p">What outcome do you need delivered? What systems do they need to touch? What does success look like in numbers? If you can&rsquo;t answer those, you don&rsquo;t need an agent yet &mdash; you need a clearer business problem.</p></li>
-      <li><b data-block-id="lp-2-h">Interview against it.</b><p data-block-id="lp-2-p">Run the agent against real cases before it&rsquo;s let near production. Eval datasets. Smell tests. The same instinctive &ldquo;does this person actually understand the job?&rdquo; check you do for human candidates.</p></li>
-      <li><b data-block-id="lp-3-h">Onboard them.</b><p data-block-id="lp-3-p">Register the agent in Agent 365. Connect it to the data sources it needs &mdash; and only those. Give it guardrails on what it&rsquo;s allowed to decide alone vs what it must escalate.</p></li>
-      <li><b data-block-id="lp-4-h">Probation period.</b><p data-block-id="lp-4-p">First 90 days under direct human supervision. Performance tracked weekly. Iterate on the job description, the access, the prompts. Most agents need a probation just like most hires do.</p></li>
-      <li><b data-block-id="lp-5-h">Promote, retain, or retire.</b><p data-block-id="lp-5-p">Once the agent proves itself, expand its remit or hire another. When its role is no longer needed, retire it cleanly. Don&rsquo;t leave it running because nobody remembers to turn it off &mdash; that&rsquo;s how agent sprawl starts.</p></li>
+      <li><b data-block-id="lp-1-h">Write the job description.</b><p data-block-id="lp-1-p">What outcome, what systems, what success in numbers? If you can&rsquo;t answer, you don&rsquo;t need an agent yet &mdash; you need a clearer business problem.</p></li>
+      <li><b data-block-id="lp-2-h">Interview against it.</b><p data-block-id="lp-2-p">Run the agent against real cases before production. Eval datasets. Smell tests. The same &ldquo;do they actually understand the job?&rdquo; check you do for humans.</p></li>
+      <li><b data-block-id="lp-3-h">Onboard them.</b><p data-block-id="lp-3-p">Register in Agent 365. Connect only the data sources they need. Set guardrails on what they decide alone vs what they escalate.</p></li>
+      <li><b data-block-id="lp-4-h">Probation period.</b><p data-block-id="lp-4-p">First 90 days under direct human supervision. Performance tracked weekly. Iterate on the JD, the access, the prompts.</p></li>
+      <li><b data-block-id="lp-5-h">Promote, retain, or retire.</b><p data-block-id="lp-5-p">When the agent proves itself, expand its remit. When its role is done, retire it cleanly. Don&rsquo;t leave it running because nobody remembers to turn it off &mdash; that&rsquo;s how sprawl starts.</p></li>
     </ol>
 
     <h2 data-block-id="h2-gov">Governance falls out for free</h2>
 
-    <p data-block-id="p-gov-1">Here&rsquo;s the trick I didn&rsquo;t expect when I started thinking this way: the moment you treat agents as a workforce, AI governance stops being a separate, scary, top-down thing and starts being a set of muscles you already have.</p>
+    <p data-block-id="p-gov-1">Here&rsquo;s the trick. The moment you treat agents as a workforce, AI governance stops being a separate, scary, top-down thing and starts being a set of muscles you already have.</p>
 
     <blockquote data-block-id="bq-1">
-      &ldquo;Access management is a workforce muscle. Role assignment is a workforce muscle. Performance review is a workforce muscle. Retirement is a workforce muscle. We don&rsquo;t need new categories &mdash; we need to apply the ones we&rsquo;ve had for fifty years.&rdquo;
+      &ldquo;Access management, role assignment, performance review, retirement &mdash; these are workforce muscles. We don&rsquo;t need new categories. We need to apply the ones we&rsquo;ve had for fifty years.&rdquo;
     </blockquote>
 
-    <p data-block-id="p-gov-2">When the CISO asks &ldquo;how do we govern these agents?&rdquo; the answer is &ldquo;the same way we govern our people, applied to a different kind of worker.&rdquo; That&rsquo;s a much shorter conversation than the one most security teams are currently having.</p>
+    <p data-block-id="p-gov-2">When the CISO asks &ldquo;how do we govern these agents?&rdquo; the answer is &ldquo;the same way we govern people.&rdquo; A much shorter conversation than the one most security teams are having today.</p>
 
     <h2 data-block-id="h2-where">Where to start &mdash; one role, one agent, ten days</h2>
 
-    <p data-block-id="p-where-1">You don&rsquo;t need to design your whole agent workforce in one go. The opposite, in fact. Pick <strong>one role</strong> in your organisation that&rsquo;s painful, repetitive, well-understood. Write the job description. Stand up one agent. Onboard it through Agent 365 the same way you&rsquo;d onboard a new hire. Run it for a sprint &mdash; ten working days. Measure outcomes against the job description.</p>
+    <p data-block-id="p-where-1">Don&rsquo;t design your whole agent workforce in one go. Pick <strong>one role</strong> that&rsquo;s painful, repetitive, well-understood. Write the JD. Stand up one agent in Agent 365. Run it for a sprint &mdash; ten working days. Measure against the JD.</p>
 
     <p data-block-id="p-where-2">If it works, hire another. If it doesn&rsquo;t, retire it cleanly and try a different role. The workforce grows the same way every workforce grows: one good hire at a time.</p>
 
     <h2 data-block-id="h2-close">The boring part is the point</h2>
 
-    <p data-block-id="p-close-1">There&rsquo;s a temptation, with anything new and exciting, to invent a new framework for it. Resist it. The hiring frame works because it&rsquo;s old. Onboarding works because it&rsquo;s old. Performance reviews work because they&rsquo;re old. The boring AI Jack wrote about isn&rsquo;t boring because the technology is dull &mdash; it&rsquo;s boring because the management around it should feel familiar.</p>
+    <p data-block-id="p-close-1">The temptation with anything new is to invent a new framework. Resist it. The hiring frame works because it&rsquo;s old. Boring AI isn&rsquo;t boring because the tech is dull &mdash; it&rsquo;s boring because the management around it should feel familiar.</p>
 
-    <p data-block-id="p-close-2">Build it &mdash; Adam&rsquo;s call. Make it boring &mdash; Jack&rsquo;s standard. Hire it like you&rsquo;d hire any other teammate &mdash; that&rsquo;s the bit I&rsquo;d add. Next week, my colleague Scott Gosling will pick up the thread with the question this raises: <em>once you&rsquo;re hiring agents, how does the way you buy AI delivery have to change too?</em></p>
+    <p data-block-id="p-close-2">Build it &mdash; Adam&rsquo;s call. Make it boring &mdash; Jack&rsquo;s standard. Hire it like a teammate &mdash; that&rsquo;s the bit I&rsquo;d add. Next, Scott Gosling picks up the question this raises: <em>once you&rsquo;re hiring agents, how does the way you buy AI delivery have to change too?</em></p>
 
     <p data-block-id="p-close-3">Spoiler: it does.</p>
 

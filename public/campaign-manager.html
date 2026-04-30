@@ -1,0 +1,1859 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Campaign Manager &mdash; turn one campaign into many | Data#3</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap');
+
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+
+:root {
+  --bg-deep: #000018;
+  --bg-surface: #04081a;
+  --bg-card: #0a0f24;
+  --bg-card-hover: #0f1530;
+  --bg-elevated: #131b3c;
+  --border-subtle: rgba(0, 174, 255, 0.08);
+  --border-mid: rgba(0, 174, 255, 0.15);
+  --border-accent: rgba(0, 174, 255, 0.3);
+  --d3-blue-black: #000025;
+  --d3-blue: #007BC3;
+  --d3-light-blue: #00AEFF;
+  --d3-pale-blue: #78DCFF;
+  --d3-aqua: #00FFFF;
+  --d3-purple: #7300FF;
+  --d3-magenta: #FF00FF;
+  --text-primary: #e8ecf4;
+  --text-secondary: #a8b3cc;
+  --text-muted: #6e7894;
+  --text-bright: #ffffff;
+  --gradient-aqua: linear-gradient(135deg, #00FFFF, #00AEFF);
+  --gradient-brand: linear-gradient(135deg, #00AEFF, #7300FF);
+  --gradient-magenta: linear-gradient(135deg, #FF00FF, #7300FF);
+  --shadow-card: 0 1px 3px rgba(0,0,0,0.5), 0 0 0 1px var(--border-subtle);
+  --shadow-elevated: 0 8px 40px rgba(0,0,0,0.55), 0 0 0 1px var(--border-subtle);
+  --shadow-glow: 0 0 60px rgba(0, 174, 255, 0.18);
+}
+
+html { scroll-behavior: smooth; font-size: 15px; }
+body {
+  font-family: 'DM Sans', -apple-system, sans-serif;
+  background: var(--bg-deep); color: var(--text-primary);
+  line-height: 1.65; -webkit-font-smoothing: antialiased; overflow-x: hidden;
+}
+body::before {
+  content: ''; position: fixed; top: -50%; left: -50%;
+  width: 200%; height: 200%; pointer-events: none; z-index: 0;
+  background:
+    radial-gradient(ellipse at 22% 12%, rgba(0, 174, 255, 0.08) 0%, transparent 45%),
+    radial-gradient(ellipse at 80% 82%, rgba(115, 0, 255, 0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 50%, rgba(0, 255, 255, 0.025) 0%, transparent 40%);
+  animation: meshDrift 26s ease-in-out infinite alternate;
+}
+body::after {
+  content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(0, 174, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 174, 255, 0.025) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(ellipse at center, black 30%, transparent 90%);
+}
+@keyframes meshDrift {
+  0%   { transform: translate(0,0) rotate(0deg); }
+  100% { transform: translate(-3%, 4%) rotate(2deg); }
+}
+
+.page { position: relative; z-index: 1; max-width: 1280px; margin: 0 auto; padding: 0 1.5rem; }
+
+/* ─── Top nav ─── */
+.topnav {
+  position: sticky; top: 0; z-index: 100;
+  -webkit-backdrop-filter: blur(24px) saturate(1.5);
+  backdrop-filter: blur(24px) saturate(1.5);
+  background: rgba(0, 0, 24, 0.78);
+  border-bottom: 1px solid var(--border-subtle);
+  padding: 0.85rem 1.5rem; margin: 0 -1.5rem;
+}
+.topnav-inner {
+  max-width: 1280px; margin: 0 auto;
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+}
+.topnav-brand {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.7rem;
+  letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-muted);
+}
+.topnav-brand b { color: var(--d3-light-blue); font-weight: 600; }
+.topnav-brand em { font-style: normal; color: var(--d3-aqua); margin-left: 0.5rem; }
+.topnav-right { display: flex; align-items: center; gap: 0.65rem; flex-wrap: wrap; }
+
+.campaign-selector {
+  background: var(--bg-card); border: 1px solid var(--border-mid);
+  color: var(--text-primary); padding: 0.5rem 0.85rem;
+  border-radius: 7px; font-family: 'DM Sans', sans-serif; font-size: 0.85rem;
+  cursor: pointer; min-width: 280px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%2300AEFF' d='M0 0l5 6 5-6z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 0.85rem center;
+  -webkit-appearance: none; appearance: none; padding-right: 2rem;
+}
+.campaign-selector:focus { outline: none; border-color: var(--d3-light-blue); }
+.btn-primary {
+  background: var(--gradient-aqua); color: var(--d3-blue-black);
+  border: none; padding: 0.55rem 1rem; border-radius: 7px;
+  font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 0.85rem;
+  cursor: pointer; transition: all 0.2s ease;
+  box-shadow: 0 4px 16px rgba(0, 255, 255, 0.18);
+  display: inline-flex; align-items: center; gap: 0.4rem;
+}
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(0, 255, 255, 0.32); }
+.btn-ghost {
+  background: transparent; color: var(--text-secondary);
+  border: 1px solid var(--border-mid);
+  padding: 0.5rem 0.85rem; border-radius: 7px;
+  font-family: 'JetBrains Mono', monospace; font-size: 0.65rem;
+  letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer;
+  transition: all 0.2s ease;
+}
+.btn-ghost:hover { border-color: var(--border-accent); color: var(--text-primary); }
+.btn-aqua {
+  background: rgba(0, 255, 255, 0.08); color: var(--d3-aqua);
+  border: 1px solid rgba(0, 255, 255, 0.32);
+  padding: 0.45rem 0.8rem; border-radius: 6px;
+  font-family: 'JetBrains Mono', monospace; font-size: 0.62rem;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  cursor: pointer; transition: all 0.2s ease;
+}
+.btn-aqua:hover { background: rgba(0, 255, 255, 0.18); transform: translateY(-1px); }
+.btn-aqua::before { content: '✦'; margin-right: 0.4rem; color: var(--d3-aqua); }
+
+/* ─── Hero ─── */
+.hero { padding: 4.5rem 0 3rem; }
+.hero-eyebrow {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.65rem;
+  letter-spacing: 0.3em; text-transform: uppercase; color: var(--d3-light-blue);
+  margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.85rem;
+}
+.hero-eyebrow::before {
+  content: ''; width: 38px; height: 1px; background: var(--gradient-brand);
+}
+.hero h1 {
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-size: clamp(2.6rem, 6.5vw, 4.6rem); font-weight: 400;
+  line-height: 1.05; letter-spacing: -0.025em;
+  color: var(--text-bright); margin-bottom: 1.5rem; max-width: 980px;
+}
+.hero h1 em {
+  font-style: italic;
+  background: var(--gradient-aqua);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.hero-subtitle {
+  font-size: 1.15rem; color: var(--text-secondary);
+  max-width: 760px; line-height: 1.65;
+}
+.hero-subtitle b { color: var(--text-bright); font-weight: 500; }
+.hero-subtitle a {
+  color: var(--d3-light-blue); text-decoration: none;
+  border-bottom: 1px dashed rgba(0, 174, 255, 0.4);
+}
+.hero-subtitle a:hover { color: var(--d3-aqua); }
+
+/* ─── Stat strip ─── */
+.stats {
+  display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.85rem;
+  margin: 2rem 0 1rem;
+}
+@media (max-width: 920px) { .stats { grid-template-columns: repeat(2, 1fr); } }
+.stat {
+  background: var(--bg-card); border: 1px solid var(--border-mid);
+  border-radius: 10px; padding: 1rem 1.1rem;
+  position: relative; overflow: hidden;
+}
+.stat::before {
+  content: ''; position: absolute; top: 0; left: 0;
+  width: 3px; height: 100%; background: var(--gradient-aqua);
+}
+.stat-tag {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.55rem;
+  letter-spacing: 0.18em; text-transform: uppercase; color: var(--d3-aqua);
+  margin-bottom: 0.4rem;
+}
+.stat-num {
+  font-family: 'Instrument Serif', Georgia, serif; font-style: italic;
+  font-size: 2rem; line-height: 1; color: var(--text-bright);
+  margin-bottom: 0.25rem;
+}
+.stat-num small { font-size: 0.75rem; color: var(--text-muted); margin-left: 0.3rem; font-style: normal; font-family: 'JetBrains Mono', monospace; }
+.stat-p { font-size: 0.78rem; color: var(--text-secondary); }
+
+/* ─── Tab nav ─── */
+.tabs-bar {
+  position: sticky; top: 49px; z-index: 50;
+  margin: 2rem -1.5rem 0;
+  padding: 0.6rem 1.5rem;
+  background: rgba(0,0,24,0.88);
+  -webkit-backdrop-filter: blur(20px) saturate(1.5);
+  backdrop-filter: blur(20px) saturate(1.5);
+  border-bottom: 1px solid var(--border-subtle);
+  overflow-x: auto;
+}
+.tabs {
+  max-width: 1280px; margin: 0 auto;
+  display: flex; gap: 0.4rem; flex-wrap: nowrap;
+  font-family: 'JetBrains Mono', monospace;
+}
+.tab {
+  font-size: 0.66rem; letter-spacing: 0.12em; text-transform: uppercase;
+  padding: 0.5rem 0.85rem; border-radius: 6px;
+  border: 1px solid var(--border-mid); background: var(--bg-card);
+  color: var(--text-secondary); cursor: pointer; transition: all 0.2s ease;
+  white-space: nowrap;
+}
+.tab:hover { border-color: var(--border-accent); color: var(--text-primary); }
+.tab.active {
+  background: var(--gradient-aqua); color: var(--d3-blue-black);
+  border-color: transparent; font-weight: 600;
+  box-shadow: 0 4px 14px rgba(0, 255, 255, 0.25);
+}
+.tab .ct {
+  display: inline-block; margin-left: 0.4rem; padding: 0.05rem 0.36rem;
+  background: rgba(0, 0, 0, 0.18); border-radius: 8px; font-size: 0.58rem;
+}
+
+/* ─── Panels ─── */
+.panel { display: none; padding: 3rem 0; scroll-margin-top: 110px; }
+.panel.active { display: block; animation: fadeIn 0.4s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.panel-num {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.6rem;
+  letter-spacing: 0.22em; text-transform: uppercase; color: var(--d3-aqua);
+  margin-bottom: 1rem; display: flex; align-items: center; gap: 0.6rem;
+}
+.panel-num::after {
+  content: ''; flex: 1; height: 1px;
+  background: linear-gradient(90deg, var(--border-accent), transparent);
+}
+.panel h2 {
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-size: clamp(1.8rem, 4vw, 2.6rem); font-weight: 400;
+  color: var(--text-bright); margin-bottom: 0.85rem; line-height: 1.1;
+  max-width: 920px; letter-spacing: -0.02em;
+}
+.panel h2 em {
+  font-style: italic;
+  background: var(--gradient-aqua);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.panel .lede { font-size: 1.05rem; color: var(--text-secondary); max-width: 820px; margin-bottom: 2rem; }
+.panel .lede b { color: var(--text-bright); font-weight: 500; }
+
+/* ─── Subhead row ─── */
+.subhead {
+  display: flex; align-items: center; justify-content: space-between;
+  margin: 1.5rem 0 1rem; gap: 1rem; flex-wrap: wrap;
+}
+.subhead h3 {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.7rem;
+  letter-spacing: 0.16em; text-transform: uppercase; color: var(--text-bright);
+  font-weight: 500;
+}
+.subhead-actions { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+
+/* ─── Campaign cards (dashboard) ─── */
+.campaign-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;
+  margin-top: 1.5rem;
+}
+@media (max-width: 1000px) { .campaign-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 680px)  { .campaign-grid { grid-template-columns: 1fr; } }
+
+.campaign-card {
+  background: var(--bg-card); border: 1px solid var(--border-mid);
+  border-radius: 12px; padding: 1.4rem 1.4rem 1.2rem;
+  cursor: pointer; transition: all 0.25s ease;
+  position: relative; overflow: hidden;
+}
+.campaign-card:hover {
+  border-color: var(--border-accent); transform: translateY(-3px);
+  box-shadow: var(--shadow-elevated);
+}
+.campaign-card.active-cm {
+  border-color: var(--d3-aqua);
+  background: linear-gradient(135deg, rgba(0,255,255,0.05), rgba(0,174,255,0.02)), var(--bg-card);
+}
+.campaign-card.template-cm {
+  border-style: dashed; border-color: var(--border-mid);
+  background: rgba(10, 15, 36, 0.4);
+}
+.campaign-card.template-cm:hover {
+  border-style: solid; border-color: var(--d3-light-blue);
+  background: var(--bg-card-hover);
+}
+.cm-flag {
+  position: absolute; top: 0; right: 0;
+  font-family: 'JetBrains Mono', monospace; font-size: 0.55rem;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  padding: 0.32rem 0.7rem; border-radius: 0 12px 0 6px;
+  background: var(--gradient-aqua); color: var(--d3-blue-black);
+  font-weight: 600;
+}
+.cm-eye {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.58rem;
+  letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-muted);
+  margin-bottom: 0.45rem;
+}
+.cm-h {
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-size: 1.45rem; line-height: 1.2; color: var(--text-bright);
+  margin-bottom: 0.4rem;
+}
+.cm-desc { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.55; margin-bottom: 1rem; min-height: 2.6em; }
+.cm-meta {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem;
+  padding: 0.85rem 0; border-top: 1px dashed var(--border-mid);
+  border-bottom: 1px dashed var(--border-mid); margin-bottom: 0.85rem;
+}
+.cm-meta-cell {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.62rem;
+  letter-spacing: 0.06em; color: var(--text-muted);
+}
+.cm-meta-cell b {
+  display: block; color: var(--d3-light-blue); font-weight: 500;
+  font-size: 0.95rem; font-family: 'Instrument Serif', Georgia, serif;
+  font-style: italic;
+}
+.cm-foot {
+  display: flex; justify-content: space-between; align-items: center;
+  font-family: 'JetBrains Mono', monospace; font-size: 0.6rem;
+  letter-spacing: 0.05em; color: var(--text-muted);
+}
+.status-pill {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.55rem;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  padding: 0.25rem 0.55rem; border-radius: 4px;
+  display: inline-flex; align-items: center; gap: 0.4rem;
+}
+.status-pill::before {
+  content: ''; width: 5px; height: 5px; border-radius: 50%;
+}
+.status-pill.draft         { background: rgba(168,179,204,0.12); color: var(--text-secondary); }
+.status-pill.draft::before { background: var(--text-muted); }
+.status-pill.planning      { background: rgba(0, 174, 255, 0.10); color: var(--d3-light-blue); }
+.status-pill.planning::before { background: var(--d3-light-blue); }
+.status-pill.sme           { background: rgba(115, 0, 255, 0.18); color: #c4a8ff; }
+.status-pill.sme::before   { background: #c4a8ff; }
+.status-pill.creation      { background: rgba(0, 255, 255, 0.10); color: var(--d3-aqua); }
+.status-pill.creation::before { background: var(--d3-aqua); animation: pulse 2.4s ease-in-out infinite; }
+.status-pill.review        { background: rgba(255, 183, 255, 0.14); color: #ffb7ff; }
+.status-pill.review::before { background: #ffb7ff; }
+.status-pill.ready         { background: rgba(251, 191, 36, 0.10); color: #fbbf24; }
+.status-pill.ready::before { background: #fbbf24; }
+.status-pill.published     { background: rgba(52, 211, 153, 0.12); color: #6ee7b7; }
+.status-pill.published::before { background: #6ee7b7; }
+@keyframes pulse { 0%,100% {opacity:1; transform:scale(1);} 50% {opacity:.5; transform:scale(.85);} }
+
+.progress {
+  height: 4px; border-radius: 4px; background: rgba(0,174,255,0.08);
+  margin-top: 0.6rem; overflow: hidden;
+}
+.progress > span { display: block; height: 100%; background: var(--gradient-aqua); }
+
+/* ─── Generic table-like list ─── */
+.list { display: grid; gap: 0.55rem; margin-top: 1rem; }
+.list-row {
+  background: var(--bg-card); border: 1px solid var(--border-subtle);
+  border-radius: 8px; padding: 0.85rem 1rem;
+  display: grid; align-items: center; gap: 1rem;
+  transition: all 0.2s ease;
+}
+.list-row:hover { border-color: var(--border-accent); background: var(--bg-card-hover); }
+
+.list-row.faq {
+  grid-template-columns: 32px 1fr 130px 140px 120px;
+}
+@media (max-width: 980px) { .list-row.faq { grid-template-columns: 32px 1fr; row-gap: 0.4rem; } .faq .show-md { grid-column: 2; } }
+.faq-num {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--d3-aqua);
+}
+.faq-q {
+  font-family: 'Instrument Serif', Georgia, serif; font-style: italic;
+  color: var(--text-primary); font-size: 1rem; line-height: 1.4;
+}
+.faq-q small { display: block; color: var(--text-muted); font-style: normal;
+  font-family: 'DM Sans', sans-serif; font-size: 0.78rem; margin-top: 0.2rem; }
+.faq-theme {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.6rem;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 0.2rem 0.5rem; border-radius: 4px;
+  border: 1px solid transparent; white-space: nowrap;
+  display: inline-block; align-self: start;
+}
+.faq-theme[data-theme="squad"]     { background: rgba(0, 174, 255, 0.12); color: var(--d3-light-blue); border-color: rgba(0, 174, 255, 0.28); }
+.faq-theme[data-theme="buying"]    { background: rgba(0, 255, 255, 0.12); color: var(--d3-aqua); border-color: rgba(0, 255, 255, 0.28); }
+.faq-theme[data-theme="lifecycle"] { background: rgba(115, 0, 255, 0.18); color: #c4a8ff; border-color: rgba(115, 0, 255, 0.32); }
+.faq-theme[data-theme="customer"]  { background: rgba(255, 183, 255, 0.14); color: #ffb7ff; border-color: rgba(255, 183, 255, 0.32); }
+.faq-sme {
+  font-size: 0.85rem; color: var(--text-secondary);
+  font-family: 'DM Sans', sans-serif;
+}
+.faq-sme b { color: var(--d3-light-blue); font-weight: 500; }
+.faq-actions { display: flex; gap: 0.3rem; justify-self: end; }
+.icon-btn {
+  width: 28px; height: 28px; border-radius: 6px;
+  background: rgba(0, 174, 255, 0.05);
+  border: 1px solid var(--border-mid); color: var(--text-muted);
+  font-size: 0.85rem; cursor: pointer; transition: all 0.2s ease;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.icon-btn:hover { color: var(--d3-aqua); border-color: var(--border-accent); background: rgba(0, 174, 255, 0.12); }
+.icon-btn.approve.on { color: #6ee7b7; border-color: rgba(52,211,153,0.35); background: rgba(52,211,153,0.12); }
+.icon-btn.reject.on  { color: #fb7185; border-color: rgba(251,113,133,0.35); background: rgba(251,113,133,0.12); }
+
+/* Small ai-tag */
+.ai-flag {
+  display: inline-block; font-family: 'JetBrains Mono', monospace;
+  font-size: 0.5rem; letter-spacing: 0.18em; text-transform: uppercase;
+  color: #c4a8ff; padding: 0.1rem 0.35rem;
+  background: rgba(115,0,255,0.12); border-radius: 3px;
+  border: 1px solid rgba(115,0,255,0.3);
+  vertical-align: middle; margin-right: 0.4rem;
+}
+
+/* ─── Theme cards ─── */
+.theme-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.85rem;
+  margin-top: 1rem;
+}
+@media (max-width: 980px) { .theme-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 540px) { .theme-grid { grid-template-columns: 1fr; } }
+.theme-card {
+  background: var(--bg-card); border: 1px solid var(--border-mid);
+  border-radius: 10px; padding: 1.15rem 1.2rem;
+  position: relative; overflow: hidden; transition: all 0.2s ease;
+}
+.theme-card:hover { transform: translateY(-2px); border-color: var(--border-accent); }
+.theme-card[data-theme="squad"]     { border-color: rgba(0,174,255,0.32); }
+.theme-card[data-theme="buying"]    { border-color: rgba(0,255,255,0.32); }
+.theme-card[data-theme="lifecycle"] { border-color: rgba(115,0,255,0.34); }
+.theme-card[data-theme="customer"]  { border-color: rgba(255,183,255,0.32); }
+.theme-card-tag {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.58rem;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  margin-bottom: 0.6rem;
+}
+.theme-card[data-theme="squad"]     .theme-card-tag { color: var(--d3-light-blue); }
+.theme-card[data-theme="buying"]    .theme-card-tag { color: var(--d3-aqua); }
+.theme-card[data-theme="lifecycle"] .theme-card-tag { color: #c4a8ff; }
+.theme-card[data-theme="customer"]  .theme-card-tag { color: #ffb7ff; }
+.theme-card h4 {
+  font-family: 'Instrument Serif', Georgia, serif; font-style: italic;
+  font-size: 1.35rem; line-height: 1.2; color: var(--text-bright);
+  margin-bottom: 0.55rem;
+}
+.theme-card p { font-size: 0.82rem; color: var(--text-secondary); line-height: 1.55; margin-bottom: 0.8rem; min-height: 2.6em; }
+.theme-stats {
+  display: flex; gap: 0.85rem; padding-top: 0.65rem;
+  border-top: 1px dashed var(--border-mid);
+  font-family: 'JetBrains Mono', monospace; font-size: 0.6rem;
+  letter-spacing: 0.05em; color: var(--text-muted);
+}
+.theme-stats b { color: var(--text-primary); font-weight: 500; }
+
+/* ─── SME cards ─── */
+.sme-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.85rem;
+  margin-top: 1rem;
+}
+@media (max-width: 920px) { .sme-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 600px) { .sme-grid { grid-template-columns: 1fr; } }
+.sme-card {
+  background: var(--bg-card); border: 1px solid var(--border-mid);
+  border-radius: 10px; padding: 1.1rem 1.2rem; transition: all 0.2s ease;
+}
+.sme-card:hover { transform: translateY(-2px); border-color: var(--border-accent); }
+.sme-head { display: flex; gap: 0.85rem; align-items: center; margin-bottom: 0.85rem; }
+.sme-avatar {
+  width: 42px; height: 42px; border-radius: 50%;
+  background: var(--gradient-brand); color: white;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Instrument Serif', Georgia, serif; font-style: italic;
+  font-size: 1.1rem; flex-shrink: 0;
+}
+.sme-name {
+  font-family: 'DM Sans', sans-serif; font-weight: 500;
+  color: var(--text-bright); font-size: 1rem; line-height: 1.2;
+}
+.sme-role {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.6rem;
+  letter-spacing: 0.05em; color: var(--text-muted); margin-top: 0.2rem;
+}
+.sme-tags {
+  display: flex; gap: 0.3rem; flex-wrap: wrap; margin-bottom: 0.85rem;
+}
+.sme-tag {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.56rem;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 0.15rem 0.45rem; border-radius: 3px;
+  background: rgba(0,174,255,0.08); color: var(--d3-light-blue);
+  border: 1px solid rgba(0,174,255,0.2);
+}
+.sme-meta {
+  display: flex; justify-content: space-between; padding-top: 0.7rem;
+  border-top: 1px dashed var(--border-mid);
+  font-family: 'JetBrains Mono', monospace; font-size: 0.62rem;
+  color: var(--text-muted);
+}
+.sme-meta b { color: var(--d3-aqua); font-weight: 500; }
+
+/* ─── Mapping matrix ─── */
+.matrix-wrap { overflow-x: auto; margin-top: 1rem; padding-bottom: 0.5rem; }
+.matrix {
+  border-collapse: separate; border-spacing: 4px;
+  font-family: 'JetBrains Mono', monospace; font-size: 0.65rem;
+  min-width: 720px;
+}
+.matrix th, .matrix td {
+  background: var(--bg-card); border: 1px solid var(--border-subtle);
+  padding: 0.5rem 0.6rem; text-align: center; min-width: 56px;
+  border-radius: 4px;
+}
+.matrix th.row-h, .matrix td.row-h {
+  text-align: left; font-weight: 500; color: var(--text-secondary);
+  background: var(--bg-elevated); white-space: nowrap;
+  position: sticky; left: 0; z-index: 1;
+  font-family: 'DM Sans', sans-serif; font-size: 0.78rem;
+}
+.matrix th.row-h small { display: block; color: var(--text-muted); font-size: 0.65rem; margin-top: 0.1rem; }
+.matrix th { color: var(--d3-aqua); letter-spacing: 0.1em; }
+.matrix .cell.primary {
+  background: rgba(0,255,255,0.18); color: var(--d3-blue-black);
+  font-weight: 600; border-color: var(--d3-aqua);
+}
+.matrix .cell.support {
+  background: rgba(0,174,255,0.16); color: var(--d3-light-blue);
+  border-color: rgba(0,174,255,0.4);
+}
+.matrix .cell.review  {
+  background: rgba(115,0,255,0.16); color: #c4a8ff;
+  border-color: rgba(115,0,255,0.32);
+}
+.matrix .cell.empty   { color: var(--text-muted); opacity: 0.4; }
+
+.legend {
+  display: flex; gap: 1rem; flex-wrap: wrap; margin: 1rem 0 0;
+  font-family: 'JetBrains Mono', monospace; font-size: 0.6rem;
+  letter-spacing: 0.1em; color: var(--text-muted);
+}
+.legend span { display: inline-flex; align-items: center; gap: 0.4rem; }
+.legend i {
+  width: 11px; height: 11px; border-radius: 3px; display: inline-block; font-style: normal;
+}
+.legend i.primary { background: rgba(0,255,255,0.4); border: 1px solid var(--d3-aqua); }
+.legend i.support { background: rgba(0,174,255,0.4); border: 1px solid var(--d3-light-blue); }
+.legend i.review  { background: rgba(115,0,255,0.32); border: 1px solid #c4a8ff; }
+
+/* ─── Content planner rows ─── */
+.list-row.content {
+  grid-template-columns: 60px 70px 1fr 130px 110px 100px;
+}
+@media (max-width: 1080px) { .list-row.content { grid-template-columns: 60px 1fr; } .content .show-md { grid-column: 2; } }
+.cnum { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--d3-aqua); }
+.ctype {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.55rem;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  padding: 0.2rem 0.45rem; border-radius: 3px;
+  background: rgba(115,0,255,0.14); color: #c4a8ff;
+  border: 1px solid rgba(115,0,255,0.28);
+  white-space: nowrap;
+}
+.ctype.kb     { background: rgba(255,183,255,0.14); color: #ffb7ff; border-color: rgba(255,183,255,0.32); }
+.ctype.spine  { background: rgba(0,255,255,0.14); color: var(--d3-aqua); border-color: rgba(0,255,255,0.32); }
+.ctype.blog   { background: rgba(0,174,255,0.14); color: var(--d3-light-blue); border-color: rgba(0,174,255,0.32); }
+.ctitle {
+  font-family: 'Instrument Serif', Georgia, serif; font-style: italic;
+  color: var(--text-primary); font-size: 1rem; line-height: 1.3;
+}
+.ctitle small { display: block; font-style: normal; font-family: 'DM Sans', sans-serif;
+  font-size: 0.78rem; color: var(--text-muted); margin-top: 0.2rem; }
+.cdate {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--text-secondary);
+}
+.cdate small { display: block; color: var(--text-muted); font-size: 0.6rem; margin-top: 0.15rem; }
+
+/* ─── Calendar ─── */
+.calendar { display: grid; gap: 0.55rem; margin-top: 1rem; }
+.cal-week {
+  background: var(--bg-card); border: 1px solid var(--border-subtle);
+  border-radius: 10px; padding: 0.85rem 1.1rem;
+  display: grid; grid-template-columns: 130px 1fr; gap: 1rem;
+  align-items: start;
+}
+.cal-week-label {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.62rem;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--d3-aqua);
+}
+.cal-week-label b { display: block; color: var(--text-bright);
+  font-family: 'Instrument Serif', Georgia, serif; font-style: italic;
+  font-size: 1.4rem; margin: 0.2rem 0 0.3rem; }
+.cal-week-label small { display: block; color: var(--text-muted); font-size: 0.6rem; }
+.cal-items { display: grid; gap: 0.4rem; }
+.cal-item {
+  display: grid; grid-template-columns: 70px 1fr 110px;
+  gap: 0.85rem; align-items: center;
+  padding: 0.5rem 0.7rem; border-radius: 6px;
+  background: rgba(0,174,255,0.04);
+  border-left: 2px solid var(--d3-light-blue);
+}
+.cal-item.kb     { border-left-color: #ffb7ff; }
+.cal-item.spine  { border-left-color: var(--d3-aqua); }
+.cal-item.blog   { border-left-color: var(--d3-light-blue); }
+.cal-item-type {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.55rem;
+  letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted);
+}
+.cal-item-title {
+  font-family: 'DM Sans', sans-serif; color: var(--text-primary); font-size: 0.85rem;
+}
+.cal-item-title small { color: var(--text-muted); font-size: 0.7rem; margin-left: 0.4rem; }
+.cal-item-status { justify-self: end; }
+
+/* ─── Workflow stepper ─── */
+.workflow {
+  display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.5rem;
+  margin-top: 1.5rem;
+}
+@media (max-width: 980px) { .workflow { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 600px) { .workflow { grid-template-columns: repeat(2, 1fr); } }
+.wstep {
+  background: var(--bg-card); border: 1px solid var(--border-mid);
+  border-radius: 8px; padding: 0.85rem 0.85rem;
+  position: relative;
+}
+.wstep.done {
+  background: linear-gradient(135deg, rgba(52,211,153,0.10), rgba(52,211,153,0.02));
+  border-color: rgba(52,211,153,0.35);
+}
+.wstep.current {
+  background: linear-gradient(135deg, rgba(0,255,255,0.12), rgba(0,174,255,0.04));
+  border-color: var(--d3-aqua);
+  box-shadow: 0 0 24px rgba(0, 255, 255, 0.18);
+}
+.wstep.pending {
+  background: var(--bg-card); border-color: var(--border-subtle); opacity: 0.65;
+}
+.wstep-n {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.55rem;
+  letter-spacing: 0.18em; color: var(--d3-aqua); margin-bottom: 0.4rem;
+}
+.wstep.done .wstep-n { color: #6ee7b7; }
+.wstep.pending .wstep-n { color: var(--text-muted); }
+.wstep-h {
+  font-family: 'DM Sans', sans-serif; color: var(--text-bright);
+  font-size: 0.82rem; font-weight: 500; line-height: 1.3;
+}
+.wstep-meta {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.55rem;
+  letter-spacing: 0.05em; color: var(--text-muted); margin-top: 0.4rem;
+}
+
+/* ─── Source material ─── */
+.src-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem; }
+@media (max-width: 760px) { .src-grid { grid-template-columns: 1fr; } }
+.src-card {
+  background: var(--bg-card); border: 1px solid var(--border-mid);
+  border-radius: 10px; padding: 1.1rem 1.25rem;
+}
+.src-card h4 {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.66rem;
+  letter-spacing: 0.16em; text-transform: uppercase; color: var(--d3-aqua);
+  margin-bottom: 0.85rem;
+}
+.src-list { display: grid; gap: 0.45rem; }
+.src-item {
+  display: grid; grid-template-columns: 28px 1fr auto;
+  gap: 0.7rem; align-items: center;
+  padding: 0.5rem 0.65rem; border-radius: 6px;
+  background: rgba(0,174,255,0.04);
+  font-size: 0.85rem;
+}
+.src-icon {
+  width: 24px; height: 24px; border-radius: 5px;
+  background: rgba(0,174,255,0.12); color: var(--d3-light-blue);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'JetBrains Mono', monospace; font-size: 0.62rem;
+  font-weight: 600;
+}
+.src-item small { display: block; color: var(--text-muted); font-size: 0.72rem; }
+.src-item-meta {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.6rem;
+  color: var(--text-muted); white-space: nowrap;
+}
+.src-textarea {
+  width: 100%; background: var(--bg-deep); border: 1px solid var(--border-mid);
+  border-radius: 7px; padding: 0.7rem 0.85rem;
+  font-family: 'DM Sans', sans-serif; font-size: 0.85rem;
+  color: var(--text-primary); resize: vertical; min-height: 90px;
+}
+.src-textarea:focus { outline: none; border-color: var(--d3-light-blue); }
+
+/* ─── Export tiles ─── */
+.export-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.85rem;
+  margin-top: 1rem;
+}
+@media (max-width: 920px) { .export-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 540px) { .export-grid { grid-template-columns: 1fr; } }
+.export-tile {
+  background: var(--bg-card); border: 1px solid var(--border-mid);
+  border-radius: 10px; padding: 1.1rem 1.2rem;
+  cursor: pointer; transition: all 0.2s ease;
+  display: flex; flex-direction: column; gap: 0.4rem;
+}
+.export-tile:hover { transform: translateY(-2px); border-color: var(--border-accent); background: var(--bg-card-hover); }
+.export-icon {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.7rem;
+  letter-spacing: 0.18em; color: var(--d3-aqua);
+}
+.export-h {
+  font-family: 'Instrument Serif', Georgia, serif; font-style: italic;
+  font-size: 1.2rem; color: var(--text-bright);
+}
+.export-p { font-size: 0.8rem; color: var(--text-secondary); line-height: 1.5; }
+
+/* ─── Modal ─── */
+.modal-mask {
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(0, 0, 24, 0.88);
+  -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+  display: none; align-items: center; justify-content: center;
+  padding: 2rem;
+}
+.modal-mask.open { display: flex; animation: fadeIn 0.2s ease; }
+.modal {
+  background: var(--bg-card); border: 1px solid var(--border-accent);
+  border-radius: 14px; padding: 2rem; width: 100%; max-width: 760px;
+  max-height: 90vh; overflow-y: auto;
+  box-shadow: var(--shadow-elevated);
+}
+.modal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
+.modal-head h3 {
+  font-family: 'Instrument Serif', Georgia, serif; font-style: italic;
+  font-size: 1.7rem; color: var(--text-bright);
+}
+.modal-close {
+  width: 32px; height: 32px; border-radius: 6px;
+  background: transparent; border: 1px solid var(--border-mid);
+  color: var(--text-muted); cursor: pointer; font-size: 1.1rem;
+}
+.modal-close:hover { color: var(--d3-aqua); border-color: var(--border-accent); }
+.template-grid {
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.7rem;
+}
+@media (max-width: 600px) { .template-grid { grid-template-columns: 1fr; } }
+.template-card {
+  background: rgba(0,174,255,0.04); border: 1px solid var(--border-mid);
+  border-radius: 9px; padding: 0.95rem 1.1rem;
+  cursor: pointer; transition: all 0.2s ease;
+}
+.template-card:hover {
+  background: rgba(0,174,255,0.10); border-color: var(--d3-light-blue); transform: translateY(-2px);
+}
+.template-card.featured {
+  background: linear-gradient(135deg, rgba(0,255,255,0.08), rgba(0,174,255,0.03));
+  border-color: var(--d3-aqua);
+}
+.template-tag {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.55rem;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--d3-aqua);
+  margin-bottom: 0.45rem;
+}
+.template-h {
+  font-family: 'Instrument Serif', Georgia, serif; font-style: italic;
+  font-size: 1.2rem; color: var(--text-bright); margin-bottom: 0.3rem;
+}
+.template-p { font-size: 0.78rem; color: var(--text-secondary); line-height: 1.5; }
+
+.modal-fields { display: grid; gap: 0.85rem; margin-bottom: 1.25rem; }
+.modal-fields label {
+  display: block; font-family: 'JetBrains Mono', monospace; font-size: 0.6rem;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--d3-aqua);
+  margin-bottom: 0.4rem;
+}
+.modal-fields input, .modal-fields textarea, .modal-fields select {
+  width: 100%; background: var(--bg-deep); border: 1px solid var(--border-mid);
+  border-radius: 6px; padding: 0.6rem 0.75rem;
+  font-family: 'DM Sans', sans-serif; font-size: 0.88rem; color: var(--text-primary);
+}
+.modal-fields input:focus, .modal-fields textarea:focus, .modal-fields select:focus {
+  outline: none; border-color: var(--d3-light-blue);
+}
+.modal-foot { display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1.25rem; padding-top: 1.25rem; border-top: 1px solid var(--border-subtle); }
+
+/* ─── Footer ─── */
+.foot {
+  margin: 4rem -1.5rem 0; padding: 2rem 1.5rem;
+  border-top: 1px solid var(--border-subtle);
+  font-family: 'JetBrains Mono', monospace; font-size: 0.62rem;
+  letter-spacing: 0.1em; color: var(--text-muted);
+  display: flex; justify-content: space-between; flex-wrap: wrap; gap: 1rem;
+}
+.foot a { color: var(--d3-light-blue); text-decoration: none; border-bottom: 1px dashed rgba(0,174,255,0.3); }
+.foot a:hover { color: var(--d3-aqua); }
+
+/* Toast */
+.toast {
+  position: fixed; bottom: 2rem; right: 2rem; z-index: 300;
+  background: var(--bg-card); border: 1px solid var(--d3-aqua);
+  border-radius: 8px; padding: 0.85rem 1.2rem;
+  box-shadow: var(--shadow-elevated);
+  font-family: 'JetBrains Mono', monospace; font-size: 0.72rem;
+  color: var(--text-primary);
+  display: none;
+}
+.toast.show { display: block; animation: fadeIn 0.3s ease; }
+.toast b { color: var(--d3-aqua); font-weight: 500; }
+
+/* Print */
+@media print {
+  body { background: #fff; color: #111; }
+  body::before, body::after, .topnav, .tabs-bar, .modal-mask, .toast, .foot { display: none !important; }
+  .panel { display: block !important; padding: 1rem 0; page-break-after: always; }
+  * { color: #222 !important; }
+  h2 em { -webkit-text-fill-color: #007BC3 !important; }
+}
+</style>
+</head>
+<body>
+
+<!-- ─── Top nav ─── -->
+<nav class="topnav">
+  <div class="topnav-inner">
+    <div class="topnav-brand">DATA<b>#</b>3 &middot; AI PRACTICE <em>&middot; CAMPAIGN MANAGER</em></div>
+    <div class="topnav-right">
+      <select class="campaign-selector" id="campaignSelector">
+        <option value="msft" selected>★ Agentic AI &middot; Microsoft Knowledge Centre</option>
+        <option value="" disabled>──────────── Templates ────────────</option>
+        <option value="security">+ New: Security campaign</option>
+        <option value="copilot">+ New: Copilot campaign</option>
+        <option value="readiness">+ New: AI Readiness campaign</option>
+        <option value="modern-work">+ New: Modern Workplace campaign</option>
+        <option value="azure">+ New: Azure Infrastructure campaign</option>
+        <option value="data">+ New: Data &amp; Analytics campaign</option>
+        <option value="bizapps">+ New: Business Applications campaign</option>
+      </select>
+      <button class="btn-primary" id="addCampaignBtn">+ Add Campaign</button>
+    </div>
+  </div>
+</nav>
+
+<div class="page">
+
+  <!-- ─── Hero ─── -->
+  <header class="hero">
+    <div class="hero-eyebrow">Campaign Operating Model &middot; turn one into many</div>
+    <h1>One campaign worked. <em>Now make it repeatable.</em></h1>
+    <p class="hero-subtitle">
+      The Microsoft Knowledge Centre campaign is in flight &mdash; <b>9 named voices, 20 KB articles, 10 follow-up posts</b>, all linked to one spine.
+      Campaign Manager turns that pattern into a reusable system. Spin up a new campaign for Security, AI Readiness, Modern Work, or anywhere else &mdash; and inherit the structure, not the manual planning.
+      Inspired by <a href="/marketing-pilot.html">marketing-pilot</a> &middot; powered by <a href="/knowledge-centre-rain.html">knowledge-centre-rain</a>.
+    </p>
+
+    <!-- Stats strip -->
+    <div class="stats">
+      <div class="stat"><div class="stat-tag">Campaigns</div><div class="stat-num">1<small>/ 7 templates</small></div><div class="stat-p">Microsoft live; six themes ready to spin up</div></div>
+      <div class="stat"><div class="stat-tag">FAQs</div><div class="stat-num">20</div><div class="stat-p">across 4 themes &middot; 11 approved &middot; 9 in review</div></div>
+      <div class="stat"><div class="stat-tag">SMEs</div><div class="stat-num">9</div><div class="stat-p">named voices, mapped to FAQs &amp; posts</div></div>
+      <div class="stat"><div class="stat-tag">Content pieces</div><div class="stat-num">33</div><div class="stat-p">3 spine + 10 blog rain + 20 KB articles</div></div>
+      <div class="stat"><div class="stat-tag">Time-to-first-draft</div><div class="stat-num">~22<small>min</small></div><div class="stat-p">vs. 4&ndash;6 weeks of manual planning</div></div>
+    </div>
+  </header>
+
+  <!-- ─── Tab nav ─── -->
+  <div class="tabs-bar">
+    <div class="tabs" role="tablist">
+      <button class="tab active" data-tab="dashboard">Dashboard</button>
+      <button class="tab" data-tab="overview">Overview</button>
+      <button class="tab" data-tab="source">Source</button>
+      <button class="tab" data-tab="faqs">FAQs<span class="ct">20</span></button>
+      <button class="tab" data-tab="themes">Themes<span class="ct">4</span></button>
+      <button class="tab" data-tab="smes">SMEs<span class="ct">9</span></button>
+      <button class="tab" data-tab="mapping">Mapping</button>
+      <button class="tab" data-tab="content">Content<span class="ct">33</span></button>
+      <button class="tab" data-tab="calendar">Calendar</button>
+      <button class="tab" data-tab="workflow">Workflow</button>
+      <button class="tab" data-tab="export">Export</button>
+    </div>
+  </div>
+
+  <!-- ─── 1. DASHBOARD ─── -->
+  <section class="panel active" data-panel="dashboard">
+    <div class="panel-num">01 &middot; campaign dashboard</div>
+    <h2>Every campaign in <em>one view</em>.</h2>
+    <p class="lede">One active campaign &mdash; the Microsoft Knowledge Centre &mdash; is the working template. Six dashed cards show the practice themes ready to spin up next, each inheriting the same structure: spine, FAQ set, SME map, content plan, calendar.</p>
+
+    <div class="campaign-grid">
+      <!-- Active campaign -->
+      <div class="campaign-card active-cm" data-cmid="msft">
+        <span class="cm-flag">★ Active</span>
+        <div class="cm-eye">campaign &middot; Microsoft Practice</div>
+        <h3 class="cm-h">Agentic AI &middot; Knowledge Centre</h3>
+        <p class="cm-desc">Build it. Ship it. Make it boring. Nine named D#3 voices, 20 KB articles, 10 follow-up blog posts &mdash; all replying to one spine.</p>
+        <div class="cm-meta">
+          <div class="cm-meta-cell">FAQs<b>20</b></div>
+          <div class="cm-meta-cell">SMEs<b>9</b></div>
+          <div class="cm-meta-cell">Content<b>33</b></div>
+        </div>
+        <div class="cm-foot">
+          <span class="status-pill creation">Content Creation</span>
+          <span>Apr&nbsp;30 &middot; week 9 of 16</span>
+        </div>
+        <div class="progress"><span style="width:56%"></span></div>
+      </div>
+
+      <!-- Templates / dashed -->
+      <div class="campaign-card template-cm" data-cmid="security">
+        <div class="cm-eye">template &middot; Security</div>
+        <h3 class="cm-h">Security &amp; Sovereign AI</h3>
+        <p class="cm-desc">Threat protection, identity, data protection, compliance &mdash; with AI-TRiSM and Agent 365 governance baked in.</p>
+        <div class="cm-meta">
+          <div class="cm-meta-cell">Themes<b>7</b></div>
+          <div class="cm-meta-cell">SMEs<b>—</b></div>
+          <div class="cm-meta-cell">Content<b>—</b></div>
+        </div>
+        <div class="cm-foot"><span class="status-pill draft">Template</span><span>Spin up in ~22 min</span></div>
+      </div>
+
+      <div class="campaign-card template-cm" data-cmid="copilot">
+        <div class="cm-eye">template &middot; Modern Work</div>
+        <h3 class="cm-h">Copilot for the Frontline</h3>
+        <p class="cm-desc">From "we have licences" to "the team uses it daily". Adoption playbooks, governance, ROI proof.</p>
+        <div class="cm-meta">
+          <div class="cm-meta-cell">Themes<b>5</b></div>
+          <div class="cm-meta-cell">SMEs<b>—</b></div>
+          <div class="cm-meta-cell">Content<b>—</b></div>
+        </div>
+        <div class="cm-foot"><span class="status-pill draft">Template</span><span>Spin up in ~22 min</span></div>
+      </div>
+
+      <div class="campaign-card template-cm" data-cmid="readiness">
+        <div class="cm-eye">template &middot; Cross-practice</div>
+        <h3 class="cm-h">AI Readiness</h3>
+        <p class="cm-desc">The "where do I start" campaign. Factory readiness, data foundations, governance from day one.</p>
+        <div class="cm-meta">
+          <div class="cm-meta-cell">Themes<b>6</b></div>
+          <div class="cm-meta-cell">SMEs<b>—</b></div>
+          <div class="cm-meta-cell">Content<b>—</b></div>
+        </div>
+        <div class="cm-foot"><span class="status-pill draft">Template</span><span>Spin up in ~22 min</span></div>
+      </div>
+
+      <div class="campaign-card template-cm" data-cmid="modern-work">
+        <div class="cm-eye">template &middot; Modern Work</div>
+        <h3 class="cm-h">Modern Workplace</h3>
+        <p class="cm-desc">Endpoint, identity, productivity. The boring fortnightly delivery model that wraps Microsoft 365 around the way teams actually work.</p>
+        <div class="cm-meta">
+          <div class="cm-meta-cell">Themes<b>5</b></div>
+          <div class="cm-meta-cell">SMEs<b>—</b></div>
+          <div class="cm-meta-cell">Content<b>—</b></div>
+        </div>
+        <div class="cm-foot"><span class="status-pill draft">Template</span><span>Spin up in ~22 min</span></div>
+      </div>
+
+      <div class="campaign-card template-cm" data-cmid="azure">
+        <div class="cm-eye">template &middot; Infrastructure</div>
+        <h3 class="cm-h">Azure Infrastructure</h3>
+        <p class="cm-desc">Frontier offer, FinOps, landing zones, the on-ramp from on-prem to AI-ready cloud.</p>
+        <div class="cm-meta">
+          <div class="cm-meta-cell">Themes<b>6</b></div>
+          <div class="cm-meta-cell">SMEs<b>—</b></div>
+          <div class="cm-meta-cell">Content<b>—</b></div>
+        </div>
+        <div class="cm-foot"><span class="status-pill draft">Template</span><span>Spin up in ~22 min</span></div>
+      </div>
+
+      <div class="campaign-card template-cm" data-cmid="data">
+        <div class="cm-eye">template &middot; Analytics</div>
+        <h3 class="cm-h">Data &amp; Analytics</h3>
+        <p class="cm-desc">Data Factory &mdash; the precedent. 70% effort reduction, OneLake, Fabric, what "boring" looks like in analytics.</p>
+        <div class="cm-meta">
+          <div class="cm-meta-cell">Themes<b>5</b></div>
+          <div class="cm-meta-cell">SMEs<b>—</b></div>
+          <div class="cm-meta-cell">Content<b>—</b></div>
+        </div>
+        <div class="cm-foot"><span class="status-pill draft">Template</span><span>Spin up in ~22 min</span></div>
+      </div>
+
+      <div class="campaign-card template-cm" data-cmid="bizapps">
+        <div class="cm-eye">template &middot; BizApps</div>
+        <h3 class="cm-h">Business Applications</h3>
+        <p class="cm-desc">Treat your agents like a workforce. Hire, onboard, supervise, retire &mdash; D365 + Power Platform as the substrate.</p>
+        <div class="cm-meta">
+          <div class="cm-meta-cell">Themes<b>4</b></div>
+          <div class="cm-meta-cell">SMEs<b>—</b></div>
+          <div class="cm-meta-cell">Content<b>—</b></div>
+        </div>
+        <div class="cm-foot"><span class="status-pill draft">Template</span><span>Spin up in ~22 min</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── 2. OVERVIEW ─── -->
+  <section class="panel" data-panel="overview">
+    <div class="panel-num">02 &middot; campaign overview</div>
+    <h2>Agentic AI &middot; <em>Microsoft Knowledge Centre</em></h2>
+    <p class="lede">Build it. Ship it. Make it boring. The campaign that argues agentic AI is the new baseline &mdash; from the people delivering it. <b>Adam called it on Mar&nbsp;4. Jack said how on Apr&nbsp;27. Scott&rsquo;s up next.</b></p>
+
+    <div class="src-grid" style="grid-template-columns: 1.3fr 1fr;">
+      <div class="src-card">
+        <h4>Campaign Brief</h4>
+        <table style="width:100%; border-collapse: collapse; font-size:0.85rem;">
+          <tbody>
+            <tr><td style="padding:0.5rem 0; color:var(--text-muted); width:38%; border-bottom:1px dashed var(--border-mid);">Owner</td><td style="padding:0.5rem 0; color:var(--text-bright); border-bottom:1px dashed var(--border-mid);"><b>Adam Rappaport</b> &middot; AI Practice</td></tr>
+            <tr><td style="padding:0.5rem 0; color:var(--text-muted); border-bottom:1px dashed var(--border-mid);">Primary audience</td><td style="padding:0.5rem 0; color:var(--text-primary); border-bottom:1px dashed var(--border-mid);">Mid-market AU IT &amp; business decision makers, Microsoft customers</td></tr>
+            <tr><td style="padding:0.5rem 0; color:var(--text-muted); border-bottom:1px dashed var(--border-mid);">Secondary audience</td><td style="padding:0.5rem 0; color:var(--text-primary); border-bottom:1px dashed var(--border-mid);">D#3 sellers; Microsoft partner team</td></tr>
+            <tr><td style="padding:0.5rem 0; color:var(--text-muted); border-bottom:1px dashed var(--border-mid);">Business objective</td><td style="padding:0.5rem 0; color:var(--text-primary); border-bottom:1px dashed var(--border-mid);">Establish thought leadership in agentic AI; create sales-ready KB layer linked from every customer email</td></tr>
+            <tr><td style="padding:0.5rem 0; color:var(--text-muted); border-bottom:1px dashed var(--border-mid);">Vendor alignment</td><td style="padding:0.5rem 0; color:var(--text-primary); border-bottom:1px dashed var(--border-mid);">Microsoft &middot; Azure, Copilot, Agent&nbsp;365, Purview</td></tr>
+            <tr><td style="padding:0.5rem 0; color:var(--text-muted); border-bottom:1px dashed var(--border-mid);">Funding</td><td style="padding:0.5rem 0; color:var(--text-primary); border-bottom:1px dashed var(--border-mid);">Microsoft FY27 H1 marketing partner motion (subject to per-customer eligibility)</td></tr>
+            <tr><td style="padding:0.5rem 0; color:var(--text-muted); border-bottom:1px dashed var(--border-mid);">Tone</td><td style="padding:0.5rem 0; color:var(--text-primary); border-bottom:1px dashed var(--border-mid);">Practitioner &middot; specific &middot; mildly contrarian &middot; transparent about AI assist</td></tr>
+            <tr><td style="padding:0.5rem 0; color:var(--text-muted);">Cadence</td><td style="padding:0.5rem 0; color:var(--text-primary);">12 weeks &middot; 1 drop/week (sustainable pilot)</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="src-card">
+        <h4>The Spine</h4>
+        <div style="display:grid; gap:0.65rem;">
+          <div style="padding:0.85rem 1rem; border-radius:8px; background:linear-gradient(135deg, rgba(0,255,255,0.08), rgba(0,174,255,0.02)); border:1px solid rgba(0,255,255,0.32);">
+            <div style="font-family:'JetBrains Mono',monospace; font-size:0.55rem; letter-spacing:0.18em; color:var(--d3-aqua); margin-bottom:0.4rem;">BEAT 01</div>
+            <h4 style="font-family:'Instrument Serif',Georgia,serif; font-style:italic; font-size:1.5rem; color:var(--text-bright); margin-bottom:0.3rem;">Build it.</h4>
+            <p style="font-size:0.82rem; color:var(--text-secondary); line-height:1.5;">Agentic AI is the new baseline. <b style="color:var(--d3-light-blue);">Adam &middot; Mar 4</b></p>
+          </div>
+          <div style="padding:0.85rem 1rem; border-radius:8px; background:linear-gradient(135deg, rgba(0,255,255,0.08), rgba(0,174,255,0.02)); border:1px solid rgba(0,255,255,0.32);">
+            <div style="font-family:'JetBrains Mono',monospace; font-size:0.55rem; letter-spacing:0.18em; color:var(--d3-aqua); margin-bottom:0.4rem;">BEAT 02</div>
+            <h4 style="font-family:'Instrument Serif',Georgia,serif; font-style:italic; font-size:1.5rem; color:var(--text-bright); margin-bottom:0.3rem;">Make it boring.</h4>
+            <p style="font-size:0.82rem; color:var(--text-secondary); line-height:1.5;">Useful, reliable, measurable. <b style="color:var(--d3-light-blue);">Jack &middot; Apr 27</b></p>
+          </div>
+          <div style="padding:0.85rem 1rem; border-radius:8px; background:linear-gradient(135deg, rgba(0,255,255,0.08), rgba(0,174,255,0.02)); border:1px solid rgba(0,255,255,0.32);">
+            <div style="font-family:'JetBrains Mono',monospace; font-size:0.55rem; letter-spacing:0.18em; color:var(--d3-aqua); margin-bottom:0.4rem;">BEAT 03</div>
+            <h4 style="font-family:'Instrument Serif',Georgia,serif; font-style:italic; font-size:1.5rem; color:var(--text-bright); margin-bottom:0.3rem;">Ship it.</h4>
+            <p style="font-size:0.82rem; color:var(--text-secondary); line-height:1.5;">Drawdown, not SOW. The Win97 moment. <b style="color:var(--d3-light-blue);">Scott &middot; ~May</b></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="subhead" style="margin-top:2rem;">
+      <h3>Workflow status</h3>
+      <span class="status-pill creation">Content Creation &middot; step 9 of 15</span>
+    </div>
+    <div class="progress" style="height:6px; margin-top:0.4rem;"><span style="width:60%"></span></div>
+    <p class="lede" style="margin-top:1rem;">Source material gathered &middot; FAQs generated &middot; SMEs mapped &middot; content plan drafted &middot; editorial calendar approved &middot; <b>9 of 33 pieces in flight</b>. Next: SME review of P05 &amp; P06.</p>
+  </section>
+
+  <!-- ─── 3. SOURCE ─── -->
+  <section class="panel" data-panel="source">
+    <div class="panel-num">03 &middot; source material intake</div>
+    <h2>What feeds the campaign.</h2>
+    <p class="lede">Source material is what the FAQ generator reads to extract themes, customer pain points, suggested SME owners, and CTAs. Drop in URLs, paste text, upload decks &mdash; the system pulls signal from all of it.</p>
+
+    <div class="src-grid">
+      <div class="src-card">
+        <h4>URLs &amp; Pages <span class="ai-flag">indexed</span></h4>
+        <div class="src-list">
+          <div class="src-item"><div class="src-icon">URL</div><div>data3.com/&hellip;/year-of-the-agentic-ai-builder<small>Adam Rappaport &middot; Mar 4 2026</small></div><div class="src-item-meta">~1,800w</div></div>
+          <div class="src-item"><div class="src-icon">URL</div><div>data3.com/&hellip;/building-australias-most-boring-ai<small>Jack Latrobe &middot; Apr 27 2026</small></div><div class="src-item-meta">~1,400w</div></div>
+          <div class="src-item"><div class="src-icon">URL</div><div>knowledge-centre-rain.html (this site)<small>Campaign brief &amp; rain visualization</small></div><div class="src-item-meta">internal</div></div>
+          <div class="src-item"><div class="src-icon">URL</div><div>marketing-pilot.html (this site)<small>Pilot proposal slide deck</small></div><div class="src-item-meta">internal</div></div>
+        </div>
+      </div>
+
+      <div class="src-card">
+        <h4>Files</h4>
+        <div class="src-list">
+          <div class="src-item"><div class="src-icon">PDF</div><div>D#3 Agentic AI Practice Brief v3.pdf<small>Adam &middot; Apr 18 2026</small></div><div class="src-item-meta">22 pp</div></div>
+          <div class="src-item"><div class="src-icon">PPT</div><div>Microsoft FY27 H1 Partner Funding Map.pptx<small>From Garrett &middot; Apr 22</small></div><div class="src-item-meta">14 sl</div></div>
+          <div class="src-item"><div class="src-icon">DOC</div><div>Squad Model &amp; Sprints unit-of-sale.docx<small>Practice doctrine &middot; v1.2</small></div><div class="src-item-meta">~3,400w</div></div>
+          <div class="src-item"><div class="src-icon">DOC</div><div>Customer questions transcript bundle.docx<small>20 calls &middot; Mar&ndash;Apr</small></div><div class="src-item-meta">~12,000w</div></div>
+        </div>
+      </div>
+
+      <div class="src-card" style="grid-column: 1 / -1;">
+        <h4>Free-text themes <span class="ai-flag">extracted</span></h4>
+        <textarea class="src-textarea" readonly>Spine: Build it / Ship it / Make it boring.
+Drawdown beats SOW for AI engagement (Packaged Agentic Sprints — S/M/L = $35k/$150k/$250k AUD).
+Microsoft funds the on-ramp for eligible customers (S tier = MS-funded entry).
+Squad model: 1·1·2 (Lead, Mentor, 2 Shadows) — capability-as-a-service, not staff aug.
+Governance is the failure mode, not the model layer (AI-TRiSM, Agent 365, Purview as wrap).
+Data Factory precedent: 70% effort reduction in cross-practice work, "not inventing — extending".
+Customers ask the same eight questions before buying AI — distilled in P10.</textarea>
+        <div style="margin-top:0.85rem; display:flex; gap:0.5rem; flex-wrap:wrap;">
+          <button class="btn-aqua" onclick="toast('Re-extracted 7 strategic messages, 4 themes, 24 candidate FAQs.')">Re-extract themes</button>
+          <button class="btn-ghost">+ Add URL</button>
+          <button class="btn-ghost">+ Upload file</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── 4. FAQs ─── -->
+  <section class="panel" data-panel="faqs">
+    <div class="panel-num">04 &middot; faq builder</div>
+    <h2>20 FAQs. <em>Four themes.</em> One spine answered from every angle.</h2>
+    <p class="lede">Generated from source material, edited by hand, approved one by one. Each FAQ targets a real customer question, maps to a primary SME, and seeds at least one content piece below. <b>Default target: 20 core FAQs &mdash; matching the existing Microsoft campaign model.</b></p>
+
+    <div class="subhead">
+      <h3>FAQ list &middot; <span style="color:var(--d3-aqua);">11 approved</span> / <span style="color:var(--d3-light-blue);">9 in review</span></h3>
+      <div class="subhead-actions">
+        <button class="btn-aqua" onclick="toast('Generated 4 candidate FAQs from new source material.')">Generate more</button>
+        <button class="btn-ghost">+ Add FAQ</button>
+        <button class="btn-ghost" onclick="filterFaq('all', this)">All</button>
+        <button class="btn-ghost" onclick="filterFaq('squad', this)">Squad</button>
+        <button class="btn-ghost" onclick="filterFaq('buying', this)">Buying</button>
+        <button class="btn-ghost" onclick="filterFaq('lifecycle', this)">Lifecycle</button>
+        <button class="btn-ghost" onclick="filterFaq('customer', this)">Customer</button>
+      </div>
+    </div>
+
+    <div class="list" id="faqList">
+      <!-- 7 squad -->
+      <div class="list-row faq" data-theme="squad">
+        <div class="faq-num">SQ1</div>
+        <div class="faq-q">What is an AI Squad?<small><span class="ai-flag">AI draft</span>The 1&middot;1&middot;2 unit; Lead + Mentor + 2 Shadows. Capability-as-a-service.</small></div>
+        <span class="faq-theme show-md" data-theme="squad">Squad Model</span>
+        <span class="faq-sme show-md">Owner: <b>Jack Latrobe</b></span>
+        <div class="faq-actions"><button class="icon-btn approve on" title="Approve">✓</button><button class="icon-btn reject" title="Reject">✕</button><button class="icon-btn" title="Edit">✎</button></div>
+      </div>
+      <div class="list-row faq" data-theme="squad">
+        <div class="faq-num">SQ2</div>
+        <div class="faq-q">What is a sprint and what does it deliver?<small>2 weeks. One outcome. Drawdown unit, not a story-point exercise.</small></div>
+        <span class="faq-theme show-md" data-theme="squad">Squad Model</span>
+        <span class="faq-sme show-md">Owner: <b>Mark Pattie</b></span>
+        <div class="faq-actions"><button class="icon-btn approve on" title="Approve">✓</button><button class="icon-btn reject" title="Reject">✕</button><button class="icon-btn" title="Edit">✎</button></div>
+      </div>
+      <div class="list-row faq" data-theme="squad">
+        <div class="faq-num">SQ3</div>
+        <div class="faq-q">What is a 1&middot;1&middot;2 squad?<small>One Lead, one Mentor, two Shadows &mdash; the staffing pattern that makes the rate card hold.</small></div>
+        <span class="faq-theme show-md" data-theme="squad">Squad Model</span>
+        <span class="faq-sme show-md">Owner: <b>Dave Summers</b></span>
+        <div class="faq-actions"><button class="icon-btn approve on" title="Approve">✓</button><button class="icon-btn reject" title="Reject">✕</button><button class="icon-btn" title="Edit">✎</button></div>
+      </div>
+      <div class="list-row faq" data-theme="squad">
+        <div class="faq-num">SQ4</div>
+        <div class="faq-q">Mentor vs Lead vs Shadow &mdash; who does what?<small>The three roles inside a squad and how time gets billed against each.</small></div>
+        <span class="faq-theme show-md" data-theme="squad">Squad Model</span>
+        <span class="faq-sme show-md">Owner: <b>Jack Latrobe</b></span>
+        <div class="faq-actions"><button class="icon-btn approve" title="Approve">✓</button><button class="icon-btn reject" title="Reject">✕</button><button class="icon-btn" title="Edit">✎</button></div>
+      </div>
+      <div class="list-row faq" data-theme="squad">
+        <div class="faq-num">SQ5</div>
+        <div class="faq-q">Lean Sprint vs Scaled Sprint &mdash; which do I need?<small>How to pick the sprint shape based on outcome size and risk profile.</small></div>
+        <span class="faq-theme show-md" data-theme="squad">Squad Model</span>
+        <span class="faq-sme show-md">Owner: <b>Mark Pattie</b></span>
+        <div class="faq-actions"><button class="icon-btn approve" title="Approve">✓</button><button class="icon-btn reject" title="Reject">✕</button><button class="icon-btn" title="Edit">✎</button></div>
+      </div>
+      <div class="list-row faq" data-theme="squad">
+        <div class="faq-num">SQ6</div>
+        <div class="faq-q">How does the squad model differ from staff augmentation?<small>The "rate card defence" answer &mdash; outcome ownership, not seat-renting.</small></div>
+        <span class="faq-theme show-md" data-theme="squad">Squad Model</span>
+        <span class="faq-sme show-md">Owner: <b>Dave Summers</b></span>
+        <div class="faq-actions"><button class="icon-btn approve" title="Approve">✓</button><button class="icon-btn reject" title="Reject">✕</button><button class="icon-btn" title="Edit">✎</button></div>
+      </div>
+      <div class="list-row faq" data-theme="squad">
+        <div class="faq-num">SQ7</div>
+        <div class="faq-q">What is a Factory Pod and when do I need one?<small>The "we&rsquo;re going to be doing this for a year" answer. Persistent capability.</small></div>
+        <span class="faq-theme show-md" data-theme="squad">Squad Model</span>
+        <span class="faq-sme show-md">Owner: <b>Alenka Caserman</b></span>
+        <div class="faq-actions"><button class="icon-btn approve" title="Approve">✓</button><button class="icon-btn reject" title="Reject">✕</button><button class="icon-btn" title="Edit">✎</button></div>
+      </div>
+
+      <!-- 5 buying -->
+      <div class="list-row faq" data-theme="buying">
+        <div class="faq-num">BU1</div>
+        <div class="faq-q">What is capability-as-a-service?<small><span class="ai-flag">AI draft</span>The drawdown commercial model; pay for capability, not stories.</small></div>
+        <span class="faq-theme show-md" data-theme="buying">Buying Model</span>
+        <span class="faq-sme show-md">Owner: <b>Scott Gosling</b></span>
+        <div class="faq-actions"><button class="icon-btn approve on" title="Approve">✓</button><button class="icon-btn reject" title="Reject">✕</button><button class="icon-btn" title="Edit">✎</button></div>
+      </div>
+      <div class="list-row faq" data-theme="buying">
+        <div class="faq-num">BU2</div>
+        <div class="faq-q">How is AI work priced at Data#3?<small>S/M/L drawdown = $35k / $150k / $250k AUD &mdash; 1, 5, 10 sprints.</small></div>
+        <span class="faq-theme show-md" data-theme="buying">Buying Model</span>
+        <span class="faq-sme show-md">Owner: <b>Matt Gooden</b></span>
+        <div class="faq-actions"><button class="icon-btn approve on" title="Approve">✓</button><button class="icon-btn reject" title="Reject">✕</button><button class="icon-btn" title="Edit">✎</button></div>
+      </div>
+      <div class="list-row faq" data-theme="buying">
+        <div class="faq-num">BU3</div>
+        <div class="faq-q">What is an AAF Pilot?<small>Agentic AI Factory pilot &mdash; the entry shape; small, time-boxed, customer-owned outcome.</small></div>
+        <span class="faq-theme show-md" data-theme="buying">Buying Model</span>
+        <span class="faq-sme show-md">Owner: <b>Adam Rappaport</b></span>
+        <div class="faq-actions"><button class="icon-btn approve" title="Approve">✓</button><button class="icon-btn reject" title="Reject">✕</button><button class="icon-btn" title="Edit">✎</button></div>
+      </div>
+      <div class="list-row faq" data-theme="buying">
+        <div class="faq-num">BU4</div>
+        <div class="faq-q">What is the Azure Frontier Offer (AFO)?<small>Microsoft's funded landing-zone path. The customer-eligible on-ramp.</small></div>
+        <span class="faq-theme show-md" data-theme="buying">Buying Model</span>
+        <span class="faq-sme show-md">Owner: <b>Scott Gosling</b></span>
+        <div class="faq-actions"><button class="icon-btn approve" title="Approve">✓</button><button class="icon-btn reject" title="Reject">✕</button><button class="icon-btn" title="Edit">✎</button></div>
+      </div>
+      <div class="list-row faq" data-theme="buying">
+        <div class="faq-num">BU5</div>
+        <div class="faq-q">How do I de-risk our first AI engagement?<small>The CFO answer. Drawdown structure + governance from day one + prove-out clause.</small></div>
+        <span class="faq-theme show-md" data-theme="buying">Buying Model</span>
+        <span class="faq-sme show-md">Owner: <b>Matt Gooden</b></span>
+        <div class="faq-actions"><button class="icon-btn approve on" title="Approve">✓</button><button class="icon-btn reject" title="Reject">✕</button><button class="icon-btn" title="Edit">✎</button></div>
+      </div>
+
+      <!-- 4 lifecycle -->
+      <div class="list-row faq" data-theme="lifecycle">
+        <div class="faq-num">LC1</div>
+        <div class="faq-q">What is Envision &rarr; Transform &rarr; Operate?<small>The three-phase delivery arc. The "ETO" model the rest of the practice runs on.</small></div>
+        <span class="faq-theme show-md" data-theme="lifecycle">Lifecycle</span>
+        <span class="faq-sme show-md">Owner: <b>Adam Rappaport</b></span>
+        <div class="faq-actions"><button class="icon-btn approve on" title="Approve">✓</button><button class="icon-btn reject" title="Reject">✕</button><button class="icon-btn" title="Edit">✎</button></div>
+      </div>
+      <div class="list-row faq" data-theme="lifecycle">
+        <div class="faq-num">LC2</div>
+        <div class="faq-q">What governance controls should I expect from day one?<small>AI-TRiSM, Purview, audit trail. The "wrap, not SKU" answer.</small></div>
+        <span class="faq-theme show-md" data-theme="lifecycle">Lifecycle</span>
+        <span class="faq-sme show-md">Owner: <b>Richard Dornhart</b></span>
+        <div class="faq-actions"><button class="icon-btn approve on" title="Approve">✓</button><button class="icon-btn reject" title="Reject">✕</button><button class="icon-btn" title="Edit">✎</button></div>
+      </div>
+      <div class="list-row faq" data-theme="lifecycle">
+        <div class="faq-num">LC3</div>
+        <div class="faq-q">How is Agent&nbsp;365 used at Data#3?<small><span class="ai-flag">AI draft</span>Agent supervision platform &mdash; how we hire, monitor, retire agents.</small></div>
+        <span class="faq-theme show-md" data-theme="lifecycle">Lifecycle</span>
+        <span class="faq-sme show-md">Owner: <b>Suzanne Maroc</b></span>
+        <div class="faq-actions"><button class="icon-btn approve" title="Approve">✓</button><button class="icon-btn reject" title="Reject">✕</button><button class="icon-btn" title="Edit">✎</button></div>
+      </div>
+      <div class="list-row faq" data-theme="lifecycle">
+        <div class="faq-num">LC4</div>
+        <div class="faq-q">What is the AI Factory Readiness Assessment?<small>The 90-minute structured intake that opens an AAF Pilot.</small></div>
+        <span class="faq-theme show-md" data-theme="lifecycle">Lifecycle</span>
+        <span class="faq-sme show-md">Owner: <b>Alenka Caserman</b></span>
+        <div class="faq-actions"><button class="icon-btn approve" title="Approve">✓</button><button class="icon-btn reject" title="Reject">✕</button><button class="icon-btn" title="Edit">✎</button></div>
+      </div>
+
+      <!-- 4 customer -->
+      <div class="list-row faq" data-theme="customer">
+        <div class="faq-num">CU1</div>
+        <div class="faq-q">Where do I start with AI?<small>The most-Googled question. Answer: a Readiness Assessment + an AAF Pilot.</small></div>
+        <span class="faq-theme show-md" data-theme="customer">Customer</span>
+        <span class="faq-sme show-md">Owner: <b>Adam Rappaport</b></span>
+        <div class="faq-actions"><button class="icon-btn approve on" title="Approve">✓</button><button class="icon-btn reject" title="Reject">✕</button><button class="icon-btn" title="Edit">✎</button></div>
+      </div>
+      <div class="list-row faq" data-theme="customer">
+        <div class="faq-num">CU2</div>
+        <div class="faq-q">Who owns AI internally?<small>BizApps frame: hire, onboard, supervise. The "treat agents like a workforce" answer.</small></div>
+        <span class="faq-theme show-md" data-theme="customer">Customer</span>
+        <span class="faq-sme show-md">Owner: <b>Suzanne Maroc</b></span>
+        <div class="faq-actions"><button class="icon-btn approve on" title="Approve">✓</button><button class="icon-btn reject" title="Reject">✕</button><button class="icon-btn" title="Edit">✎</button></div>
+      </div>
+      <div class="list-row faq" data-theme="customer">
+        <div class="faq-num">CU3</div>
+        <div class="faq-q">How do I avoid agent sprawl?<small>The governance answer for customers who already have 12 pilots.</small></div>
+        <span class="faq-theme show-md" data-theme="customer">Customer</span>
+        <span class="faq-sme show-md">Owner: <b>Suzanne Maroc</b></span>
+        <div class="faq-actions"><button class="icon-btn approve" title="Approve">✓</button><button class="icon-btn reject" title="Reject">✕</button><button class="icon-btn" title="Edit">✎</button></div>
+      </div>
+      <div class="list-row faq" data-theme="customer">
+        <div class="faq-num">CU4</div>
+        <div class="faq-q">What happens when the agent gives the wrong answer?<small><span class="ai-flag">AI draft</span>The CISO question. Audit, rollback, supervision &mdash; not "trust the model".</small></div>
+        <span class="faq-theme show-md" data-theme="customer">Customer</span>
+        <span class="faq-sme show-md">Owner: <b>Richard Dornhart</b></span>
+        <div class="faq-actions"><button class="icon-btn approve" title="Approve">✓</button><button class="icon-btn reject" title="Reject">✕</button><button class="icon-btn" title="Edit">✎</button></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── 5. THEMES ─── -->
+  <section class="panel" data-panel="themes">
+    <div class="panel-num">05 &middot; theme manager</div>
+    <h2>Four themes. <em>One spine answered four ways.</em></h2>
+    <p class="lede">Themes are how the FAQ set is organised &mdash; and how the rain of follow-up posts knows what to extend. Each theme has a messaging priority, an SME owner, and a content target.</p>
+
+    <div class="theme-grid">
+      <div class="theme-card" data-theme="squad">
+        <div class="theme-card-tag">01 &middot; squad model</div>
+        <h4>Squad Model</h4>
+        <p>How D#3 actually delivers. 1&middot;1&middot;2 staffing, sprint as unit-of-sale, mentor-lead-shadow roles.</p>
+        <div class="theme-stats"><span><b>7</b> FAQs</span><span><b>3</b> SMEs</span><span><b>4</b> blog posts</span></div>
+      </div>
+      <div class="theme-card" data-theme="buying">
+        <div class="theme-card-tag">02 &middot; buying model</div>
+        <h4>Buying Model</h4>
+        <p>Drawdown beats SOW. Capability-as-a-service. The CFO/procurement vocabulary.</p>
+        <div class="theme-stats"><span><b>5</b> FAQs</span><span><b>3</b> SMEs</span><span><b>3</b> blog posts</span></div>
+      </div>
+      <div class="theme-card" data-theme="lifecycle">
+        <div class="theme-card-tag">03 &middot; lifecycle</div>
+        <h4>Lifecycle</h4>
+        <p>Envision &rarr; Transform &rarr; Operate. Governance from day one. Agent 365.</p>
+        <div class="theme-stats"><span><b>4</b> FAQs</span><span><b>4</b> SMEs</span><span><b>3</b> blog posts</span></div>
+      </div>
+      <div class="theme-card" data-theme="customer">
+        <div class="theme-card-tag">04 &middot; customer questions</div>
+        <h4>Customer Questions</h4>
+        <p>The eight questions every customer asks before buying AI. Distilled, named, answered.</p>
+        <div class="theme-stats"><span><b>4</b> FAQs</span><span><b>3</b> SMEs</span><span><b>2</b> blog posts</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── 6. SMEs ─── -->
+  <section class="panel" data-panel="smes">
+    <div class="panel-num">06 &middot; sme manager</div>
+    <h2>Nine named voices. <em>One spine each.</em></h2>
+    <p class="lede">Every SME on the roster has agreed to a byline, an area of expertise, and a specific reply to the spine. The hard part &mdash; finding people who&rsquo;ll publicly attach their name &mdash; is already done.</p>
+
+    <div class="sme-grid">
+      <div class="sme-card">
+        <div class="sme-head"><div class="sme-avatar">AR</div><div><div class="sme-name">Adam Rappaport</div><div class="sme-role">AI Specialist &middot; Practice Lead</div></div></div>
+        <div class="sme-tags"><span class="sme-tag">Spine&nbsp;01</span><span class="sme-tag">Customer</span><span class="sme-tag">Buying</span></div>
+        <div class="sme-meta"><span><b>4</b> FAQs owned</span><span><b>2</b> blog posts</span></div>
+      </div>
+      <div class="sme-card">
+        <div class="sme-head"><div class="sme-avatar">JL</div><div><div class="sme-name">Jack Latrobe</div><div class="sme-role">Solutions Architect</div></div></div>
+        <div class="sme-tags"><span class="sme-tag">Spine&nbsp;02</span><span class="sme-tag">Squad</span></div>
+        <div class="sme-meta"><span><b>2</b> FAQs owned</span><span><b>1</b> blog post</span></div>
+      </div>
+      <div class="sme-card">
+        <div class="sme-head"><div class="sme-avatar">SG</div><div><div class="sme-name">Scott Gosling</div><div class="sme-role">Microsoft Practice Manager</div></div></div>
+        <div class="sme-tags"><span class="sme-tag">Spine&nbsp;03</span><span class="sme-tag">Buying</span></div>
+        <div class="sme-meta"><span><b>2</b> FAQs owned</span><span><b>1</b> blog post</span></div>
+      </div>
+      <div class="sme-card">
+        <div class="sme-head"><div class="sme-avatar">MP</div><div><div class="sme-name">Mark Pattie</div><div class="sme-role">Modern Work Solution Lead</div></div></div>
+        <div class="sme-tags"><span class="sme-tag">Squad</span><span class="sme-tag">Lifecycle</span></div>
+        <div class="sme-meta"><span><b>2</b> FAQs owned</span><span><b>1</b> blog post</span></div>
+      </div>
+      <div class="sme-card">
+        <div class="sme-head"><div class="sme-avatar">SM</div><div><div class="sme-name">Suzanne Maroc</div><div class="sme-role">Solution Sales &middot; BizApps</div></div></div>
+        <div class="sme-tags"><span class="sme-tag">Customer</span><span class="sme-tag">Lifecycle</span></div>
+        <div class="sme-meta"><span><b>3</b> FAQs owned</span><span><b>1</b> blog post</span></div>
+      </div>
+      <div class="sme-card">
+        <div class="sme-head"><div class="sme-avatar">RD</div><div><div class="sme-name">Richard Dornhart</div><div class="sme-role">Security Practice Manager</div></div></div>
+        <div class="sme-tags"><span class="sme-tag">Lifecycle</span><span class="sme-tag">Customer</span></div>
+        <div class="sme-meta"><span><b>2</b> FAQs owned</span><span><b>1</b> blog post</span></div>
+      </div>
+      <div class="sme-card">
+        <div class="sme-head"><div class="sme-avatar">DS</div><div><div class="sme-name">Dave Summers</div><div class="sme-role">Agent Smith &middot; AI-augmented delivery</div></div></div>
+        <div class="sme-tags"><span class="sme-tag">Squad</span></div>
+        <div class="sme-meta"><span><b>2</b> FAQs owned</span><span><b>1</b> blog post</span></div>
+      </div>
+      <div class="sme-card">
+        <div class="sme-head"><div class="sme-avatar">MG</div><div><div class="sme-name">Matt Gooden</div><div class="sme-role">AI Practice Director</div></div></div>
+        <div class="sme-tags"><span class="sme-tag">Buying</span></div>
+        <div class="sme-meta"><span><b>2</b> FAQs owned</span><span><b>1</b> blog post</span></div>
+      </div>
+      <div class="sme-card">
+        <div class="sme-head"><div class="sme-avatar">AC</div><div><div class="sme-name">Alenka Caserman</div><div class="sme-role">Analytics Solution Architect</div></div></div>
+        <div class="sme-tags"><span class="sme-tag">Squad</span><span class="sme-tag">Lifecycle</span></div>
+        <div class="sme-meta"><span><b>2</b> FAQs owned</span><span><b>1</b> blog post</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── 7. MAPPING ─── -->
+  <section class="panel" data-panel="mapping">
+    <div class="panel-num">07 &middot; faq-to-sme mapping</div>
+    <h2>Who answers what. <em>Suggested by AI, confirmed by you.</em></h2>
+    <p class="lede">Every FAQ has a Primary SME (owns the answer), one or more Supporting SMEs (contribute angle/example), and a Reviewer (signs off voice fidelity). Suggestions come from expertise tags, source material, and prior campaign participation.</p>
+
+    <div class="legend">
+      <span><i class="primary"></i> Primary owner</span>
+      <span><i class="support"></i> Supporting</span>
+      <span><i class="review"></i> Reviewer</span>
+    </div>
+
+    <div class="matrix-wrap">
+      <table class="matrix">
+        <thead>
+          <tr>
+            <th class="row-h">FAQ</th>
+            <th>Adam</th><th>Jack</th><th>Scott</th><th>Mark</th><th>Suzanne</th><th>Richard</th><th>Dave</th><th>Matt</th><th>Alenka</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="row-h">SQ1<small>What is an AI Squad?</small></td><td class="cell empty">·</td><td class="cell primary">P</td><td class="cell empty">·</td><td class="cell support">S</td><td class="cell empty">·</td><td class="cell empty">·</td><td class="cell support">S</td><td class="cell review">R</td><td class="cell empty">·</td></tr>
+          <tr><td class="row-h">SQ2<small>What is a sprint?</small></td><td class="cell empty">·</td><td class="cell support">S</td><td class="cell empty">·</td><td class="cell primary">P</td><td class="cell empty">·</td><td class="cell empty">·</td><td class="cell support">S</td><td class="cell review">R</td><td class="cell empty">·</td></tr>
+          <tr><td class="row-h">SQ3<small>1·1·2 squad?</small></td><td class="cell empty">·</td><td class="cell support">S</td><td class="cell empty">·</td><td class="cell empty">·</td><td class="cell empty">·</td><td class="cell empty">·</td><td class="cell primary">P</td><td class="cell review">R</td><td class="cell empty">·</td></tr>
+          <tr><td class="row-h">BU1<small>Capability-as-a-service?</small></td><td class="cell support">S</td><td class="cell empty">·</td><td class="cell primary">P</td><td class="cell empty">·</td><td class="cell empty">·</td><td class="cell empty">·</td><td class="cell empty">·</td><td class="cell support">S</td><td class="cell empty">·</td></tr>
+          <tr><td class="row-h">BU2<small>How is AI work priced?</small></td><td class="cell empty">·</td><td class="cell empty">·</td><td class="cell support">S</td><td class="cell empty">·</td><td class="cell empty">·</td><td class="cell empty">·</td><td class="cell empty">·</td><td class="cell primary">P</td><td class="cell review">R</td></tr>
+          <tr><td class="row-h">BU3<small>What is an AAF Pilot?</small></td><td class="cell primary">P</td><td class="cell empty">·</td><td class="cell support">S</td><td class="cell empty">·</td><td class="cell empty">·</td><td class="cell empty">·</td><td class="cell empty">·</td><td class="cell support">S</td><td class="cell empty">·</td></tr>
+          <tr><td class="row-h">BU5<small>De-risk first engagement?</small></td><td class="cell support">S</td><td class="cell empty">·</td><td class="cell empty">·</td><td class="cell empty">·</td><td class="cell empty">·</td><td class="cell support">S</td><td class="cell empty">·</td><td class="cell primary">P</td><td class="cell empty">·</td></tr>
+          <tr><td class="row-h">LC1<small>Envision → Transform → Operate?</small></td><td class="cell primary">P</td><td class="cell empty">·</td><td class="cell empty">·</td><td class="cell support">S</td><td class="cell empty">·</td><td class="cell empty">·</td><td class="cell empty">·</td><td class="cell review">R</td><td class="cell support">S</td></tr>
+          <tr><td class="row-h">LC2<small>Governance from day one?</small></td><td class="cell empty">·</td><td class="cell empty">·</td><td class="cell empty">·</td><td class="cell empty">·</td><td class="cell support">S</td><td class="cell primary">P</td><td class="cell empty">·</td><td class="cell review">R</td><td class="cell empty">·</td></tr>
+          <tr><td class="row-h">LC3<small>Agent 365 at D#3?</small></td><td class="cell empty">·</td><td class="cell empty">·</td><td class="cell empty">·</td><td class="cell empty">·</td><td class="cell primary">P</td><td class="cell support">S</td><td class="cell empty">·</td><td class="cell empty">·</td><td class="cell empty">·</td></tr>
+          <tr><td class="row-h">CU1<small>Where do I start?</small></td><td class="cell primary">P</td><td class="cell empty">·</td><td class="cell empty">·</td><td class="cell empty">·</td><td class="cell support">S</td><td class="cell empty">·</td><td class="cell empty">·</td><td class="cell empty">·</td><td class="cell empty">·</td></tr>
+          <tr><td class="row-h">CU2<small>Who owns AI internally?</small></td><td class="cell support">S</td><td class="cell empty">·</td><td class="cell empty">·</td><td class="cell empty">·</td><td class="cell primary">P</td><td class="cell empty">·</td><td class="cell empty">·</td><td class="cell empty">·</td><td class="cell empty">·</td></tr>
+          <tr><td class="row-h">CU4<small>Wrong answer?</small></td><td class="cell empty">·</td><td class="cell empty">·</td><td class="cell empty">·</td><td class="cell empty">·</td><td class="cell support">S</td><td class="cell primary">P</td><td class="cell empty">·</td><td class="cell empty">·</td><td class="cell empty">·</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="lede" style="margin-top:1.5rem; font-size:0.85rem;"><b>Coverage check:</b> every FAQ has at least one Primary &middot; every SME owns 1&ndash;3 FAQs &middot; no single SME has more than 3 Primary assignments. <button class="btn-aqua" onclick="toast('Re-balanced 2 mappings: SQ4 from Jack (3) → Mark (2). Coverage stays even.')">Auto-balance load</button></p>
+  </section>
+
+  <!-- ─── 8. CONTENT PLANNER ─── -->
+  <section class="panel" data-panel="content">
+    <div class="panel-num">08 &middot; content planner</div>
+    <h2>33 pieces. <em>One plan.</em></h2>
+    <p class="lede">Every FAQ links to one or more content pieces. Every content piece links back to one or more FAQs. The plan is generated automatically from the spine + FAQ set + SME map &mdash; then edited by hand.</p>
+
+    <div class="subhead">
+      <h3>Content list &middot; 3 spine + 10 blog rain + 20 KB articles</h3>
+      <div class="subhead-actions">
+        <button class="btn-aqua" onclick="toast('Generated 8 candidate blog titles linked to LC2, LC3, CU3, CU4.')">Suggest titles</button>
+        <button class="btn-ghost">+ Add piece</button>
+      </div>
+    </div>
+
+    <div class="list">
+      <!-- spine -->
+      <div class="list-row content"><div class="cnum">B01</div><div><span class="ctype spine">Spine</span></div><div class="ctitle">2026: The Year of the Agentic AI Builder<small>Adam Rappaport &middot; published Mar 4 &middot; FAQs: CU1, BU3</small></div><div class="cdate">Mar 4<small>published</small></div><div class="show-md"><span class="status-pill published">Published</span></div><div class="show-md"><span style="font-family:'JetBrains Mono',monospace; font-size:0.62rem; color:var(--text-muted);">Adam</span></div></div>
+      <div class="list-row content"><div class="cnum">B02</div><div><span class="ctype spine">Spine</span></div><div class="ctitle">Building Australia's Most Boring AI<small>Jack Latrobe &middot; published Apr 27 &middot; FAQs: SQ1, SQ2, SQ4</small></div><div class="cdate">Apr 27<small>published</small></div><div class="show-md"><span class="status-pill published">Published</span></div><div class="show-md"><span style="font-family:'JetBrains Mono',monospace; font-size:0.62rem; color:var(--text-muted);">Jack</span></div></div>
+      <div class="list-row content"><div class="cnum">B03</div><div><span class="ctype spine">Spine</span></div><div class="ctitle">It's the Win97 moment for AI<small>Scott Gosling &middot; due ~mid-May &middot; FAQs: BU1, BU2, LC1</small></div><div class="cdate">May 14<small>publish</small></div><div class="show-md"><span class="status-pill creation">Drafting</span></div><div class="show-md"><span style="font-family:'JetBrains Mono',monospace; font-size:0.62rem; color:var(--text-muted);">Scott</span></div></div>
+
+      <!-- rain -->
+      <div class="list-row content"><div class="cnum">P01</div><div><span class="ctype blog">Rain</span></div><div class="ctitle">It's the Win97 moment for AI &mdash; and the calendar is writing our plan for us<small>Pillar reply &middot; FAQs: BU1, BU2, LC1</small></div><div class="cdate">May 14<small>publish</small></div><div class="show-md"><span class="status-pill creation">Drafting</span></div><div class="show-md"><span style="font-family:'JetBrains Mono',monospace; font-size:0.62rem; color:var(--text-muted);">Scott</span></div></div>
+      <div class="list-row content"><div class="cnum">P02</div><div><span class="ctype blog">Rain</span></div><div class="ctitle">Six weeks in the crucible: what we've learned since March 4<small>FAQs: CU1, LC4, BU5</small></div><div class="cdate">May 21<small>publish</small></div><div class="show-md"><span class="status-pill sme">Briefed</span></div><div class="show-md"><span style="font-family:'JetBrains Mono',monospace; font-size:0.62rem; color:var(--text-muted);">Adam</span></div></div>
+      <div class="list-row content"><div class="cnum">P03</div><div><span class="ctype blog">Rain</span></div><div class="ctitle">Boring AI shipped: ten working days inside a squad<small>FAQs: SQ1, SQ2, SQ4</small></div><div class="cdate">May 28<small>publish</small></div><div class="show-md"><span class="status-pill sme">Briefed</span></div><div class="show-md"><span style="font-family:'JetBrains Mono',monospace; font-size:0.62rem; color:var(--text-muted);">Jack</span></div></div>
+      <div class="list-row content"><div class="cnum">P04</div><div><span class="ctype blog">Rain</span></div><div class="ctitle">Boring is what fortnightly looks like<small>FAQs: SQ2, SQ5, LC1</small></div><div class="cdate">Jun 4<small>publish</small></div><div class="show-md"><span class="status-pill sme">Briefed</span></div><div class="show-md"><span style="font-family:'JetBrains Mono',monospace; font-size:0.62rem; color:var(--text-muted);">Mark</span></div></div>
+      <div class="list-row content"><div class="cnum">P05</div><div><span class="ctype blog">Rain</span></div><div class="ctitle">Treat your agents like a workforce<small>FAQs: CU2, CU3, LC3</small></div><div class="cdate">Jun 11<small>publish</small></div><div class="show-md"><span class="status-pill creation">Drafting</span></div><div class="show-md"><span style="font-family:'JetBrains Mono',monospace; font-size:0.62rem; color:var(--text-muted);">Suzanne</span></div></div>
+      <div class="list-row content"><div class="cnum">P06</div><div><span class="ctype blog">Rain</span></div><div class="ctitle">Boring AI doesn't fail at the model layer. It fails at governance.<small>FAQs: LC2, LC3, CU4</small></div><div class="cdate">Jun 18<small>publish</small></div><div class="show-md"><span class="status-pill sme">Briefed</span></div><div class="show-md"><span style="font-family:'JetBrains Mono',monospace; font-size:0.62rem; color:var(--text-muted);">Richard</span></div></div>
+      <div class="list-row content"><div class="cnum">P07</div><div><span class="ctype blog">Rain</span></div><div class="ctitle">How a lean squad ships like a big one: the boring multiplier<small>FAQs: SQ3, SQ6, SQ7</small></div><div class="cdate">Jun 25<small>publish</small></div><div class="show-md"><span class="status-pill sme">Briefed</span></div><div class="show-md"><span style="font-family:'JetBrains Mono',monospace; font-size:0.62rem; color:var(--text-muted);">Dave</span></div></div>
+      <div class="list-row content"><div class="cnum">P08</div><div><span class="ctype blog">Rain</span></div><div class="ctitle">What "four sprints" actually means<small>FAQs: BU2, BU1, SQ2</small></div><div class="cdate">Jul 2<small>publish</small></div><div class="show-md"><span class="status-pill sme">Briefed</span></div><div class="show-md"><span style="font-family:'JetBrains Mono',monospace; font-size:0.62rem; color:var(--text-muted);">Matt</span></div></div>
+      <div class="list-row content"><div class="cnum">P09</div><div><span class="ctype blog">Rain</span></div><div class="ctitle">We've been doing boring for a year. We called it Data Factory.<small>FAQs: LC1, SQ7, LC4</small></div><div class="cdate">Jul 9<small>publish</small></div><div class="show-md"><span class="status-pill sme">Briefed</span></div><div class="show-md"><span style="font-family:'JetBrains Mono',monospace; font-size:0.62rem; color:var(--text-muted);">Alenka</span></div></div>
+      <div class="list-row content"><div class="cnum">P10</div><div><span class="ctype blog">Rain</span></div><div class="ctitle">The eight questions every customer asks before buying AI<small>FAQs: BU3, BU4, BU5</small></div><div class="cdate">Jul 16<small>optional</small></div><div class="show-md"><span class="status-pill draft">Optional</span></div><div class="show-md"><span style="font-family:'JetBrains Mono',monospace; font-size:0.62rem; color:var(--text-muted);">Adam</span></div></div>
+
+      <!-- KB -->
+      <div class="list-row content"><div class="cnum">K01</div><div><span class="ctype kb">KB</span></div><div class="ctitle">What is an AI Squad? <small>~250w &middot; from FAQ SQ1</small></div><div class="cdate">May 14<small>publish</small></div><div class="show-md"><span class="status-pill ready">Ready</span></div><div class="show-md"><span style="font-family:'JetBrains Mono',monospace; font-size:0.62rem; color:var(--text-muted);">Jack</span></div></div>
+      <div class="list-row content"><div class="cnum">K02</div><div><span class="ctype kb">KB</span></div><div class="ctitle">What is a sprint and what does it deliver? <small>~220w &middot; from FAQ SQ2</small></div><div class="cdate">May 14<small>publish</small></div><div class="show-md"><span class="status-pill ready">Ready</span></div><div class="show-md"><span style="font-family:'JetBrains Mono',monospace; font-size:0.62rem; color:var(--text-muted);">Mark</span></div></div>
+      <div class="list-row content"><div class="cnum">K03</div><div><span class="ctype kb">KB</span></div><div class="ctitle">What is a 1·1·2 squad? <small>~210w &middot; from FAQ SQ3</small></div><div class="cdate">May 21<small>publish</small></div><div class="show-md"><span class="status-pill review">In review</span></div><div class="show-md"><span style="font-family:'JetBrains Mono',monospace; font-size:0.62rem; color:var(--text-muted);">Dave</span></div></div>
+      <div class="list-row content"><div class="cnum">K04</div><div><span class="ctype kb">KB</span></div><div class="ctitle">What is capability-as-a-service? <small>~280w &middot; from FAQ BU1</small></div><div class="cdate">May 14<small>publish</small></div><div class="show-md"><span class="status-pill ready">Ready</span></div><div class="show-md"><span style="font-family:'JetBrains Mono',monospace; font-size:0.62rem; color:var(--text-muted);">Scott</span></div></div>
+      <div class="list-row content"><div class="cnum">K05</div><div><span class="ctype kb">KB</span></div><div class="ctitle">How is AI work priced at Data#3? <small>~230w &middot; from FAQ BU2</small></div><div class="cdate">May 21<small>publish</small></div><div class="show-md"><span class="status-pill review">In review</span></div><div class="show-md"><span style="font-family:'JetBrains Mono',monospace; font-size:0.62rem; color:var(--text-muted);">Matt</span></div></div>
+      <div class="list-row content"><div class="cnum">K06</div><div><span class="ctype kb">KB</span></div><div class="ctitle">What is Envision → Transform → Operate? <small>~260w &middot; from FAQ LC1</small></div><div class="cdate">May 14<small>publish</small></div><div class="show-md"><span class="status-pill ready">Ready</span></div><div class="show-md"><span style="font-family:'JetBrains Mono',monospace; font-size:0.62rem; color:var(--text-muted);">Adam</span></div></div>
+      <div class="list-row content"><div class="cnum">K07</div><div><span class="ctype kb">KB</span></div><div class="ctitle">What governance controls should I expect? <small>~290w &middot; from FAQ LC2</small></div><div class="cdate">May 28<small>publish</small></div><div class="show-md"><span class="status-pill creation">Drafting</span></div><div class="show-md"><span style="font-family:'JetBrains Mono',monospace; font-size:0.62rem; color:var(--text-muted);">Richard</span></div></div>
+      <div class="list-row content"><div class="cnum">K08</div><div><span class="ctype kb">KB</span></div><div class="ctitle">Where do I start with AI? <small>~250w &middot; from FAQ CU1</small></div><div class="cdate">May 14<small>publish</small></div><div class="show-md"><span class="status-pill ready">Ready</span></div><div class="show-md"><span style="font-family:'JetBrains Mono',monospace; font-size:0.62rem; color:var(--text-muted);">Adam</span></div></div>
+      <div class="list-row content" style="opacity:0.7;"><div class="cnum">K09–K20</div><div><span class="ctype kb">KB</span></div><div class="ctitle">+ 12 more KB articles<small>SQ4–7, BU3–5, LC3, LC4, CU2, CU3, CU4 &middot; ~210–290w each</small></div><div class="cdate">May 21 → Jul 16<small>staggered</small></div><div class="show-md"><span class="status-pill draft">Planned</span></div><div class="show-md"><span style="font-family:'JetBrains Mono',monospace; font-size:0.62rem; color:var(--text-muted);">9 SMEs</span></div></div>
+    </div>
+  </section>
+
+  <!-- ─── 9. CALENDAR ─── -->
+  <section class="panel" data-panel="calendar">
+    <div class="panel-num">09 &middot; editorial calendar</div>
+    <h2>One drop a week. <em>For twelve weeks.</em></h2>
+    <p class="lede">Generated from the content plan. Sustainable cadence Amanda asked for. Each week pairs one blog drop with two or three KB articles &mdash; the rain promotes, the KB converts.</p>
+
+    <div class="subhead">
+      <h3>Pilot &middot; May 14 → Jul 30 2026</h3>
+      <div class="subhead-actions">
+        <button class="btn-ghost">Monthly</button>
+        <button class="btn-ghost" style="border-color:var(--d3-light-blue); color:var(--d3-light-blue);">Weekly list</button>
+        <button class="btn-ghost">By SME</button>
+        <button class="btn-ghost">By status</button>
+      </div>
+    </div>
+
+    <div class="calendar">
+      <div class="cal-week">
+        <div class="cal-week-label">Week 01<b>May 14</b><small>Wed launch</small></div>
+        <div class="cal-items">
+          <div class="cal-item spine"><div class="cal-item-type">SPINE B03</div><div class="cal-item-title">It's the Win97 moment for AI <small>Scott Gosling</small></div><div class="cal-item-status"><span class="status-pill creation">Drafting</span></div></div>
+          <div class="cal-item blog"><div class="cal-item-type">RAIN P01</div><div class="cal-item-title">Win97 moment &mdash; pillar reply <small>Scott</small></div><div class="cal-item-status"><span class="status-pill creation">Drafting</span></div></div>
+          <div class="cal-item kb"><div class="cal-item-type">KB K01,K04,K06,K08</div><div class="cal-item-title">Launch KB block (4 articles) <small>SQ1, BU1, LC1, CU1</small></div><div class="cal-item-status"><span class="status-pill ready">Ready</span></div></div>
+        </div>
+      </div>
+      <div class="cal-week">
+        <div class="cal-week-label">Week 02<b>May 21</b><small>Tue drop</small></div>
+        <div class="cal-items">
+          <div class="cal-item blog"><div class="cal-item-type">RAIN P02</div><div class="cal-item-title">Six weeks in the crucible <small>Adam</small></div><div class="cal-item-status"><span class="status-pill sme">Briefed</span></div></div>
+          <div class="cal-item kb"><div class="cal-item-type">KB K02,K03,K05</div><div class="cal-item-title">Squad &amp; pricing block <small>SQ2, SQ3, BU2</small></div><div class="cal-item-status"><span class="status-pill review">In review</span></div></div>
+        </div>
+      </div>
+      <div class="cal-week">
+        <div class="cal-week-label">Week 03<b>May 28</b></div>
+        <div class="cal-items">
+          <div class="cal-item blog"><div class="cal-item-type">RAIN P03</div><div class="cal-item-title">Boring AI shipped: ten working days inside a squad <small>Jack</small></div><div class="cal-item-status"><span class="status-pill sme">Briefed</span></div></div>
+          <div class="cal-item kb"><div class="cal-item-type">KB K07</div><div class="cal-item-title">What governance controls? <small>LC2 &middot; Richard</small></div><div class="cal-item-status"><span class="status-pill creation">Drafting</span></div></div>
+        </div>
+      </div>
+      <div class="cal-week">
+        <div class="cal-week-label">Week 04<b>Jun 4</b></div>
+        <div class="cal-items">
+          <div class="cal-item blog"><div class="cal-item-type">RAIN P04</div><div class="cal-item-title">Boring is what fortnightly looks like <small>Mark</small></div><div class="cal-item-status"><span class="status-pill sme">Briefed</span></div></div>
+          <div class="cal-item kb"><div class="cal-item-type">KB K09–K10</div><div class="cal-item-title">Squad role articles <small>SQ4, SQ5</small></div><div class="cal-item-status"><span class="status-pill draft">Planned</span></div></div>
+        </div>
+      </div>
+      <div class="cal-week">
+        <div class="cal-week-label">Week 05<b>Jun 11</b></div>
+        <div class="cal-items">
+          <div class="cal-item blog"><div class="cal-item-type">RAIN P05</div><div class="cal-item-title">Treat your agents like a workforce <small>Suzanne</small></div><div class="cal-item-status"><span class="status-pill creation">Drafting</span></div></div>
+          <div class="cal-item kb"><div class="cal-item-type">KB K13–K14</div><div class="cal-item-title">Customer ownership articles <small>CU2, CU3</small></div><div class="cal-item-status"><span class="status-pill draft">Planned</span></div></div>
+        </div>
+      </div>
+      <div class="cal-week">
+        <div class="cal-week-label">Week 06<b>Jun 18</b></div>
+        <div class="cal-items">
+          <div class="cal-item blog"><div class="cal-item-type">RAIN P06</div><div class="cal-item-title">Boring AI fails at governance <small>Richard</small></div><div class="cal-item-status"><span class="status-pill sme">Briefed</span></div></div>
+          <div class="cal-item kb"><div class="cal-item-type">KB K11,K15</div><div class="cal-item-title">Agent 365 + wrong-answer articles <small>LC3, CU4</small></div><div class="cal-item-status"><span class="status-pill draft">Planned</span></div></div>
+        </div>
+      </div>
+      <div class="cal-week">
+        <div class="cal-week-label">Week 07<b>Jun 25</b></div>
+        <div class="cal-items">
+          <div class="cal-item blog"><div class="cal-item-type">RAIN P07</div><div class="cal-item-title">Lean squad / boring multiplier <small>Dave</small></div><div class="cal-item-status"><span class="status-pill sme">Briefed</span></div></div>
+          <div class="cal-item kb"><div class="cal-item-type">KB K16</div><div class="cal-item-title">Factory Pod article <small>SQ7</small></div><div class="cal-item-status"><span class="status-pill draft">Planned</span></div></div>
+        </div>
+      </div>
+      <div class="cal-week">
+        <div class="cal-week-label">Week 08<b>Jul 2</b></div>
+        <div class="cal-items">
+          <div class="cal-item blog"><div class="cal-item-type">RAIN P08</div><div class="cal-item-title">What "four sprints" actually means <small>Matt</small></div><div class="cal-item-status"><span class="status-pill sme">Briefed</span></div></div>
+          <div class="cal-item kb"><div class="cal-item-type">KB K17–K18</div><div class="cal-item-title">AAF Pilot / AFO articles <small>BU3, BU4</small></div><div class="cal-item-status"><span class="status-pill draft">Planned</span></div></div>
+        </div>
+      </div>
+      <div class="cal-week">
+        <div class="cal-week-label">Week 09<b>Jul 9</b></div>
+        <div class="cal-items">
+          <div class="cal-item blog"><div class="cal-item-type">RAIN P09</div><div class="cal-item-title">We called it Data Factory <small>Alenka</small></div><div class="cal-item-status"><span class="status-pill sme">Briefed</span></div></div>
+          <div class="cal-item kb"><div class="cal-item-type">KB K12,K19</div><div class="cal-item-title">Lifecycle close-out <small>LC4 &middot; Factory readiness</small></div><div class="cal-item-status"><span class="status-pill draft">Planned</span></div></div>
+        </div>
+      </div>
+      <div class="cal-week">
+        <div class="cal-week-label">Week 10<b>Jul 16</b></div>
+        <div class="cal-items">
+          <div class="cal-item blog"><div class="cal-item-type">RAIN P10</div><div class="cal-item-title">Eight questions every customer asks <small>Adam &middot; optional wrap</small></div><div class="cal-item-status"><span class="status-pill draft">Optional</span></div></div>
+          <div class="cal-item kb"><div class="cal-item-type">KB K20</div><div class="cal-item-title">De-risking the first engagement <small>BU5</small></div><div class="cal-item-status"><span class="status-pill draft">Planned</span></div></div>
+        </div>
+      </div>
+      <div class="cal-week">
+        <div class="cal-week-label">Weeks 11–12<b>Jul 23 → 30</b><small>Buffer</small></div>
+        <div class="cal-items">
+          <div class="cal-item"><div class="cal-item-type">SOAK</div><div class="cal-item-title">Soak window &middot; collect customer feedback &middot; voice-fidelity check</div><div class="cal-item-status"><span class="status-pill review">Watch</span></div></div>
+          <div class="cal-item"><div class="cal-item-type">RETRO</div><div class="cal-item-title">Pilot retro: which voices, which CTAs, which KB chips drove conversions</div><div class="cal-item-status"><span class="status-pill draft">Planned</span></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── 10. WORKFLOW ─── -->
+  <section class="panel" data-panel="workflow">
+    <div class="panel-num">10 &middot; campaign workflow</div>
+    <h2>Fifteen steps. <em>Human at every gate.</em></h2>
+    <p class="lede">The workflow models the campaign lifecycle &mdash; created → planned → SME-mapped → drafted → reviewed → published → archived. AI sits in the middle, where the lift is. <b>Five of fifteen steps are AI-assisted; the other ten are humans.</b></p>
+
+    <div class="workflow">
+      <div class="wstep done"><div class="wstep-n">01 ✓</div><div class="wstep-h">Campaign created</div><div class="wstep-meta">Mar 4 &middot; Adam</div></div>
+      <div class="wstep done"><div class="wstep-n">02 ✓</div><div class="wstep-h">Source material added</div><div class="wstep-meta">Apr 18 &middot; 4 URLs, 4 files</div></div>
+      <div class="wstep done"><div class="wstep-n">03 ✓ AI</div><div class="wstep-h">FAQs generated</div><div class="wstep-meta">Apr 19 &middot; 24 candidates → 20</div></div>
+      <div class="wstep done"><div class="wstep-n">04 ✓</div><div class="wstep-h">FAQs approved</div><div class="wstep-meta">Apr 22 &middot; 11/20 approved</div></div>
+      <div class="wstep done"><div class="wstep-n">05 ✓</div><div class="wstep-h">SMEs nominated</div><div class="wstep-meta">Apr 24 &middot; 9 named voices</div></div>
+      <div class="wstep done"><div class="wstep-n">06 ✓ AI</div><div class="wstep-h">FAQs mapped to SMEs</div><div class="wstep-meta">Apr 25 &middot; matrix balanced</div></div>
+      <div class="wstep done"><div class="wstep-n">07 ✓ AI</div><div class="wstep-h">Content plan generated</div><div class="wstep-meta">Apr 26 &middot; 33 pieces</div></div>
+      <div class="wstep done"><div class="wstep-n">08 ✓</div><div class="wstep-h">Editorial calendar approved</div><div class="wstep-meta">Apr 28 &middot; Amanda + Adam</div></div>
+      <div class="wstep current"><div class="wstep-n">09 &middot; NOW</div><div class="wstep-h">Content assigned &amp; in flight</div><div class="wstep-meta">9 of 33 pieces drafting/briefed</div></div>
+      <div class="wstep pending"><div class="wstep-n">10 AI</div><div class="wstep-h">Drafts created</div><div class="wstep-meta">Claude v0.1 → SME edit to voice</div></div>
+      <div class="wstep pending"><div class="wstep-n">11</div><div class="wstep-h">SME review</div><div class="wstep-meta">Voice fidelity sign-off</div></div>
+      <div class="wstep pending"><div class="wstep-n">12</div><div class="wstep-h">Marketing review</div><div class="wstep-meta">Amanda &middot; CTA + brand</div></div>
+      <div class="wstep pending"><div class="wstep-n">13</div><div class="wstep-h">Content scheduled</div><div class="wstep-meta">data3.com publishing pipes</div></div>
+      <div class="wstep pending"><div class="wstep-n">14</div><div class="wstep-h">Content published</div><div class="wstep-meta">May 14 → Jul 30 cadence</div></div>
+      <div class="wstep pending"><div class="wstep-n">15</div><div class="wstep-h">Campaign archived / refreshed</div><div class="wstep-meta">Aug retro &middot; lock template for next</div></div>
+    </div>
+  </section>
+
+  <!-- ─── 11. EXPORT ─── -->
+  <section class="panel" data-panel="export">
+    <div class="panel-num">11 &middot; export &amp; brief</div>
+    <h2>Ship it elsewhere. <em>One click.</em></h2>
+    <p class="lede">Export the campaign plan as a CSV for the spreadsheet crowd, a Markdown brief for the docs crowd, a CMS-ready outline for the publishing crowd, or a one-page PDF for the steerco crowd. <b>Single source of truth &mdash; many surfaces.</b></p>
+
+    <div class="export-grid">
+      <div class="export-tile" onclick="exportFile('faqs.csv', exportFaqsCsv())"><div class="export-icon">▼ CSV</div><div class="export-h">FAQ list (.csv)</div><div class="export-p">20 rows &middot; question, theme, owner, status, target word count.</div></div>
+      <div class="export-tile" onclick="exportFile('content-plan.csv', exportContentCsv())"><div class="export-icon">▼ CSV</div><div class="export-h">Content plan (.csv)</div><div class="export-p">33 rows &middot; piece, type, owner, FAQ links, due date, status.</div></div>
+      <div class="export-tile" onclick="exportFile('editorial-calendar.csv', exportCalendarCsv())"><div class="export-icon">▼ CSV</div><div class="export-h">Editorial calendar (.csv)</div><div class="export-p">12 weeks &middot; one row per week with drops + KB articles + statuses.</div></div>
+      <div class="export-tile" onclick="exportFile('campaign-brief.md', exportBriefMd())"><div class="export-icon">▼ MD</div><div class="export-h">Campaign brief (.md)</div><div class="export-p">Full campaign brief in Markdown &mdash; spine, themes, FAQs, SMEs, calendar.</div></div>
+      <div class="export-tile" onclick="exportFile('sme-map.md', exportSmeMd())"><div class="export-icon">▼ MD</div><div class="export-h">SME map (.md)</div><div class="export-p">Per-SME view: who owns what, when their drop ships, who reviews them.</div></div>
+      <div class="export-tile" onclick="toast('Steerco one-pager exported as PDF (mock).')"><div class="export-icon">▼ PDF</div><div class="export-h">Steerco one-pager</div><div class="export-p">PDF &middot; one-page summary &middot; spine, status, milestones, asks.</div></div>
+      <div class="export-tile" onclick="toast('CMS-ready outline copied to clipboard. Paste into data3.com Knowledge Centre.')"><div class="export-icon">▼ HTML</div><div class="export-h">CMS-ready outline</div><div class="export-p">Section structure ready to paste into the Knowledge Centre CMS.</div></div>
+      <div class="export-tile" onclick="toast('Sales enablement summary generated. 1 page, 6 talking points.')"><div class="export-icon">▼ DOC</div><div class="export-h">Sales enablement</div><div class="export-p">One-pager for sellers &middot; talking points + KB links + objection handling.</div></div>
+      <div class="export-tile" onclick="toast('Saved current campaign as new template "Microsoft Knowledge Centre v1.0".')"><div class="export-icon">★</div><div class="export-h">Save as template</div><div class="export-p">Lock this structure as a reusable template for the next campaign.</div></div>
+    </div>
+  </section>
+
+  <!-- ─── Footer ─── -->
+  <footer class="foot">
+    <div>DATA<b style="color:var(--d3-light-blue);">#</b>3 &middot; AI PRACTICE &middot; CAMPAIGN MANAGER &middot; v0.1 mockup</div>
+    <div><a href="/marketing-pilot.html">marketing-pilot</a> &nbsp;&middot;&nbsp; <a href="/knowledge-centre-rain.html">knowledge-centre-rain</a> &nbsp;&middot;&nbsp; <a href="/agentic-resourcing.html">agentic-resourcing</a></div>
+  </footer>
+
+</div><!-- /.page -->
+
+<!-- ─── Modal ─── -->
+<div class="modal-mask" id="addCampaignModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>Start a new campaign</h3>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <p style="color:var(--text-secondary); font-size:0.9rem; margin-bottom:1.5rem;">Pick a template. Inherit the spine, theme structure, FAQ skeleton, and editorial cadence from a proven campaign &mdash; then make it yours.</p>
+
+    <div class="template-grid">
+      <div class="template-card featured" onclick="useTemplate('Microsoft Knowledge Centre v1.0')">
+        <div class="template-tag">★ canonical template</div>
+        <div class="template-h">Microsoft Knowledge Centre</div>
+        <div class="template-p">9 SMEs &middot; 20 FAQs &middot; 4 themes &middot; 12-week cadence. The blueprint.</div>
+      </div>
+      <div class="template-card" onclick="useTemplate('Security &amp; Sovereign AI')">
+        <div class="template-tag">practice template</div>
+        <div class="template-h">Security &amp; Sovereign AI</div>
+        <div class="template-p">7 themes &middot; threat protection, identity, compliance, AI-TRiSM.</div>
+      </div>
+      <div class="template-card" onclick="useTemplate('Copilot for the Frontline')">
+        <div class="template-tag">practice template</div>
+        <div class="template-h">Copilot for the Frontline</div>
+        <div class="template-p">5 themes &middot; adoption, governance, ROI proof.</div>
+      </div>
+      <div class="template-card" onclick="useTemplate('AI Readiness')">
+        <div class="template-tag">cross-practice</div>
+        <div class="template-h">AI Readiness</div>
+        <div class="template-p">6 themes &middot; factory readiness, data foundations, governance.</div>
+      </div>
+      <div class="template-card" onclick="useTemplate('Modern Workplace')">
+        <div class="template-tag">practice template</div>
+        <div class="template-h">Modern Workplace</div>
+        <div class="template-p">5 themes &middot; endpoint, identity, productivity.</div>
+      </div>
+      <div class="template-card" onclick="useTemplate('Azure Infrastructure')">
+        <div class="template-tag">practice template</div>
+        <div class="template-h">Azure Infrastructure</div>
+        <div class="template-p">6 themes &middot; AFO, FinOps, landing zones.</div>
+      </div>
+      <div class="template-card" onclick="useTemplate('Data &amp; Analytics')">
+        <div class="template-tag">practice template</div>
+        <div class="template-h">Data &amp; Analytics</div>
+        <div class="template-p">5 themes &middot; Fabric, OneLake, Data Factory precedent.</div>
+      </div>
+      <div class="template-card" onclick="useTemplate('Business Applications')">
+        <div class="template-tag">practice template</div>
+        <div class="template-h">Business Applications</div>
+        <div class="template-p">4 themes &middot; D365 + Power Platform &middot; agents-as-workforce.</div>
+      </div>
+      <div class="template-card" onclick="useTemplate('Blank campaign')">
+        <div class="template-tag">+ custom</div>
+        <div class="template-h">Start blank</div>
+        <div class="template-p">Empty shell &middot; you provide the source material, AI proposes structure.</div>
+      </div>
+    </div>
+
+    <div class="modal-foot">
+      <button class="btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn-primary" onclick="closeModal(); toast('Campaign created. Source intake is the next step.')">Continue</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+(function() {
+  // ─── Tab switching ───
+  var tabs = document.querySelectorAll('.tab');
+  var panels = document.querySelectorAll('.panel');
+  tabs.forEach(function(t) {
+    t.addEventListener('click', function() {
+      var name = t.getAttribute('data-tab');
+      tabs.forEach(function(x) { x.classList.remove('active'); });
+      panels.forEach(function(p) { p.classList.remove('active'); });
+      t.classList.add('active');
+      var panel = document.querySelector('.panel[data-panel="' + name + '"]');
+      if (panel) panel.classList.add('active');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  });
+
+  // Dashboard cards open detail tabs / modal
+  document.querySelectorAll('.campaign-card').forEach(function(c) {
+    c.addEventListener('click', function() {
+      if (c.classList.contains('active-cm')) {
+        document.querySelector('.tab[data-tab="overview"]').click();
+      } else {
+        openModal();
+      }
+    });
+  });
+
+  // Campaign selector
+  var selector = document.getElementById('campaignSelector');
+  selector.addEventListener('change', function() {
+    var v = selector.value;
+    if (v && v !== 'msft') {
+      openModal();
+      selector.value = 'msft';
+    }
+  });
+
+  // FAQ approve toggle
+  document.querySelectorAll('.icon-btn.approve').forEach(function(b) {
+    b.addEventListener('click', function(e) {
+      e.stopPropagation();
+      var row = b.closest('.list-row');
+      var rej = row.querySelector('.icon-btn.reject');
+      b.classList.toggle('on');
+      if (b.classList.contains('on') && rej) rej.classList.remove('on');
+    });
+  });
+  document.querySelectorAll('.icon-btn.reject').forEach(function(b) {
+    b.addEventListener('click', function(e) {
+      e.stopPropagation();
+      var row = b.closest('.list-row');
+      var app = row.querySelector('.icon-btn.approve');
+      b.classList.toggle('on');
+      if (b.classList.contains('on') && app) app.classList.remove('on');
+    });
+  });
+})();
+
+// ─── FAQ filter ───
+function filterFaq(theme, btn) {
+  document.querySelectorAll('#faqList .list-row').forEach(function(r) {
+    if (theme === 'all') { r.style.display = ''; }
+    else { r.style.display = (r.getAttribute('data-theme') === theme) ? '' : 'none'; }
+  });
+}
+
+// ─── Modal ───
+function openModal()  { document.getElementById('addCampaignModal').classList.add('open'); }
+function closeModal() { document.getElementById('addCampaignModal').classList.remove('open'); }
+document.getElementById('addCampaignBtn').addEventListener('click', openModal);
+document.getElementById('addCampaignModal').addEventListener('click', function(e) {
+  if (e.target.id === 'addCampaignModal') closeModal();
+});
+function useTemplate(name) {
+  closeModal();
+  toast('New campaign created from "' + name + '". Source intake is the next step.');
+}
+
+// ─── Toast ───
+var toastEl = document.getElementById('toast');
+var toastTimer;
+function toast(msg) {
+  toastEl.innerHTML = msg.replace(/\b(\d+)\b/g, '<b>$1</b>');
+  toastEl.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function() { toastEl.classList.remove('show'); }, 3500);
+}
+
+// ─── Export ───
+function exportFile(name, content) {
+  var blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = name;
+  document.body.appendChild(a); a.click();
+  setTimeout(function() { document.body.removeChild(a); URL.revokeObjectURL(a.href); }, 100);
+  toast('Exported ' + name);
+}
+
+function exportFaqsCsv() {
+  var rows = [['id','question','theme','owner','status','target_words']];
+  document.querySelectorAll('#faqList .list-row').forEach(function(r) {
+    var id = r.querySelector('.faq-num').textContent.trim();
+    var q  = r.querySelector('.faq-q').firstChild.textContent.trim();
+    var th = r.getAttribute('data-theme');
+    var smeEl = r.querySelector('.faq-sme b');
+    var sme = smeEl ? smeEl.textContent.trim() : '';
+    var status = r.querySelector('.icon-btn.approve.on') ? 'Approved' : 'In review';
+    rows.push([id, '"'+q.replace(/"/g,'""')+'"', th, sme, status, '~250']);
+  });
+  return rows.map(function(r){ return r.join(','); }).join('\n');
+}
+
+function exportContentCsv() {
+  var rows = [['id','type','title','owner','due_date','status']];
+  document.querySelectorAll('.panel[data-panel="content"] .list-row').forEach(function(r) {
+    var id = (r.querySelector('.cnum')||{textContent:''}).textContent.trim();
+    var typeEl = r.querySelector('.ctype');
+    var type = typeEl ? typeEl.textContent.trim() : '';
+    var titleEl = r.querySelector('.ctitle');
+    var title = titleEl ? titleEl.firstChild.textContent.trim() : '';
+    var date = r.querySelector('.cdate') ? r.querySelector('.cdate').firstChild.textContent.trim() : '';
+    var stEl = r.querySelector('.status-pill');
+    var status = stEl ? stEl.textContent.trim() : '';
+    rows.push([id, type, '"'+title.replace(/"/g,'""')+'"', '', date, status]);
+  });
+  return rows.map(function(r){ return r.join(','); }).join('\n');
+}
+
+function exportCalendarCsv() {
+  var rows = [['week','date','type','title','owner','status']];
+  document.querySelectorAll('.cal-week').forEach(function(w) {
+    var lab = w.querySelector('.cal-week-label');
+    var weekTxt = lab.firstChild.textContent.trim();
+    var dateTxt = (lab.querySelector('b')||{textContent:''}).textContent.trim();
+    w.querySelectorAll('.cal-item').forEach(function(it) {
+      var t = it.querySelector('.cal-item-type').textContent.trim();
+      var title = it.querySelector('.cal-item-title').firstChild.textContent.trim();
+      var owner = (it.querySelector('.cal-item-title small')||{textContent:''}).textContent.trim();
+      var status = (it.querySelector('.status-pill')||{textContent:''}).textContent.trim();
+      rows.push([weekTxt, dateTxt, t, '"'+title.replace(/"/g,'""')+'"', owner, status]);
+    });
+  });
+  return rows.map(function(r){ return r.join(','); }).join('\n');
+}
+
+function exportBriefMd() {
+  return [
+    '# Agentic AI — Microsoft Knowledge Centre Campaign',
+    '',
+    '**Owner:** Adam Rappaport · AI Practice  ',
+    '**Cadence:** 12 weeks · 1 drop / week (May 14 → Jul 30 2026)  ',
+    '**Funding:** Microsoft FY27 H1 partner motion (per-customer eligibility)  ',
+    '',
+    '## Spine',
+    '1. **Build it.** — Adam · Mar 4 · published',
+    '2. **Make it boring.** — Jack · Apr 27 · published',
+    '3. **Ship it.** — Scott · May 14 · drafting',
+    '',
+    '## Themes',
+    '- **Squad Model** (7 FAQs · 3 SMEs · 4 blog posts)',
+    '- **Buying Model** (5 FAQs · 3 SMEs · 3 blog posts)',
+    '- **Lifecycle** (4 FAQs · 4 SMEs · 3 blog posts)',
+    '- **Customer Questions** (4 FAQs · 3 SMEs · 2 blog posts)',
+    '',
+    '## SMEs',
+    '- Adam Rappaport (AI Practice Lead)',
+    '- Jack Latrobe (Solutions Architect)',
+    '- Scott Gosling (MS Practice Manager)',
+    '- Mark Pattie (Modern Work Solution Lead)',
+    '- Suzanne Maroc (Solution Sales · BizApps)',
+    '- Richard Dornhart (Security Practice Manager)',
+    '- Dave Summers (Agent Smith · AI-aug delivery)',
+    '- Matt Gooden (AI Practice Director)',
+    '- Alenka Caserman (Analytics Solution Architect)',
+    '',
+    '## Status',
+    'Step 9 of 15 — content assigned & in flight. 9 of 33 pieces drafting/briefed.',
+    '',
+    '_Exported from Campaign Manager · ' + new Date().toISOString().slice(0,10) + '_'
+  ].join('\n');
+}
+
+function exportSmeMd() {
+  var smes = [];
+  document.querySelectorAll('.sme-card').forEach(function(c) {
+    var name = c.querySelector('.sme-name').textContent.trim();
+    var role = c.querySelector('.sme-role').textContent.trim();
+    var meta = Array.from(c.querySelectorAll('.sme-meta span')).map(function(s){ return s.textContent.trim(); }).join(' · ');
+    smes.push('### ' + name + '\n*' + role + '*  \n' + meta + '\n');
+  });
+  return '# SME Map — Microsoft Knowledge Centre Campaign\n\n' + smes.join('\n');
+}
+</script>
+
+</body>
+</html>

@@ -292,6 +292,86 @@ body::after {
   border-style: solid; border-color: var(--d3-light-blue);
   background: var(--bg-card-hover);
 }
+
+/* Empty-state banner shown when a user-created campaign is active */
+.empty-banner {
+  display: flex; align-items: center; gap: 1.1rem;
+  padding: 1rem 1.2rem;
+  background: linear-gradient(135deg, rgba(0, 174, 255, 0.10), rgba(115, 0, 255, 0.06));
+  border: 1px solid rgba(0, 174, 255, 0.32);
+  border-radius: 10px;
+  margin: 1.2rem 0 1.6rem;
+}
+.empty-banner-icon {
+  width: 24px; height: 24px; border-radius: 50%;
+  background: var(--d3-aqua); color: var(--d3-blue-black);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.9rem; flex-shrink: 0;
+  animation: pulseDot 1.6s ease-in-out infinite;
+}
+@keyframes pulseDot {
+  0%,100% { box-shadow: 0 0 0 0 rgba(0,255,255,0.6); }
+  50%     { box-shadow: 0 0 0 8px rgba(0,255,255,0); }
+}
+.empty-banner-text {
+  flex: 1;
+  font-size: 0.92rem; color: var(--text-secondary); line-height: 1.5;
+}
+.empty-banner-text b { color: var(--text-bright); font-weight: 500; }
+.empty-banner-reset {
+  flex-shrink: 0; white-space: nowrap;
+}
+@media (max-width: 720px) {
+  .empty-banner { flex-direction: column; align-items: flex-start; }
+}
+
+/* Phase-notes block on the dashboard */
+.phase-notes {
+  margin-top: 3rem; padding-top: 2.4rem;
+  border-top: 1px dashed var(--border-mid);
+}
+.phase-notes-h {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.65rem;
+  letter-spacing: 0.22em; text-transform: uppercase; color: var(--d3-aqua);
+  margin-bottom: 1.2rem;
+  display: flex; align-items: center; gap: 0.85rem;
+}
+.phase-notes-h::before { content: ''; width: 28px; height: 1px; background: var(--gradient-aqua); }
+.phase-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;
+}
+@media (max-width: 920px) { .phase-grid { grid-template-columns: 1fr; } }
+.phase-card {
+  background: var(--bg-card); border: 1px solid var(--border-mid);
+  border-radius: 10px; padding: 1.2rem 1.3rem;
+}
+.phase-card.phase-now { border-color: rgba(0, 255, 255, 0.32); background: linear-gradient(135deg, rgba(0,255,255,0.04), transparent); }
+.phase-card.phase-next { border-color: rgba(0, 174, 255, 0.28); }
+.phase-card.phase-later { border-color: rgba(115, 0, 255, 0.28); border-style: dashed; }
+.phase-tag {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.6rem;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  margin-bottom: 0.75rem; color: var(--text-secondary);
+}
+.phase-card.phase-now .phase-tag { color: var(--d3-aqua); }
+.phase-card.phase-next .phase-tag { color: var(--d3-light-blue); }
+.phase-card.phase-later .phase-tag { color: #c4a8ff; }
+.phase-card ul { list-style: none; padding: 0; margin: 0; }
+.phase-card li {
+  font-size: 0.88rem; color: var(--text-secondary); line-height: 1.55;
+  padding: 0.4rem 0; border-bottom: 1px dashed rgba(168, 179, 204, 0.12);
+}
+.phase-card li:last-child { border-bottom: none; }
+.phase-card li code {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.78rem;
+  background: rgba(0,174,255,0.08); padding: 0.05rem 0.32rem; border-radius: 3px;
+  color: var(--d3-pale-blue);
+}
+.phase-foot {
+  margin-top: 1.2rem; padding-top: 1rem;
+  border-top: 1px dashed var(--border-mid);
+  font-size: 0.88rem; color: var(--text-secondary); line-height: 1.55;
+}
 .cm-flag {
   position: absolute; top: 0; right: 0;
   font-family: 'JetBrains Mono', monospace; font-size: 0.55rem;
@@ -894,6 +974,14 @@ body::after {
     <h2>Every campaign in <em>one view</em>.</h2>
     <p class="lede">One active campaign &mdash; the Microsoft Knowledge Centre &mdash; is the working template. Six dashed cards show the practice themes ready to spin up next, each inheriting the same structure: spine, FAQ set, SME map, content plan, calendar.</p>
 
+    <div class="empty-banner" id="emptyCampaignBanner" style="display:none;">
+      <div class="empty-banner-icon">●</div>
+      <div class="empty-banner-text">
+        <b><span class="empty-banner-name">New campaign</span></b> is now active &mdash; it&rsquo;s empty. The other tabs (FAQs, themes, content plan, calendar) currently still show <em>Microsoft Knowledge Centre</em> data as a working reference. Per-campaign panels are <b>Phase&nbsp;2</b> &mdash; see the note at the bottom of this page.
+      </div>
+      <button class="btn-ghost empty-banner-reset" onclick="clearAllUserCampaigns()">Clear created campaigns</button>
+    </div>
+
     <div class="campaign-grid">
       <!-- Active campaign -->
       <div class="campaign-card active-cm" data-cmid="msft">
@@ -997,6 +1085,40 @@ body::after {
         </div>
         <div class="cm-foot"><span class="status-pill draft">Template</span><span>Spin up in ~22 min</span></div>
       </div>
+    </div>
+
+    <div class="phase-notes">
+      <div class="phase-notes-h">Phasing &middot; what works today vs what&rsquo;s next</div>
+      <div class="phase-grid">
+        <div class="phase-card phase-now">
+          <div class="phase-tag">Phase 1 &middot; live now</div>
+          <ul>
+            <li>Add Campaign creates a real card in the dashboard</li>
+            <li>Persists in <code>localStorage</code> across reloads</li>
+            <li>Switch active campaign by clicking any card</li>
+            <li>Microsoft campaign panels (FAQs, themes, content plan, calendar, governance, exports) are fully populated as a working reference</li>
+          </ul>
+        </div>
+        <div class="phase-card phase-next">
+          <div class="phase-tag">Phase 2 &middot; per-campaign panels</div>
+          <ul>
+            <li>FAQ / theme / SME / content / calendar panels read from the active campaign instead of showing Microsoft data</li>
+            <li>Source-intake tab actually parses uploaded material (Claude API extraction)</li>
+            <li>Empty-state UX inside each panel for fresh campaigns</li>
+            <li>Per-campaign edit history in NeonDB (same pattern as the editable pages)</li>
+          </ul>
+        </div>
+        <div class="phase-card phase-later">
+          <div class="phase-tag">Phase 3 &middot; production</div>
+          <ul>
+            <li>Auth + multi-user (Garrett / Amanda / Jared roles)</li>
+            <li>Real AI loops: FAQ extraction, theme clustering, 5-beat proposals, v0.1 drafts</li>
+            <li>Round-trip with the editable-page infrastructure for in-browser SME edits</li>
+            <li>Export pipeline integrated with Marketing&rsquo;s sign-off workflow</li>
+          </ul>
+        </div>
+      </div>
+      <p class="phase-foot">Build pace: Phase 2 is ~1&ndash;2 days of focused work. Phase 3 needs a real scope conversation &mdash; backend, auth, AI integration cost. Decision point: does this stay a pitch artifact or become an internal tool?</p>
     </div>
   </section>
 
@@ -1651,7 +1773,7 @@ Customers ask the same eight questions before buying AI — distilled in P10.</t
 
     <div class="modal-foot">
       <button class="btn-ghost" onclick="closeModal()">Cancel</button>
-      <button class="btn-primary" onclick="closeModal(); toast('Campaign created. Source intake is the next step.')">Continue</button>
+      <button class="btn-primary" onclick="useTemplate('Blank campaign')">Continue with blank</button>
     </div>
   </div>
 </div>
@@ -1733,10 +1855,192 @@ document.getElementById('addCampaignBtn').addEventListener('click', openModal);
 document.getElementById('addCampaignModal').addEventListener('click', function(e) {
   if (e.target.id === 'addCampaignModal') closeModal();
 });
+// ─── Campaign creation (real, persisted) ───
+var CAMPAIGN_STORE_KEY = 'cm-user-campaigns';
+function escHtml(s) {
+  return String(s).replace(/[<>&"']/g, function(c) {
+    return {'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'}[c];
+  });
+}
+function loadStoredCampaigns() {
+  try { return JSON.parse(localStorage.getItem(CAMPAIGN_STORE_KEY) || '[]'); }
+  catch(e) { return []; }
+}
+function saveStoredCampaigns(arr) {
+  try { localStorage.setItem(CAMPAIGN_STORE_KEY, JSON.stringify(arr)); } catch(e) {}
+}
+function buildCampaignCardHtml(c) {
+  return '' +
+    '<span class="cm-flag">★ Active</span>' +
+    '<div class="cm-eye">' + escHtml(c.eyebrow) + '</div>' +
+    '<h3 class="cm-h">' + escHtml(c.name) + '</h3>' +
+    '<p class="cm-desc">' + escHtml(c.desc) + '</p>' +
+    '<div class="cm-meta">' +
+      '<div class="cm-meta-cell">FAQs<b>0</b></div>' +
+      '<div class="cm-meta-cell">SMEs<b>0</b></div>' +
+      '<div class="cm-meta-cell">Content<b>0</b></div>' +
+    '</div>' +
+    '<div class="cm-foot">' +
+      '<span class="status-pill draft">Source intake</span>' +
+      '<span>' + escHtml(c.created) + ' &middot; 0%</span>' +
+    '</div>' +
+    '<div class="progress"><span style="width:0%"></span></div>';
+}
+function demoteActiveCard() {
+  document.querySelectorAll('.campaign-card.active-cm').forEach(function(card) {
+    card.classList.remove('active-cm');
+    card.classList.add('template-cm');
+    var flag = card.querySelector('.cm-flag');
+    if (flag) flag.remove();
+  });
+}
+function injectCampaignCard(c) {
+  var grid = document.querySelector('.campaign-grid');
+  var card = document.createElement('div');
+  card.className = 'campaign-card active-cm cm-user';
+  card.setAttribute('data-cmid', c.id);
+  card.innerHTML = buildCampaignCardHtml(c);
+  card.addEventListener('click', function() {
+    if (card.classList.contains('active-cm')) {
+      document.querySelector('.tab[data-tab="overview"]').click();
+    } else {
+      // re-activate this card
+      demoteActiveCard();
+      card.classList.remove('template-cm');
+      card.classList.add('active-cm');
+      var head = '<span class="cm-flag">★ Active</span>';
+      if (!card.querySelector('.cm-flag')) card.insertAdjacentHTML('afterbegin', head);
+      setActiveCampaignBanner(c);
+      saveStoredCampaigns(snapshotUserCampaigns());
+    }
+  });
+  grid.insertBefore(card, grid.firstChild);
+
+  // Update dropdown
+  var sel = document.getElementById('campaignSelector');
+  if (sel && !sel.querySelector('option[value="' + c.id + '"]')) {
+    var opt = document.createElement('option');
+    opt.value = c.id;
+    opt.textContent = c.name;
+    sel.insertBefore(opt, sel.firstChild);
+  }
+  return card;
+}
+function snapshotUserCampaigns() {
+  var arr = [];
+  document.querySelectorAll('.campaign-card.cm-user').forEach(function(card) {
+    arr.push({
+      id: card.getAttribute('data-cmid'),
+      name: (card.querySelector('.cm-h') || {}).textContent || 'Untitled',
+      eyebrow: (card.querySelector('.cm-eye') || {}).textContent || 'campaign',
+      desc: (card.querySelector('.cm-desc') || {}).textContent || '',
+      created: 'Just created',
+      isActive: card.classList.contains('active-cm'),
+    });
+  });
+  return arr;
+}
+function setActiveCampaignBanner(c) {
+  var banner = document.getElementById('emptyCampaignBanner');
+  if (!banner) return;
+  if (!c) { banner.style.display = 'none'; return; }
+  banner.querySelector('.empty-banner-name').textContent = c.name;
+  banner.style.display = 'flex';
+}
 function useTemplate(name) {
   closeModal();
-  toast('New campaign created from "' + name + '". Source intake is the next step.');
+  var isBlank = (name === 'Blank campaign');
+  var id = 'usr-' + Date.now().toString(36);
+  var displayName = isBlank ? 'New empty campaign' : name;
+  var eyebrow = isBlank ? 'campaign &middot; custom' : 'campaign &middot; from template';
+  var desc = isBlank
+    ? 'Empty campaign — upload source material and let the agent extract themes, FAQs, and a content plan.'
+    : 'Template scaffold — refine the spine, customise FAQs, swap SMEs, then run the same workflow.';
+  var c = {
+    id: id, name: displayName, eyebrow: eyebrow, desc: desc,
+    created: 'Just created', isActive: true,
+  };
+  demoteActiveCard();
+  injectCampaignCard(c);
+  // Persist
+  var stored = loadStoredCampaigns();
+  stored.forEach(function(s) { s.isActive = false; });
+  stored.unshift(c);
+  saveStoredCampaigns(stored);
+  // Banner
+  setActiveCampaignBanner(c);
+  // Toast + navigate to Source tab
+  toast('Created &ldquo;' + escHtml(displayName) + '&rdquo;. Switching to Source intake.');
+  setTimeout(function() {
+    var srcTab = document.querySelector('.tab[data-tab="source"]');
+    if (srcTab) srcTab.click();
+  }, 700);
 }
+function hydrateStoredCampaigns() {
+  var stored = loadStoredCampaigns();
+  if (!stored.length) return;
+  // Render in reverse so the latest ends up first (insertBefore prepends)
+  for (var i = stored.length - 1; i >= 0; i--) {
+    injectCampaignCard(stored[i]);
+  }
+  // Mark active state
+  var activeStored = stored.find(function(s) { return s.isActive; });
+  if (activeStored) {
+    demoteActiveCard();
+    var card = document.querySelector('.campaign-card[data-cmid="' + activeStored.id + '"]');
+    if (card) {
+      card.classList.remove('template-cm');
+      card.classList.add('active-cm');
+      if (!card.querySelector('.cm-flag')) {
+        card.insertAdjacentHTML('afterbegin', '<span class="cm-flag">★ Active</span>');
+      }
+    }
+    setActiveCampaignBanner(activeStored);
+  }
+}
+// Allow Microsoft card to be reactivated when demoted (user-created campaign is currently active)
+(function bindMsftReactivation() {
+  var msft = document.querySelector('.campaign-card[data-cmid="msft"]');
+  if (!msft) return;
+  msft.addEventListener('click', function(e) {
+    if (!msft.classList.contains('template-cm')) return; // active or unchanged — let original handler run
+    e.stopImmediatePropagation();
+    demoteActiveCard();
+    msft.classList.remove('template-cm');
+    msft.classList.add('active-cm');
+    if (!msft.querySelector('.cm-flag')) {
+      msft.insertAdjacentHTML('afterbegin', '<span class="cm-flag">★ Active</span>');
+    }
+    var stored = loadStoredCampaigns();
+    stored.forEach(function(s) { s.isActive = false; });
+    saveStoredCampaigns(stored);
+    setActiveCampaignBanner(null);
+    toast('Microsoft Knowledge Centre is active.');
+  }, true);
+})();
+function clearAllUserCampaigns() {
+  document.querySelectorAll('.campaign-card.cm-user').forEach(function(c) { c.remove(); });
+  var sel = document.getElementById('campaignSelector');
+  if (sel) {
+    sel.querySelectorAll('option').forEach(function(o) {
+      if (o.value && o.value.indexOf('usr-') === 0) o.remove();
+    });
+  }
+  saveStoredCampaigns([]);
+  // Re-activate Microsoft card
+  var msft = document.querySelector('.campaign-card[data-cmid="msft"]');
+  if (msft) {
+    demoteActiveCard();
+    msft.classList.remove('template-cm');
+    msft.classList.add('active-cm');
+    if (!msft.querySelector('.cm-flag')) {
+      msft.insertAdjacentHTML('afterbegin', '<span class="cm-flag">★ Active</span>');
+    }
+  }
+  setActiveCampaignBanner(null);
+  toast('Cleared all created campaigns. Microsoft campaign is active again.');
+}
+hydrateStoredCampaigns();
 
 // ─── Toast ───
 var toastEl = document.getElementById('toast');

@@ -32,6 +32,10 @@ const nextConfig = {
         destination: '/marketing-pilot.html',
       },
       {
+        source: '/campaign-manager',
+        destination: '/campaign-manager.html',
+      },
+      {
         source: '/boring-ai',
         destination: '/knowledge-centre-rain.html',
       },

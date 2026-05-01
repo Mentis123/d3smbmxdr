@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Adam Rappaport &mdash; Value Delivered (Feb 2025 – Apr 2026)</title>
+<style>
+  :root {
+    --accent: #464feb;
+    --accent-soft: #ebefff;
+    --accent-deep: #2c34c9;
+    --timeline-ln: linear-gradient(to bottom, transparent 0%, #b0beff 15%, #b0beff 85%, transparent 100%);
+    --timeline-border: #ffffff;
+    --bg-page: #f7f8fb;
+    --bg-card: #ffffff;
+    --bg-soft: #f5f7fa;
+    --bg-hover: #ebefff;
+    --bg-elevated: #ffffff;
+    --text-title: #1a1a1a;
+    --text-body: #2d2d2d;
+    --text-muted: #6b7280;
+    --text-accent: var(--accent);
+    --border: #e5e7eb;
+    --border-strong: #d1d5db;
+    --border-accent: rgba(70, 79, 235, 0.3);
+    --radius: 12px;
+    --shadow: 0 2px 10px rgba(0,0,0,0.06);
+    --hover-shadow: 0 4px 14px rgba(0,0,0,0.1);
+    --font: "Segoe UI", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Roboto, sans-serif;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --accent: #7385ff;
+      --accent-soft: #1f2447;
+      --accent-deep: #a5b1ff;
+      --timeline-ln: linear-gradient(to bottom, transparent 0%, transparent 3%, #6264a7 30%, #6264a7 50%, transparent 97%, transparent 100%);
+      --timeline-border: #2a2a2a;
+      --bg-page: #121316;
+      --bg-card: #1c1d22;
+      --bg-soft: #1a1b1f;
+      --bg-hover: #2a2c35;
+      --bg-elevated: #232429;
+      --text-title: #ffffff;
+      --text-body: #e5e7eb;
+      --text-muted: #9ca3af;
+      --border: #2f3138;
+      --border-strong: #3d3d3d;
+      --border-accent: rgba(115, 133, 255, 0.4);
+      --shadow: 0 2px 10px rgba(0,0,0,0.3);
+      --hover-shadow: 0 4px 14px rgba(0,0,0,0.5);
+    }
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg-page);
+    color: var(--text-body);
+    font-family: var(--font);
+    font-size: 16px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  main {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 48px 32px 64px;
+  }
+
+  header.page-header {
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 24px;
+    margin-bottom: 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .eyebrow {
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin: 0;
+  }
+
+  h1.page-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-title);
+    margin: 0;
+    letter-spacing: -0.01em;
+  }
+
+  .page-intro {
+    color: var(--text-body);
+    margin: 4px 0 0;
+    max-width: 760px;
+  }
+
+  /* Tab toggle */
+  .view-toggle {
+    display: flex;
+    gap: 4px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 4px;
+    margin-bottom: 28px;
+    box-shadow: var(--shadow);
+    flex-wrap: wrap;
+  }
+
+  .view-toggle button {
+    flex: 1 1 auto;
+    min-width: 140px;
+    background: transparent;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 0.92rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+  }
+
+  .view-toggle button:hover {
+    color: var(--text-title);
+    background: var(--bg-hover);
+  }
+
+  .view-toggle button.active {
+    background: var(--accent);
+    color: white;
+    font-weight: 600;
+  }
+
+  .view-toggle button.active:hover {
+    background: var(--accent-deep);
+    color: white;
+  }
+
+  /* Panel base */
+  .panel { display: none; animation: fadeIn 0.25s ease; }
+  .panel.active { display: block; }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .panel h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-title);
+    margin: 0 0 16px;
+    letter-spacing: -0.005em;
+  }
+
+  /* Executive list cards */
+  .exec-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 16px;
+  }
+
+  .exec-list > li {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    box-shadow: var(--shadow);
+    transition: box-shadow 0.15s, transform 0.15s;
+  }
+
+  .exec-list > li:hover {
+    box-shadow: var(--hover-shadow);
+  }
+
+  .exec-list h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--accent);
+    margin: 0 0 8px;
+  }
+
+  .exec-list p {
+    margin: 0;
+  }
+
+  .exec-list .impact {
+    display: block;
+    margin-top: 8px;
+    color: var(--text-muted);
+    font-size: 0.92rem;
+  }
+
+  .exec-list .impact b { color: var(--text-body); }
+
+  .result-callout {
+    margin-top: 20px;
+    padding: 18px 22px;
+    background: var(--accent-soft);
+    border-left: 3px solid var(--accent);
+    border-radius: 8px;
+  }
+
+  .result-callout strong { color: var(--accent-deep); }
+
+  /* Ledger table */
+  .ledger-wrap {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+
+  .ledger-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+  }
+
+  .ledger-table thead th {
+    background: var(--bg-soft);
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-align: left;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .ledger-table tbody td {
+    padding: 16px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+    color: var(--text-body);
+  }
+
+  .ledger-table tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  .ledger-table tbody tr:hover td {
+    background: var(--bg-hover);
+  }
+
+  .ledger-table .col-date {
+    white-space: nowrap;
+    font-weight: 600;
+    color: var(--accent);
+    width: 90px;
+  }
+
+  .ledger-table .col-type {
+    width: 160px;
+  }
+
+  .type-pill {
+    display: inline-block;
+    padding: 3px 10px;
+    background: var(--accent-soft);
+    color: var(--accent-deep);
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  /* Timeline */
+  .timeline-container {
+    position: relative;
+    margin: 0;
+    padding: 0 0 0 40px;
+    list-style: none;
+    color: var(--text-body);
+    line-height: 1.55;
+  }
+
+  .timeline-container::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 16px;
+    width: 2px;
+    height: 100%;
+    background: var(--timeline-ln);
+  }
+
+  .timeline-container > li {
+    position: relative;
+    margin-bottom: 16px;
+    padding: 18px 22px;
+    border-radius: var(--radius);
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    transition: box-shadow 0.15s;
+  }
+
+  .timeline-container > li:last-child { margin-bottom: 0; }
+  .timeline-container > li:hover { box-shadow: var(--hover-shadow); }
+
+  .timeline-container > li::before {
+    content: "";
+    position: absolute;
+    top: 22px;
+    left: -32px;
+    width: 14px;
+    height: 14px;
+    background: var(--accent);
+    border: 2px solid var(--timeline-border);
+    border-radius: 50%;
+    box-shadow: 0 0 0 2px var(--bg-page);
+  }
+
+  .timeline-container h3 {
+    margin: 0 0 6px;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--accent);
+  }
+
+  .timeline-container p {
+    margin: 0;
+    font-size: 0.95rem;
+  }
+
+  .timeline-container p + p { margin-top: 8px; }
+
+  .person {
+    color: var(--text-title);
+    font-weight: 600;
+  }
+
+  footer.page-footer {
+    margin-top: 48px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    color: var(--text-muted);
+    font-size: 0.82rem;
+    text-align: center;
+  }
+
+  /* ============================================================
+     Editor chrome (kcEditor pattern)
+     ============================================================ */
+
+  [data-block-id] {
+    cursor: pointer;
+    transition: outline 0.15s ease;
+    outline: 2px dashed transparent;
+    outline-offset: 3px;
+    border-radius: 3px;
+  }
+  [data-block-id]:hover { outline-color: rgba(70, 79, 235, 0.35); }
+  [data-block-id].editing {
+    outline: 2px solid var(--accent) !important;
+    outline-offset: 4px;
+    background: rgba(70, 79, 235, 0.05) !important;
+  }
+  [data-block-id].deleted {
+    opacity: 0; max-height: 0; overflow: hidden;
+    padding: 0 !important; margin: 0 !important; border: none !important;
+    pointer-events: none; transition: opacity 0.3s, max-height 0.3s;
+  }
+  body.show-deleted [data-block-id].deleted {
+    opacity: 0.4; max-height: 800px; overflow: visible;
+    text-decoration: line-through; pointer-events: auto;
+    padding: revert !important; margin: revert !important; position: relative;
+  }
+  @keyframes save-flash {
+    0% { outline-color: #34d399; }
+    100% { outline-color: transparent; }
+  }
+  [data-block-id].just-saved { animation: save-flash 0.8s ease; }
+
+  .edit-toolbar {
+    position: fixed; z-index: 9999;
+    display: flex; gap: 0.35rem; padding: 0.4rem;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-accent);
+    border-radius: 8px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+  }
+  .edit-toolbar button {
+    font-family: var(--font); font-size: 0.7rem; font-weight: 600;
+    letter-spacing: 0.04em; text-transform: uppercase;
+    padding: 0.4rem 0.8rem;
+    border: 1px solid transparent; border-radius: 5px;
+    cursor: pointer; transition: all 0.15s ease; white-space: nowrap;
+  }
+  .edit-toolbar .btn-save {
+    background: rgba(52, 211, 153, 0.15); color: #047857;
+    border-color: rgba(52, 211, 153, 0.4);
+  }
+  .edit-toolbar .btn-save:hover { background: rgba(52, 211, 153, 0.25); }
+  .edit-toolbar .btn-cancel {
+    background: rgba(107, 114, 128, 0.08); color: var(--text-muted);
+    border-color: rgba(107, 114, 128, 0.2);
+  }
+  .edit-toolbar .btn-cancel:hover { background: rgba(107, 114, 128, 0.15); }
+  .edit-toolbar .btn-delete {
+    background: rgba(251, 113, 133, 0.1); color: #be123c;
+    border-color: rgba(251, 113, 133, 0.3);
+  }
+  .edit-toolbar .btn-delete:hover { background: rgba(251, 113, 133, 0.18); }
+  .edit-toolbar .btn-restore {
+    background: rgba(70, 79, 235, 0.1); color: var(--accent-deep);
+    border-color: rgba(70, 79, 235, 0.3);
+  }
+  .edit-toolbar .btn-restore:hover { background: rgba(70, 79, 235, 0.18); }
+
+  .edit-status {
+    display: none; align-items: center; gap: 0.4rem;
+    font-size: 0.65rem; font-weight: 600;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 0.3rem 0.7rem; border-radius: 5px;
+  }
+  .edit-status.saving { display: inline-flex; color: var(--accent-deep); background: rgba(70, 79, 235, 0.1); }
+  .edit-status.saved  { display: inline-flex; color: #047857; background: rgba(52, 211, 153, 0.12); }
+  .edit-status.error  { display: inline-flex; color: #be123c; background: rgba(251, 113, 133, 0.12); }
+
+  .changes-trigger {
+    position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 998;
+    font-family: var(--font); font-size: 0.72rem; font-weight: 600;
+    letter-spacing: 0.04em;
+    padding: 0.6rem 1.1rem; border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--bg-elevated); color: var(--text-muted);
+    cursor: pointer; transition: all 0.2s;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+  }
+  .changes-trigger:hover {
+    border-color: var(--border-accent);
+    color: var(--accent-deep);
+  }
+  .changes-trigger.has-changes {
+    border-color: var(--border-accent);
+    color: var(--accent-deep);
+    background: var(--accent-soft);
+  }
+
+  .changes-panel {
+    position: fixed; bottom: 4.2rem; right: 1.5rem; z-index: 997;
+    width: 340px; max-height: 60vh;
+    background: var(--bg-card);
+    border: 1px solid var(--border-accent);
+    border-radius: 12px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.15);
+    display: none; flex-direction: column; overflow: hidden;
+  }
+  .changes-panel.open { display: flex; }
+  .changes-panel-header {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .changes-panel-title {
+    font-size: 0.7rem; font-weight: 700;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .changes-panel-actions button {
+    font-family: var(--font); font-size: 0.6rem; font-weight: 600;
+    letter-spacing: 0.04em; text-transform: uppercase;
+    padding: 0.3rem 0.55rem; border-radius: 4px;
+    border: 1px solid transparent; cursor: pointer;
+  }
+  .btn-show-deleted {
+    background: rgba(251, 113, 133, 0.08);
+    color: var(--text-muted);
+    border-color: rgba(251, 113, 133, 0.2);
+  }
+  .btn-show-deleted.active,
+  .btn-show-deleted:hover {
+    background: rgba(251, 113, 133, 0.15);
+    color: #be123c;
+  }
+  .changes-panel-body { overflow-y: auto; padding: 0.5rem; flex: 1; }
+  .changes-panel-empty {
+    padding: 2rem 1rem; text-align: center;
+    font-size: 0.85rem; color: var(--text-muted);
+  }
+  .change-item {
+    display: flex; align-items: center; gap: 0.5rem;
+    padding: 0.55rem 0.65rem; border-radius: 6px;
+    margin-bottom: 0.25rem;
+  }
+  .change-item:hover { background: var(--bg-hover); }
+  .change-badge {
+    font-size: 0.55rem; font-weight: 700;
+    letter-spacing: 0.05em; text-transform: uppercase;
+    padding: 0.18rem 0.4rem; border-radius: 3px;
+    flex-shrink: 0;
+  }
+  .change-badge.edited { background: rgba(70, 79, 235, 0.12); color: var(--accent-deep); }
+  .change-badge.deleted-badge { background: rgba(251, 113, 133, 0.15); color: #be123c; }
+  .change-label {
+    font-size: 0.78rem; color: var(--text-body);
+    flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    cursor: pointer;
+  }
+  .change-reset {
+    font-family: var(--font); font-size: 0.55rem; font-weight: 700;
+    letter-spacing: 0.04em; text-transform: uppercase;
+    padding: 0.25rem 0.45rem; border-radius: 3px;
+    border: 1px solid rgba(251, 191, 36, 0.3);
+    background: rgba(251, 191, 36, 0.08);
+    color: #b45309; cursor: pointer; flex-shrink: 0;
+  }
+  .change-reset:hover { background: rgba(251, 191, 36, 0.18); }
+
+  .lock-toggle {
+    position: fixed; top: 0.75rem; right: 0.85rem; z-index: 9999;
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    font-family: var(--font); font-size: 0.7rem; font-weight: 600;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    padding: 0.45rem 0.75rem;
+    border-radius: 6px;
+    border: 1px solid var(--border-accent);
+    background: var(--bg-elevated);
+    color: var(--accent-deep);
+    cursor: pointer; transition: all 0.18s ease;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+    user-select: none;
+  }
+  .lock-toggle:hover {
+    background: var(--accent-soft);
+    transform: translateY(-1px);
+  }
+  .lock-toggle svg { display: inline-block; vertical-align: middle; }
+  .lock-toggle .lock-icon-locked,
+  .lock-toggle .lock-label-locked { display: none; }
+  body.locked .lock-toggle { color: var(--text-muted); border-color: var(--border); }
+  body.locked .lock-toggle:hover { color: var(--accent-deep); border-color: var(--border-accent); }
+  body.locked .lock-toggle .lock-icon-unlocked,
+  body.locked .lock-toggle .lock-label-unlocked { display: none; }
+  body.locked .lock-toggle .lock-icon-locked { display: inline-block; }
+  body.locked .lock-toggle .lock-label-locked { display: inline; }
+
+  body.locked [data-block-id] { cursor: default !important; outline: none !important; }
+  body.locked [data-block-id]:hover { outline: none !important; background: transparent !important; }
+  body.locked .changes-trigger,
+  body.locked .changes-panel,
+  body.locked .edit-status,
+  body.locked .edit-toolbar { display: none !important; }
+
+  @media print {
+    .lock-toggle, .changes-trigger, .changes-panel,
+    .edit-toolbar, .edit-status, .view-toggle { display: none !important; }
+    .panel { display: block !important; page-break-after: always; }
+    body { background: #fff; color: #111; }
+  }
+
+  @media (max-width: 720px) {
+    main { padding: 32px 18px 48px; }
+    h1.page-title { font-size: 1.5rem; }
+    .ledger-table { font-size: 0.82rem; }
+    .ledger-table thead { display: none; }
+    .ledger-table tbody td {
+      display: block;
+      padding: 8px 16px;
+      border-bottom: none;
+    }
+    .ledger-table tbody tr {
+      display: block;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .ledger-table tbody td::before {
+      content: attr(data-label);
+      display: block;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+    .changes-panel { width: calc(100vw - 2rem); right: 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<button class="lock-toggle" id="lockToggle" type="button" aria-label="Toggle page edit lock" aria-pressed="false">
+  <svg class="lock-icon-unlocked" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>
+  <svg class="lock-icon-locked" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+  <span class="lock-label-unlocked">Unlocked</span>
+  <span class="lock-label-locked">Locked</span>
+</button>
+
+<main>
+  <header class="page-header">
+    <div class="header-row">
+      <p class="eyebrow" data-block-id="hero-eyebrow">Value Delivered &middot; Feb 2025 &ndash; Apr 2026</p>
+      <span class="edit-status" id="editStatus"></span>
+    </div>
+    <h1 class="page-title" data-block-id="hero-title">Adam Rappaport &mdash; Contribution Snapshot</h1>
+    <p class="page-intro" data-block-id="hero-intro">An evidence-backed overview of key contributions over the past 14+ months, structured in three toggleable views: an Executive Summary, a Quantified Value Ledger, and a Narrative Timeline. Use the toggles below to switch views.</p>
+  </header>
+
+  <nav class="view-toggle" role="tablist" aria-label="View selector">
+    <button role="tab" aria-controls="panel-exec" aria-selected="true" class="active" data-target="panel-exec">Executive One-Pager</button>
+    <button role="tab" aria-controls="panel-ledger" aria-selected="false" data-target="panel-ledger">Quantified Value Ledger</button>
+    <button role="tab" aria-controls="panel-timeline" aria-selected="false" data-target="panel-timeline">Narrative Timeline</button>
+  </nav>
+
+  <!-- ================== EXECUTIVE ================== -->
+  <section id="panel-exec" class="panel active" role="tabpanel">
+    <h2 data-block-id="exec-h2">Executive One-Pager</h2>
+    <ul class="exec-list">
+      <li>
+        <h3 data-block-id="e1-h3">Cross-Practice &amp; Strategic Enablement</h3>
+        <p data-block-id="e1-p">A driving force in elevating practice strategies and fostering cross-team alignment around Data#3&rsquo;s AI vision. On <b>13 Apr 2026</b>, delivered <b>major upgrades to the Security and Microsoft practice plans</b> (FY27), transforming sprawling drafts into concise ~20-slide decks integrating clear AI capability focus areas &mdash; introducing concepts like an &ldquo;AI layer&rdquo; in the <b>capability stack</b> and a new &ldquo;capability-as-a-service&rdquo; model tailored to each practice. Both practice leads &mdash; <span class="person">Richard Dornhart</span> (Security) and <span class="person">Scott Gosling</span> (Microsoft) &mdash; quickly adopted the recommendations (Scott responded <i>&ldquo;LOVE THIS&rdquo;</i> to the new GTM messaging). Manager <span class="person">Graham Robinson</span> praised the work as <i>&ldquo;nice [and] brilliant&rdquo;</i> and leveraged it to inspire other teams.</p>
+        <span class="impact" data-block-id="e1-impact"><b>Beyond practices:</b> catalysed cross-functional innovation by conceptualising a <b>&ldquo;Customer Virtual P&amp;L&rdquo;</b> model in March &mdash; a one-customer, one-view strategic framework linking sales, delivery, and finance. The idea attracted senior executive interest and is being refined as a potential new strategic customer planning approach.</span>
+      </li>
+
+      <li>
+        <h3 data-block-id="e2-h3">Marketing &amp; Go-to-Market (GTM) Catalyst</h3>
+        <p data-block-id="e2-p">Rapidly delivered high-impact content aligning technical strategy with marketing and sales. On <b>14 Apr 2026</b>, single-handedly produced version 3.2 of the <b>Agentic AI GTM campaign</b> assets &mdash; revamped landing page copy and infographic outline (<code>Agentic AI Web pages copy V3.2.docx</code>, <code>Agentic AI Infographic outline V3.2.docx</code>) &mdash; in less than a day, plus authored two <b>sample Knowledge Centre articles</b> (variants &ldquo;A&rdquo; and &ldquo;B&rdquo;). Materials tightly linked the campaign narrative with the latest practice frameworks (Envision&ndash;Transform&ndash;Operate, AI Factory).</p>
+        <span class="impact" data-block-id="e2-impact"><b>Impact:</b> The marketing team led by <span class="person">Amanda Gower</span> swiftly incorporated the content, accelerating campaign timeline. Leadership acknowledged the initiative &mdash; impressive volume of quality output delivered in his manager&rsquo;s absence &mdash; underscoring the need to scale Adam&rsquo;s approach across the organisation.</span>
+      </li>
+
+      <li>
+        <h3 data-block-id="e3-h3">Thought Leadership &amp; Brand Elevation</h3>
+        <p data-block-id="e3-p">Significantly contributed to Data#3&rsquo;s public thought leadership on AI. The blog <i>&ldquo;2026: The Year of the Agentic AI Builder&rdquo;</i> (published <b>4 Mar 2026</b>) highlighted emerging AI trends and Data#3&rsquo;s internal successes (like the early Feb 2026 <b>AI builder workshop</b>), framing Data#3 as a pioneer in business-oriented AI development. Strategically timed to coincide with <b>JuiceIT 2026</b> events and amplified on social media.</p>
+        <span class="impact" data-block-id="e3-impact"><b>Impact:</b> Boosted Data#3&rsquo;s credibility and audience engagement around AI. Introduced a novel call-to-action &mdash; an <b>&ldquo;Agentic AI Foundation&rdquo; pilot program invitation</b> &mdash; further promoted at events, resulting in immediate leads for Data#3&rsquo;s sales pipeline.</span>
+      </li>
+
+      <li>
+        <h3 data-block-id="e4-h3">Event Leadership &amp; Customer Engagement</h3>
+        <p data-block-id="e4-p">Played a central role in Data#3&rsquo;s successful <b>JuiceIT 2026</b> event roadshow, delivering flagship sessions and creating interactive experiences that converted audience interest into tangible leads across multiple cities. At JuiceIT <b>Perth</b> on <b>5 Mar 2026</b>, co-presented the marquee session <i>&ldquo;2026: The Year of the Agentic AI Builder&rdquo;</i> with <span class="person">Daniel Thomas</span>, captivating ~150 attendees with real-world AI success stories and a live demo. Ended the talk with a QR code linking to a pilot program EOI form &mdash; five attendees signed up on the spot. Repeated success in subsequent stops (Adelaide in March, Brisbane in April).</p>
+        <span class="impact" data-block-id="e4-impact"><b>Booth innovation:</b> Created a custom <b>AI-themed memory-match game</b> (Vercel web app) and accompanying &ldquo;How to Play&rdquo; video &mdash; used as booth staff training material. Boosted booth traffic and positioned Data#3&rsquo;s presence as interactive and innovative, distinguishing the company on the expo floor.</span>
+      </li>
+
+      <li>
+        <h3 data-block-id="e5-h3">Team Enablement &amp; Mentorship</h3>
+        <p data-block-id="e5-p">Consistently invested in upskilling colleagues and fostering an <b>AI builder culture</b>. Co-organised and facilitated an <b>Agentic AI Builder workshop</b> (<b>25 Feb 2026</b>, Melbourne) with <span class="person">Genevieve Wood</span>, guiding ~12 Data#3 staff and clients through building their own AI agents in real time. Mentored multiple colleagues 1:1 &mdash; notably helped mentee <span class="person">Anna Dziech</span> design and prototype a custom AI agent within 48 hours, connecting her with technical experts for deployment. On <b>17 Apr 2026</b>, spent an hour with <span class="person">Emma Keeton</span> (Project Manager) to build an <b>email-writing Copilot agent</b> tailored to her style &mdash; later highlighted in the JuiceIT Suva talk.</p>
+        <span class="impact" data-block-id="e5-impact"><b>Impact:</b> Newfound skills and excitement among colleagues (<i>&ldquo;I got an agent&hellip; that&rsquo;s so cool!&rdquo;</i> &mdash; Emma) and expanded Data#3&rsquo;s internal capacity to execute AI projects.</span>
+      </li>
+
+      <li>
+        <h3 data-block-id="e6-h3">Rapid Prototyping &amp; Continuous Innovation</h3>
+        <p data-block-id="e6-p">Beyond formal deliverables, proactively creates quick, high-leverage prototypes and assets that inspire teams and accelerate innovation. In the lead-up to JuiceIT 2026, built a fully functional <b>memory-match web game</b> and a <b>&ldquo;How to Play&rdquo;</b> explainer video in under an hour, showcasing agile content creation. Developed internal microsites and visualisations for complex ideas &mdash; an interactive <b>&ldquo;AI Squad Model &amp; Economics&rdquo;</b> page (mid-April) illustrating a new delivery team structure, and a <b>&ldquo;Customer Virtual P&amp;L&rdquo;</b> concept page (mid-March) aligning sales and practice teams on customer-centric financial insights. Released an experimental <b>&ldquo;RogueMobile&rdquo; demo app</b> (Apr 2026) as a proof-of-concept.</p>
+        <span class="impact" data-block-id="e6-impact"><b>Impact:</b> Often built with cutting-edge AI/low-code tools, these prototypes have been widely shared for feedback and quickly adopted (e.g. squad-structure content was integrated into an official slide deck by the practice manager within days). Underscores Adam&rsquo;s exceptional versatility and commitment to seeding innovation across Data#3.</span>
+      </li>
+    </ul>
+
+    <div class="result-callout" data-block-id="exec-summary">
+      <strong>Summary:</strong> In a short span, Adam has delivered an exceptional breadth of value &mdash; from reshaping practice strategies and accelerating marketing campaigns, to energising national events, building demos, and empowering colleagues to become AI creators. His outputs have driven real outcomes: faster strategy development, elevated brand presence, new sales leads, and a stronger internal culture of innovation. As Data#3 continues to expand its AI offerings, Adam&rsquo;s unique blend of strategic vision, technical creativity, and collaborative drive has made him a linchpin in turning AI ambition into business advantage.
+    </div>
+  </section>
+
+  <!-- ================== LEDGER ================== -->
+  <section id="panel-ledger" class="panel" role="tabpanel">
+    <h2 data-block-id="ledger-h2">Quantified Value Ledger</h2>
+    <div class="ledger-wrap">
+      <table class="ledger-table">
+        <thead>
+          <tr>
+            <th class="col-date">Date (2025&ndash;26)</th>
+            <th>Contribution / Deliverable</th>
+            <th>Recipients / Collaborators</th>
+            <th class="col-type">Type</th>
+            <th>Outcome / Impact</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="col-date" data-label="Date" data-block-id="r1-date">28 Feb 2025</td>
+            <td data-label="Contribution" data-block-id="r1-contrib">Co-presented JuiceIT Series 1 <b>session</b>: <i>&ldquo;Revolutionise Your Business with AI&rdquo;</i> (with <span class="person">Mark Pattie</span>) in multiple cities. Included an interactive slide inviting attendees to join a follow-up &ldquo;AI builder workshop&rdquo;.</td>
+            <td data-label="Recipients" data-block-id="r1-recip">~100+ customer attendees per event; co-presenter <span class="person">Mark Pattie</span>; marketing &amp; sales teams.</td>
+            <td class="col-type" data-label="Type" data-block-id="r1-type"><span class="type-pill">Conference Presentation</span></td>
+            <td data-label="Outcome" data-block-id="r1-outcome">Strong audience engagement: <b>16 attendees</b> filled the EOI form at the Melbourne event (15 &ldquo;Awesome&rdquo; responses), with 14 providing contact info and converted to leads. Validated demand for AI workshops and directly fed Data#3&rsquo;s sales funnel in 2025.</td>
+          </tr>
+          <tr>
+            <td class="col-date" data-label="Date" data-block-id="r2-date">12 Aug 2025</td>
+            <td data-label="Contribution" data-block-id="r2-contrib">Delivered JuiceIT <b>Hobart</b> session: <i>&ldquo;Inference Engines: Augmenting Business Processes&hellip;&rdquo;</i> &mdash; showcasing how Data#3 integrates AI &amp; automation (LLMs, RPA, Azure services). Developed content featuring real demos (e.g. automated document processing for a bank).</td>
+            <td data-label="Recipients" data-block-id="r2-recip">~50&ndash;80 customer attendees (new region); supported by Data#3 marketing &amp; local team; co-reviewed by <span class="person">Steve Bedwell</span>.</td>
+            <td class="col-type" data-label="Type" data-block-id="r2-type"><span class="type-pill">Conference Presentation</span></td>
+            <td data-label="Outcome" data-block-id="r2-outcome">Demonstrated Data#3&rsquo;s advanced AI solutions in a new market (Tasmania), reinforcing technical credibility and expanding brand reach. Practical demos and business-outcome focus resonated with attendees.</td>
+          </tr>
+          <tr>
+            <td class="col-date" data-label="Date" data-block-id="r3-date">18 Feb 2026</td>
+            <td data-label="Contribution" data-block-id="r3-contrib">Developed <b>AI Booth Memory-Match Game</b> (web app) &amp; <b>&ldquo;How to Play&rdquo; video</b> for JuiceIT 2026. Built on personal Vercel deployment <code>d3juiceit.vercel.app</code>, including a public how-to-play page with explainer video.</td>
+            <td data-label="Recipients" data-block-id="r3-recip">JuiceIT 2026 AI Booth team (<span class="person">Kerri Absolon</span>, national events team); internal &ldquo;Know-Before-You-Go&rdquo; attendees.</td>
+            <td class="col-type" data-label="Type" data-block-id="r3-type"><span class="type-pill">Demo &amp; Video</span></td>
+            <td data-label="Outcome" data-block-id="r3-outcome">Enhanced booth interactivity and staff training: the game drew booth visitors while the video was used during staff prep. Rapid turnaround impressed colleagues (<i>&ldquo;awesome stuff&rdquo;</i>) and spurred discussion on scaling Adam&rsquo;s quick-prototyping approach across teams.</td>
+          </tr>
+          <tr>
+            <td class="col-date" data-label="Date" data-block-id="r4-date">25 Feb 2026</td>
+            <td data-label="Contribution" data-block-id="r4-contrib">Co-led a hands-on <b>&ldquo;Agentic AI Builder&rdquo; Workshop</b> (Melbourne) for Data#3 staff and clients. Guided ~12 participants through building their first AI agents using real tools over a half-day session. Co-facilitated with <span class="person">Genevieve Wood</span>.</td>
+            <td data-label="Recipients" data-block-id="r4-recip">~12 workshop participants (consultants, architects, clients); co-facilitator <span class="person">Genevieve Wood</span>.</td>
+            <td class="col-type" data-label="Type" data-block-id="r4-type"><span class="type-pill">Workshop</span></td>
+            <td data-label="Outcome" data-block-id="r4-outcome">Every attendee built a basic AI agent by session&rsquo;s end, boosting confidence and skills in AI development. Generated internal momentum for more practical AI training; later featured in marketing content (Adam&rsquo;s blog, JuiceIT talks).</td>
+          </tr>
+          <tr>
+            <td class="col-date" data-label="Date" data-block-id="r5-date">4 Mar 2026</td>
+            <td data-label="Contribution" data-block-id="r5-contrib">Authored Data#3 <b>Knowledge Centre blog</b>: <a href="https://www.data3.com/knowledge-centre/blog/2026-the-year-of-the-agentic-ai-builder/" target="_blank" rel="noopener"><i>&ldquo;2026: The Year of the Agentic AI Builder&rdquo;</i></a>. Bridged industry trends, Data#3&rsquo;s internal AI initiatives, and an invitation to an &ldquo;Agentic AI Foundation&rdquo; pilot program. Co-reviewed with marketing (e.g. <span class="person">Jared Prestwidge</span>).</td>
+            <td data-label="Recipients" data-block-id="r5-recip">Data#3 external audience (CIOs, IT leaders); reviewed by marketing and practice leads (e.g. <span class="person">Daniel Thomas</span>).</td>
+            <td class="col-type" data-label="Type" data-block-id="r5-type"><span class="type-pill">Public Blog</span></td>
+            <td data-label="Outcome" data-block-id="r5-outcome">Established Data#3&rsquo;s thought leadership in AI. Shared via corporate site and LinkedIn; attracted readership ahead of JuiceIT. Internally unified messaging (narrative repurposed for campaign assets and event scripts), and the pilot CTA helped generate qualified leads at events.</td>
+          </tr>
+          <tr>
+            <td class="col-date" data-label="Date" data-block-id="r6-date">5 Mar 2026</td>
+            <td data-label="Contribution" data-block-id="r6-contrib">Co-presented <b>JuiceIT Perth</b> session: <i>&ldquo;2026: The Year of the Agentic AI Builder&rdquo;</i> (with <span class="person">Daniel Thomas</span>). Engaged ~150 attendees in a high-energy talk featuring Data#3&rsquo;s AI stories and an interactive Q&amp;A. Ended with an EOI <b>QR code call-to-action</b> for a pilot program.</td>
+            <td data-label="Recipients" data-block-id="r6-recip">~150 customer attendees (Perth); co-presenter <span class="person">Dr. Daniel Thomas</span> (Business Aspect); Data#3 marketing and practice teams.</td>
+            <td class="col-type" data-label="Type" data-block-id="r6-type"><span class="type-pill">Conference Session</span></td>
+            <td data-label="Outcome" data-block-id="r6-outcome">Converted thought leadership to pipeline: <b>5 attendees scanned and submitted the EOI</b> on the spot, yielding immediate sales opportunities. Set the model for subsequent JuiceIT sessions (Adelaide, Brisbane), ensuring consistent messaging and interest across all events.</td>
+          </tr>
+          <tr>
+            <td class="col-date" data-label="Date" data-block-id="r7-date">11&ndash;13 Mar 2026</td>
+            <td data-label="Contribution" data-block-id="r7-contrib">Mentored colleague <span class="person">Anna Dziech</span> in building a <b>custom AI agent</b> for her role. Provided resources (multi-agent system guides) and iterative feedback in Teams chats, connecting her with <span class="person">Steve Bedwell</span> for deployment advice.</td>
+            <td data-label="Recipients" data-block-id="r7-recip"><span class="person">Anna Dziech</span> (Consultant, mentee); consulted <span class="person">Steve Bedwell</span> (Senior AI Engineer).</td>
+            <td class="col-type" data-label="Type" data-block-id="r7-type"><span class="type-pill">1:1 Mentorship</span></td>
+            <td data-label="Outcome" data-block-id="r7-outcome">Within 2 days, Anna developed a working agent prototype, demonstrating accelerated skill transfer. Her success story has been shared internally as an example of rapid upskilling, contributing to increased confidence and autonomous experimentation among team members.</td>
+          </tr>
+          <tr>
+            <td class="col-date" data-label="Date" data-block-id="r8-date">13&ndash;16 Mar 2026</td>
+            <td data-label="Contribution" data-block-id="r8-contrib">Initiated a new <b>&ldquo;Customer Virtual P&amp;L&rdquo; whitepaper</b> (interactive page at <code>d3smbmxdr.vercel.app</code>) after a leadership call. Drafted using generative AI and domain expertise, and circulated for feedback (to <span class="person">Richard Dornhart</span>, <span class="person">Paula Fountain</span>, <span class="person">Leon Scott</span>).</td>
+            <td data-label="Recipients" data-block-id="r8-recip">Internal stakeholders across practices (Security, Microsoft, Sales) and exec sponsor (<i>&ldquo;Goldie&rdquo;</i>, senior finance leader).</td>
+            <td class="col-type" data-label="Type" data-block-id="r8-type"><span class="type-pill">Concept Whitepaper</span></td>
+            <td data-label="Outcome" data-block-id="r8-outcome">Sparked <b>cross-functional discussion</b> on aligning practice and account planning with customer-level profitability. Senior leadership showed strong interest (<i>&ldquo;massive internally&hellip; super keen&rdquo;</i> feedback), and contributors are refining it into a formal strategy approach.</td>
+          </tr>
+          <tr>
+            <td class="col-date" data-label="Date" data-block-id="r9-date">13 Apr 2026</td>
+            <td data-label="Contribution" data-block-id="r9-contrib">Produced <b>Security Practice Plan (FY27)</b> &mdash; rewrote a 50+ slide draft into a concise 20-slide presentation deck (<code>FY27 &ndash; AI Proposed &ndash; Security Practice Plan.pptx</code>) with clearly defined offerings and an &ldquo;AI capability layer&rdquo;.</td>
+            <td data-label="Recipients" data-block-id="r9-recip"><span class="person">Richard Dornhart</span> (National Practice Manager &mdash; Security).</td>
+            <td class="col-type" data-label="Type" data-block-id="r9-type"><span class="type-pill">Strategy Deck</span></td>
+            <td data-label="Outcome" data-block-id="r9-outcome">Sharpened strategic focus and reduced complexity: Richard&rsquo;s unwieldy original plan was transformed into an easily consumable format. The new deck, delivered within hours of request, was lauded by Richard and used to guide his leadership discussions.</td>
+          </tr>
+          <tr>
+            <td class="col-date" data-label="Date" data-block-id="r10-date">13 Apr 2026</td>
+            <td data-label="Contribution" data-block-id="r10-contrib">Created <b>Microsoft Practice Plan (FY27)</b> enhancements &mdash; shared a new GTM narrative (&ldquo;from license to value&rdquo;) and a &ldquo;three strategic pillars&rdquo; visual, then delivered a refined 15-slide presentation (<code>FY27 &ndash; AI-Modified &ndash; Microsoft Practice Plan.pptx</code>) with integrated AI opportunities.</td>
+            <td data-label="Recipients" data-block-id="r10-recip"><span class="person">Scott Gosling</span> (National Practice Manager &mdash; Microsoft).</td>
+            <td class="col-type" data-label="Type" data-block-id="r10-type"><span class="type-pill">Strategy Deck</span></td>
+            <td data-label="Outcome" data-block-id="r10-outcome">Influenced practice strategy: Scott enthusiastically incorporated Adam&rsquo;s messaging (<i>&ldquo;LOVE THIS&rdquo;</i>). The final plan aligned Microsoft practice offerings with Data#3&rsquo;s AI roadmap and complemented the Security plan, enabling a unified cross-practice value narrative.</td>
+          </tr>
+          <tr>
+            <td class="col-date" data-label="Date" data-block-id="r11-date">14 Apr 2026</td>
+            <td data-label="Contribution" data-block-id="r11-contrib">Delivered <b>Agentic AI GTM campaign</b> content (v3.2) &mdash; updated landing-page copy (<code>Agentic AI Web pages V3.2.docx</code>) &amp; infographic outline (<code>Agentic AI Infographic V3.2.docx</code>), plus drafted two <b>Knowledge Centre articles</b> (A/B versions). Completed in a day, following operational shifts decided with the AI practice team.</td>
+            <td data-label="Recipients" data-block-id="r11-recip">Marketing team (campaign lead <span class="person">Amanda Gower</span>) and practice stakeholders (<span class="person">Matthew Gooden</span>, <span class="person">Scott Gosling</span>, <span class="person">Alenka Caserman</span>).</td>
+            <td class="col-type" data-label="Type" data-block-id="r11-type"><span class="type-pill">Marketing Collateral</span></td>
+            <td data-label="Outcome" data-block-id="r11-outcome">Rapid alignment of marketing with technical strategy: provided ready-to-use copy capturing the new positioning (Envision&ndash;Transform&ndash;Operate framework, AI Factory model). Accelerated campaign progress and filled content gaps, earning praise from leadership (<i>&ldquo;brilliant&rdquo;</i> execution).</td>
+          </tr>
+          <tr>
+            <td class="col-date" data-label="Date" data-block-id="r12-date">15&ndash;16 Apr 2026</td>
+            <td data-label="Contribution" data-block-id="r12-contrib">Built <b>internal AI practice knowledge assets</b> &mdash; created interactive HTML pages on a personal site to visualise and share new operational concepts. Notables: <b>&ldquo;AI Practice &mdash; Squad Model&rdquo;</b> (delivery team structure blueprint) and <b>&ldquo;AI Factory &mdash; Squad Economics&rdquo;</b> (resourcing model) &mdash; both integrating diagrams and text. Iterated with practice leaders <span class="person">Jack Latrobe</span>, <span class="person">Matthew Gooden</span>.</td>
+            <td data-label="Recipients" data-block-id="r12-recip">Data#3 AI Centre of Excellence; National Practice team.</td>
+            <td class="col-type" data-label="Type" data-block-id="r12-type"><span class="type-pill">Interactive Content</span></td>
+            <td data-label="Outcome" data-block-id="r12-outcome">Accelerated internal consensus-building. Shareable visuals enabled rapid feedback and collaborative refinement, contributing to an updated <b>&ldquo;AI Squads&rdquo; deck</b> promptly adopted by the practice manager. Quick prototyping helped <b>crystallise operating models</b> now guiding practice org design and service packaging.</td>
+          </tr>
+          <tr>
+            <td class="col-date" data-label="Date" data-block-id="r13-date">17 Apr 2026</td>
+            <td data-label="Contribution" data-block-id="r13-contrib">Conducted a 1:1 <b>AI agent build session</b> with <span class="person">Emma Keeton</span> (Project Manager), guiding her step-by-step to create a personal &ldquo;Email Copilot&rdquo; agent using Microsoft&rsquo;s Copilot agent builder.</td>
+            <td data-label="Recipients" data-block-id="r13-recip"><span class="person">Emma Keeton</span>; Microsoft 365 Copilot platform (live build).</td>
+            <td class="col-type" data-label="Type" data-block-id="r13-type"><span class="type-pill">Live Coaching</span></td>
+            <td data-label="Outcome" data-block-id="r13-outcome">Resulted in a working agent that drafts Emma&rsquo;s emails in her own style. Emma was thrilled (<i>&ldquo;that&rsquo;s so cool&hellip; I got an agent!&rdquo;</i>) and can now champion AI usage to her peers. Featured in Adam&rsquo;s JuiceIT Suva talk, underscoring how rapidly Data#3 employees can be enabled to leverage AI tools.</td>
+          </tr>
+          <tr>
+            <td class="col-date" data-label="Date" data-block-id="r14-date">Apr 2026</td>
+            <td data-label="Contribution" data-block-id="r14-contrib">Deployed <b>&ldquo;RogueMobile&rdquo; app demo</b> (personal Vercel site). Though experimental, illustrates a mobile solution concept (details confidential) shared with a colleague for feedback.</td>
+            <td data-label="Recipients" data-block-id="r14-recip">Internal stakeholders (e.g. <span class="person">Adam Maughan</span>).</td>
+            <td class="col-type" data-label="Type" data-block-id="r14-type"><span class="type-pill">Prototype App</span></td>
+            <td data-label="Outcome" data-block-id="r14-outcome">Demonstrated Adam&rsquo;s ability to deliver working <b>code prototypes</b> that spark discussion and exploration. Underscores his technical creativity and willingness to explore innovative solutions even in early concept stages.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ================== TIMELINE ================== -->
+  <section id="panel-timeline" class="panel" role="tabpanel">
+    <h2 data-block-id="tl-h2">Narrative Timeline</h2>
+    <ul class="timeline-container">
+      <li>
+        <h3 data-block-id="t1-h3">Feb 2025 &mdash; First Major AI Showcase (JuiceIT 2025)</h3>
+        <p data-block-id="t1-p"><span class="person">Adam Rappaport</span> steps into the spotlight as a Data#3 AI Specialist at the JuiceIT 2025 technology roadshow. He co-presents an AI-focused session &mdash; <i>&ldquo;Revolutionise Your Business with AI&rdquo;</i> &mdash; alongside <span class="person">Mark Pattie</span>, sharing early insights on how generative AI could drive business transformation. The sessions (in multiple cities) receive strong feedback, and Adam experimentally includes a slide inviting attendees to sign up (via QR code) for a follow-up AI builder workshop. The response validates the approach: at the Melbourne event, 16 people fill out the EOI form (15 enthusiastically marking it as an &ldquo;awesome idea&rdquo;), with 14 leaving contact details that are quickly converted to sales leads in Salesforce. This success demonstrates Adam&rsquo;s knack for connecting thought leadership to tangible business outcomes and sets the stage for more ambitious initiatives in 2026.</p>
+      </li>
+      <li>
+        <h3 data-block-id="t2-h3">Aug 2025 &mdash; Expanding Impact at JuiceIT Hobart</h3>
+        <p data-block-id="t2-p">At Data#3&rsquo;s JuiceIT mid-year event in Hobart, Adam delivers a deep-dive technical session titled <i>&ldquo;Inference Engines: Augmenting Business Processes with Next-Gen Intelligence.&rdquo;</i> The talk showcases how Data#3 leverages Azure AI tools and automation to solve complex workflow challenges. Adam walks the audience through live demos &mdash; for instance, dropping a scanned document into SharePoint and showing how an automated pipeline uses OCR and LLMs to extract metadata and update records in real time &mdash; to illustrate pragmatic AI in action. The session&rsquo;s emphasis on real customer stories and behind-the-scenes demos solidifies Data#3&rsquo;s credibility in a new region, leaving attendees with a clear message: Data#3 can turn AI hype into practical, valuable solutions. Highlights Adam&rsquo;s versatility as a presenter, able to both inspire with vision and delve into technical details as needed.</p>
+      </li>
+      <li>
+        <h3 data-block-id="t3-h3">Feb 2026 &mdash; Building Blocks: Workshop and Booth Innovations</h3>
+        <p data-block-id="t3-p1">In early 2026, Adam accelerates Data#3&rsquo;s AI evangelism internally and externally. On <b>25 Feb</b>, he co-facilitates an <b>Agentic AI Builder Workshop</b> in Melbourne, empowering about a dozen Data#3 staff and customers to create their first AI software agents. This immersive session mirrors Adam&rsquo;s learning-by-building philosophy, and every participant walks away with a working agent &mdash; a transformative experience for many and a catalyst for internal enthusiasm about AI.</p>
+        <p data-block-id="t3-p2">Just days later, as JuiceIT 2026 approaches, Adam channels his creativity into developing a unique <b>AI-themed memory-match game</b> for the AI practice&rsquo;s expo booth. By <b>18 Feb</b>, he has not only coded the game on a personal Vercel site (for easy access) but also produced a quick <b>&ldquo;How to Play&rdquo; video</b> explaining the rules &mdash; accomplished from concept to completion in under an hour. These contributions significantly enrich the JuiceIT booth experience: booth staff use Adam&rsquo;s video to prepare, and the fun, interactive game draws more visitors (and leads) to Data#3&rsquo;s exhibition area. National events manager <span class="person">Kerri Absolon</span> praises his work in team forums, and it&rsquo;s agreed that Adam&rsquo;s creative, fast-turnaround approach could be a model for other marketing efforts.</p>
+      </li>
+      <li>
+        <h3 data-block-id="t4-h3">4 Mar 2026 &mdash; Publishing the Vision</h3>
+        <p data-block-id="t4-p">Adam&rsquo;s first major <b>thought leadership article</b>, <a href="https://www.data3.com/knowledge-centre/blog/2026-the-year-of-the-agentic-ai-builder/" target="_blank" rel="noopener"><i>&ldquo;2026: The Year of the Agentic AI Builder,&rdquo;</i></a> goes live on Data#3&rsquo;s public Knowledge Centre. This blog weaves together global AI trends and Data#3&rsquo;s own experiments &mdash; from an anecdote about Tesla&rsquo;s AI Day to the company&rsquo;s February agent-building workshop &mdash; to argue that a paradigm shift toward &ldquo;AI builders&rdquo; is underway. The piece is timed as a teaser for the JuiceIT roadshow, with a call-to-action encouraging readers to sign up for Data#3&rsquo;s upcoming Agentic AI pilot. Internally, Adam collaborated with Marketing (e.g. <span class="person">Jared Prestwidge</span>) on refining the narrative. Externally, the blog heightens Data#3&rsquo;s profile as an AI thought leader &mdash; shared on LinkedIn, garnering positive engagement from partners and clients &mdash; and primes the market for Data#3&rsquo;s AI offerings ahead of JuiceIT.</p>
+      </li>
+      <li>
+        <h3 data-block-id="t5-h3">5 Mar 2026 &mdash; JuiceIT Perth: AI Session Converts Enthusiasm into Pipeline</h3>
+        <p data-block-id="t5-p">The JuiceIT 2026 series kicks off in Perth with Adam co-presenting Data#3&rsquo;s headline session <i>&ldquo;2026: The Year of the Agentic AI Builder&rdquo;</i> beside <span class="person">Daniel Thomas</span>. In a packed room (~150 attendees), Adam engages the audience with a narrative of how Data#3 is turning the AI hype into real customer value. The session is peppered with examples (including a live Copilot agent demo) and ends with a bold twist: Adam invites the audience to scan a <b>QR code</b> on-screen to express interest in joining Data#3&rsquo;s AI pilot program. The response is immediate &mdash; five individuals pull out their phones and sign up <b>on the spot</b>. As one attendee later remarks, <i>&ldquo;It was refreshing to leave an IT talk with a concrete next step.&rdquo;</i> The Perth event validates the power of Adam&rsquo;s approach: inspiring vision paired with practical calls-to-action to initiate customer engagement.</p>
+      </li>
+      <li>
+        <h3 data-block-id="t6-h3">Mid Mar 2026 &mdash; Roadshow Continues &amp; Internal Innovation Sparks</h3>
+        <p data-block-id="t6-p1">Following Perth, the <b>JuiceIT roadshow</b> travels to Adelaide in mid-March. Adam delivers the AI session there (this time solo, as co-presenters rotate) to another full audience, building on lessons from Perth. While slightly smaller in scale, the Adelaide event yields additional results: <b>three more attendees sign up</b> via the EOI code (uploaded to Salesforce shortly after), and local account teams report strong conversations sparked by the talk.</p>
+        <p data-block-id="t6-p2">Back at headquarters, Adam&rsquo;s momentum continues in the days after Adelaide: after an internal call, he identifies an opportunity to address a gap between sales and practice planning. By <b>16 Mar</b>, Adam has drafted a <b>&ldquo;Customer Virtual P&amp;L&rdquo;</b> concept &mdash; an interactive whitepaper page that outlines a unified view of account profitability and potential &ldquo;One Data#3&rdquo; strategies. He circulates the draft to colleagues across sales and practices for feedback, even instructing them how to suggest AI-driven edits via &ldquo;Note to Claude&rdquo; in the document. The idea &mdash; which he describes as <i>&ldquo;MASSIVE right now internally&rdquo;</i> &mdash; catches on: a senior executive expresses keen interest and asks for further development. This episode exemplifies Adam&rsquo;s skill in rapidly capturing and shaping nascent ideas to drive cross-team innovation.</p>
+      </li>
+      <li>
+        <h3 data-block-id="t7-h3">Late Mar&ndash;Apr 2026 &mdash; Sustaining Event Momentum &amp; Multi-Format Content Output</h3>
+        <p data-block-id="t7-p1">The JuiceIT roadshow&rsquo;s energy carries into Brisbane (early April 2026), where Adam once again delivers the AI session to an engaged crowd, and collects more pilot program interest from attendees (Data#3&rsquo;s leads from the roadshow now number in the high single digits). With the final event &mdash; a groundbreaking JuiceIT in <b>Suva, Fiji</b> &mdash; on the horizon, Adam continually refines content to maximise impact.</p>
+        <p data-block-id="t7-p2">On the marketing front, Adam&rsquo;s ability to produce quality content at speed is on full display on <b>14 Apr</b>. In a single day he revamps the core <b>Agentic AI campaign assets</b> to reflect new strategy decisions from an AI practice meeting earlier that week. He sends a comprehensive package to marketing: updated landing page text emphasising &ldquo;Envision, Transform, Operate&rdquo; phases, an infographic outline pinpointing Data#3&rsquo;s unique approach, and two versions of a Knowledge Centre article for the campaign&rsquo;s thought leadership angle. Manager <span class="person">Graham Robinson</span>, checking in from overseas, is surprised and thrilled &mdash; praising the <i>&ldquo;nice work&rdquo;</i> and noting that Adam&rsquo;s independent drive &ldquo;in [my] absence&rdquo; has been crucial. Graham reports he&rsquo;s using Adam&rsquo;s work to &ldquo;put a rocket&rdquo; under other teams to adopt the same aligned approach.</p>
+      </li>
+      <li>
+        <h3 data-block-id="t8-h3">15&ndash;16 Apr 2026 &mdash; Visualising New Delivery Models</h3>
+        <p data-block-id="t8-p">With practice strategies and campaigns on track, Adam turns to operational innovation. In mid-April, he collaborates intensively with colleagues like <span class="person">Jack Latrobe</span> and <span class="person">Matthew Gooden</span> on a new <b>AI delivery &ldquo;squad&rdquo; model</b>. To articulate their ideas, Adam creates an <b>interactive web page</b> outlining the &ldquo;AI Practice &mdash; Squad Model&rdquo; and its economics, complete with diagrams (e.g. an image <code>squads.jpg</code> summarising roles and resources). He shares this internally for feedback via Teams chat and quickly iterates on the design (using Google&rsquo;s advanced image editing tools, code-named &ldquo;Gemini&rdquo;). Within hours, he produces a refined version (<code>ai_envisioning2.jpg</code>) that incorporates suggestions like chevron timelines and icons for clarity. By the next day, practice leaders have enough confidence in the concept to incorporate Adam&rsquo;s content into an official <b>&ldquo;AI Squads&rdquo; presentation deck</b> (with the practice manager tagging Adam in comments as slides get updated). This rapid cycle from idea to visuals to adoption illustrates how Adam&rsquo;s entrepreneurial approach &mdash; using modern tools and quick prototypes &mdash; is accelerating organisational learning and change.</p>
+      </li>
+      <li>
+        <h3 data-block-id="t9-h3">17 Apr 2026 &mdash; Another Empowered AI Builder &amp; Global Stage Preparation</h3>
+        <p data-block-id="t9-p1">Just two weeks after guiding his mentee to build an agent, Adam conducts another hands-on enablement session &mdash; this time with a colleague outside the AI team. In a virtual meeting on <b>17 Apr</b>, he helps <span class="person">Emma Keeton</span>, a project manager, build a personalised <b>&ldquo;Email Copilot&rdquo; agent</b> from scratch. Starting from the basics of Microsoft&rsquo;s Copilot Studio interface, Adam leads Emma through designing prompts and integrating her writing style. In under an hour, they succeed; Emma is astonished to see a demo email drafted in her own voice. <i>&ldquo;That&rsquo;s so cool&hellip; I got an agent!&rdquo;</i> she exclaims, grateful for Adam&rsquo;s patient guidance.</p>
+        <p data-block-id="t9-p2">Adam immediately recognises the story&rsquo;s impact and plans to incorporate it as a highlight in his upcoming JuiceIT <b>Suva</b> keynote. As he finalises preparations for the Fiji event (where he&rsquo;s been invited to present as a solo headline speaker), the tale of Emma&rsquo;s new agent becomes a powerful example of Data#3&rsquo;s internal transformation. Adam&rsquo;s unique ability to both do the cutting-edge work and then translate it into compelling narratives underpins his success. As he boards the plane to Suva, he carries not only a refined presentation deck loaded with Data#3&rsquo;s latest AI triumphs, but also the momentum of a remarkable run of contributions &mdash; a testament to the immense value he has delivered, and a sign of more innovation to come.</p>
+      </li>
+    </ul>
+  </section>
+
+  <footer class="page-footer" data-block-id="foot">
+    Single-page report &middot; Adam Rappaport &middot; Data#3 AI Practice
+  </footer>
+</main>
+
+<button class="changes-trigger" id="changesTrigger">No Changes</button>
+<div class="changes-panel" id="changesPanel">
+  <div class="changes-panel-header">
+    <span class="changes-panel-title">Change History</span>
+    <div class="changes-panel-actions">
+      <button class="btn-show-deleted" id="showDeletedBtn">Show Deleted</button>
+    </div>
+  </div>
+  <div class="changes-panel-body" id="changesList"></div>
+</div>
+
+<script>
+  // Tab switching
+  const tabs = document.querySelectorAll('.view-toggle button');
+  const panels = document.querySelectorAll('.panel');
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      const target = tab.dataset.target;
+      tabs.forEach(t => {
+        const isActive = t === tab;
+        t.classList.toggle('active', isActive);
+        t.setAttribute('aria-selected', isActive ? 'true' : 'false');
+      });
+      panels.forEach(p => p.classList.toggle('active', p.id === target));
+    });
+  });
+</script>
+
+<script src="/_kc-editor.js"></script>
+<script>kcEditor('contributions');</script>
+
+</body>
+</html>

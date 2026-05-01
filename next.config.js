@@ -91,6 +91,10 @@ const nextConfig = {
         source: '/knowledge-centre/adam-wrap',
         destination: '/knowledge-centre/adam-wrap-v01.html',
       },
+      {
+        source: '/contributions',
+        destination: '/contributions.html',
+      },
     ]
   },
 }

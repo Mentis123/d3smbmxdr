@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>AI Practice Manager — Proposal · Data#3</title>
+<meta name="description" content="Data#3 AI Practice Manager proposal — a 10-slide deck. Scroll to advance, or enter full-screen presentation mode." />
+<meta name="theme-color" content="#070b16" />
+<meta property="og:title" content="AI Practice Manager — Proposal · Data#3" />
+<meta property="og:description" content="A 10-slide deck: the decision, the problem, the operating model, the structure and the ask." />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://d3smbmxdr.vercel.app/ai-practice/deck" />
+<meta property="og:image" content="https://d3smbmxdr.vercel.app/ai-practice/practice-deck-assets/og.jpg" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta name="twitter:card" content="summary_large_image" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<!-- Fonts loaded non-blocking so the slide-1 image is never gated on a third-party round-trip -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" media="print" onload="this.media='all'" />
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" /></noscript>
+<style>
+  :root{
+    --bg:#070b16;
+    --bg-2:#0a1020;
+    --ink:#e9edf6;
+    --muted:#8b95ab;
+    --muted-2:#5f6982;
+    --cyan:#4dd2f0;
+    --cyan-dim:#2a8fb0;
+    --line:rgba(255,255,255,.10);
+    --line-2:rgba(255,255,255,.06);
+    --bar:54px;
+    --vpad-t:clamp(8px,1.6vh,20px);   /* must match .slide top padding (after --bar) */
+    --vpad-b:clamp(14px,3vh,40px);    /* must match .slide bottom padding */
+    --ar:1.77683;          /* exact 1672 / 941 */
+    --sans:"DM Sans",system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  html{background:var(--bg);scroll-behavior:smooth}
+  body{
+    font-family:var(--sans);
+    color:var(--ink);
+    background:
+      radial-gradient(1200px 700px at 78% -10%, rgba(77,210,240,.10), transparent 60%),
+      radial-gradient(900px 600px at -5% 110%, rgba(115,0,255,.08), transparent 55%),
+      var(--bg);
+    -webkit-font-smoothing:antialiased;
+    overscroll-behavior-y:none;
+  }
+  @media (prefers-reduced-motion:reduce){ html{scroll-behavior:auto} }
+  a{color:inherit}
+
+  /* ---------- Top bar ---------- */
+  .topbar{
+    position:fixed;inset:0 0 auto 0;height:var(--bar);z-index:40;
+    display:flex;align-items:center;gap:16px;
+    padding:0 clamp(12px,2.4vw,26px);
+    background:linear-gradient(to bottom, rgba(7,11,22,.92), rgba(7,11,22,.55) 70%, rgba(7,11,22,0));
+    backdrop-filter:saturate(140%) blur(10px);
+    -webkit-backdrop-filter:saturate(140%) blur(10px);
+    transition:transform .35s ease, opacity .35s ease;
+  }
+  .wordmark{font-weight:700;letter-spacing:-.01em;font-size:16px;white-space:nowrap}
+  .wordmark sup{color:var(--cyan);font-size:.62em;font-weight:700;top:-.55em}
+  .topbar .sep{width:1px;height:20px;background:var(--line)}
+  .deck-title{
+    font-size:12.5px;color:var(--muted);font-weight:500;white-space:nowrap;
+    overflow:hidden;text-overflow:ellipsis;
+  }
+  .topbar .spacer{flex:1 1 auto}
+  .counter{
+    font-family:var(--mono);font-size:12px;color:var(--muted);
+    letter-spacing:.04em;white-space:nowrap;font-variant-numeric:tabular-nums;
+  }
+  .counter b{color:var(--ink);font-weight:600}
+  .btn{
+    appearance:none;border:1px solid var(--line);background:rgba(255,255,255,.03);
+    color:var(--ink);font-family:var(--sans);font-weight:600;font-size:12.5px;
+    padding:8px 13px;border-radius:9px;cursor:pointer;white-space:nowrap;
+    display:inline-flex;align-items:center;gap:7px;line-height:1;
+    transition:background .18s ease, border-color .18s ease, transform .06s ease;
+  }
+  .btn:hover{background:rgba(77,210,240,.12);border-color:rgba(77,210,240,.5)}
+  .btn:active{transform:translateY(1px)}
+  .btn svg{width:14px;height:14px;display:block}
+  .btn-primary{background:rgba(77,210,240,.14);border-color:rgba(77,210,240,.45);color:#dffaff}
+  .btn-primary:hover{background:rgba(77,210,240,.22)}
+  .btn .lbl{display:inline}
+  @media (max-width:560px){ .deck-title{display:none} .btn .lbl{display:none} .btn{padding:8px 10px} }
+
+  /* ---------- Deck / slides ---------- */
+  .deck{
+    height:100vh;height:100svh;
+    overflow-y:auto;overflow-x:hidden;
+    overscroll-behavior:none;
+    scroll-snap-type:y mandatory;
+    scroll-behavior:smooth;
+  }
+  @media (prefers-reduced-motion:reduce){ .deck{scroll-behavior:auto} }
+  .slide{
+    position:relative;
+    height:100vh;height:100svh;
+    scroll-snap-align:center;scroll-snap-stop:always;
+    display:flex;align-items:center;justify-content:center;
+    padding:calc(var(--bar) + var(--vpad-t)) clamp(8px,2vw,40px) var(--vpad-b);
+  }
+  .frame{
+    position:relative;
+    width:min(100%, calc((100vh - var(--bar) - var(--vpad-t) - var(--vpad-b)) * var(--ar)));
+    width:min(100%, calc((100svh - var(--bar) - var(--vpad-t) - var(--vpad-b)) * var(--ar)));
+    aspect-ratio:1672 / 941;
+    border-radius:14px;overflow:hidden;
+    background:#0a1020;
+    box-shadow:0 30px 80px -30px rgba(0,0,0,.8), 0 0 0 1px var(--line-2);
+  }
+  .frame img{display:block;width:100%;height:100%;object-fit:contain}
+  .slide-no{
+    position:absolute;left:14px;bottom:11px;z-index:2;
+    font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;
+    color:rgba(255,255,255,.5);pointer-events:none;
+    text-transform:uppercase;
+    text-shadow:0 1px 4px rgba(0,0,0,.7);
+  }
+
+  /* ---------- Dot rail ---------- */
+  .dots{
+    position:fixed;right:clamp(8px,1.3vw,18px);top:50%;transform:translateY(-50%);
+    z-index:35;display:flex;flex-direction:column;gap:9px;align-items:center;
+  }
+  .dots button{
+    appearance:none;border:0;padding:0;cursor:pointer;background:transparent;
+    width:18px;height:14px;display:flex;align-items:center;justify-content:center;
+  }
+  .dots button i{
+    display:block;width:7px;height:7px;border-radius:50%;
+    background:rgba(255,255,255,.26);transition:all .2s ease;
+  }
+  .dots button:hover i{background:rgba(255,255,255,.55);transform:scale(1.15)}
+  .dots button[aria-current="true"] i{
+    background:var(--cyan);width:9px;height:9px;
+    box-shadow:0 0 0 4px rgba(77,210,240,.16);
+  }
+  @media (max-width:560px){
+    .dots{display:none}
+    /* dot rail is hidden on phones, so surface a slim progress bar in scroll mode */
+    body:not(.present) .pbar{display:block}
+  }
+
+  /* ---------- Hint ---------- */
+  .hint{
+    position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:30;
+    display:flex;align-items:center;gap:9px;
+    font-size:12px;color:var(--muted);
+    background:rgba(10,16,32,.7);border:1px solid var(--line);
+    padding:7px 13px;border-radius:999px;backdrop-filter:blur(8px);
+    transition:opacity .5s ease;
+  }
+  .hint .kbd{
+    font-family:var(--mono);font-size:10.5px;color:var(--ink);
+    border:1px solid var(--line);border-radius:5px;padding:2px 5px;background:rgba(255,255,255,.04);
+  }
+  .hint.gone{opacity:0;pointer-events:none}
+  @media (max-width:560px){ .hint{font-size:11px} }
+
+  /* ---------- Present-mode chrome ---------- */
+  .edge{
+    position:fixed;top:0;height:100%;width:13%;min-width:64px;z-index:25;
+    border:0;background:transparent;cursor:pointer;display:none;
+    align-items:center;color:#fff;opacity:0;transition:opacity .2s ease;
+  }
+  .edge svg{width:34px;height:34px;filter:drop-shadow(0 2px 8px rgba(0,0,0,.6))}
+  .edge-prev{left:0;justify-content:flex-start;padding-left:14px}
+  .edge-next{right:0;justify-content:flex-end;padding-right:14px}
+  .edge:hover{opacity:.9;background:linear-gradient(var(--edge-dir),rgba(0,0,0,.32),transparent)}
+  .edge:focus-visible{opacity:.95;outline:2px solid var(--cyan);outline-offset:-6px;background:linear-gradient(var(--edge-dir),rgba(0,0,0,.32),transparent)}
+  .edge-prev{--edge-dir:to right}
+  .edge-next{--edge-dir:to left}
+  /* On touch / no-hover devices, give the chevrons a faint resting cue */
+  @media (hover:none),(pointer:coarse){ body.present .edge{opacity:.34} }
+
+  .pbar{
+    position:fixed;left:0;right:0;bottom:0;z-index:26;height:3px;
+    background:rgba(255,255,255,.08);display:none;
+  }
+  .pbar i{display:block;height:100%;width:0;background:var(--cyan);transition:width .3s ease}
+  .pmeta{
+    position:fixed;right:16px;bottom:14px;z-index:27;display:none;
+    font-family:var(--mono);font-size:12px;color:rgba(255,255,255,.72);
+    background:rgba(10,16,32,.82);border:1px solid var(--line);
+    padding:5px 10px;border-radius:8px;backdrop-filter:blur(6px);
+    font-variant-numeric:tabular-nums;
+  }
+  @supports (backdrop-filter:blur(2px)){ .pmeta{background:rgba(10,16,32,.55)} }
+
+  /* ---------- PRESENT MODE ---------- */
+  body.present{overflow:hidden}
+  body.present .topbar{transform:translateY(-100%);opacity:0;pointer-events:none}
+  body.present .dots{display:none}
+  body.present .hint{display:none}
+  body.present .edge{display:flex}
+  body.present .pbar,body.present .pmeta{display:block}
+
+  body.present .deck{
+    height:100vh;height:100svh;overflow:hidden;scroll-snap-type:none;
+    background:#000;
+  }
+  body.present .slide{
+    position:fixed;inset:0;height:100vh;height:100svh;width:100vw;
+    padding:0;background:#000;
+    opacity:0;visibility:hidden;transition:opacity .35s ease;
+    z-index:1;
+  }
+  body.present .slide.active{opacity:1;visibility:visible;z-index:2}
+  @media (prefers-reduced-motion:reduce){ body.present .slide{transition:none} }
+  body.present .frame{
+    width:min(100vw, calc(100vh * var(--ar)));
+    width:min(100vw, calc(100svh * var(--ar)));
+    height:min(100vh, calc(100vw / var(--ar)));
+    height:min(100svh, calc(100vw / var(--ar)));
+    border-radius:0;box-shadow:none;
+  }
+  body.present .slide-no{display:none}
+
+  /* loading shimmer */
+  .frame.loading::after{
+    content:"";position:absolute;inset:0;
+    background:linear-gradient(110deg,#0a1020 30%,#121a2e 50%,#0a1020 70%);
+    background-size:200% 100%;animation:sh 1.3s linear infinite;
+  }
+  @keyframes sh{to{background-position:-200% 0}}
+  @media (prefers-reduced-motion:reduce){ .frame.loading::after{animation:none} }
+
+  .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}
+
+  /* Tap-to-zoom overlay (touch devices) — lets phones pinch-zoom dense slides */
+  .zoom{
+    position:fixed;inset:0;z-index:60;display:none;background:#05080f;
+    overflow:auto;-webkit-overflow-scrolling:touch;touch-action:pinch-zoom;
+  }
+  .zoom.open{display:block}
+  .zoom img{display:block;width:100%;height:auto;margin:auto}
+  .zoom .close{
+    position:fixed;top:12px;right:12px;z-index:61;
+    background:rgba(10,16,32,.7);border:1px solid var(--line);color:#fff;
+    font-family:var(--mono);font-size:12px;padding:8px 12px;border-radius:9px;cursor:pointer;
+    backdrop-filter:blur(8px);
+  }
+  .zoom .tip{
+    position:fixed;left:50%;top:12px;transform:translateX(-50%);z-index:61;
+    background:rgba(10,16,32,.7);border:1px solid var(--line);color:var(--muted);
+    font-size:11.5px;padding:7px 12px;border-radius:999px;backdrop-filter:blur(8px);
+  }
+  .frame.zoomable{cursor:zoom-in}
+
+  /* Print / Save-as-PDF: one slide per page, no chrome */
+  @media print{
+    html,body{height:auto;overflow:visible;background:#fff}
+    .topbar,.dots,.hint,.edge,.pbar,.pmeta,.zoom{display:none !important}
+    .deck{height:auto;overflow:visible;scroll-snap-type:none}
+    .slide{height:auto;min-height:0;padding:0;break-after:page;page-break-after:always}
+    .slide:last-child{break-after:auto}
+    .frame{width:100%;max-width:100%;border-radius:0;box-shadow:none}
+    .frame img{print-color-adjust:exact;-webkit-print-color-adjust:exact}
+    .slide-no{display:none}
+  }
+</style>
+</head>
+<body data-mode="scroll">
+
+  <header class="topbar">
+    <span class="wordmark">Data<sup>#3</sup></span>
+    <span class="sep" aria-hidden="true"></span>
+    <span class="deck-title">AI Practice Manager — Proposal</span>
+    <span class="spacer"></span>
+    <span class="counter" aria-hidden="true"><b id="cur">01</b> / <span id="tot">10</span></span>
+    <button class="btn btn-primary" id="presentBtn" aria-label="Enter full-screen presentation mode">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3m13-5v3a2 2 0 0 1-2 2h-3"/></svg>
+      <span class="lbl">Present</span>
+    </button>
+  </header>
+
+  <main class="deck" id="deck" tabindex="-1" aria-roledescription="carousel" aria-label="AI Practice Manager proposal slides" aria-describedby="kbdHelp"></main>
+
+  <nav class="dots" id="dots" aria-label="Jump to slide"></nav>
+
+  <div class="hint" id="hint">
+    <span>Scroll, or press</span><span class="kbd">→</span><span>to advance</span>
+    <span style="color:var(--muted-2)">·</span><span class="kbd">F</span><span>to present</span>
+  </div>
+
+  <!-- present-mode navigation -->
+  <button class="edge edge-prev" id="edgePrev" aria-label="Previous slide">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+  </button>
+  <button class="edge edge-next" id="edgeNext" aria-label="Next slide">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
+  </button>
+  <div class="pbar" aria-hidden="true"><i id="pbarFill"></i></div>
+  <div class="pmeta" id="pmeta" aria-hidden="true">01 / 10</div>
+
+  <!-- Tap-to-zoom overlay for touch devices -->
+  <div class="zoom" id="zoom" role="dialog" aria-modal="true" aria-label="Zoomed slide">
+    <span class="tip">Pinch to zoom · tap ✕ to close</span>
+    <button class="close" id="zoomClose" aria-label="Close zoom">✕ Close</button>
+    <img id="zoomImg" alt="" />
+  </div>
+
+  <div class="sr-only" aria-live="polite" id="live"></div>
+  <p class="sr-only" id="kbdHelp">Use Arrow keys, Page Up/Down or Space to move between slides. Press a number key 1 to 9, or 0 for slide 10, to jump. Press F to enter full-screen presentation mode and Escape to exit.</p>
+
+<script>
+(function(){
+  "use strict";
+
+  // ---- Slide data (order is authoritative: image1..image10) ----
+  var SLIDES = [
+    {t:"The final build rule", a:"Final build rule — every slide must answer one of five questions: why the role exists, what the role owns, how the operating model works, how it de-risks Data#3, and why you are the natural accountable owner. This is the shape of the case."},
+    {t:"The Decision", a:"The Decision — appoint an AI Practice Manager with a clear mandate, model and outcome. Data#3 does not need another AI contributor; it needs one accountable owner for the AI operating system."},
+    {t:"The Problem — Fragmented AI Demand", a:"The Problem — fragmented AI demand. Today AI demand is diffuse and inconsistent across Sales, Pre-Sales, Microsoft, Security, CSP and Managed Services. The AI Practice fixes it with a coordinated model: clear ownership, strong alignment, repeatable delivery and governance."},
+    {t:"One Practice, Three Motions", a:"One Practice, Three Motions — the practice connects Customer GTM AI, Organisational AI and Personal AI. It is not just a services practice; it is the operating layer for Data#3's AI opportunity."},
+    {t:"The AI Operating System", a:"The AI Operating System — Benchmark, Prototype, Productionise, Bespoke. Fast value first; bespoke only when differentiation justifies the risk. Lower risk and faster to value on the left; highest commitment and advantage on the right."},
+    {t:"Partner Strategy — Microsoft ++", a:"Partner Strategy — Microsoft plus plus. Microsoft-led but not Microsoft-only, with Microsoft as the anchor across AI platforms and models, data plane, cloud and infrastructure, governance and operations, and the services layer."},
+    {t:"Organisational Structure", a:"Organisational Structure — Adam Rappaport as Practice Manager over Mark Pattie (Strategic Operations), Jack LaTrobe (Delivery) and Daniel Thomas (Governance & Advisory), with a Principal Consultant / Solution Architect leading customer and internal squads."},
+    {t:"Delivery Model", a:"Delivery Model — repeatable delivery from architect-led squads. A Delivery Manager and Principal Consultant lead customer-facing and internal squads, with rotating specialist roles: Change, BA, Data Engineer, AI Engineer, UX, Responsible AI and QA."},
+    {t:"First 90 Days", a:"First 90 Days — Days 1 to 30 confirm the mandate and structure; Days 31 to 60 activate flagship offers and the operating model; Days 61 to 90 show active work on named accounts and visible progress, tracked by key progress metrics."},
+    {t:"Proposed Structure, Appointments & Ask", a:"Proposed Structure, Appointments and the Ask — approve the structure, back the operating model, and let us move forward. Clear structure, clear ownership, clear next step."}
+  ];
+
+  var N = SLIDES.length;
+  var deck = document.getElementById('deck');
+  var dotsWrap = document.getElementById('dots');
+  var curEl = document.getElementById('cur');
+  var totEl = document.getElementById('tot');
+  var liveEl = document.getElementById('live');
+  var pbarFill = document.getElementById('pbarFill');
+  var pmeta = document.getElementById('pmeta');
+  var hint = document.getElementById('hint');
+  var presentBtn = document.getElementById('presentBtn');
+
+  var current = 0;            // 0-based
+  var slideEls = [];
+  var BASE = 'practice-deck-assets/slide-';
+
+  function pad(n){ return (n<10?'0':'')+n; }
+
+  // ---- Build slides ----
+  for(var i=0;i<N;i++){
+    (function(i){
+      var n = pad(i+1);
+      var sec = document.createElement('section');
+      sec.className = 'slide';
+      sec.id = 's'+(i+1);
+      sec.setAttribute('aria-roledescription','slide');
+      sec.setAttribute('aria-label', (i+1)+' of '+N+': '+SLIDES[i].t);
+      sec.setAttribute('role','group');
+
+      var frame = document.createElement('div');
+      frame.className = 'frame loading';
+
+      var pic = document.createElement('picture');
+      var src = document.createElement('source');
+      src.type = 'image/webp';
+      src.srcset = BASE+n+'.webp';
+      var img = document.createElement('img');
+      img.src = BASE+n+'.png';
+      img.alt = SLIDES[i].a;
+      img.width = 1672; img.height = 941;
+      img.decoding = 'async';
+      if(i===0){ img.loading='eager'; img.setAttribute('fetchpriority','high'); }
+      else { img.loading='lazy'; }
+      img.addEventListener('load', function(){ frame.classList.remove('loading'); });
+      img.addEventListener('error', function(){ frame.classList.remove('loading'); });
+
+      pic.appendChild(src); pic.appendChild(img);
+      frame.appendChild(pic);
+
+      var no = document.createElement('span');
+      no.className = 'slide-no';
+      no.textContent = n+' / '+N;
+      frame.appendChild(no);
+
+      sec.appendChild(frame);
+      deck.appendChild(sec);
+      slideEls.push(sec);
+
+      // dot
+      var b = document.createElement('button');
+      b.type='button';
+      b.setAttribute('aria-label','Slide '+(i+1)+': '+SLIDES[i].t);
+      b.setAttribute('aria-controls','s'+(i+1));
+      b.innerHTML = '<i></i>';
+      b.addEventListener('click', function(){ goTo(i); });
+      dotsWrap.appendChild(b);
+    })(i);
+  }
+  var dotEls = Array.prototype.slice.call(dotsWrap.children);
+  totEl.textContent = N;
+
+  // ---- Sync UI to current (visual only; never announces) ----
+  function reflect(){
+    curEl.textContent = pad(current+1);
+    pmeta.textContent = pad(current+1)+' / '+N;
+    pbarFill.style.width = ((current+1)/N*100)+'%';
+    var present = isPresent();
+    for(var k=0;k<N;k++){
+      if(k===current){ dotEls[k].setAttribute('aria-current','true'); }
+      else { dotEls[k].removeAttribute('aria-current'); }
+      slideEls[k].classList.toggle('active', k===current);
+      // In present mode only one slide is visible — hide the rest from assistive tech.
+      if(present && k!==current){ slideEls[k].setAttribute('aria-hidden','true'); }
+      else { slideEls[k].removeAttribute('aria-hidden'); }
+    }
+    var h = '#'+(current+1);
+    if(location.hash !== h){ history.replaceState(null,'',h); }
+    preload(current);
+  }
+
+  // Announce only on deliberate navigation, so passive scroll/multi-slide jumps don't spam SR.
+  function announce(){
+    liveEl.textContent = 'Slide '+(current+1)+' of '+N+': '+SLIDES[current].t;
+  }
+
+  function preload(i){
+    [i-1,i+1].forEach(function(j){
+      if(j<0||j>=N) return;
+      var ref = slideEls[j].querySelector('img');
+      var im = new Image();
+      im.src = (ref && ref.currentSrc) ? ref.currentSrc : BASE+pad(j+1)+'.webp';
+    });
+  }
+
+  // ---- Navigation ----
+  // While a programmatic (multi-slide) scroll is animating, mute the observer so it
+  // doesn't stomp `current` or rewrite the hash through every slide it passes.
+  var programmaticScroll=false, progTimer=0;
+  function armProgrammatic(){
+    programmaticScroll=true;
+    clearTimeout(progTimer);
+    progTimer=setTimeout(function(){ programmaticScroll=false; }, 700);
+  }
+  deck.addEventListener('scrollend', function(){ programmaticScroll=false; clearTimeout(progTimer); });
+
+  function goTo(i, opts){
+    opts = opts || {};
+    i = Math.max(0, Math.min(N-1, i));
+    current = i;
+    if(isPresent()){
+      reflect();
+      if(!opts.silent) announce();
+    } else {
+      var behavior = opts.instant ? 'auto' :
+        (matchMedia('(prefers-reduced-motion:reduce)').matches ? 'auto':'smooth');
+      armProgrammatic();
+      slideEls[i].scrollIntoView({behavior:behavior, block:'center'});
+      reflect();
+      if(!opts.silent) announce();
+    }
+  }
+  function next(){ goTo(current+1); }
+  function prev(){ goTo(current-1); }
+
+  // ---- Scroll-mode: track which slide is centered ----
+  var io = new IntersectionObserver(function(entries){
+    if(isPresent() || programmaticScroll) return;
+    var best=null, bestRatio=0;
+    entries.forEach(function(e){
+      if(e.intersectionRatio > bestRatio){ bestRatio=e.intersectionRatio; best=e.target; }
+    });
+    if(best && bestRatio>0.5){
+      var idx = slideEls.indexOf(best);
+      if(idx>=0 && idx!==current){ current=idx; reflect(); dismissHint(); }
+    }
+  }, {root:deck, threshold:[0.5,0.75,1]});
+  slideEls.forEach(function(s){ io.observe(s); });
+
+  // ---- Present mode ----
+  function isPresent(){ return document.body.classList.contains('present'); }
+
+  function enterPresent(){
+    if(isPresent()) return;
+    document.body.classList.add('present');
+    document.body.dataset.mode='present';
+    var el = document.documentElement;
+    var rq = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
+    // requestFullscreen returns a promise that rejects without a user gesture — swallow it.
+    if(rq){ try{ var p=rq.call(el); if(p&&p.catch) p.catch(function(){}); }catch(e){} }
+    reflect();
+    // Land keyboard / screen-reader focus inside the deck, on the active slide.
+    slideEls[current].setAttribute('tabindex','-1');
+    try{ slideEls[current].focus({preventScroll:true}); }catch(e){ try{ slideEls[current].focus(); }catch(_){} }
+    announce();
+    dismissHint();
+  }
+  function exitPresent(){
+    if(!isPresent()) return;
+    document.body.classList.remove('present');
+    document.body.dataset.mode='scroll';
+    if(document.fullscreenElement || document.webkitFullscreenElement){
+      var ex = document.exitFullscreen || document.webkitExitFullscreen || document.msExitFullscreen;
+      if(ex){ try{ var p=ex.call(document); if(p&&p.catch) p.catch(function(){}); }catch(e){} }
+    }
+    reflect();
+    // Restore scroll position after the reverted flow layout settles, then return focus to the trigger.
+    requestAnimationFrame(function(){ requestAnimationFrame(function(){
+      goTo(current,{instant:true, silent:true});
+      try{ presentBtn.focus({preventScroll:true}); }catch(e){ try{ presentBtn.focus(); }catch(_){} }
+    }); });
+  }
+  function togglePresent(){ isPresent()? exitPresent() : enterPresent(); }
+
+  presentBtn.addEventListener('click', togglePresent);
+  document.getElementById('edgeNext').addEventListener('click', next);
+  document.getElementById('edgePrev').addEventListener('click', prev);
+
+  // If user leaves fullscreen via Esc/F11, drop out of present layout.
+  function onFsChange(){
+    var fs = document.fullscreenElement || document.webkitFullscreenElement;
+    if(!fs && isPresent()){ exitPresent(); }
+  }
+  document.addEventListener('fullscreenchange', onFsChange);
+  document.addEventListener('webkitfullscreenchange', onFsChange);
+
+  // ---- Keyboard ----
+  document.addEventListener('keydown', function(e){
+    if(e.metaKey||e.ctrlKey||e.altKey) return;
+    var k = e.key;
+    switch(k){
+      case 'ArrowRight': case 'ArrowDown': case 'PageDown': case ' ': case 'Spacebar':
+        e.preventDefault(); next(); dismissHint(); break;
+      case 'ArrowLeft': case 'ArrowUp': case 'PageUp':
+        e.preventDefault(); prev(); dismissHint(); break;
+      case 'Home': e.preventDefault(); goTo(0); break;
+      case 'End': e.preventDefault(); goTo(N-1); break;
+      case 'f': case 'F': e.preventDefault(); togglePresent(); break;
+      case 'Escape': if(isPresent()){ e.preventDefault(); exitPresent(); } break;
+      default:
+        if(k>='1' && k<='9'){ e.preventDefault(); goTo(parseInt(k,10)-1); }
+        else if(k==='0'){ e.preventDefault(); goTo(9); }
+    }
+  });
+
+  // ---- Touch swipe (present mode) ----
+  var tsx=0,tsy=0,tst=0;
+  deck.addEventListener('touchstart',function(e){
+    if(!isPresent())return; var t=e.changedTouches[0]; tsx=t.clientX;tsy=t.clientY;tst=Date.now();
+  },{passive:true});
+  deck.addEventListener('touchend',function(e){
+    if(!isPresent())return; var t=e.changedTouches[0];
+    var dx=t.clientX-tsx, dy=t.clientY-tsy, dt=Date.now()-tst;
+    if(dt<700 && Math.abs(dx)>50 && Math.abs(dx)>Math.abs(dy)*1.4){ dx<0?next():prev(); }
+    else if(dt<700 && Math.abs(dy)>50 && Math.abs(dy)>Math.abs(dx)*1.4){ dy<0?next():prev(); }
+  },{passive:true});
+
+  // ---- Hint auto-dismiss + touch-aware copy ----
+  var hintDismissed=false;
+  function dismissHint(){ if(!hintDismissed){ hintDismissed=true; hint.classList.add('gone'); } }
+  setTimeout(dismissHint, 6000);
+  var coarse = matchMedia('(hover:none),(pointer:coarse)').matches;
+  if(coarse){
+    hint.innerHTML = '<span>Swipe, or tap a slide to zoom</span><span style="color:var(--muted-2)">·</span><span>tap</span><span class="kbd" style="font-family:var(--sans)">Present</span><span>for full screen</span>';
+  }
+
+  // ---- Tap-to-zoom (touch devices): open the full-res slide for native pinch-zoom ----
+  var zoom=document.getElementById('zoom'), zoomImg=document.getElementById('zoomImg');
+  function openZoom(i){
+    zoomImg.src = BASE+pad(i+1)+'.png';
+    zoomImg.alt = SLIDES[i].t;
+    zoom.classList.add('open');
+  }
+  function closeZoom(){ zoom.classList.remove('open'); zoomImg.removeAttribute('src'); }
+  document.getElementById('zoomClose').addEventListener('click', closeZoom);
+  zoom.addEventListener('click', function(e){ if(e.target===zoom) closeZoom(); });
+  if(coarse){
+    slideEls.forEach(function(sec, i){
+      var fr = sec.querySelector('.frame');
+      fr.classList.add('zoomable');
+      fr.addEventListener('click', function(){ if(!isPresent()) openZoom(i); });
+    });
+  }
+  document.addEventListener('keydown', function(e){ if(e.key==='Escape' && zoom.classList.contains('open')){ closeZoom(); } });
+
+  // ---- Init from hash ----
+  function initFromHash(){
+    var m = (location.hash||'').match(/^#(\d+)$/);
+    var start = m ? Math.max(1,Math.min(N,parseInt(m[1],10)))-1 : 0;
+    current = start;
+    reflect();
+    if(start>0){ requestAnimationFrame(function(){ goTo(start,{instant:true, silent:true}); }); }
+  }
+  initFromHash();
+  window.addEventListener('hashchange', function(){
+    var m=(location.hash||'').match(/^#(\d+)$/);
+    if(m){ var i=Math.max(1,Math.min(N,parseInt(m[1],10)))-1; if(i!==current) goTo(i); }
+  });
+})();
+</script>
+</body>
+</html>

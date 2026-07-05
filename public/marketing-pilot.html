@@ -337,12 +337,23 @@ h2.slide-h em {
   text-transform: uppercase;
 }
 .brand b { color: var(--d3-light-blue); font-weight: 600; }
+.present-btn {
+  position: fixed; bottom: 1.4rem; left: 1.6rem; z-index: 40;
+  font-family: 'JetBrains Mono', monospace; font-size: 0.62rem;
+  letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-muted);
+  background: rgba(0,0,24,0.5);
+  -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+  border: 1px solid var(--border-subtle); border-radius: 100px;
+  padding: 0.55rem 0.9rem; cursor: pointer;
+}
+.present-btn:hover { color: var(--d3-aqua); border-color: var(--border-accent); }
 @media (max-width: 720px) { .brand { display: none; } }
+@media (max-width: 720px) { .present-btn { display: none; } }
 
 /* ─── Print ─── */
 @media print {
   body { background: #fff; color: #111; }
-  body::before, .dotnav, .brand { display: none !important; }
+  body::before, .dotnav, .brand, .present-btn { display: none !important; }
   .slide { min-height: auto; padding: 1.5rem 0; page-break-after: always; }
   * { color: #222 !important; }
   h1.slide-title em, h2.slide-h em { -webkit-text-fill-color: #007BC3 !important; }
@@ -353,6 +364,7 @@ h2.slide-h em {
 <body>
 
 <div class="brand">DATA<b>#</b>3 &middot; AI PRACTICE</div>
+<button class="present-btn" id="presentBtn" aria-label="Toggle fullscreen presentation">&#x26F6; PRESENT &middot; F</button>
 
 <nav class="dotnav" aria-label="Slide navigation">
   <a href="#s1" data-slide="1" title="Title"></a>
@@ -532,8 +544,44 @@ h2.slide-h em {
   // Active dot tracking via IntersectionObserver
   var slides = document.querySelectorAll('.slide');
   var dots = document.querySelectorAll('.dotnav a');
+  var presentBtn = document.getElementById('presentBtn');
+  var fullscreenSnapIndex = null;
   var slideToDot = {};
   dots.forEach(function(d) { slideToDot[d.getAttribute('href').slice(1)] = d; });
+
+  function getCurrentSlideIndex() {
+    for (var i = 0; i < slides.length; i++) {
+      var rect = slides[i].getBoundingClientRect();
+      if (rect.top >= -50 && rect.top <= window.innerHeight / 2) return i;
+    }
+    return 0;
+  }
+
+  function getFullscreenElement() {
+    return document.fullscreenElement || document.webkitFullscreenElement;
+  }
+
+  function updatePresentButton() {
+    presentBtn.innerHTML = getFullscreenElement() ? '&#x2716; EXIT &middot; F' : '&#x26F6; PRESENT &middot; F';
+  }
+
+  function snapCurrentSlide() {
+    var current = fullscreenSnapIndex === null ? getCurrentSlideIndex() : fullscreenSnapIndex;
+    fullscreenSnapIndex = null;
+    if (slides[current]) slides[current].scrollIntoView();
+  }
+
+  function toggleFullscreen() {
+    if (getFullscreenElement()) {
+      if (document.exitFullscreen) document.exitFullscreen();
+      else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+    } else {
+      var root = document.documentElement;
+      fullscreenSnapIndex = getCurrentSlideIndex();
+      if (root.requestFullscreen) root.requestFullscreen();
+      else if (root.webkitRequestFullscreen) root.webkitRequestFullscreen();
+    }
+  }
 
   var io = new IntersectionObserver(function(entries) {
     entries.forEach(function(e) {
@@ -546,14 +594,25 @@ h2.slide-h em {
   }, { threshold: [0.5] });
   slides.forEach(function(s) { io.observe(s); });
 
+  presentBtn.addEventListener('click', toggleFullscreen);
+  document.addEventListener('fullscreenchange', function() {
+    updatePresentButton();
+    if (getFullscreenElement()) requestAnimationFrame(snapCurrentSlide);
+  });
+  document.addEventListener('webkitfullscreenchange', function() {
+    updatePresentButton();
+    if (getFullscreenElement()) requestAnimationFrame(snapCurrentSlide);
+  });
+
   // Keyboard nav: arrow keys, j/k, space
   document.addEventListener('keydown', function(e) {
-    var current = -1;
-    for (var i = 0; i < slides.length; i++) {
-      var rect = slides[i].getBoundingClientRect();
-      if (rect.top >= -50 && rect.top <= window.innerHeight / 2) { current = i; break; }
+    if (e.key === 'f' || e.key === 'F') {
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      e.preventDefault();
+      toggleFullscreen();
+      return;
     }
-    if (current === -1) current = 0;
+    var current = getCurrentSlideIndex();
     var target = -1;
     if (e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === 'j' || (e.key === ' ' && !e.shiftKey)) target = current + 1;
     else if (e.key === 'ArrowUp' || e.key === 'PageUp' || e.key === 'k' || (e.key === ' ' && e.shiftKey)) target = current - 1;

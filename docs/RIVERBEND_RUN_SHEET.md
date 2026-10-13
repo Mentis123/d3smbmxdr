@@ -2,7 +2,7 @@
 
 The live room instrument for **When the agent attacks**. One URL for everything:
 
-**`https://d3smbmxdr.vercel.app/decision-room`**
+**`https://d3smbmxdr.vercel.app/decision-room`** (short link for the room: **bit.ly/4evinZE**)
 
 Standalone Crisis Room (Richard's companion, no login): `https://d3smbmxdr.vercel.app/crisis-room`
 
@@ -17,7 +17,7 @@ The same app also runs on `https://data3-cisco-live.vercel.app/decision-room` as
 
 ## What the room sees and what you say
 
-> "One device per table — a laptop or a phone. Go to **d3smbmxdr.vercel.app/decision-room**, scan the QR on the screen (or tap **Join a table** and type the room code), tap your table number — green means free — and give your team a name. You're now watching Riverbend's systems. Nothing is wrong yet."
+> "One device per table — a laptop or a phone. Go to **bit.ly/4evinZE**, scan the QR on the screen (or tap **Join a table** and type the room code), tap your table number — green means free — and give your team a name. You're now watching Riverbend's systems. Nothing is wrong yet."
 
 Each table's device shows the Riverbend attack path and six live meters. In the lobby everything is green: monitoring mode.
 

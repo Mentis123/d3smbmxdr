@@ -18,7 +18,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { QRCodeSVG } from "qrcode.react";
 import { AlertTriangle, ArrowRight, Check, Copy, Download, Eye, FileText, Printer, LockKeyhole, Monitor, Play, Radio, RotateCcw, ShieldCheck, Square, Users, Zap } from "lucide-react";
 import "./decision-room.css";
-import VersionHub, { EditionIntro, editions, type Edition } from "./VersionHub";
+import VersionHub, { EditionIntro, HomeFooter, editions, type Edition } from "./VersionHub";
 
 /* ------------------------------------------------------------------ types */
 
@@ -251,6 +251,7 @@ function Landing({ presetCode, edition }: { presetCode?: string; edition?: Editi
         </section>
       </div>
     </div>
+    {edition ? <HomeFooter /> : null}
   </Frame>;
 }
 

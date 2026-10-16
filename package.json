@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "test:decision-room": "node scripts/decision-room-flow-test.mjs"
+    "test:decision-room": "node scripts/decision-room-flow-test.mjs",
+    "check:decision-room-scenarios": "node scripts/decision-room-scenario-check.mjs"
   },
   "dependencies": {
     "@neondatabase/serverless": "^0.9.0",

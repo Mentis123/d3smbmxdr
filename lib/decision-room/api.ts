@@ -20,7 +20,7 @@
 import { createHash, randomBytes, randomUUID, timingSafeEqual } from "crypto";
 import { neon, type NeonQueryFunction } from "@neondatabase/serverless";
 import { z, ZodError } from "zod";
-import { consequenceFor, dashboardFor, factStates, publicRound, replay, resolveScenario, roundContent, roundCount, scenarioInfo, scenarioKeyForNewRoom } from "./scenarios";
+import { SCENARIOS, consequenceFor, dashboardFor, factStates, latestOf, publicRound, replay, resolveScenario, roundContent, roundCount, scenarioInfo, scenarioKeyForNewRoom } from "./scenarios";
 import type { Scenario } from "./types";
 
 /* ------------------------------------------------------------ plumbing
@@ -361,6 +361,22 @@ const actionSchema = z.discriminatedUnion("action", [
 ]);
 
 function registerDecisionRoomRoutes(app: Express) {
+  // Public: which scenario a new room of each edition will run, so the edition pages describe it truthfully.
+  app.get("/api/decision-room/editions", async (_req, res, next) => { try {
+    const of = (variant: string) => scenarioInfo(SCENARIOS[scenarioKeyForNewRoom(variant)]);
+    res.json({ "ciso-basecamp": of("riverbend"), "agent-0": of("agent0") });
+  } catch (e) { fail(e, res, next); } });
+
+  // Facilitator-only review pack: the whole scenario, including preferences, consequences and branches.
+  // Never public: it is the answer key a participant must not read ahead of the room.
+  app.get("/api/decision-room/review/:family", async (req, res, next) => { try {
+    if (!ensureAdmin(req, res)) return;
+    const scenario = latestOf(req.params.family);
+    if (!scenario) { res.status(404).json({ message: "No such scenario" }); return; }
+    res.setHeader("Cache-Control", "no-store");
+    res.json({ scenario, info: scenarioInfo(scenario), initialFacts: scenario.facts ? factStates(scenario, replay(scenario, new Map(), 0).facts) : null, liveForAgent0: scenarioKeyForNewRoom("agent0") === scenario.key });
+  } catch (e) { fail(e, res, next); } });
+
   app.post("/api/decision-room/sessions", async (req, res, next) => { try {
     if (!ensureAdmin(req, res) || rejectMissingDatabase(res)) return;
     const input = createSchema.parse(req.body ?? {}); await ensureTables();

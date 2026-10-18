@@ -46,3 +46,9 @@ A0-A4 are production verified, six journeys total. Next: A5 fictional constraine
 ## 2026-10-19 UX refresh
 
 User feedback supersedes earlier layout acceptance. Example-first cards, normal page scrolling and a wider lesson replace the nested scrolling sidebar. Phone site context is collapsed by default with explicit Explore in 3D; expandable camera tools are opt-in controls=compact in the pinned renderer. All six recipes and authority rules remain. Steps now read Try it, How it works, Human decision; final action chooses another example. This checkpoint is pending deployed UX/condition verification, not final acceptance. A5/A6 paused until this UX pass is verified.
+
+## UX release acceptance — 19 October 2026
+
+Tested runtime 397eb1ede800bc28f88c540cb8a1bf745fc4e414; pinned renderer 53d3cf1ce33d7dd8b8f5fa1136f1e4e13f22c12d (65 files). Vercel success. Final deployed gates: 211 UX assertions across six journeys at 320/390/820-landscape/1600 widths; 24 mining, 25 energy and 45 host assertions. Zero runtime exceptions; source hashes match; canonical 30 renderer checks passed. Primary inspected final choice screens, normal lessons, mobile input/result ordering and expanded world views. These are browser emulation checks; physical iPhone/Safari and user usability review remain outstanding.
+
+The supported interaction is now: industry → example card → Try it / How it works / Decide → another example. No nested lesson scroller. Mobile site context expands deliberately; camera tools have their own disclosure and remain inside the scene at narrow widths. Hidden scenes skip GPU animation; the lesson works while 3D loads. World hotspots remain an alternative entry. Browser Back/deep links/reset/source links and human authority remain verified. Evidence and UX-R1.md are in canonical docs/three-worlds; use its state.json to continue. A5/A6 were deferred to prioritise this feedback.

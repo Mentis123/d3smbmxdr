@@ -69,5 +69,13 @@ export function buildActivity(world){
   const traffic=buildServiceTraffic(world);
   world.activityDiagnostics=t=>{const s=stateAt(t);return {route:{from,to,z:roadZ,roadY:groundY},position:{x:s.x,y:groundY,z:roadZ},heading:s.heading,phase:s.phase,cycleSeconds:s.cycleSeconds,bounds:{length:.432,width:.224,height:.24,withinRoute:s.x>=from&&s.x<=to},fleet:traffic.diagnostics(t)};};
   update(0);
+  // Actor contract for fly-through shots (flythrough.js): where the van is at any scene time, in
+  // what frame, and the schedule of its cycle so a shot can be pinned to a leg of it.
+  world.actors=world.actors||{};
+  world.actors['dam-service-van']={
+    cycle,
+    phases:[{name:'outbound',start:0,length:leg},{name:'turnaround',start:leg,length:dwell},{name:'returning',start:leg+dwell,length:leg},{name:'turnaround-home',start:2*leg+dwell,length:dwell}],
+    stateAt:t=>{const s=stateAt(t);return {position:[s.x,groundY,roadZ],heading:s.heading,phase:s.phase};},
+  };
   return {diagnostics:world.activityDiagnostics};
 }

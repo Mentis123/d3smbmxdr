@@ -20,3 +20,27 @@ body.diagnostic .flight-pad,body.diagnostic .flight-height{display:none!importan
 
 /* Embedded in /worlds/<id>: host page owns masthead, heading and credit. */
 body.embed .masthead,body.embed .scene-heading,body.embed .credit{display:none}body.embed #viewer{height:100svh;min-height:0}body.embed .toolbar{bottom:28px}@media(max-width:600px),(pointer:coarse){body.embed #viewer{height:100svh}body.embed .toolbar{bottom:max(16px,env(safe-area-inset-bottom))}}
+
+/* Studio (/map?studio=1): full-window frame for screen capture. */
+body.studio .masthead,body.studio .scene-heading,body.studio .toolbar,body.studio .viewer-bottom,body.studio .credit,body.studio .flight-pad,body.studio .flight-height,body.studio .fly-reticle{display:none!important}
+body.studio #viewer{height:100svh;min-height:0}body.studio #scene{position:absolute;inset:0;height:100%;width:100%}
+body.studio.studio-playing,body.studio.studio-playing #scene{cursor:none}
+.studio-panel{position:absolute;right:20px;top:20px;z-index:6;width:min(340px,calc(100% - 40px));display:grid;gap:10px;padding:16px;border:1px solid #36566899;border-radius:12px;background:#020b17e6;backdrop-filter:blur(12px);box-shadow:0 8px 30px #0008;font-size:13px}
+.studio-panel label{display:grid;gap:4px;color:var(--muted)}.studio-panel .studio-check{display:flex;gap:8px;align-items:center}
+.studio-title{margin:0;font-size:11px;letter-spacing:2.5px;text-transform:uppercase;color:#72b9d6}
+.studio-panel #studio-play{background:#114257;border-color:#68deef;font-weight:600;min-height:40px}
+.studio-help{margin:0;font-size:11px;line-height:1.5;color:var(--muted)}
+.studio-count{position:absolute;left:18px;top:14px;z-index:6;font:600 15px/1 'Helvetica Neue',Arial,sans-serif;color:#9befff;opacity:.85;pointer-events:none}.studio-count::before{content:'● REC in ';color:#ff5a4f;font-weight:400}
+
+/* Compact controls are opt-in for learning embeds; the scene keeps the full viewport. */
+.camera-tools-toggle{position:absolute;bottom:12px;right:12px;z-index:4;min-height:44px;font-size:12px;background:#06122bf2}
+body.compact-controls:not(.camera-tools-open) .toolbar{display:none}
+body.compact-controls .viewer-bottom{display:none}
+body.compact-controls #scene{width:100%;height:100%}
+body.compact-controls.camera-tools-open #scene{height:calc(100% - 180px)}
+body.compact-controls.camera-tools-open .toolbar{bottom:64px;width:calc(100% - 24px);max-width:500px;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:4px;padding:6px}
+body.compact-controls .toolbar .separator{display:none}
+body.compact-controls .toolbar button,body.compact-controls .toolbar select{min-height:44px;padding:4px;font-size:12px}
+body.compact-controls .quality-label{grid-column:span 2}
+body.compact-controls .quality-label select{width:100%}
+body.compact-controls .flight-pad,body.compact-controls .flight-height{bottom:190px}

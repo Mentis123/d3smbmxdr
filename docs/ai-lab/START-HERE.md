@@ -1,5 +1,8 @@
 # AI Lab continuation
 
+> **Next direction — 19 October 2026:** Read [DIORAMA-EXHIBITS.md](https://github.com/Mentis123/adamrappaport/blob/main/docs/three-worlds/DIORAMA-EXHIBITS.md) and canonical state before coding. The user wants world-first exploration with clickable close-up animated exhibits and short explanations. Retire the lesson-step interface in the next implementation; do not extend it with A5/A6 first. First build EX0 shell/lifecycle, EX1 conveyor and EX2 intake, then obtain paired visual review before the other four. Preserve exact world view on close and existing example URLs. This checkpoint changes plans only; UX-R1 is still the live runtime.
+
+
 Canonical project: https://github.com/Mentis123/adamrappaport/tree/main/docs/three-worlds
 Read its START-HERE.md, state.json, ROADMAP.md, AI-LAB.md and latest JOURNAL.md before extending this experience. Keep this repository's CLAUDE.md rules: update /links for routes, no local dev server/test suite; use deployment-based interactive validation. The host's production build/type validation is permitted.
 

@@ -43,7 +43,7 @@ export function deriveDrawing(c: DrawingConditions): DrawingResult {
   const readableId = true
   const readableAsset = c.scan === 'clear'
   const readableRevision = c.scan !== 'poor'
-  const orientation = c.rotated ? ' The scan is rotated; the labelled fields remain readable in this example.' : ''
+  const orientation = c.rotated ? (c.scan === 'clear' ? ' The scan is rotated; the labelled fields remain readable in this example.' : ' The scan is rotated; rotation does not restore absent or unreadable fields.') : ''
   const fields: DrawingField[] = [
     { key: 'drawing', label: 'Drawing ID', value: readableId ? drawing.id : null, source: 'Title-block region · drawing identifier' },
     { key: 'asset', label: 'Asset', value: readableAsset ? drawing.asset : null, source: 'Title-block region · asset identifier' },

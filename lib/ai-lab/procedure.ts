@@ -1,4 +1,4 @@
-/** Synthetic, non-operational document fixtures for the AI Lab procedure journey. */
+/** Synthetic, non-operational document examples for the AI Lab procedure journey. */
 
 export type ProcedureConditions = {
   selected: 'approved' | 'draft'
@@ -50,7 +50,7 @@ export type ProcedureResult = {
   canUseAsCurrent: boolean
 }
 
-/** Selects a fixture outcome; it never merges, promotes or edits document content. */
+/** Selects a example outcome; it never merges, promotes or edits document content. */
 export function deriveProcedure(conditions: ProcedureConditions): ProcedureResult {
   const cacheLabel = conditions.connected
     ? 'Register connection: online'
@@ -84,7 +84,7 @@ export function deriveProcedure(conditions: ProcedureConditions): ProcedureResul
     return {
       status: 'attention',
       headline: 'Approval has been removed',
-      detail: 'Revision C is no longer represented as approved in this fixture. Ask the document controller to confirm the current controlled record.',
+      detail: 'Revision C is no longer represented as approved in this example. Ask the document controller to confirm the current controlled record.',
       authority: 'Central document register (synthetic authority)',
       sourceRevision: null,
       cacheLabel,
@@ -106,7 +106,7 @@ export function deriveProcedure(conditions: ProcedureConditions): ProcedureResul
 
   return {
     status: 'ready',
-    headline: 'Approved fixture revision C is available',
+    headline: 'Approved example revision C is available',
     detail: 'This is original synthetic, non-operational example text. A worker still verifies document ID, revision and applicability with the central register.',
     authority: 'Central document register (synthetic authority)',
     sourceRevision: 'C',

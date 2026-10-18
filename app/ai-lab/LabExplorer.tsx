@@ -28,7 +28,7 @@ export default function LabExplorer({industry}:{industry:LabIndustry}){
   function resetFixtures(){setConditions({...INITIAL});setProcedure({...PROCEDURE_INITIAL});setHistorianCase(HISTORIAN_INITIAL);setUplink(true);}
   function choose(id:string,history=true){
     const recipe=recipeFor(industry,id);setLinkNotice(false);setRecipeId(recipe.id);setSelected(true);setStep(0);resetFixtures();setSynced(false);
-    if(history){const url=new URL(window.location.href);url.searchParams.set('example',recipe.id);window.history.pushState({},'',url);}
+    if(history){const url=new URL(window.location.href);url.hash='';url.searchParams.set('example',recipe.id);window.history.pushState({},'',url);}
     panel.current?.scrollTo({top:0});
   }
   useEffect(()=>{
@@ -53,7 +53,7 @@ export default function LabExplorer({industry}:{industry:LabIndustry}){
   },[industry]);
   useEffect(()=>{latestPayload.current=payload;if(ready){setSynced(false);send('lab:conditions',{conditions:payload});}},[ready,payload]);
   useEffect(()=>{if(ready&&selected)send('worlds:focus',{view:lab.view});},[ready,recipeId,selected,lab.view]);
-  function close(){setSelected(false);setStep(0);resetFixtures();const url=new URL(window.location.href);url.searchParams.delete('example');window.history.pushState({},'',url);}
+  function close(){setSelected(false);setStep(0);resetFixtures();const url=new URL(window.location.href);url.hash='';url.searchParams.delete('example');window.history.pushState({},'',url);}
   function change<K extends keyof LabConditions>(key:K,value:LabConditions[K]){setConditions(c=>({...c,[key]:value}));}
   const sourceLabel=lab.kind==='vision'?(result.status==='review'?'UNCERTAIN':result.status==='attention'?'ADVISORY':'NO FLAG'):lab.kind==='procedure'?(proc.canUseAsCurrent?'APPROVED IN FIXTURE':'REVIEW REQUIRED'):(hist.observedState==='unknown'?'OBSERVATION UNKNOWN':'EVIDENCE AVAILABLE');
   return <main className="al-container al-explorer" data-industry={industry} data-recipe={lab.id}>
@@ -81,7 +81,7 @@ export default function LabExplorer({industry}:{industry:LabIndustry}){
             </>:step===1?<>
               <p className="al-eyebrow">WHAT THE OUTPUT MEANS</p><h3>{lab.kind==='vision'?'An advisory needs context.':'Evidence before a conclusion.'}</h3><p>{lab.interpretation}</p><h3>Where could it run?</h3><p>{lab.compute}</p>
               <div className="al-compute" aria-label="Example compute locations">{lab.computeNodes.map(node=><span key={node.label}>{node.label}<small>{node.detail}</small></span>)}</div>
-              <p className="al-small">Processing locations are proposed, not live connections. The browser runs fixture rules; it does not measure model accuracy, confidence or latency.</p>
+              <p className="al-small">Processing locations are proposed, not live connections. The browser runs example rules; it does not measure model accuracy, confidence or latency.</p>
             </>:<>
               <p className="al-eyebrow">HUMAN AUTHORITY / VERIFICATION</p><h3>Operator decides. Procedures apply.</h3><p>{lab.response}</p><h3>Close the loop with evidence.</h3><p>{lab.verification}</p>
               {lab.kind==='historian'&&<div className="al-callout"><strong>Next supported check</strong><p>{hist.nextCheck}</p></div>}

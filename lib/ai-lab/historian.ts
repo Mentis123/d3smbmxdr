@@ -1,4 +1,4 @@
-/** Synthetic historian fixture. Rules detect gaps; explanatory summaries are scripted. */
+/** Synthetic historian example. Rules detect gaps; explanatory summaries are scripted. */
 
 export type HistorianCase = 'normal' | 'sensor' | 'network' | 'shutdown'
 
@@ -57,7 +57,7 @@ export function deriveHistorian(caseId: HistorianCase, connected: boolean): Hist
     return {
       ...base,
       status: 'ready', headline: 'Synthetic trend is continuous',
-      detail: 'All seven timestamped samples are present. This scripted fixture does not establish the real asset condition.',
+      detail: 'All seven timestamped samples are present. This scripted example does not establish the real asset condition.',
       machineState: 'running', observedState: 'running', gateway: 'online',
       events: [{ time: '00:00–01:00', source: 'Synthetic historian', detail: 'Seven samples received at 10-second intervals.' }],
       nextCheck: 'Compare the tag and time range with the approved site record.',

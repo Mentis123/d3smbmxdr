@@ -47,7 +47,7 @@ export function createLabLayer(world, industry, host, onSelect) {
       projected.fromArray(recipe.anchor);projected.y+=.65;world.root.localToWorld(projected);projected.project(camera);
       const x=(projected.x*.5+.5)*host.clientWidth,y=(-projected.y*.5+.5)*host.clientHeight;
       const overlap=placed.some(p=>Math.abs(p.x-x)<(p.width+width)/2+8&&Math.abs(p.y-y)<52);
-      marker.hidden=overlap||projected.z>1||projected.z< -1||Math.abs(projected.x)>.94||Math.abs(projected.y)>.9;
+      marker.hidden=overlap||x-width/2<8||x+width/2>host.clientWidth-8||y<48||projected.z>1||projected.z< -1||Math.abs(projected.x)>.94||Math.abs(projected.y)>.9;
       marker.style.left=x+'px';marker.style.top=y+'px';if(!marker.hidden)placed.push({x,y,width});
     }
   }

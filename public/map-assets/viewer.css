@@ -33,17 +33,27 @@ body.studio.studio-playing,body.studio.studio-playing #scene{cursor:none}
 .studio-count{position:absolute;left:18px;top:14px;z-index:6;font:600 15px/1 'Helvetica Neue',Arial,sans-serif;color:#9befff;opacity:.85;pointer-events:none}.studio-count::before{content:'● REC in ';color:#ff5a4f;font-weight:400}
 
 /* Compact controls are opt-in for learning embeds; the scene keeps the full viewport. */
-.camera-tools-toggle{position:absolute;bottom:12px;right:12px;z-index:4;min-height:44px;font-size:12px;background:#06122bf2}
-body.compact-controls:not(.camera-tools-open) .toolbar{display:none}
+.camera-tools-toggle{position:absolute;bottom:max(12px,env(safe-area-inset-bottom));right:max(12px,env(safe-area-inset-right));z-index:5;min-height:44px;font-size:12px;background:#06122bf2}
+.camera-tools-panel{display:none;position:absolute;right:12px;bottom:64px;width:min(280px,calc(100% - 24px));max-height:calc(100% - 80px);overflow:auto;z-index:5;padding:6px;border:1px solid #56738688;border-radius:10px;background:#06122bf5;box-shadow:0 6px 20px #0005}
+.camera-tools-heading{display:flex;align-items:center;gap:4px;position:sticky;top:-6px;background:#06122b;z-index:1;margin-bottom:5px}.camera-tools-heading strong{flex:1;font-size:12px;padding-left:6px}.camera-tools-heading button{font-size:12px;min-width:44px;min-height:44px;padding:4px 8px}.camera-tools-close{font-size:23px!important}
+body.compact-controls.camera-tools-open .camera-tools-panel{display:block}
 body.compact-controls .viewer-bottom{display:none}
-body.compact-controls #scene{width:100%;height:100%}
-body.compact-controls.camera-tools-open #scene{height:calc(100% - 180px)}
-body.compact-controls.camera-tools-open .toolbar{bottom:64px;width:calc(100% - 24px);max-width:500px;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:4px;padding:6px}
+body.compact-controls #scene,body.compact-controls.camera-tools-open #scene{width:100%;height:100%;top:0}
+body.compact-controls .toolbar{position:static;inset:auto;transform:none;display:grid;grid-template-columns:repeat(4,minmax(44px,1fr));grid-auto-rows:44px;align-content:start;align-items:stretch;justify-content:stretch;gap:4px;padding:0;width:100%;max-width:none;height:auto;margin:0;border:0;box-shadow:none;backdrop-filter:none;background:none}
 body.compact-controls .toolbar .separator{display:none}
-body.compact-controls .toolbar button,body.compact-controls .toolbar select{min-height:44px;padding:4px;font-size:12px}
+body.compact-controls:not(.camera-tools-advanced) .toolbar [data-camera-advanced]{display:none!important}
+body.compact-controls .toolbar button,body.compact-controls .toolbar select{width:100%;min-width:44px;min-height:44px;height:44px;padding:4px;font-size:12px}
 body.compact-controls .quality-label{grid-column:span 2}
-body.compact-controls .quality-label select{width:100%}
-body.compact-controls .flight-pad,body.compact-controls .flight-height{bottom:190px}
-@media(max-width:350px){body.compact-controls.camera-tools-open .toolbar{grid-template-columns:repeat(5,minmax(44px,1fr))}body.compact-controls.camera-tools-open #scene{height:calc(100% - 230px)}}
-
+.compact-fly-bar{display:none;position:absolute;left:max(12px,env(safe-area-inset-left));bottom:max(12px,env(safe-area-inset-bottom));z-index:4;align-items:center;gap:5px}.compact-fly-bar button{min-height:44px;font-size:12px;padding:7px 10px;background:#06122bf2}.compact-fly-hint{display:none;font-size:11px;color:#c0dce9;background:#06122be6;padding:8px;border-radius:5px}
+body.compact-controls.flying .compact-fly-bar{display:flex}
+body.compact-controls.touch-ui .compact-fly-mouse,body.compact-controls.mouse-locked .compact-fly-mouse{display:none}
+body.compact-controls .flight-pad,body.compact-controls .flight-height{bottom:70px}
+body.compact-controls .flight-pad{grid-template-rows:repeat(2,44px)}body.compact-controls .flight-pad [data-move=back]{grid-area:2/2}
+body.compact-controls.camera-tools-open .flight-pad,body.compact-controls.camera-tools-open .flight-height{display:none}
+@media(min-width:900px){.compact-fly-hint{display:block}}
+@media(max-width:420px){body.compact-controls .compact-fly-mouse{display:none}}
 .exhibit-active .lab-hotspot,.exhibit-active .camera-tools-toggle,.exhibit-active .toolbar,.exhibit-active .viewer-bottom,.exhibit-active .flight-pad,.exhibit-active .flight-height{display:none!important}
+
+.exhibit-active .camera-tools-panel,.exhibit-active .compact-fly-bar{display:none!important}
+
+.camera-tools-panel,.camera-tools-toggle,.compact-fly-bar{font-family:"Helvetica Neue",Arial,sans-serif}

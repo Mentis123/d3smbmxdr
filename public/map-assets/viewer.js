@@ -17,12 +17,34 @@ const SEED=isMining?181026:ENERGY_SEED;
 if(capture)document.body.classList.add('diagnostic');
 // embed=1: the scene is hosted inside another page (the /worlds explorer), which supplies its own chrome.
 if(params.get('embed')==='1')document.body.classList.add('embed');
-// Learning embeds reveal camera tools deliberately instead of covering the scene.
+// Compact embeds keep the canvas full size; camera tools are a small dismissible overlay.
+let cameraToolsToggle,cameraToolsPanel,cameraToolsMore;
+function setCameraToolsOpen(open,{focus=false}={}){
+  if(!cameraToolsToggle)return;
+  document.body.classList.toggle('camera-tools-open',open);
+  document.body.classList.remove('camera-tools-advanced');
+  cameraToolsToggle.setAttribute('aria-expanded',String(open));cameraToolsMore.setAttribute('aria-expanded','false');
+  if(open)navigation?.cancelInput();
+  if(focus)cameraToolsToggle.focus({preventScroll:true});
+}
 if(params.get('controls')==='compact'){
   document.body.classList.add('compact-controls');
-  const toggle=document.createElement('button');toggle.className='camera-tools-toggle';toggle.textContent='Camera controls';toggle.setAttribute('aria-expanded','false');
-  toggle.addEventListener('click',()=>{const open=document.body.classList.toggle('camera-tools-open');toggle.setAttribute('aria-expanded',String(open));toggle.textContent=open?'Hide camera controls':'Camera controls';});
-  document.querySelector('#viewer').append(toggle);
+  const toolbar=document.querySelector('.toolbar');toolbar.id='camera-tools-actions';
+  for(const child of toolbar.children)if(!['pan','fly','reset','pause'].includes(child.dataset.action))child.dataset.cameraAdvanced='true';
+  cameraToolsToggle=document.createElement('button');cameraToolsToggle.className='camera-tools-toggle';cameraToolsToggle.textContent='Camera controls';cameraToolsToggle.setAttribute('aria-expanded','false');cameraToolsToggle.setAttribute('aria-controls','camera-tools-panel');
+  cameraToolsToggle.addEventListener('click',()=>setCameraToolsOpen(!document.body.classList.contains('camera-tools-open')));
+  cameraToolsPanel=document.createElement('section');cameraToolsPanel.className='camera-tools-panel';cameraToolsPanel.id='camera-tools-panel';cameraToolsPanel.setAttribute('aria-label','Camera controls');
+  const heading=document.createElement('div');heading.className='camera-tools-heading';
+  const label=document.createElement('strong');label.textContent='Camera';
+  cameraToolsMore=document.createElement('button');cameraToolsMore.textContent='More';cameraToolsMore.setAttribute('aria-label','More camera options');cameraToolsMore.setAttribute('aria-expanded','false');cameraToolsMore.setAttribute('aria-controls',toolbar.id);
+  cameraToolsMore.addEventListener('click',()=>{const open=document.body.classList.toggle('camera-tools-advanced');cameraToolsMore.setAttribute('aria-expanded',String(open));});
+  const close=document.createElement('button');close.className='camera-tools-close';close.textContent='×';close.setAttribute('aria-label','Close camera controls');close.addEventListener('click',()=>setCameraToolsOpen(false,{focus:true}));
+  heading.append(label,cameraToolsMore,close);cameraToolsPanel.append(heading,toolbar);
+  const flyBar=document.createElement('div');flyBar.className='compact-fly-bar';flyBar.setAttribute('aria-label','Fly mode');
+  const exit=document.createElement('button');exit.dataset.action='fly';exit.textContent='Exit fly';exit.setAttribute('aria-label','Exit fly mode');
+  const mouse=document.createElement('button');mouse.className='compact-fly-mouse';mouse.textContent='Lock mouse';mouse.title='Optional mouse capture. Press Escape to release.';mouse.addEventListener('click',()=>{setCameraToolsOpen(false);navigation?.action('mouse-look');});
+  const hint=document.createElement('span');hint.textContent='WASD · Q/E · drag to look';hint.className='compact-fly-hint';
+  flyBar.append(exit,mouse,hint);document.querySelector('#viewer').append(cameraToolsPanel,cameraToolsToggle,flyBar);
 }
 const host=document.querySelector('#scene'),loading=document.querySelector('#loading'),error=document.querySelector('#error');
 const openingTilt=Math.atan2(15,Math.hypot(12,23));
@@ -187,7 +209,7 @@ const flythrough={
 function setView(name){navigation?.exitFly();const v=views[name]||views.hero;camera.fov=v.fov||42;camera.updateProjectionMatrix();azimuth=v.azimuth??Math.atan2(12,23);tilt=targetTilt=v.tilt??openingTilt;yaw=targetYaw=v.yaw;zoom=targetZoom=v.zoom;target.fromArray(v.target);render();}
 function reset(){azimuth=Math.atan2(12,23);targetTilt=openingTilt;target.set(0,1,0);targetYaw=0;targetZoom=1;if(matchMedia('(prefers-reduced-motion: reduce)').matches){yaw=0;zoom=1;tilt=targetTilt;}}
 function animate(now){if(disposed)return;if(document.hidden||host.clientWidth<1||host.clientHeight<1){last=0;raf=requestAnimationFrame(animate);return;}const rawDt=last?(now-last)/1000:0,dt=Math.min(rawDt,shot?.25:.05);last=now;if(rawDt>0){frameTimes.push(rawDt*1000);if(frameTimes.length>2000)frameTimes.shift();}if(exhibit){exhibit.update(dt);renderer.render(exhibit.scene,exhibit.camera);raf=requestAnimationFrame(animate);return;}if(exhibitSaved){render();raf=requestAnimationFrame(animate);return;}if(!paused){elapsed+=dt;if(!capture&&!shot&&rawDt>0)tuner.sample(rawDt*1000,now);}if(shot&&!paused)tickShot();const k=1-Math.exp(-dt*10);yaw+=(targetYaw-yaw)*k;tilt+=(targetTilt-tilt)*k;zoom+=(targetZoom-zoom)*k;navigation?.update(dt);render();raf=requestAnimationFrame(animate);}
-function action(name){if(navigation?.action(name))return;if(name==='rotate-left')targetYaw-=Math.PI/8;if(name==='rotate-right')targetYaw+=Math.PI/8;if(name==='zoom-in')targetZoom=clampZoom(targetZoom*1.2,host.clientWidth,host.clientHeight);if(name==='zoom-out')targetZoom=clampZoom(targetZoom/1.2,host.clientWidth,host.clientHeight);if(name==='reset')reset();if(name==='pause'){paused=!paused;tuner.reset(performance.now());pauseButton();}if(name==='retry')location.reload();}
+function action(name){if(name==='mouse-look')setCameraToolsOpen(false);if(navigation?.action(name))return;if(name==='rotate-left')targetYaw-=Math.PI/8;if(name==='rotate-right')targetYaw+=Math.PI/8;if(name==='zoom-in')targetZoom=clampZoom(targetZoom*1.2,host.clientWidth,host.clientHeight);if(name==='zoom-out')targetZoom=clampZoom(targetZoom/1.2,host.clientWidth,host.clientHeight);if(name==='reset')reset();if(name==='pause'){paused=!paused;tuner.reset(performance.now());pauseButton();}if(name==='retry')location.reload();}
 function key(e){if(e.target!==host||e.shiftKey||navigation?.mode==='fly')return;const map={ArrowLeft:'rotate-left',ArrowRight:'rotate-right','+':'zoom-in','=':'zoom-in','-':'zoom-out',Home:'reset',' ':'pause'};if(map[e.key]){e.preventDefault();action(map[e.key]);}}
 const onResize=()=>fit(),click=e=>{const b=e.target.closest('[data-action]');if(b)action(b.dataset.action);};
 function applyQualityProfile(){effectiveProfile=tuner.profile();if(!renderer||!world)return;renderer.shadowMap.enabled=effectiveProfile.shadows;const shadow=world.key.shadow;if(shadow.mapSize.x!==effectiveProfile.shadowSize){shadow.map?.dispose();shadow.map=null;shadow.mapSize.set(effectiveProfile.shadowSize,effectiveProfile.shadowSize);shadow.needsUpdate=true;}const spray=world.root.getObjectByName('spillway-droplets-and-spray');if(spray)spray.geometry.setDrawRange(0,Math.floor(world.stats.sprayParticles*effectiveProfile.spray));let mistIndex=0;world.root.traverse(o=>{if(o.name==='impact-mist')o.visible=!o.userData.diagnosticHidden&&mistIndex++<Math.ceil(42*effectiveProfile.mist);});const auto=qSelect.querySelector('option[value=auto]');if(auto)auto.textContent='Auto Â· '+effectiveProfile.name;fit();}
@@ -207,8 +229,8 @@ try{
   if(capture&&params.has('only')){const prefix={tanks:'treatment-',grid:'electrical-yard',town:'settlement-'}[params.get('only')];if(prefix)for(const o of world.root.children)if(!o.isLight&&!o.name.startsWith(prefix)){o.visible=false;o.userData.diagnosticHidden=true;}}
   if(capture&&['normal','clay'].includes(params.get('material'))){const normal=params.get('material')==='normal'?new THREE.MeshNormalMaterial():new THREE.MeshStandardMaterial({color:0x91979b,roughness:.85}),originals=[];world.root.traverse(o=>{if(o.isMesh){originals.push([o,o.material]);o.material=normal;}});const originalDispose=world.dispose;world.dispose=()=>{for(const[o,m]of originals)o.material=m;originalDispose();normal.dispose();};}
   applyQualityProfile();pauseButton();
-  navigation=createNavigation({host,camera,getOrbit:()=>({target,yaw,tilt,zoom,targetZoom}),setOrbit(s){if(s.target)target.copy(s.target);if(s.azimuth!==undefined)azimuth=s.azimuth;if(s.deltaYaw)targetYaw+=s.deltaYaw;if(s.deltaTilt!==undefined)targetTilt=THREE.MathUtils.clamp(targetTilt+s.deltaTilt,-Math.PI/2+.03,Math.PI/2-.03);if(s.tilt!==undefined)targetTilt=s.tilt;if(s.yaw!==undefined)targetYaw=s.yaw;if(s.zoom!==undefined)targetZoom=clampZoom(s.zoom,host.clientWidth,host.clientHeight);if(s.immediate){yaw=targetYaw;zoom=targetZoom;tilt=targetTilt;}},resetOrbit:reset,onChange({mode,tool,locked}){
-    const flying=mode==='fly',fly=document.querySelector('[data-action=fly]');fly.textContent=flying?'Exit fly':'Fly';fly.setAttribute('aria-pressed',String(flying));document.querySelector('[data-action=pan]').setAttribute('aria-pressed',String(tool==='pan'));document.querySelector('[data-action=mouse-look]').hidden=!flying||locked;
+  navigation=createNavigation({host,camera,captureOnFly:params.get('controls')!=='compact',getOrbit:()=>({target,yaw,tilt,zoom,targetZoom}),setOrbit(s){if(s.target)target.copy(s.target);if(s.azimuth!==undefined)azimuth=s.azimuth;if(s.deltaYaw)targetYaw+=s.deltaYaw;if(s.deltaTilt!==undefined)targetTilt=THREE.MathUtils.clamp(targetTilt+s.deltaTilt,-Math.PI/2+.03,Math.PI/2-.03);if(s.tilt!==undefined)targetTilt=s.tilt;if(s.yaw!==undefined)targetYaw=s.yaw;if(s.zoom!==undefined)targetZoom=clampZoom(s.zoom,host.clientWidth,host.clientHeight);if(s.immediate){yaw=targetYaw;zoom=targetZoom;tilt=targetTilt;}},resetOrbit:reset,onChange({mode,tool,locked}){
+    const flying=mode==='fly',wasFlying=document.body.classList.contains('flying');if(flying&&!wasFlying)setCameraToolsOpen(false);document.body.classList.toggle('mouse-locked',locked);const fly=document.querySelector('[data-action=fly]');fly.textContent=flying?'Exit fly':'Fly';fly.setAttribute('aria-pressed',String(flying));document.querySelector('[data-action=pan]').setAttribute('aria-pressed',String(tool==='pan'));document.querySelector('[data-action=mouse-look]').hidden=!flying||locked;
     document.body.classList.toggle('flying',flying);document.querySelector('#hint').textContent=flying?'WASD move Â· Q/E down/up Â· Shift faster Â· '+(locked?'Mouse look':'Drag to look')+' Â· Esc return':(tool==='pan'?'Drag to pan':'Drag rotate/tilt Â· Shift/right-drag pan')+' Â· Alt-drag crane Â· Scroll zoom';
     if(document.body.classList.contains('touch-ui')){document.querySelector('[data-action=mouse-look]').hidden=true;document.querySelector('#hint').textContent=flying?'Hold arrows to move Â· Drag to look Â· â†‘/â†“ height':(tool==='pan'?'Drag to pan':'One finger: rotate / tilt')+' Â· Two fingers: pan / pinch zoom';}
     document.querySelector('#navigation-status').textContent=flying?'Fly mode. WASD moves, Q and E change height. Escape returns to tabletop.':'Tabletop mode';

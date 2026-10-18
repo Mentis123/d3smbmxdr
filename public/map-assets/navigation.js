@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import {clampZoom,orbitDistance} from './camera-limits.js';
 
 /** Camera navigation is independent of decorative scene time. */
-export function createNavigation({host,camera,getOrbit,setOrbit,resetOrbit,onChange}) {
+export function createNavigation({host,camera,getOrbit,setOrbit,resetOrbit,onChange,captureOnFly=true}) {
   let mode='tabletop',tool='rotate',drag=null,flyYaw=0,flyPitch=0,speed=4,lockedBefore=false,disposed=false;
   let flightLimit=35,ceiling=25,touchInput=matchMedia('(pointer:coarse)').matches;
   const touches=new Map(),held=new Map();let gesture=null;
@@ -18,7 +18,7 @@ export function createNavigation({host,camera,getOrbit,setOrbit,resetOrbit,onCha
   function crane(amount){if(mode==='fly'){flyPosition.y=THREE.MathUtils.clamp(flyPosition.y+amount,.18,ceiling);}else{const target=getOrbit().target.clone();target.y+=amount;limitTarget(target);setOrbit({target});}}
   function look(dx,dy){flyYaw-=dx*.0024;flyPitch=THREE.MathUtils.clamp(flyPitch-dy*.0024,-Math.PI/2+.03,Math.PI/2-.03);}
   function requestLook(){if(mode!=='fly'||disposed||touchInput)return;try{const request=host.requestPointerLock?.();request?.catch(()=>notify());}catch{notify();}}
-  function enterFly({capture=true}={}){if(mode==='fly')return;release();keys.clear();const orbit=getOrbit();setOrbit({yaw:orbit.yaw,zoom:orbit.zoom,immediate:true});flyPosition.copy(camera.position);flightLimit=Math.max(35,Math.abs(flyPosition.x)+5,Math.abs(flyPosition.z)+5);ceiling=Math.max(25,flyPosition.y+5);euler.setFromQuaternion(camera.quaternion,'YXZ');flyYaw=euler.y;flyPitch=euler.x;lockedBefore=false;mode='fly';host.focus({preventScroll:true});notify();if(capture)requestLook();}
+  function enterFly({capture=captureOnFly}={}){if(mode==='fly')return;release();keys.clear();const orbit=getOrbit();setOrbit({yaw:orbit.yaw,zoom:orbit.zoom,immediate:true});flyPosition.copy(camera.position);flightLimit=Math.max(35,Math.abs(flyPosition.x)+5,Math.abs(flyPosition.z)+5);ceiling=Math.max(25,flyPosition.y+5);euler.setFromQuaternion(camera.quaternion,'YXZ');flyYaw=euler.y;flyPitch=euler.x;lockedBefore=false;mode='fly';host.focus({preventScroll:true});notify();if(capture)requestLook();}
   function exitFly(preserveView=true){
     if(mode!=='fly')return;
     // Rebase orbit around a point on the current sightline. The turntable yaw is

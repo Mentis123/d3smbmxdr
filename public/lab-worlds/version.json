@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "sourceRepository": "Mentis123/adamrappaport",
-  "sourceCommit": "11d566ed9b5b7ba261047eb2706ac52cc7912ca4",
+  "sourceCommit": "6e99e5ee3321588f03eb3f03ff14ae4795fecb93",
   "experience": "ai-lab",
   "runtimeDependency": "Self-hosted static files; no personal-site requests",
   "files": {
@@ -11,7 +11,7 @@
     "public/map-assets/builder-utils.js": "4d0f2d3a6d268936522572c09ce84763af9c837b096af8f603fe9414b8eb5768",
     "public/map-assets/camera-limits.js": "81debf1686fc3993a460450ae77f2e7704804ff5a046e06b516660c12bd8598d",
     "public/map-assets/electrical.js": "cc49e083143cab12430332dad6ef3a182d48c4654e227912b22aca587d3ae7a3",
-    "public/map-assets/exhibits.js": "287ab027a0c642d4ebfe50cbc0b58d1205c620cb27a4c4f2c711f81e50370ad8",
+    "public/map-assets/exhibits.js": "17feecaf92aad7151b45d0914600350e10baca3dee16c28f7c176c0b41c31958",
     "public/map-assets/expansion.js": "aca30063e9af4c6c23d7c9b419bae582fe7d2288be0c47a8a5feacde98294de3",
     "public/map-assets/flow-effects.js": "4b1fe69a494284e1a342ce895b94ba2eb7aac796cbebefcf7b55e57b1a8749a4",
     "public/map-assets/flythrough.js": "fee90f10bfab0ec02659492e75b4b5e9c08bf63d8172fb05e10890579eca32d7",

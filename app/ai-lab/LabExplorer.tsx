@@ -14,15 +14,15 @@ export default function LabExplorer({industry}:{industry:LabIndustry}){
  const select=useCallback((next:string,history=true)=>{
   if(!recipesFor(industry).some(r=>r.id===next))return;
   returnFocus.current=document.activeElement instanceof HTMLElement?document.activeElement:null;
-  if(history){const url=new URL(window.location.href);url.searchParams.set('example',next);window.history.pushState({labExhibit:true},'',url);pushed.current=true;}
+  if(history){const url=new URL(window.location.href);url.searchParams.set('example',next);window.history.pushState({...window.history.state,labExhibit:true},'',url);pushed.current=true;}
   setId(next);
  },[industry]);
  const close=useCallback(()=>{
   if(pushed.current){pushed.current=false;window.history.back();}
-  else{const url=new URL(window.location.href);url.searchParams.delete('example');window.history.replaceState({},'',url);setId(null);}
+  else{const url=new URL(window.location.href);url.searchParams.delete('example');window.history.replaceState({...window.history.state,labExhibit:false},'',url);setId(null);}
  },[]);
  useEffect(()=>{
-  const read=()=>{const query=new URLSearchParams(window.location.search).get('example');setId(query&&recipesFor(industry).some(r=>r.id===query)?query:null);};
+  const read=()=>{pushed.current=!!window.history.state?.labExhibit;const query=new URLSearchParams(window.location.search).get('example');setId(query&&recipesFor(industry).some(r=>r.id===query)?query:null);};
   read();window.addEventListener('popstate',read);return()=>window.removeEventListener('popstate',read);
  },[industry]);
  useEffect(()=>{
@@ -33,10 +33,11 @@ export default function LabExplorer({industry}:{industry:LabIndustry}){
    if(e.data?.requestId!==request.current||e.data?.id!==idRef.current)return;
    if(e.data.type==='exhibit:ready'){clearTimeout(loadTimer.current);setLoaded(true);setFailed(false);}
    if(e.data.type==='exhibit:error')setFailed(true);
+   if(e.data.type==='exhibit:state'&&e.data.close){close();return;}
    if(e.data.type==='exhibit:state'){setPhase(e.data.phase);setPlaying(e.data.playing);}
   };
   window.addEventListener('message',message);return()=>window.removeEventListener('message',message);
- },[industry,select]);
+ },[industry,select,close]);
  useEffect(()=>{
   idRef.current=id;request.current++;setLoaded(false);setFailed(false);setPhase(0);
   if(!id){send('exhibit:close');dialog.current?.close();dialog.current?.show();returnFocus.current?.focus({preventScroll:true});return;}

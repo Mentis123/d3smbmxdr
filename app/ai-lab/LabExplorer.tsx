@@ -15,6 +15,8 @@ export default function LabExplorer({industry}:{industry:LabIndustry}){
   if(!recipesFor(industry).some(r=>r.id===next))return;
   returnFocus.current=document.activeElement instanceof HTMLElement?document.activeElement:null;
   if(history){const url=new URL(window.location.href);url.searchParams.set('example',next);window.history.pushState({...window.history.state,labExhibit:true},'',url);pushed.current=true;}
+  // Same-origin preparation must happen before React changes the canvas dimensions.
+  if(EXHIBITS[next].model){try{(frame.current?.contentWindow as (Window&{__tabletop?:{exhibit?:{prepare:()=>void}}})|null)?.__tabletop?.exhibit?.prepare();}catch{/* The renderer will prepare itself after loading. */}}
   setId(next);
  },[industry]);
  const close=useCallback(()=>{
@@ -22,7 +24,7 @@ export default function LabExplorer({industry}:{industry:LabIndustry}){
   else{const url=new URL(window.location.href);url.searchParams.delete('example');window.history.replaceState({...window.history.state,labExhibit:false},'',url);setId(null);}
  },[]);
  useEffect(()=>{
-  const read=()=>{pushed.current=!!window.history.state?.labExhibit;const query=new URLSearchParams(window.location.search).get('example');setId(query&&recipesFor(industry).some(r=>r.id===query)?query:null);};
+  const read=()=>{pushed.current=!!window.history.state?.labExhibit;const query=new URLSearchParams(window.location.search).get('example');if(query&&EXHIBITS[query]?.model){try{(frame.current?.contentWindow as (Window&{__tabletop?:{exhibit?:{prepare:()=>void}}})|null)?.__tabletop?.exhibit?.prepare();}catch{/* Initial direct links may still be loading. */}}setId(query&&recipesFor(industry).some(r=>r.id===query)?query:null);};
   read();window.addEventListener('popstate',read);return()=>window.removeEventListener('popstate',read);
  },[industry]);
  useEffect(()=>{

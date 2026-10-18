@@ -584,3 +584,12 @@
 /* The site-wide globals.css styles every <header> white with padding; inside the room a header is layout only. */
 .dr-shell header:not(.dr-brand){background:transparent;border:0;padding:0;justify-content:flex-start;align-items:baseline}
 .dr-review-round>header{display:block;margin:0 0 8px}
+
+/* Keep the decision visible; full sourced context lives behind Explain more. */
+.dr-briefing--compact .dr-b-block p{font-size:17px;line-height:1.55}.dr-briefing--compact .dr-b-block{margin-bottom:16px}.dr-briefing--compact .dr-b-role{font-size:14px}.dr-briefing--compact .dr-explain-button{margin:4px 0 12px}.dr-table .dr-task{font-size:clamp(20px,2vw,27px);line-height:1.3}.dr-proj-sit>.dr-explain-button{margin-top:16px}.dr-guidance>.dr-explain-button{margin-top:12px}.dr-run-foot>.dr-explain-button{margin:4px 0 12px}
+
+.dr-table .dr-site-context{display:flex;align-items:center;gap:12px;grid-column:1/-1}.dr-table .dr-site-context .dr-explain-button{margin:0}.dr-table .dr-briefing--compact .dr-b-block h3{font-size:14px;letter-spacing:0;text-transform:none;font-weight:700}.dr-table .dr-vote .dr-options button{font-size:16px;line-height:1.45;padding:14px}.dr-table .dr-opt-cost{font-size:14px}.dr-table .dr-explain-dialog .dr-dash{overflow:visible;max-height:none}.dr-table .dr-explain-dialog .dr-dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+@media(min-width:1000px){.dr-table .dr-table-grid{grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);grid-template-rows:auto minmax(0,1fr);gap:14px}.dr-table .dr-table-work{display:contents}.dr-table .dr-slot{min-height:0;overflow:auto}.dr-table .dr-slot--span{grid-column:1/-1}.dr-table .dr-task{font-size:25px}.dr-table .dr-card{padding:20px}.dr-table .dr-briefing--compact .dr-b-block p{font-size:18px}}
+@media(max-width:600px){.dr-table .dr-explain-dialog .dr-dash-grid{grid-template-columns:1fr}.dr-table .dr-vote .dr-options button{font-size:16px}}
+
+.dr-table .dr-brief>.dr-task{animation:none;margin-top:0!important;margin-bottom:18px!important}

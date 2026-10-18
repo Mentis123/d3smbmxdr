@@ -72,8 +72,34 @@ export function createExhibit(id, host, notify) {
     outline=mesh(new THREE.TorusGeometry(1.05,.018,8,64),amber,0,1.4,.3);outline.scale.y=.48;
   }
   let time=0,playing=!matchMedia('(prefers-reduced-motion: reduce)').matches,angle=.55,elevation=.42,distance=10.8,lastPhase=-1;
+  // Fit actual mesh corners, rather than a conservative empty bounding box or fixed distance.
+  root.updateMatrixWorld(true);
+  const frameBox=new THREE.Box3().setFromObject(root);frameBox.getCenter(target);const frameCenter=target.clone();
+  const framePoints=[];
+  root.traverse(o=>{if(!o.isMesh)return;const a=o.geometry.attributes.position;for(let i=0;i<a.count;i++)framePoints.push(new THREE.Vector3().fromBufferAttribute(a,i).applyMatrix4(o.matrixWorld).sub(frameCenter));});
+  const outward=new THREE.Vector3(),right=new THREE.Vector3(),screenUp=new THREE.Vector3(),vertical=new THREE.Vector3(0,1,0);
+  let fittedDistance=10.8,frameKey='';
   const points=new Map();let gesture=null;
-  function pose(){const w=host.clientWidth,h=host.clientHeight;camera.aspect=w/Math.max(1,h);camera.updateProjectionMatrix();const fit=camera.aspect<1?1.15/camera.aspect:1;camera.position.set(Math.sin(angle)*Math.cos(elevation),Math.sin(elevation),Math.cos(angle)*Math.cos(elevation)).multiplyScalar(distance*fit).add(target);camera.lookAt(target);camera.updateMatrixWorld();}
+  function pose(){
+    const w=host.clientWidth,h=host.clientHeight;if(w<1||h<1)return;camera.aspect=w/Math.max(1,h);camera.updateProjectionMatrix();
+    const nextKey=[w,h,angle,elevation].join(':');
+    if(nextKey!==frameKey){
+      frameKey=nextKey;outward.set(Math.sin(angle)*Math.cos(elevation),Math.sin(elevation),Math.cos(angle)*Math.cos(elevation));right.crossVectors(vertical,outward).normalize();screenUp.crossVectors(outward,right).normalize();
+      const tanV=Math.tan(THREE.MathUtils.degToRad(camera.fov/2)),tanH=tanV*camera.aspect,coords=framePoints.map(p=>({x:p.dot(right),y:p.dot(screenUp),z:p.dot(outward)}));
+      let sx=0,sy=0,fit=0;
+      for(let iteration=0;iteration<4;iteration++){
+        fit=0;for(const p of coords)fit=Math.max(fit,p.z+Math.abs(p.x-sx)/tanH,p.z+Math.abs(p.y-sy)/tanV);
+        if(iteration===3)break;
+        let minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;
+        for(const p of coords){const depth=fit-p.z;minX=Math.min(minX,(p.x-sx)/depth);maxX=Math.max(maxX,(p.x-sx)/depth);minY=Math.min(minY,(p.y-sy)/depth);maxY=Math.max(maxY,(p.y-sy)/depth);}
+        sx+=(minX+maxX)*.5*fit;sy+=(minY+maxY)*.5*fit;
+      }
+      fittedDistance=fit*1.08;target.copy(frameCenter).addScaledVector(right,sx).addScaledVector(screenUp,sy);
+    }
+    camera.position.copy(outward).multiplyScalar(fittedDistance*(distance/10.8)).add(target);camera.lookAt(target);camera.updateMatrixWorld();
+  }
+  function framing(){const bounds={minX:Infinity,maxX:-Infinity,minY:Infinity,maxY:-Infinity};for(const p of framePoints){const v=p.clone().add(frameCenter).project(camera);bounds.minX=Math.min(bounds.minX,v.x);bounds.maxX=Math.max(bounds.maxX,v.x);bounds.minY=Math.min(bounds.minY,v.y);bounds.maxY=Math.max(bounds.maxY,v.y);}return bounds;}
+
   function update(dt){if(playing)time+=dt;const t=time%12,amount=THREE.MathUtils.smoothstep(t,4,7),phase=t<4?0:t<7?1:2;
     moving.forEach(o=>{o.position.set(-2.6+((o.userData.offset+time*.13)%1)*5.2,1.18,o.userData.lane);o.rotation.z=time*1.2+o.userData.offset;});
     pile.forEach((o,i)=>{const s=Math.max(.001,THREE.MathUtils.clamp(amount*pile.length-i,0,1));o.scale.setScalar(s);});
@@ -91,5 +117,5 @@ export function createExhibit(id, host, notify) {
   const listeners=[['pointerdown',down],['pointermove',move],['pointerup',up],['pointercancel',up],['wheel',wheel]];
   listeners.forEach(([n,f])=>host.addEventListener(n,f,{capture:true,passive:false}));document.addEventListener('keydown',keydown,true);
   update(0);
-  return{scene,camera,update,command(action){if(action==='pause')playing=!playing;if(action==='replay'){time=0;playing=true;}if(action==='reset'){angle=.55;elevation=.42;distance=10.8;}notify({phase:lastPhase,playing,time:time%12});},setTime(t){time=t;playing=false;update(0);},metrics:()=>({id,time:time%12,playing,phase:lastPhase,angle,elevation,distance}),dispose(){listeners.forEach(([n,f])=>host.removeEventListener(n,f,true));document.removeEventListener('keydown',keydown,true);points.clear();geometries.forEach(g=>g.dispose());materials.forEach(m=>m.dispose());textures.forEach(t=>t.dispose());key.shadow.map?.dispose();}};
+  return{scene,camera,update,command(action){if(action==='pause')playing=!playing;if(action==='replay'){time=0;playing=true;}if(action==='reset'){angle=.55;elevation=.42;distance=10.8;}notify({phase:lastPhase,playing,time:time%12});},setTime(t){time=t;playing=false;update(0);},metrics:()=>({id,time:time%12,playing,phase:lastPhase,angle,elevation,distance,fittedDistance,framing:framing()}),dispose(){listeners.forEach(([n,f])=>host.removeEventListener(n,f,true));document.removeEventListener('keydown',keydown,true);points.clear();geometries.forEach(g=>g.dispose());materials.forEach(m=>m.dispose());textures.forEach(t=>t.dispose());key.shadow.map?.dispose();}};
 }

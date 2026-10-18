@@ -18,6 +18,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { QRCodeSVG } from "qrcode.react";
 import { AlertTriangle, ArrowRight, Check, Copy, Download, Eye, FileText, Printer, LockKeyhole, Monitor, Play, Radio, RotateCcw, ShieldCheck, Square, Users, Zap } from "lucide-react";
 import "./decision-room.css";
+import ExplainMore from "./ExplainMore";
 import type { Briefing, Condition, Consequence, Dashboard, FactState, Guidance, Launch, MeterDef, PublicRound, Reveal, RunPlan, RunSegment, Scenario, ScenarioInfo, Tone } from "../../lib/decision-room/types";
 import VersionHub, { EditionIntro, HomeFooter, editions, type Edition } from "./VersionHub";
 
@@ -159,7 +160,8 @@ function StatePanel({ facts, meters, keys, note, flash, standby }: { facts?: Fac
 }
 const KIND_LABEL = { evidence: "Evidence", interpretation: "AI interpretation" } as const;
 /** The decision briefing: role, what changed, three sourced evidence cards, the gap, the stakes. Never marks an option as recommended. */
-function BriefingCard({ b }: { b: Omit<Briefing, "variants"> }) {
+function BriefingCard({ b, compact = false }: { b: Omit<Briefing, "variants">; compact?: boolean }) {
+  if(compact)return <div className="dr-briefing dr-briefing--compact"><p className="dr-b-role"><b>{b.role}</b><span>{b.horizon}</span></p><div className="dr-b-block"><h3>What changed</h3><p>{b.changed}</p></div><div className="dr-b-block dr-b-unknown"><h3>Still uncertain</h3><p>{b.unknown}</p></div><ExplainMore title="Full briefing: evidence and context"><BriefingCard b={b}/></ExplainMore></div>;
   return <div className="dr-briefing">
     <p className="dr-b-role"><b>{b.role}</b><span>{b.horizon}</span></p>
     <div className="dr-b-block"><h3>What changed</h3><p>{b.changed}</p></div>
@@ -342,9 +344,7 @@ function Participant({ code }: { code: string }) {
 
   const inRound = Boolean(round) && (state === "open" || state === "closed" || state === "published");
   const briefCard = round && inRound
-    ? <section className="dr-card dr-brief" key={`brief-${round.roundNo}`}>{round.briefing ? <BriefingCard b={round.briefing} /> : <><div className="dr-panel-head"><span>Incoming</span></div><FeedPanel feed={round.feed} />
-        <div className="dr-situation">{round.situation.map((line, i) => <p key={i} style={{ animationDelay: `${0.4 + i * 0.14}s` }}><b>{String(i + 1).padStart(2, "0")}</b>{line}</p>)}</div></>}
-        <h2 className="dr-task">{round.prompt}</h2>
+    ? <section className="dr-card dr-brief" key={`brief-${round.roundNo}-${state}`}><h2 className="dr-task">{round.prompt}</h2>{round.briefing ? <BriefingCard b={round.briefing} compact /> : <><div className="dr-panel-head"><span>What is happening</span></div><div className="dr-situation">{round.situation.map((line, i) => <p key={i}><b>{String(i + 1).padStart(2, "0")}</b>{line}</p>)}</div><ExplainMore title="Incoming messages and context"><FeedPanel feed={round.feed}/></ExplainMore></>}
       </section>
     : state === "lobby" ? <section className="dr-card dr-wait"><Radio className="dr-wait-icon" /><h2>{brand.lobby.title}</h2><p>{data.organisation.estate}</p><p className="dr-hint">{brand.lobby.hint}</p></section>
     : state === "launched" ? <section className="dr-card dr-wait"><Zap className="dr-wait-icon" /><h2>{brand.launched.title}</h2><p>{brand.launched.body}</p></section>
@@ -380,10 +380,10 @@ function Participant({ code }: { code: string }) {
     {connection === "offline" ? <div className="dr-banner dr-banner--warn">No connection. Your last saved response is safe — use the printed lock card and hand it to Adam. The exercise continues.</div> : null}
 
     <div className="dr-table-grid">
-      <section className="dr-card dr-dash">
+      <div className="dr-site-context" key={`site-${session.activeRound}-${state}`}><ExplainMore title="Site status and context" label="Site status"><section className="dr-card dr-dash">
         <div className="dr-panel-head"><span>{brand.pathTitle}</span><span className="dr-chain-note">{state === "lobby" ? "all systems nominal" : state === "launched" ? "something is moving" : round?.when ?? ""}</span></div>
         <div className="dr-dash-grid"><PathPanel path={dashboard.path} stages={dashboard.stages} /><div><div className="dr-panel-head"><span>Live state</span></div><StatePanel facts={dashboard.facts} meters={dashboard.meters} keys={dashboard.meterKeys} note={brand.simulationNote} flash={changedMeters} standby={state === "lobby" ? ["containment"] : undefined} /></div></div>
-      </section>
+      </section></ExplainMore></div>
       <div className="dr-table-work">
         <div className={`dr-slot dr-slot--brief ${actCard ? "" : "dr-slot--span"}`.trim()}>{briefCard}</div>
         {actCard ? <div className="dr-slot dr-slot--act">{actCard}</div> : null}
@@ -445,7 +445,7 @@ function Console({ id }: { id: string }) {
       {state === "published" && results ? <><section className="dr-results-wide">
         <div className="dr-card"><div className="dr-panel-head"><span>Where the room landed</span><span className="dr-chain-note">{results.locked} of {counts.total} tables</span></div><SplitBars split={results} options={round?.options} />{results.confidence.median !== null ? <p className="dr-confidence">Confidence median <strong>{results.confidence.median}</strong> · range <strong>{results.confidence.low}–{results.confidence.high}</strong></p> : null}</div>
         {results.featured.length ? <div className="dr-quotes">{results.featured.map((f) => <blockquote className="dr-quote" key={f.id}><span>From the room</span><strong>{f.rationale}</strong><small>confidence {f.confidence ?? "–"}</small></blockquote>)}</div> : null}
-      </section>{results.reveal ? <section className="dr-card dr-reveal-wide"><div className="dr-panel-head"><span>What the control could and could not do</span></div><RevealBlock reveal={results.reveal} /></section> : null}</> : state === "open" || state === "closed" ? <section className="dr-card"><div className="dr-panel-head"><span>{round?.prompt ?? "What is your priority?"}</span></div>{round?.briefing ? <div className="dr-proj-split"><div className="dr-proj-sit"><div className="dr-proj-lines">{round.situation.map((line, i) => <p key={i}><b>{String(i + 1).padStart(2, "0")}</b>{line}</p>)}</div><div className="dr-proj-ev">{round.briefing.evidence.map((e, i) => <div key={i}><small>{KIND_LABEL[e.kind]} · {e.at}</small><strong>{e.source}</strong><span>{e.observation}</span></div>)}</div><small className="dr-synth">Synthetic exercise material</small></div><div className="dr-option-list">{round.options.map((o) => <div key={o.key}><b>{o.key}</b><span>{o.label}{o.cost ? <small className="dr-opt-cost">{o.cost}</small> : null}</span></div>)}</div></div>
+      </section>{results.reveal ? <section className="dr-card dr-reveal-wide"><div className="dr-panel-head"><span>What the control could and could not do</span></div><RevealBlock reveal={results.reveal} /></section> : null}</> : state === "open" || state === "closed" ? <section className="dr-card"><div className="dr-panel-head"><span>{round?.prompt ?? "What is your priority?"}</span></div>{round?.briefing ? <div className="dr-proj-split"><div className="dr-proj-sit"><div className="dr-proj-lines">{round.situation.map((line, i) => <p key={i}><b>{String(i + 1).padStart(2, "0")}</b>{line}</p>)}</div><ExplainMore key={round.roundNo} title="Full briefing: evidence and context"><BriefingCard b={round.briefing}/></ExplainMore></div><div className="dr-option-list">{round.options.map((o) => <div key={o.key}><b>{o.key}</b><span>{o.label}{o.cost ? <small className="dr-opt-cost">{o.cost}</small> : null}</span></div>)}</div></div>
         : <div className="dr-option-list">{round?.options.map((o) => <div key={o.key}><b>{o.key}</b><span>{o.label}{o.cost ? <small className="dr-opt-cost">{o.cost}</small> : null}</span></div>)}</div>}<p className="dr-console-note">{state === "closed" ? "Round closed. Responses stay private until Adam shows the split." : "Tables are deciding. Responses stay private until the split is shown."}</p></section> : null}
     </>}
 
@@ -564,7 +564,7 @@ function Admin({ id }: { id: string }) {
 
     <section className="dr-card"><div className="dr-panel-head"><span>Run the room, in order</span><Status tone={stale(lastUpdated, now)} label={stale(lastUpdated, now)} /></div>
       <div className="dr-steps">{steps.map((s, i) => <button key={s.action} className={s.primary ? "dr-primary" : ""} disabled={busy || !s.enabled} onClick={() => act({ action: s.action })}><b>{i + 1}</b>{s.icon}{s.label}</button>)}</div>
-      <div className="dr-run-foot"><p className="dr-hint">Flow per round: tables lock → <b>Close round</b> → Richard walks the option slide → <b>Show the split</b> → discuss → <b>Next</b>. The timer is advisory; nothing closes on its own.</p>
+      <div className="dr-run-foot"><ExplainMore title="How to run each round"><p>Flow per round: tables lock → <b>Close round</b> → Richard walks the option slide → <b>Show the split</b> → discuss → <b>Next</b>. The timer is advisory; nothing closes on its own.</p></ExplainMore>
       <div className="dr-control-bar"><a className="dr-button" target="_blank" rel="noreferrer" href={consoleUrl}><Monitor />Open console (projector)</a><a className="dr-button" target="_blank" rel="noreferrer" href={`/decision-room/report/${id}`}><FileText />After-action report</a><button onClick={exportCsv}><Download />Export CSV</button><button onClick={() => confirm("End this room? Table devices can no longer submit.") && act({ action: "end" })} disabled={busy || session.status === "ended"}>End room</button><button className="danger" onClick={() => confirm("Reset this room and remove every response and table login?") && act({ action: "reset" })} disabled={busy}><RotateCcw />Reset</button></div></div>
       <ErrorText message={actionError} />
     </section>
@@ -583,8 +583,7 @@ function Admin({ id }: { id: string }) {
 /** Facilitator-only. A conditional preference with its conditions, the alternative and what would change it. Never rendered on a table device or the projector. */
 function GuidanceCard({ g }: { g: Guidance }) {
   return <div className="dr-card dr-guidance"><h2>Facilitator guidance</h2><p className="dr-guide-warn">Not for projection — conditional preference, not an answer key</p>
-    <p><b>Preferred: {g.preferred}</b> — {g.conditions}</p><p><b>Alternative.</b> {g.alternative}</p><p><b>Would change it.</b> {g.changeEvidence}</p>
-    {g.notes.length ? <ul>{g.notes.map((n, i) => <li key={i}>{n}</li>)}</ul> : null}</div>;
+    <ExplainMore title="Facilitator guidance"><p><b>Preferred: {g.preferred}</b> — {g.conditions}</p><p><b>Alternative.</b> {g.alternative}</p><p><b>Would change it.</b> {g.changeEvidence}</p>{g.notes.length ? <ul>{g.notes.map((n, i) => <li key={i}>{n}</li>)}</ul> : null}</ExplainMore></div>;
 }
 
 /* ---------------------------------------------------------------- report */

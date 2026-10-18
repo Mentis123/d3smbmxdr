@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { ArrowDown, ArrowLeft, ArrowRight, Activity, Radio, ShieldCheck } from "lucide-react";
 import "./version-hub.css";
+import ExplainMore from "./ExplainMore";
 
 export type Edition = "ciso-basecamp" | "agent-0";
 export const editions = {
@@ -89,8 +90,8 @@ export function EditionIntro({ edition }: { edition: Edition }) {
     <div className="vh-eyebrow">V{e.number === "01" ? "1" : "2"} / {e.label} <span className="vh-status"><i />{e.status}</span></div>
     <img className="vh-edition-art" src={e.image} alt="" width="1200" height="800" />
     <h1>{e.title}</h1><p className="vh-edition-line">{e.line}</p>
-    <p>{edition === "agent-0" ? agent0 : "One device per table. Six rounds, from the SOC floor to the boardroom. Vote A–D, say why, lock it — then see where the room landed."}</p>
-    <div className="vh-tags">{e.tags.map((tag) => <span key={tag}>{tag}</span>)}</div>
+    <p>{edition === "agent-0" ? (family === "riverbend" ? "Mining preview. New rooms currently use the original scenario." : "A facilitated mining tabletop. One device per table.") : "Six rounds. One device per table."}</p>
+    <ExplainMore title={`About ${e.title}`}><p>{edition === "agent-0" ? agent0 : "One device per table. Six rounds, from the SOC floor to the boardroom. Vote A–D, say why, lock it — then see where the room landed."}</p><p>{e.description}</p><div className="vh-tags">{e.tags.map((tag) => <span key={tag}>{tag}</span>)}</div></ExplainMore>
     {edition === "agent-0" ? <a className="vh-back vh-review-link" href="/decision-room/agent-0/review">Facilitator review pack <ArrowRight size={15} /></a> : null}
   </section>;
 }

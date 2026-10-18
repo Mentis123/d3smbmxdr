@@ -92,7 +92,7 @@ export default function LabExplorer({industry}:{industry:LabIndustry}){
      {exhibit&&!showModel&&<div className="ex-flow-illustration"><span className="al-eyebrow">WORKFLOW OVERVIEW</span>{exhibit.flow.map((label,i)=><div key={label}><span>{i===0?'◎':i===1?'▤':'◉'}</span><strong>{label}</strong>{i<2&&<i>↓</i>}</div>)}</div>}
     </div>{id&&showModel&&<><p className="ex-phase" aria-live="polite">{phaseLabel}</p><div className="ex-controls"><button onClick={()=>send('exhibit:command',{action:'pause'})}>{playing?'Pause':'Play'}</button><button onClick={()=>send('exhibit:command',{action:'replay'})}>Replay</button><button onClick={()=>send('exhibit:command',{action:'reset'})}>Reset view</button><span>Drag to rotate · pinch to zoom</span></div></>}
     {failed&&!loaded&&<p className="ex-error" role="status">The 3D close-up is unavailable. You can still explore the explanation.</p>}</div>
-    {exhibit&&<aside className="ex-copy"><p className="al-eyebrow">HOW AI HELPS</p><p className="ex-explanation">{exhibit.copy}</p><div className="ex-benefit"><span>WHY IT MATTERS</span><strong>{exhibit.benefit}</strong></div><div className="ex-compute"><span>ILLUSTRATED PROCESSING</span><p>{exhibit.flow.join(' → ')}</p></div><p className="ex-disclosure">Illustrative demonstration · simulated inputs</p></aside>}</div>
+    {exhibit&&<aside className="ex-copy"><div className="ex-benefit"><strong>{exhibit.benefit}</strong></div><h3 className="ex-context-title">How AI helps</h3><p className="ex-explanation">{exhibit.copy}</p><div className="ex-compute"><span>Where it runs</span><p>{exhibit.flow.join(' → ')}</p></div><p className="ex-disclosure">Illustrative demonstration · simulated inputs</p></aside>}</div>
    </dialog>
   </section>
 

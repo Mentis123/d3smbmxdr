@@ -60,3 +60,4 @@
  .al-panel{padding:20px}.al-change-example{margin-bottom:16px}.al-panel-heading h2{font-size:27px}.al-stepper button{font-size:12px}.al-nav{padding:16px 0}.al-world-heading h1{font-size:25px}
 }
 @media(max-width:400px){.al-container{padding:0 12px}.al-panel{padding:16px}.al-conditions label{flex-wrap:wrap}.al-conditions select{max-width:100%!important}.al-panel-actions button{width:100%}.al-panel-heading h2{font-size:25px}.al-stepper{gap:5px}}
+@media(max-width:850px){.al-world:not([data-expanded=true]) .al-site-preview{height:64px}.al-world:not([data-expanded=true]) .al-world-label strong{display:none}.al-world:not([data-expanded=true]) .al-world-label{padding:8px 12px}.al-panel-heading h2{scroll-margin-top:16px}.al-stepper button{font-size:13px}.al-try-hint{margin-bottom:16px}.al-conditions{margin-top:12px}}

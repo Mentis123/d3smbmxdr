@@ -60,3 +60,8 @@ The supported interaction is now: industry → example card → Try it / How it 
 ## EX0–EX2 proof pair — 19 October 2026
 
 World-first exploration replaces the lesson-step UI. One mounted iframe stays inside a native dialog that switches between inline world and modal exhibit (no reparenting or reload); renderer switches to deterministic conveyor/intake exhibit scenes. All six old example query IDs are retained. Other four examples currently show concise workflow overviews; their detailed dioramas await paired human review. Host build/type check passed before publication; deployed browser validation pending. Canonical scripts/exhibit-renderer-check.mjs passed 17 checks; selected captures and renderer pin are canonical evidence. Continue from canonical state for exact release status.
+
+
+## EX0–EX2 production receipt
+
+Runtime `fee3f26`, renderer pin `3a9fd9d4559aabe788e5db79781f3863214b80e3`: Vercel success and live interactive acceptance passed. Canonical evidence/exhibits-release contains 103 responsive checks, 76 pin/asset/route/reduced-motion checks and selected desktop/phone captures. The single iframe stays permanently inside an inline/modal native dialog; do not reparent or reload it. Synchronous prepare snapshots the world before layout changes; preserve Next history state. Two animated dioramas are live, four other examples remain concise workflow overviews until EX3. Await user paired review before adding their detailed scenes. Physical phone/Safari testing remains outstanding. Use the canonical exhibit-host-check and exhibit-release-check gates; historical lesson UI selectors are superseded. No host local server/test suite was run; production build/type validation passed.

@@ -18,7 +18,7 @@ export function createNavigation({host,camera,getOrbit,setOrbit,resetOrbit,onCha
   function crane(amount){if(mode==='fly'){flyPosition.y=THREE.MathUtils.clamp(flyPosition.y+amount,.18,ceiling);}else{const target=getOrbit().target.clone();target.y+=amount;limitTarget(target);setOrbit({target});}}
   function look(dx,dy){flyYaw-=dx*.0024;flyPitch=THREE.MathUtils.clamp(flyPitch-dy*.0024,-Math.PI/2+.03,Math.PI/2-.03);}
   function requestLook(){if(mode!=='fly'||disposed||touchInput)return;try{const request=host.requestPointerLock?.();request?.catch(()=>notify());}catch{notify();}}
-  function enterFly(){if(mode==='fly')return;release();keys.clear();const orbit=getOrbit();setOrbit({yaw:orbit.yaw,zoom:orbit.zoom,immediate:true});flyPosition.copy(camera.position);flightLimit=Math.max(35,Math.abs(flyPosition.x)+5,Math.abs(flyPosition.z)+5);ceiling=Math.max(25,flyPosition.y+5);euler.setFromQuaternion(camera.quaternion,'YXZ');flyYaw=euler.y;flyPitch=euler.x;lockedBefore=false;mode='fly';host.focus({preventScroll:true});notify();requestLook();}
+  function enterFly({capture=true}={}){if(mode==='fly')return;release();keys.clear();const orbit=getOrbit();setOrbit({yaw:orbit.yaw,zoom:orbit.zoom,immediate:true});flyPosition.copy(camera.position);flightLimit=Math.max(35,Math.abs(flyPosition.x)+5,Math.abs(flyPosition.z)+5);ceiling=Math.max(25,flyPosition.y+5);euler.setFromQuaternion(camera.quaternion,'YXZ');flyYaw=euler.y;flyPitch=euler.x;lockedBefore=false;mode='fly';host.focus({preventScroll:true});notify();if(capture)requestLook();}
   function exitFly(preserveView=true){
     if(mode!=='fly')return;
     // Rebase orbit around a point on the current sightline. The turntable yaw is
@@ -77,7 +77,7 @@ export function createNavigation({host,camera,getOrbit,setOrbit,resetOrbit,onCha
   document.addEventListener('pointerdown',inputKind,true);document.addEventListener('pointerdown',movementDown);document.addEventListener('pointerup',movementEnd);document.addEventListener('pointercancel',movementEnd);document.addEventListener('lostpointercapture',movementEnd);document.addEventListener('click',movementClick);
   notify();
   return {
-    action,exitFly,reset,cancelInput:blur,
+    action,enterFly,exitFly,reset,cancelInput:blur,
     get mode(){return mode;},
     metrics(){return{mode,tool,speed,pointerLocked:document.pointerLockElement===host,touchPointers:touches.size,heldMoves:held.size,flyPosition:flyPosition.toArray()};},
     update(dt){if(mode!=='fly')return;camera.quaternion.setFromEuler(euler.set(flyPitch,flyYaw,0));forward.set(0,0,-1).applyQuaternion(camera.quaternion);right.set(1,0,0).applyQuaternion(camera.quaternion);motion.set(0,0,0).addScaledVector(forward,Number(active('KeyW','forward'))-Number(active('KeyS','back'))).addScaledVector(right,Number(active('KeyD','right'))-Number(active('KeyA','left')));motion.y+=Number(active('KeyE','up'))-Number(active('KeyQ','down'));if(motion.lengthSq()>0){const fast=keys.has('ShiftLeft')||keys.has('ShiftRight'),slow=keys.has('AltLeft')||keys.has('AltRight');flyPosition.addScaledVector(motion.normalize(),speed*(fast?3:slow ? .25 : 1)*dt);}flyPosition.x=THREE.MathUtils.clamp(flyPosition.x,-flightLimit,flightLimit);flyPosition.z=THREE.MathUtils.clamp(flyPosition.z,-flightLimit,flightLimit);flyPosition.y=THREE.MathUtils.clamp(flyPosition.y,.18,ceiling);camera.position.copy(flyPosition);camera.updateMatrixWorld();},

@@ -15,7 +15,7 @@ import { deriveDrawing, DRAWING_INITIAL, type DrawingConditions } from '../../li
 import { deriveAlarm, ALARM_INITIAL, type AlarmCase } from '../../lib/ai-lab/alarm';
 
 const INITIAL:LabConditions={lighting:'day',occlusion:false,connected:true,condition:true};
-const STEPS=['Try it','How it works','Human decision'] as const;
+const STEPS=['Try it','How it works','Decide'] as const;
 export default function LabExplorer({industry}:{industry:LabIndustry}){
   const frame=useRef<HTMLIFrameElement>(null),panel=useRef<HTMLElement>(null),heading=useRef<HTMLHeadingElement>(null);
   const [recipeId,setRecipeId]=useState(()=>recipesFor(industry)[0].id);
@@ -64,6 +64,7 @@ export default function LabExplorer({industry}:{industry:LabIndustry}){
   function close(){setChoosing(true);setSelected(false);setStep(0);resetFixtures();const url=new URL(window.location.href);url.hash='';url.searchParams.delete('example');window.history.pushState({},'',url);window.scrollTo({top:0});}
   function change<K extends keyof LabConditions>(key:K,value:LabConditions[K]){setConditions(c=>({...c,[key]:value}));}
   const sourceLabel=lab.kind==='drawing'?(draw.canUseAsCurrent?'MATCHES EXAMPLE REGISTER':'REVIEW REQUIRED'):lab.kind==='alarm'?(alarm.fresh?'CORROBORATION REQUIRED':'STALE EVIDENCE'):lab.kind==='vision'?(result.status==='review'?'UNCERTAIN':result.status==='attention'?'ADVISORY':'NO FLAG'):lab.kind==='procedure'?(proc.canUseAsCurrent?'APPROVED IN EXAMPLE':'REVIEW REQUIRED'):(hist.observedState==='unknown'?'OBSERVATION UNKNOWN':'EVIDENCE AVAILABLE');
+  const resultView=<div className="al-result" data-status={result.status} aria-live="polite"><span className="al-eyebrow">{lab.processingLabel.toUpperCase()} / {sourceLabel}</span><strong>{result.headline}</strong><p>{result.detail}</p>{lab.kind==='procedure'&&proc.sourceRevision&&<a className="al-source-link" href={'#document-'+proc.sourceRevision} onClick={()=>setStep(0)}>Inspect fictional source PX-014 / Rev {proc.sourceRevision} ↗</a>}</div>;
   return <main className="al-container al-explorer" data-industry={industry} data-recipe={lab.id}>
     <LabHeader/>
     <div className="al-world-heading"><div><a href="/ai-lab" className="al-back">← All laboratories</a><h1>{industry==='energy'?'Water and energy':'Mining operations'}</h1></div><span className="al-simulation">SIMULATED DEMONSTRATION · NO LIVE AI</span></div>
@@ -91,8 +92,9 @@ export default function LabExplorer({industry}:{industry:LabIndustry}){
           <div className="al-step-body" data-step={step}>
             {step===0?<>
               {lab.kind==='drawing'?<DrawingObservation key={resetVersion} conditions={drawing} onChange={setDrawing}/>:lab.kind==='alarm'?<AlarmObservation key={resetVersion} caseId={alarmCase} connected={alarmConnected} onCase={setAlarmCase} onConnected={setAlarmConnected}/>:lab.kind==='procedure'?<ProcedureObservation conditions={procedure} onChange={setProcedure}/>:lab.kind==='historian'?<HistorianObservation caseId={historianCase} connected={uplink} onCase={setHistorianCase} onConnected={setUplink}/>:<>
-                <Observation industry={industry} conditions={conditions}/>
                 <fieldset className="al-conditions"><legend>Change the illustrated observation</legend><label>Lighting<select aria-label="Lighting" value={conditions.lighting} onChange={e=>change('lighting',e.target.value==='low'?'low':'day')}><option value="day">Daylight</option><option value="low">Low light</option></select></label><label><span>Include {industry==='energy'?'intake debris':'spilled material'}</span><input type="checkbox" checked={conditions.condition} onChange={e=>change('condition',e.target.checked)}/></label><label><span>Obscure the view</span><input type="checkbox" checked={conditions.occlusion} onChange={e=>change('occlusion',e.target.checked)}/></label><label><span>Cloud uplink available</span><input type="checkbox" checked={conditions.connected} onChange={e=>change('connected',e.target.checked)}/></label></fieldset>
+                {resultView}
+                <Observation industry={industry} conditions={conditions}/>
                 <p className="al-small">{lab.observation} Toggling the example changes the illustration; it does not clear real equipment.</p>
               </>}
               <button className="al-text-button" onClick={resetFixtures}>Reset example conditions</button>
@@ -107,7 +109,7 @@ export default function LabExplorer({industry}:{industry:LabIndustry}){
               <h3>Potential value</h3><p>{lab.benefit}</p><h3>Limits to keep in view</h3><p>{lab.limitation}</p>
             </>}
           </div>
-          <div className="al-result" data-status={result.status} aria-live="polite"><span className="al-eyebrow">{lab.processingLabel.toUpperCase()} / {sourceLabel}</span><strong>{result.headline}</strong><p>{result.detail}</p>{lab.kind==='procedure'&&proc.sourceRevision&&<a className="al-source-link" href={'#document-'+proc.sourceRevision} onClick={()=>setStep(0)}>Inspect fictional source PX-014 / Rev {proc.sourceRevision} ↗</a>}</div>
+          {!(step===0&&lab.kind==='vision')&&resultView}
           {step===1&&<div className="al-connection"><p><b>{lab.kind==='procedure'||lab.kind==='drawing'?'Source authority':'Site edge'}</b> {result.local}</p><p><b>{lab.kind==='procedure'?'Document authority':'Cloud'}</b> {result.cloud}</p></div>}
           <details className="al-evidence-details al-provenance"><summary>How this example is constructed</summary><dl><dt>Input</dt><dd>{lab.inputLabel}</dd><dt>Processing</dt><dd>{lab.processingLabel}; no model inference</dd><dt>Evidence basis</dt><dd>{lab.evidenceLabel}</dd><dt>Authority</dt><dd>Human review and approved site processes; no controller connection</dd></dl></details>
           <div className="al-panel-actions"><button onClick={()=>goStep(Math.max(0,step-1))} disabled={step===0}>← Previous step</button>{step<2?<button className="al-next" onClick={()=>goStep(step+1)}>Next: {STEPS[step+1]} →</button>:<button className="al-next" onClick={close}>Explore another example →</button>}</div>

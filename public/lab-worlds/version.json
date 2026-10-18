@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "sourceRepository": "Mentis123/adamrappaport",
-  "sourceCommit": "f77070fed3e3f2825aa2c6b0f6f336146cd8bcb3",
+  "sourceCommit": "8176def0f5a0e71fb9e46922d2f249a6b64a09f1",
   "experience": "ai-lab",
   "runtimeDependency": "Self-hosted static files; no personal-site requests",
   "files": {
@@ -64,7 +64,7 @@
     "public/map-assets/vendor/LICENSE": "bfe119ea4fd413f5f7ca3fcd63adb0c4a073ed39daa2fe7d3e6b769e21272601",
     "public/map-assets/vendor/three.core.min.js": "61ba0df005b05991361d040d8ff670e1aadfd0ce7aeebd1fdb0725957a8957de",
     "public/map-assets/vendor/three.module.min.js": "e2b5ee6bccd38fd6d8a2428546b83c5f2426d84b152ef82be8055556e3b40eb6",
-    "public/map-assets/viewer.css": "200cbfa96921d3477195a1ddff59ef83f0f926650a8728724cd01a2afc14ba97",
+    "public/map-assets/viewer.css": "7f031c25a418f9392662e453f7012e618357f95ad3ad4d8229da8ac875111069",
     "public/map-assets/viewer.js": "dccc45ddfd43202ed121cabde0c6969681c4c5971a9c23b0168348f85d074a39",
     "public/map-assets/water.js": "1e58fcdf54d9dd65652798778d983d303438ff9691e04707b878309634f66816",
     "public/map-assets/world-shell.js": "d512261ac1f602441e05506e51478605b1b1a795f4e03011229f06f783c75250",

@@ -44,3 +44,4 @@ body.compact-controls .toolbar button,body.compact-controls .toolbar select{min-
 body.compact-controls .quality-label{grid-column:span 2}
 body.compact-controls .quality-label select{width:100%}
 body.compact-controls .flight-pad,body.compact-controls .flight-height{bottom:190px}
+@media(max-width:350px){body.compact-controls.camera-tools-open .toolbar{grid-template-columns:repeat(5,minmax(44px,1fr))}body.compact-controls.camera-tools-open #scene{height:calc(100% - 230px)}}

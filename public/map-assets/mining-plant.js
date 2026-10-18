@@ -69,6 +69,10 @@ export function buildMiningPlant(world){
   const cv=document.createElement('canvas');cv.width=128;cv.height=32;const ctx=cv.getContext('2d');ctx.fillStyle='#232927';ctx.fillRect(0,0,128,32);for(let i=0;i<128;i+=16){ctx.fillStyle='#56605a';ctx.fillRect(i,0,2,32);ctx.fillStyle='#303631';ctx.fillRect(i+2,0,10,32);}
   const beltTexture=new THREE.CanvasTexture(cv);beltTexture.wrapS=beltTexture.wrapT=THREE.RepeatWrapping;beltTexture.colorSpace=THREE.SRGBColorSpace;world.extraTextures.push(beltTexture);
   const beltMaterial=new THREE.MeshStandardMaterial({map:beltTexture,roughness:.92});
+  let labStopped=false,conveyorTime=0,lastWorldTime=0;
+  // Optional Lab fixture state only. Normal Worlds retains absolute-time seeking.
+  world.setIllustratedConveyorRunning=running=>{labStopped=running===false;};
+  updates.push(t=>{if(!labStopped)conveyorTime+=t-lastWorldTime;lastWorldTime=t;});
   const conveyors=[];
   function conveyor(id,points,width=.34){
     const group=new THREE.Group();group.name=id;root.add(group);
@@ -89,7 +93,7 @@ export function buildMiningPlant(world){
     }
     const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));g.setIndex(indices);g.computeVertexNormals();const belt=new THREE.Mesh(g,beltMaterial);belt.name=id+'-moving-belt';belt.receiveShadow=true;group.add(belt);batch.finish();
     const particles=new THREE.InstancedMesh(new THREE.IcosahedronGeometry(.032,0),ore,80);particles.name=id+'-moving-ore';particles.castShadow=true;group.add(particles);
-    const dummy=new THREE.Object3D();updates.push(t=>{
+    const dummy=new THREE.Object3D();updates.push(()=>{const t=conveyorTime;
       for(let i=0;i<80;i++){
         const u=((i/80+t*.32/length)%1+1)%1,p=curve.getPointAt(u),v=curve.getTangentAt(u),side=new THREE.Vector3(-v.z,0,v.x).normalize();
         dummy.position.copy(p).addScaledVector(side,((i*17)%7-3)*.025);dummy.position.y+=.032;dummy.rotation.set(i*.4,i*.7+t*.03,i*.23);dummy.scale.set(1+(i%3)*.15,.65,1);dummy.updateMatrix();particles.setMatrixAt(i,dummy.matrix);
@@ -99,7 +103,7 @@ export function buildMiningPlant(world){
   }
   conveyor('mining-overland-conveyor',[[4.15,2.54,-4.35],[4.7,3.35,-3.3],[5.55,3.84,-2.2],[6.4,3.92,-1.5]]);
   conveyor('mining-product-conveyor',[[6.5,3.88,-.4],[6,3.9,.65],[5.3,3.75,1.8]]);
-  updates.push(t=>{beltTexture.offset.x=-t*.96;});
-  world.plantDiagnostics=()=>({mills:mills.map(m=>m.rotation.x),stockpile:stockpile.position.toArray(),conveyors:conveyors.map(c=>{const m=new THREE.Matrix4();c.particles.getMatrixAt(0,m);return{id:c.id,length:c.length,from:c.from,to:c.to,width:c.width,orePosition:new THREE.Vector3().setFromMatrixPosition(m).toArray(),particleCount:c.particles.count,beltOffset:beltTexture.offset.x};})});
+  updates.push(()=>{beltTexture.offset.x=-conveyorTime*.96;});
+  world.plantDiagnostics=()=>({conveyorsRunning:!labStopped,conveyorTime,mills:mills.map(m=>m.rotation.x),stockpile:stockpile.position.toArray(),conveyors:conveyors.map(c=>{const m=new THREE.Matrix4();c.particles.getMatrixAt(0,m);return{id:c.id,length:c.length,from:c.from,to:c.to,width:c.width,orePosition:new THREE.Vector3().setFromMatrixPosition(m).toArray(),particleCount:c.particles.count,beltOffset:beltTexture.offset.x};})});
   world.stats.conveyors=conveyors.length;world.stats.mills=mills.length;
 }

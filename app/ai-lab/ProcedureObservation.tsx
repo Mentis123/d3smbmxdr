@@ -1,0 +1,12 @@
+import { PROCEDURE_DOCUMENTS, deriveProcedure, type ProcedureConditions } from '../../lib/ai-lab/procedure';
+
+export default function ProcedureObservation({conditions:c,onChange}:{conditions:ProcedureConditions;onChange:(c:ProcedureConditions)=>void}){
+  const result=deriveProcedure(c);
+  return <div data-procedure data-current={result.canUseAsCurrent}>
+    <div className="al-question"><strong>Which revision should the worker consult?</strong><p>Select a document, then change the fictional register. A date alone does not grant approval.</p></div>
+    <fieldset className="al-document-picker"><legend>Available document revisions</legend>{PROCEDURE_DOCUMENTS.map((doc,i)=><label key={doc.revision} className="al-document" id={'document-'+doc.revision} data-selected={c.selected===(i===0?'approved':'draft')}><div className="al-document-title"><input type="radio" name="revision" value={i===0?'approved':'draft'} checked={c.selected===(i===0?'approved':'draft')} onChange={()=>onChange({...c,selected:i===0?'approved':'draft'})}/><strong>{doc.id} / Rev {doc.revision}</strong><span>{i===0&&c.approvalRemoved?'Approval withdrawn':doc.status}</span></div><p>{doc.title} · Issued {doc.issued}</p>{doc.body.map((text,j)=><p key={text} className="al-document-line"><span>§{j+1}</span>{text}</p>)}</label>)}</fieldset>
+    <section className="al-register" aria-label="Synthetic central register"><strong>Register evidence</strong><p>PX-014 / C — {c.approvalRemoved?'approval withdrawn':'approved record'}.</p>{c.conflict&&<p className="al-conflict" data-conflict>Conflicting entry: another fixture record calls D approved, while the draft itself is not approved. Document control must resolve this.</p>}<p className="al-small" data-cache>{result.cacheLabel}</p></section>
+    <fieldset className="al-conditions"><legend>Change the fictional register</legend><label><span>Conflicting approval records</span><input type="checkbox" checked={c.conflict} onChange={e=>onChange({...c,conflict:e.target.checked})}/></label><label><span>Withdraw revision C approval</span><input type="checkbox" checked={c.approvalRemoved} onChange={e=>onChange({...c,approvalRemoved:e.target.checked})}/></label><label><span>Register connection available</span><input type="checkbox" checked={c.connected} onChange={e=>onChange({...c,connected:e.target.checked})}/></label></fieldset>
+    <p className="al-small">Original fictional records for learning. Changing this register does not publish a procedure or grant permission to perform work.</p>
+  </div>;
+}

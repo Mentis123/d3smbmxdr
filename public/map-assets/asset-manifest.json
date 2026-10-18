@@ -97,11 +97,11 @@
       "modifications": "Deterministic seed/time, animated haulage, excavator, ore conveyors, mills and water arms. No third-party mining models or paid assets."
     },
     {
-      "path": "public/map-assets/lab-layer.js",
+      "path": "public/map-assets/lab-layer.js; lab-locations.js",
       "name": "Optional AI Lab observation layer",
       "source": "Project-authored 3D illustrative debris/spillage and locator",
       "license": "Project-authored",
-      "modifications": "Only enabled by experience=lab; synthetic geometry and scripted conditions, no inference or equipment control."
+      "modifications": "Only enabled by experience=lab; stable multi-hotspot bindings, synthetic geometry and scripted conditions, no inference or equipment control."
     }
   ]
 }

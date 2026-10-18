@@ -48,9 +48,9 @@ try{
   camera=new THREE.PerspectiveCamera(42,1,.1,160);world=createScene();await world.ready;
   if(params.get('experience')==='lab'){
     const {createLabLayer}=await import('./lab-layer.js');
-    labLayer=createLabLayer(world,isMining?'mining':'energy',host,locationId=>{
-      setView(isMining?'conveyor':'intake');
-      if(window.parent!==window)window.parent.postMessage({type:'lab:hotspot',locationId},location.origin);
+    labLayer=createLabLayer(world,isMining?'mining':'energy',host,recipe=>{
+      labLayer.apply({recipeId:recipe.id});setView(recipe.view);
+      if(window.parent!==window)window.parent.postMessage({type:'lab:hotspot',locationId:recipe.locationId,recipeId:recipe.id},location.origin);
     });
   }
   if(capture&&params.has('only')){const prefix={tanks:'treatment-',grid:'electrical-yard',town:'settlement-'}[params.get('only')];if(prefix)for(const o of world.root.children)if(!o.isLight&&!o.name.startsWith(prefix)){o.visible=false;o.userData.diagnosticHidden=true;}}

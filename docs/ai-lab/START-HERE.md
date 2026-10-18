@@ -18,3 +18,9 @@ Canonical scripts/lab-renderer-check.mjs covers optional scene behaviour; script
 ## Build note
 
 An initial sparse-checkout build lacked public/data3-brand-guidelines.skill required by /brand. Restoring that tracked file resolved it; no route/asset workaround was introduced. Existing framework/dependency versions are retained; npm reported pre-existing advisories, which are a separate maintenance concern.
+
+## W03A first increment
+
+Four delivered example definitions: energy intake vision; mining conveyor vision, procedure authority and historian-gap triage. lib/ai-lab/recipes.ts is the typed registry, with original fixtures in procedure.ts and historian.ts. Select examples from world markers or the chooser; ?example=mining.procedure-control and ?example=mining.historian-gap are deep links. Invalid/wrong-world ids are explained and cleared. Only the synthetic shutdown case freezes illustrated conveyor motion; missing observations never stop it. No scenario or operational API is connected.
+
+Primary retained architecture, rendering, integration and acceptance; Luna owned bounded fixtures and a read-only review. Host production build/typecheck passed; canonical renderer 24 checks, ordinary mining 23 checks and eight contracts passed. Deployed interactive acceptance is pending this implementation commit. Canonical scripts/lab-journeys-check.mjs exercises 16 procedure combinations and eight historian/cloud combinations; scripts/ai-lab-check.mjs retains the original examples, asset hashes and host regressions. Record exact runtime and production receipts in the canonical docs/three-worlds state/journal. A3 drawing search, A4 alarms, A5 mixer and A6 handover remain planned; no extra completed cards should imply otherwise.

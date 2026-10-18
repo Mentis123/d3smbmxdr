@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "sourceRepository": "Mentis123/adamrappaport",
-  "sourceCommit": "3a9fd9d4559aabe788e5db79781f3863214b80e3",
+  "sourceCommit": "b32900c8682e3cf68f83a777d920dfa8e2bbad64",
   "experience": "ai-lab",
   "runtimeDependency": "Self-hosted static files; no personal-site requests",
   "files": {
@@ -66,7 +66,7 @@
     "public/map-assets/vendor/three.core.min.js": "61ba0df005b05991361d040d8ff670e1aadfd0ce7aeebd1fdb0725957a8957de",
     "public/map-assets/vendor/three.module.min.js": "e2b5ee6bccd38fd6d8a2428546b83c5f2426d84b152ef82be8055556e3b40eb6",
     "public/map-assets/viewer.css": "7a1f473fcc6003b05e462c48fbe50fce09aaa0643d72b0370a8747931f2ae6aa",
-    "public/map-assets/viewer.js": "b96e3676255f7eece1a5c17e9de04cb73181ee97c701c191ec73d3d183a08308",
+    "public/map-assets/viewer.js": "70ea5e1a433337be8a28c53c5a0c61331760a77f6c2b68a6d3d4e85cd8a50de0",
     "public/map-assets/water.js": "1e58fcdf54d9dd65652798778d983d303438ff9691e04707b878309634f66816",
     "public/map-assets/world-shell.js": "d512261ac1f602441e05506e51478605b1b1a795f4e03011229f06f783c75250",
     "public/lab-worlds/energy.html": "64a2d754669178638ab8dfcec65d965a1dd26c03ddd2b52b288447e428850983",

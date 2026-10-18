@@ -29,6 +29,9 @@ const openingTilt=Math.atan2(15,Math.hypot(12,23));
 let tilt=openingTilt,targetTilt=openingTilt,azimuth=Math.atan2(12,23);
 let labLayer,exhibit=null,exhibitSaved=null,exhibitRequest=0;
 const exhibitMode=params.get('exhibits')==='1';
+let sceneFullscreen=false;
+function fullscreenEscape(e){if(e.key==='Escape'&&sceneFullscreen){e.preventDefault();e.stopImmediatePropagation();window.parent.postMessage({type:'scene:exit-fullscreen'},location.origin);}}
+if(exhibitMode)document.addEventListener('keydown',fullscreenEscape,true);
 let renderer,world,camera,pipeline,navigation,raf=0,elapsed=0,last=0,yaw=0,targetYaw=0,zoom=1,targetZoom=1,paused=matchMedia('(prefers-reduced-motion: reduce)').matches,quality='auto',disposed=false,frameTimes=[];
 try {quality=localStorage.getItem('tabletop-quality')||quality;}catch{}
 if(params.has('quality'))quality=['auto','high','low'].includes(params.get('quality'))?params.get('quality'):'auto';if(!['auto','high','low'].includes(quality))quality='auto';if(capture&&!params.has('quality'))quality='high';
@@ -212,10 +215,11 @@ try{
   }});
   host.addEventListener('keydown',key);window.addEventListener('resize',onResize);document.addEventListener('click',click);qSelect.addEventListener('change',onQuality);document.addEventListener('visibilitychange',onVisibility);resizeObserver=new ResizeObserver(fit);resizeObserver.observe(host);window.visualViewport?.addEventListener('resize',onResize);
   const onWorldFocus=e=>{if(e.origin!==location.origin||e.source!==window.parent)return;
-    if(exhibitMode&&e.data?.type?.startsWith('exhibit:')){handleExhibit(e.data);return;}
+    if(exhibitMode&&e.data?.type==='scene:fullscreen'){sceneFullscreen=e.data.active===true;return;}
+    if(exhibitMode&&typeof e.data?.type==='string'&&e.data.type.startsWith('exhibit:')){handleExhibit(e.data);return;}
     if(e.data?.type==='worlds:focus'&&Object.hasOwn(views,e.data.view))setView(e.data.view);if(labLayer&&e.data?.type==='lab:conditions'){labLayer.apply(e.data.conditions);render();window.parent.postMessage({type:'lab:applied',state:labLayer.diagnostics()},location.origin);}};
   window.addEventListener('message',onWorldFocus);
-  const dispose=()=>{if(disposed)return;disposed=true;window.removeEventListener('message',onWorldFocus);cancelAnimationFrame(raf);exhibit?.dispose();navigation.dispose();host.removeEventListener('keydown',key);window.removeEventListener('resize',onResize);document.removeEventListener('click',click);qSelect.removeEventListener('change',onQuality);document.removeEventListener('visibilitychange',onVisibility);resizeObserver?.disconnect();window.visualViewport?.removeEventListener('resize',onResize);labLayer?.dispose();pipeline.dispose();world.dispose();renderer.dispose();renderer.forceContextLoss();renderer.domElement.remove();};
+  const dispose=()=>{if(disposed)return;disposed=true;document.removeEventListener('keydown',fullscreenEscape,true);window.removeEventListener('message',onWorldFocus);cancelAnimationFrame(raf);exhibit?.dispose();navigation.dispose();host.removeEventListener('keydown',key);window.removeEventListener('resize',onResize);document.removeEventListener('click',click);qSelect.removeEventListener('change',onQuality);document.removeEventListener('visibilitychange',onVisibility);resizeObserver?.disconnect();window.visualViewport?.removeEventListener('resize',onResize);labLayer?.dispose();pipeline.dispose();world.dispose();renderer.dispose();renderer.forceContextLoss();renderer.domElement.remove();};
   window.addEventListener('pagehide',dispose,{once:true});window.addEventListener('pageshow',e=>{if(e.persisted)location.reload();});
   host.addEventListener('pointerdown',()=>{if(shot)stopShot('grabbed');},true);
   window.addEventListener('keydown',e=>{if(shot&&e.code==='Escape'){e.preventDefault();stopShot('escaped');}},true);

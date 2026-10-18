@@ -1,0 +1,107 @@
+{
+  "version": 1,
+  "scope": "Complete energy miniature with Claude realism round 1, persistent Fly exit pose and authored service fleet; see docs/three-worlds/MAP-REALISM.md and evidence/nav-activity/CHECKPOINT.md; W02 procedural mining miniature and shared world shell",
+  "assets": [
+    {
+      "path": "public/map-assets/vendor",
+      "name": "Three.js r180 and selected official addons",
+      "source": "https://www.npmjs.com/package/three/v/0.180.0",
+      "license": "MIT",
+      "licenseFile": "public/map-assets/vendor/LICENSE",
+      "modifications": "Selected modules vendored without source changes; custom bloom alpha compositor lives outside vendor."
+    },
+    {
+      "path": "public/map-assets/models/rock-face/cliff-solid-v2.glb",
+      "name": "Rock Face 01 derived cliff",
+      "source": "https://polyhaven.com/a/rock_face_01",
+      "creator": "Dario Barresi",
+      "license": "CC0-1.0",
+      "modifications": "1K glTF source imported to Blender; welded coincident vertices; 0.14-unit inward solid thickness; dark edge/back material; 0.72 decimation; exported GLB. Imported scanned surface has tiny remaining nonmanifold features recorded in validation; not claimed watertight."
+    },
+    {
+      "path": "public/map-assets/textures/rock-face-color.jpg",
+      "name": "Rock Face diffuse",
+      "source": "https://polyhaven.com/a/rock_face",
+      "license": "CC0-1.0",
+      "modifications": "Unmodified 1K JPG; used in local triplanar rock shader."
+    },
+    {
+      "path": "public/map-assets/textures/rock-face-normal.jpg",
+      "name": "Rock Face normal",
+      "source": "https://polyhaven.com/a/rock_face",
+      "license": "CC0-1.0",
+      "modifications": "Unmodified 1K OpenGL normal JPG; lightweight local micro-normal detail."
+    },
+    {
+      "path": "public/map-assets/textures/pine-twig-color.jpg",
+      "name": "Pine Tree 01 twig diffuse atlas",
+      "source": "https://polyhaven.com/a/pine_tree_01",
+      "creator": "Rico Cilliers / Rob Tuytel",
+      "license": "CC0-1.0",
+      "modifications": "Unmodified 1K JPG; needle branch region selected through geometry UVs, not an edited bitmap."
+    },
+    {
+      "path": "public/map-assets/textures/pine-twig-alpha.png",
+      "name": "Pine Tree 01 twig opacity atlas",
+      "source": "https://polyhaven.com/a/pine_tree_01",
+      "license": "CC0-1.0",
+      "modifications": "Unmodified 1K PNG; alpha-tested foliage cards intentionally two-sided."
+    },
+    {
+      "path": "public/map-assets/poster.jpg",
+      "name": "Fallback poster",
+      "source": "Project-rendered hydro slice screenshot",
+      "license": "Project-authored derivative with CC0 scene assets",
+      "modifications": "Resized and JPEG encoded from actual browser scene; used only for failure fallback."
+    },
+    {
+      "path": "public/map-assets/scene.js; slice.js; viewer.css",
+      "name": "Procedural geometry, local environment, mist and room",
+      "source": "Project-authored",
+      "license": "Project-authored",
+      "modifications": "Deterministic geometry/materials and CSS room. Birb was inspected for concepts; no Birb code or media copied."
+    },
+    {
+      "path": "public/map-assets/textures/fir-bough-v1.webp",
+      "name": "Dense fir needle bough cutout",
+      "source": "Generated with built-in image generation for this project, 17 October 2026",
+      "license": "Project-generated asset",
+      "modifications": "768 px WebP derivative preserving alpha. Applied to radial 3D bough surfaces around closed tree cores; not a full-tree billboard."
+    },
+    {
+      "path": "public/map-assets/textures/control-room-v1.webp",
+      "name": "Static control-room background plate",
+      "source": "Generated with built-in image generation for this project, 17 October 2026",
+      "license": "Project-generated asset",
+      "modifications": "WebP compression; CSS fixed background layer only, independent of the real rotating miniature."
+    },
+    {
+      "path": "public/map-assets/textures/cliff-color-v1.jpg; cliff-normal-v1.jpg",
+      "name": "Shared cliff material textures",
+      "source": "https://polyhaven.com/a/rock_face_01",
+      "license": "CC0-1.0",
+      "modifications": "Extracted embedded textures from the existing derived GLB; used for coherent triplanar rock colour and surface bump."
+    },
+    {
+      "path": "public/map-assets/{scene-layout,builder-utils,tanks,electrical,settlement,expansion,infrastructure-audit}.js",
+      "name": "Complete miniature authored procedural infrastructure",
+      "source": "Original project code authored 17 October 2026",
+      "license": "Project-authored code",
+      "modifications": "Closed parametric basins, lattice steel, explicit cable curves, batched facades, roads and glass sheets. Asphalt tile generated deterministically at runtime. No new external assets."
+    },
+    {
+      "path": "public/map-assets/mining-*.js; mining-poster.jpg; world-shell.js",
+      "name": "Mining terrain, industrial kits, vehicles and actual render poster",
+      "source": "Project-authored procedural geometry, materials and browser scene capture",
+      "license": "Project-authored; shared vendor/environment assets retain their entries above",
+      "modifications": "Deterministic seed/time, animated haulage, excavator, ore conveyors, mills and water arms. No third-party mining models or paid assets."
+    },
+    {
+      "path": "public/map-assets/lab-layer.js",
+      "name": "Optional AI Lab observation layer",
+      "source": "Project-authored 3D illustrative debris/spillage and locator",
+      "license": "Project-authored",
+      "modifications": "Only enabled by experience=lab; synthetic geometry and scripted conditions, no inference or equipment control."
+    }
+  ]
+}

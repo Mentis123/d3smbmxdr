@@ -29,13 +29,13 @@ export function createLabLayer(world, industry, host, onSelect) {
   function apply(input={}) {
     input=input&&typeof input==='object'?input:{};
     if(recipes.some(r=>r.id===input.recipeId))active=recipes.find(r=>r.id===input.recipeId);
-    state={recipeId:active.id,historianCase:['normal','sensor','network','shutdown'].includes(input.historianCase)?input.historianCase:'normal',procedureMode:['approved','draft','conflict','offline','removed'].includes(input.procedureMode)?input.procedureMode:'approved',lighting:input.lighting==='low'?'low':'day',occlusion:input.occlusion===true,connected:input.connected!==false,condition:input.condition!==false};
+    state={recipeId:active.id,drawingScan:['clear','poor','missing'].includes(input.drawingScan)?input.drawingScan:'clear',drawingRotated:input.drawingRotated===true,alarmCase:['baseline','maintenance','sensor','stale'].includes(input.alarmCase)?input.alarmCase:'baseline',historianCase:['normal','sensor','network','shutdown'].includes(input.historianCase)?input.historianCase:'normal',procedureMode:['approved','draft','conflict','offline','removed'].includes(input.procedureMode)?input.procedureMode:'approved',lighting:input.lighting==='low'?'low':'day',occlusion:input.occlusion===true,connected:input.connected!==false,condition:input.condition!==false};
     const vision=active.kind==='vision';
     issue.visible=vision&&state.condition;cover.visible=vision&&state.occlusion;world.key.intensity=keyIntensity*(vision&&state.lighting==='low'?.28:1);
     ring.position.fromArray(active.anchor);ring.position.y+=.1;
     world.setIllustratedConveyorRunning?.(active.kind!=='historian'||state.historianCase!=='shutdown');
     for(const {recipe,marker}of markers)marker.setAttribute('aria-pressed',String(recipe.id===active.id));
-    ring.material.color.set(state.occlusion||state.lighting==='low'?0xffc875:state.condition?0x00aeff:0x78dcff);
+    ring.material.color.set((active.kind==='alarm'&&['sensor','stale'].includes(state.alarmCase))||(active.kind==='drawing'&&(state.drawingScan!=='clear'||!state.connected))||state.occlusion||state.lighting==='low'?0xffc875:state.condition?0x00aeff:0x78dcff);
     return diagnostics();
   }
   const projected=new THREE.Vector3();

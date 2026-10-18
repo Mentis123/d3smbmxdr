@@ -19,7 +19,7 @@ export type LabDefinition = {
   title: string;
   subtitle: string;
   locationId: string;
-  view: 'intake' | 'conveyor' | 'workshop' | 'control';
+  view: 'intake' | 'conveyor' | 'workshop' | 'control' | 'tank-detail' | 'tanks';
   poster: '/map-assets/poster.jpg' | '/map-assets/mining-poster.jpg';
   observation: string;
   interpretation: string;

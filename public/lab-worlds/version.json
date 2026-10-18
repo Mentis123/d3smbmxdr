@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "sourceRepository": "Mentis123/adamrappaport",
-  "sourceCommit": "8d319eb633dff1edc37a1805997647acb3609581",
+  "sourceCommit": "9f43f629a20dcc8c6e99e4ee0b42b3065c74effe",
   "experience": "ai-lab",
   "runtimeDependency": "Self-hosted static files; no personal-site requests",
   "files": {
@@ -17,8 +17,8 @@
     "public/map-assets/geometry-audit.js": "5171fc783416ac9456a869b028825918ce7d9ae0b3faad6d0bc31563b519c722",
     "public/map-assets/hydro-profile.js": "2162e023b5e94ea12ee3629ae3e2f70b698eb3f6ea50521b4ebd5789e1527126",
     "public/map-assets/infrastructure-audit.js": "7e3b910d675526eacd7d566e8ac6a7e840df191cb91704494ded4cd6bc863b87",
-    "public/map-assets/lab-layer.js": "82b3a4e37d836761a51e184b42c3e3588ee84ff6d082c83fbe17401b6bb24425",
-    "public/map-assets/lab-locations.js": "d0d89d61aea8fc01fcf53017c2250b354c4c3020d9a5ffe88e001d8d3128bc87",
+    "public/map-assets/lab-layer.js": "fe16d8cfc5b76b98e86c73ab82410c6915fe77345db76c922f561c5096ef336e",
+    "public/map-assets/lab-locations.js": "71863d6177979e549fd12c58c984def17bae978f2a827a9b5d505c2b38316cfb",
     "public/map-assets/landscape-details.js": "a1e5986c90cef11d6808ca51bac090bc37d9740bd2696a6bff9ab8b600a88ec6",
     "public/map-assets/mining-buildings.js": "3fdb1cfc2e950eb6323e6674da53fee4bafd8ca6b2d97c95b83d2d3d71c26d81",
     "public/map-assets/mining-layout.js": "d81c2e73a1085e9ea2f946c00b363d7abe0b189bc82d86e125546fbf183367f9",

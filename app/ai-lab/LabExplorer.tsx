@@ -9,6 +9,10 @@ import { LabHeader, LabFooter } from './LabChrome';
 import Observation from './Observation';
 import ProcedureObservation from './ProcedureObservation';
 import HistorianObservation from './HistorianObservation';
+import DrawingObservation from './DrawingObservation';
+import AlarmObservation from './AlarmObservation';
+import { deriveDrawing, DRAWING_INITIAL, type DrawingConditions } from '../../lib/ai-lab/drawing';
+import { deriveAlarm, ALARM_INITIAL, type AlarmCase } from '../../lib/ai-lab/alarm';
 
 const INITIAL:LabConditions={lighting:'day',occlusion:false,connected:true,condition:true};
 const STEPS=['Observe','Understand','Respond'] as const;
@@ -17,15 +21,16 @@ export default function LabExplorer({industry}:{industry:LabIndustry}){
   const [recipeId,setRecipeId]=useState(()=>recipesFor(industry)[0].id);
   const [conditions,setConditions]=useState<LabConditions>(INITIAL),[procedure,setProcedure]=useState<ProcedureConditions>(PROCEDURE_INITIAL);
   const [historianCase,setHistorianCase]=useState<HistorianCase>(HISTORIAN_INITIAL),[uplink,setUplink]=useState(true);
+  const [drawing,setDrawing]=useState<DrawingConditions>(DRAWING_INITIAL),[alarmCase,setAlarmCase]=useState<AlarmCase>(ALARM_INITIAL),[alarmConnected,setAlarmConnected]=useState(true),[resetVersion,setResetVersion]=useState(0);
   const [ready,setReady]=useState(false),[selected,setSelected]=useState(false),[step,setStep]=useState(0),[synced,setSynced]=useState(false),[linkNotice,setLinkNotice]=useState(false);
-  const lab=recipeFor(industry,recipeId),recipes=recipesFor(industry),proc=deriveProcedure(procedure),hist=deriveHistorian(historianCase,uplink);
+  const lab=recipeFor(industry,recipeId),recipes=recipesFor(industry),proc=deriveProcedure(procedure),hist=deriveHistorian(historianCase,uplink),draw=deriveDrawing(drawing),alarm=deriveAlarm(alarmCase,alarmConnected);
   const procedureMode=!procedure.connected?'offline':procedure.conflict?'conflict':procedure.approvalRemoved?'removed':procedure.selected==='draft'?'draft':'approved';
-  const connected=lab.kind==='procedure'?procedure.connected:lab.kind==='historian'?uplink:conditions.connected;
-  const payload=useMemo(()=>({...conditions,connected,recipeId,historianCase,procedureMode}),[conditions,connected,recipeId,historianCase,procedureMode]);
+  const connected=lab.kind==='drawing'?drawing.connected:lab.kind==='alarm'?alarmConnected:lab.kind==='procedure'?procedure.connected:lab.kind==='historian'?uplink:conditions.connected;
+  const payload=useMemo(()=>({...conditions,connected,recipeId,historianCase,procedureMode,drawingScan:drawing.scan,drawingRotated:drawing.rotated,alarmCase}),[conditions,connected,recipeId,historianCase,procedureMode,drawing.scan,drawing.rotated,alarmCase]);
   const latestPayload=useRef(payload);
-  const result=lab.kind==='procedure'?{status:proc.status==='ready'?'clear':proc.status,headline:proc.headline,detail:proc.detail,local:'Endpoint: fictional document view. '+proc.cacheLabel,cloud:'Illustrative authority: central register. No document or observation data is transmitted.'}:lab.kind==='historian'?{status:hist.status==='ready'?'clear':hist.status,headline:hist.headline,detail:hist.detail,local:hist.rule,cloud:hist.cloud}:deriveLabState(industry,conditions);
+  const result=lab.kind==='drawing'?{status:draw.status==='ready'?'clear':draw.status,headline:draw.headline,detail:draw.detail,local:draw.register,cloud:draw.cloud}:lab.kind==='alarm'?{status:alarm.status,headline:alarm.headline,detail:alarm.detail,local:alarm.fresh?'Recorded site samples are present; corroboration still required.':'Last site sample 00:20; present process state is unknown.',cloud:alarm.cloud}:lab.kind==='procedure'?{status:proc.status==='ready'?'clear':proc.status,headline:proc.headline,detail:proc.detail,local:'Endpoint: fictional document view. '+proc.cacheLabel,cloud:'Illustrative authority: central register. No document or observation data is transmitted.'}:lab.kind==='historian'?{status:hist.status==='ready'?'clear':hist.status,headline:hist.headline,detail:hist.detail,local:hist.rule,cloud:hist.cloud}:deriveLabState(industry,conditions);
   function send(type:string,data:object={}){frame.current?.contentWindow?.postMessage({type,...data},window.location.origin);}
-  function resetFixtures(){setConditions({...INITIAL});setProcedure({...PROCEDURE_INITIAL});setHistorianCase(HISTORIAN_INITIAL);setUplink(true);}
+  function resetFixtures(){setConditions({...INITIAL});setProcedure({...PROCEDURE_INITIAL});setHistorianCase(HISTORIAN_INITIAL);setUplink(true);setDrawing({...DRAWING_INITIAL});setAlarmCase(ALARM_INITIAL);setAlarmConnected(true);setResetVersion(v=>v+1);}
   function choose(id:string,history=true){
     const recipe=recipeFor(industry,id);setLinkNotice(false);setRecipeId(recipe.id);setSelected(true);setStep(0);resetFixtures();setSynced(false);
     if(history){const url=new URL(window.location.href);url.hash='';url.searchParams.set('example',recipe.id);window.history.pushState({},'',url);}
@@ -55,7 +60,7 @@ export default function LabExplorer({industry}:{industry:LabIndustry}){
   useEffect(()=>{if(ready&&selected)send('worlds:focus',{view:lab.view});},[ready,recipeId,selected,lab.view]);
   function close(){setSelected(false);setStep(0);resetFixtures();const url=new URL(window.location.href);url.hash='';url.searchParams.delete('example');window.history.pushState({},'',url);}
   function change<K extends keyof LabConditions>(key:K,value:LabConditions[K]){setConditions(c=>({...c,[key]:value}));}
-  const sourceLabel=lab.kind==='vision'?(result.status==='review'?'UNCERTAIN':result.status==='attention'?'ADVISORY':'NO FLAG'):lab.kind==='procedure'?(proc.canUseAsCurrent?'APPROVED IN FIXTURE':'REVIEW REQUIRED'):(hist.observedState==='unknown'?'OBSERVATION UNKNOWN':'EVIDENCE AVAILABLE');
+  const sourceLabel=lab.kind==='drawing'?(draw.canUseAsCurrent?'MATCHES EXAMPLE REGISTER':'REVIEW REQUIRED'):lab.kind==='alarm'?(alarm.fresh?'CORROBORATION REQUIRED':'STALE EVIDENCE'):lab.kind==='vision'?(result.status==='review'?'UNCERTAIN':result.status==='attention'?'ADVISORY':'NO FLAG'):lab.kind==='procedure'?(proc.canUseAsCurrent?'APPROVED IN EXAMPLE':'REVIEW REQUIRED'):(hist.observedState==='unknown'?'OBSERVATION UNKNOWN':'EVIDENCE AVAILABLE');
   return <main className="al-container al-explorer" data-industry={industry} data-recipe={lab.id}>
     <LabHeader/>
     <div className="al-world-heading"><div><a href="/ai-lab" className="al-back">← All laboratories</a><h1>{industry==='energy'?'Water and energy':'Mining operations'}</h1></div><span className="al-simulation">SIMULATED DEMONSTRATION · NO LIVE AI</span></div>
@@ -72,7 +77,7 @@ export default function LabExplorer({industry}:{industry:LabIndustry}){
           <div className="al-stepper" role="group" aria-label="Demonstration steps">{STEPS.map((s,i)=><button key={s} onClick={()=>setStep(i)} aria-pressed={step===i}>{i+1}. {s}</button>)}</div>
           <div className="al-step-body" data-step={step}>
             {step===0?<>
-              {lab.kind==='procedure'?<ProcedureObservation conditions={procedure} onChange={setProcedure}/>:lab.kind==='historian'?<HistorianObservation caseId={historianCase} connected={uplink} onCase={setHistorianCase} onConnected={setUplink}/>:<>
+              {lab.kind==='drawing'?<DrawingObservation key={resetVersion} conditions={drawing} onChange={setDrawing}/>:lab.kind==='alarm'?<AlarmObservation key={resetVersion} caseId={alarmCase} connected={alarmConnected} onCase={setAlarmCase} onConnected={setAlarmConnected}/>:lab.kind==='procedure'?<ProcedureObservation conditions={procedure} onChange={setProcedure}/>:lab.kind==='historian'?<HistorianObservation caseId={historianCase} connected={uplink} onCase={setHistorianCase} onConnected={setUplink}/>:<>
                 <Observation industry={industry} conditions={conditions}/>
                 <fieldset className="al-conditions"><legend>Change the illustrated observation</legend><label>Lighting<select aria-label="Lighting" value={conditions.lighting} onChange={e=>change('lighting',e.target.value==='low'?'low':'day')}><option value="day">Daylight</option><option value="low">Low light</option></select></label><label><span>Include {industry==='energy'?'intake debris':'spilled material'}</span><input type="checkbox" checked={conditions.condition} onChange={e=>change('condition',e.target.checked)}/></label><label><span>Obscure the view</span><input type="checkbox" checked={conditions.occlusion} onChange={e=>change('occlusion',e.target.checked)}/></label><label><span>Cloud uplink available</span><input type="checkbox" checked={conditions.connected} onChange={e=>change('connected',e.target.checked)}/></label></fieldset>
                 <p className="al-small">{lab.observation} Toggling the example changes the illustration; it does not clear real equipment.</p>
@@ -84,13 +89,13 @@ export default function LabExplorer({industry}:{industry:LabIndustry}){
               <p className="al-small">Processing locations are proposed, not live connections. The browser runs example rules; it does not measure model accuracy, confidence or latency.</p>
             </>:<>
               <p className="al-eyebrow">HUMAN AUTHORITY / VERIFICATION</p><h3>Operator decides. Procedures apply.</h3><p>{lab.response}</p><h3>Close the loop with evidence.</h3><p>{lab.verification}</p>
-              {lab.kind==='historian'&&<div className="al-callout"><strong>Next supported check</strong><p>{hist.nextCheck}</p></div>}
+              {['historian','drawing','alarm'].includes(lab.kind)&&<div className="al-callout"><strong>Next supported check</strong><p>{lab.kind==='drawing'?draw.nextCheck:lab.kind==='alarm'?alarm.nextCheck:hist.nextCheck}</p></div>}
               <div className="al-callout"><strong>Advisory only</strong><p>No automatic shutdown, clearance, permit or controller command is connected. The demonstration never marks an inspection as completed.</p></div>
               <h3>Potential value</h3><p>{lab.benefit}</p><h3>Limits to keep in view</h3><p>{lab.limitation}</p>
             </>}
           </div>
           <div className="al-result" data-status={result.status} aria-live="polite"><span className="al-eyebrow">{lab.processingLabel.toUpperCase()} / {sourceLabel}</span><strong>{result.headline}</strong><p>{result.detail}</p>{lab.kind==='procedure'&&proc.sourceRevision&&<a className="al-source-link" href={'#document-'+proc.sourceRevision} onClick={()=>setStep(0)}>Inspect fictional source PX-014 / Rev {proc.sourceRevision} ↗</a>}</div>
-          <div className="al-connection"><p><b>{lab.kind==='procedure'?'Worker PC':'Site edge'}</b> {result.local}</p><p><b>{lab.kind==='procedure'?'Document authority':'Cloud'}</b> {result.cloud}</p></div>
+          <div className="al-connection"><p><b>{lab.kind==='procedure'||lab.kind==='drawing'?'Source authority':'Site edge'}</b> {result.local}</p><p><b>{lab.kind==='procedure'?'Document authority':'Cloud'}</b> {result.cloud}</p></div>
           <details className="al-evidence-details al-provenance"><summary>How this example is constructed</summary><dl><dt>Input</dt><dd>{lab.inputLabel}</dd><dt>Processing</dt><dd>{lab.processingLabel}; no model inference</dd><dt>Evidence basis</dt><dd>{lab.evidenceLabel}</dd><dt>Authority</dt><dd>Human review and approved site processes; no controller connection</dd></dl></details>
           <div className="al-panel-actions"><button onClick={()=>{setStep(s=>Math.max(0,s-1));panel.current?.scrollTo({top:0});}} disabled={step===0}>← Back</button><button onClick={()=>{setStep(s=>Math.min(2,s+1));panel.current?.scrollTo({top:0});}} disabled={step===2}>{step===0?'Understand →':step===1?'Response →':'End of example'}</button></div>
         </>}

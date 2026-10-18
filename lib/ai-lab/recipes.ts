@@ -1,6 +1,6 @@
 import { LABS, type LabDefinition, type LabIndustry } from './content';
 
-export type RecipeKind='vision'|'procedure'|'historian';
+export type RecipeKind='vision'|'procedure'|'historian'|'drawing'|'alarm';
 export type LabRecipe=LabDefinition & {
   id:string;industry:LabIndustry;kind:RecipeKind;question:string;
   inputLabel:string;processingLabel:string;evidenceLabel:string;
@@ -28,6 +28,25 @@ export const RECIPES:LabRecipe[]=[
     benefit:'Separating data availability from operating state could prevent a missing trend being mistaken for normal operation or a shutdown.',
     limitation:'Expected sample rates, tag semantics and time synchronisation must be known. Simulated evidence is not a validated diagnostic system; no missing values are filled in as measurements.',
     computeNodes:[{label:'Site edge',detail:'Illustrated timestamp / freshness checks'},{label:'On-premises',detail:'Proposed event correlation + explanation'},{label:'Cloud',detail:'Illustrated reporting only'}]},
+  {id:'energy.drawing-search',industry:'energy',kind:'drawing',title:'Find the applicable drawing',subtitle:'West treatment assembly / controlled drawings',locationId:'energy.treatment.west',view:'tank-detail',poster:'/map-assets/poster.jpg',question:'Which fields can the scan support, and does this revision apply to the asset?',inputLabel:'Original fictional drawing, title block + register',processingLabel:'Scripted extraction + register rules',evidenceLabel:'Industry-informed discovery adaptation; no verified deployment',
+    observation:'Two original fictional drawings show a treatment assembly. Labelled title-block regions support the displayed metadata; scan quality changes what remains readable.',
+    interpretation:'AI could help extract fields and retrieve candidates. The example uses scripted extraction: unknown fields stay unknown, and the filename does not establish revision authority.',
+    compute:'A central service could extract and index drawings; an authorised site pack could support endpoint viewing. These are proposed processing locations. No OCR, model or document-system connector runs here.',
+    response:'A drawing-office reviewer checks extracted fields against the controlled register. The maintainer confirms the asset, revision and applicability before using the drawing.',
+    verification:'Inspect the highlighted source region and compare it with the register. A superseded drawing stays superseded; an unreadable field or dated offline pack cannot establish the current approved record.',
+    benefit:'Source-linked metadata could make drawing search faster while exposing extraction and revision uncertainty.',
+    limitation:'Poor scans, incomplete metadata and unreliable registers limit retrieval. This original illustration is not an engineering drawing or a validated digital twin.',
+    computeNodes:[{label:'Central indexing',detail:'Proposed extraction + controlled search'},{label:'Site pack',detail:'Illustrated authorised, dated copy'},{label:'Worker PC',detail:'Source viewing + human verification'}]},
+  {id:'energy.alarm-investigation',industry:'energy',kind:'alarm',title:'What does this alarm mean?',subtitle:'North treatment site / evidence timeline',locationId:'energy.treatment.north',view:'tanks',poster:'/map-assets/poster.jpg',question:'The same low-rate alarm appears in four timelines. Which evidence should the operator check next?',inputLabel:'Synthetic alarm, trend + maintenance/secondary evidence',processingLabel:'Scripted hypotheses + freshness rules',evidenceLabel:'Scenario-informed industry adaptation; no verified deployment',
+    observation:'The fictional AL-07 alarm remains constant. Prior maintenance, contradictory readings or stale telemetry change which explanation is supported.',
+    interpretation:'An assistant could organise alarms, trends and approved references. Here a scripted timeline explains hypotheses and missing checks; it does not diagnose a fault or assign confidence percentages.',
+    compute:'Read-only collection could remain at site, with on-premises retrieval and event correlation plus optional cloud enrichment. Only synthetic data and fixed explanations execute in this browser.',
+    response:'The operator reviews timestamps, asset context and source evidence, then authorises an independent check through site procedures. A recent maintenance event is context, not proof of cause.',
+    verification:'Compare the primary and secondary readings, the source event log and the relevant approved records. Stale values cannot be promoted into a current process state.',
+    benefit:'An evidence-linked timeline could help an operator choose a better next check rather than accepting a fluent diagnosis.',
+    limitation:'Alarm semantics, time synchronisation, approved asset mappings and OT-reviewed integration are prerequisites. No reset, diagnosis or real equipment command is connected.',
+    computeNodes:[{label:'Site edge',detail:'Proposed read-only freshness collection'},{label:'On-premises',detail:'Proposed retrieval + event correlation'},{label:'Cloud',detail:'Illustrated optional enrichment'}]},
+
 ];
 export const recipesFor=(industry:LabIndustry)=>RECIPES.filter(r=>r.industry===industry);
 export const recipeFor=(industry:LabIndustry,id:string|null|undefined)=>recipesFor(industry).find(r=>r.id===id)??recipesFor(industry)[0];

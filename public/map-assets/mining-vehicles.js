@@ -131,6 +131,18 @@ export function buildMiningHaulage(world){
     }
   }
   world.updates.push(update);
+  // Actor contract for fly-through shots (flythrough.js). Phase starts are in scene time, so each
+  // truck's schedule is shifted back by its own offset (its phase clock runs time+offset).
+  world.actors=world.actors||{};
+  const outboundEnd=legSeconds,crusherTurnEnd=outboundEnd+turnSeconds,tipEnd=crusherTurnEnd+serviceSeconds,inboundEnd=tipEnd+legSeconds,loadTurnEnd=inboundEnd+turnSeconds;
+  const schedule=[['loaded-outbound',0,outboundEnd],['turning-at-crusher',outboundEnd,crusherTurnEnd],['tipping-at-crusher',crusherTurnEnd,tipEnd],['empty-return',tipEnd,inboundEnd],['turning-at-loading-face',inboundEnd,loadTurnEnd],['loading',loadTurnEnd,cycle]];
+  for(const truck of trucks){
+    world.actors[truck.config.id]={
+      cycle,
+      phases:schedule.map(([name,a,b])=>({name,start:a-truck.config.offset,length:b-a})),
+      stateAt:t=>{const s=sample(truck,t);return {position:s.position.toArray(),heading:s.heading,phase:s.phase};},
+    };
+  }
   const routePoints=Array.from({length:33},(_,i)=>world.haulRoute.getPointAt(i/32));
   const bounds=new THREE.Box3().setFromPoints(routePoints);
   world.haulageDiagnostics=time=>({route:{name:world.haulRoute.name||'haul-route',length:routeLength,min:bounds.min.toArray(),max:bounds.max.toArray(),finite:[...bounds.min.toArray(),...bounds.max.toArray()].every(Number.isFinite)},trucks:trucks.map(truck=>{const s=sample(truck,Number.isFinite(time)?time:0);return {...s,position:s.position.toArray(),actualPosition:truck.group.position.toArray(),actualHeading:truck.group.rotation.y,actualBedAngle:truck.bedPivot.rotation.z,actualLoadVisible:truck.load.visible,actualTires:truck.wheels.map(w=>({position:w.position.toArray(),rotation:w.rotation.z}))};})});

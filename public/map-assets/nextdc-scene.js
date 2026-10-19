@@ -39,7 +39,7 @@ const ANCHORS = {
 };
 
 // Views for the shared viewer. Distance is about 36 / zoom on a desktop screen.
-export const NEXTDC_VIEWS = {
+const NEXTDC_VIEWS_BASE = {
   hero: {yaw: 0, target: [-0.6, 2.4, -1.0], zoom: 1.12, tilt: 0.62, azimuth: 0.25, fov: 38},
   cage: {yaw: 0, target: [CAGE_CENTER.x, DECK + 0.9, CAGE_CENTER.z], zoom: 4.4, tilt: 0.78, azimuth: 0.18, fov: 38},
   power: {yaw: 0, target: [6.6, DECK + 1.2, -0.8], zoom: 2.8, tilt: 0.5, azimuth: 0.55, fov: 38},
@@ -52,6 +52,8 @@ export const NEXTDC_VIEWS = {
   cloud: {yaw: 0, target: [-1.0, 6.6, -6.4], zoom: 1.9, tilt: 0.32, azimuth: 0.2, fov: 38},
   ...Object.fromEntries(RACK_ORDER.map(id => [id, {yaw: 0, target: [RACK_X[id], DECK + 1.0, RACK_Z], zoom: 6.4, tilt: 0.5, azimuth: 0.12, fov: 38}])),
 };
+// On phones the hero pulls in a little and close-ups a little more (viewer.js viewZoom), keeping the outer cards in frame.
+export const NEXTDC_VIEWS = Object.fromEntries(Object.entries(NEXTDC_VIEWS_BASE).map(([id, v]) => [id, {...v, portraitZoom: id === 'hero' ? 1.3 : 1.25}]));
 
 // Ground rings for focus and alerts, sized per item.
 const RINGS = {

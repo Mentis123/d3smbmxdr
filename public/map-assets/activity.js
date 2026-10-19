@@ -75,7 +75,8 @@ export function buildActivity(world){
   world.actors['dam-service-van']={
     cycle,
     phases:[{name:'outbound',start:0,length:leg},{name:'turnaround',start:leg,length:dwell},{name:'returning',start:leg+dwell,length:leg},{name:'turnaround-home',start:2*leg+dwell,length:dwell}],
-    stateAt:t=>{const s=stateAt(t);return {position:[s.x,groundY,roadZ],heading:s.heading,phase:s.phase};},
+    // stateAt() calls both dwells 'turnaround'; the contract names the second one so a shot can pin it.
+    stateAt:t=>{const s=stateAt(t),p=((t%cycle)+cycle)%cycle;return {position:[s.x,groundY,roadZ],heading:s.heading,phase:s.phase==='turnaround'&&p>=2*leg+dwell?'turnaround-home':s.phase};},
   };
   return {diagnostics:world.activityDiagnostics};
 }

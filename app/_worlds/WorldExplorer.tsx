@@ -26,6 +26,8 @@ type Data = {ITEMS: Item[]; STORIES: Story[]; STATUSES?: Record<string, Status>;
 
 export default function WorldExplorer({world, brand, intro}: {world: string; brand: {title: string; small: string}; intro?: Intro}) {
   const frame = useRef<HTMLIFrameElement>(null);
+  const stage = useRef<HTMLDivElement>(null);
+  const [full, setFull] = useState(false);
   const [data, setData] = useState<Data | null>(null);
   const [failed, setFailed] = useState(false);
   const [ready, setReady] = useState(false);
@@ -51,6 +53,27 @@ export default function WorldExplorer({world, brand, intro}: {world: string; bra
     window.addEventListener('message', onMessage);
     return () => window.removeEventListener('message', onMessage);
   }, [world]);
+
+  // Full screen: native where the browser allows it on an element, otherwise a fixed viewport-sized fallback
+  // (iPhone Safari). Same iframe either way, so the world never reloads.
+  const toggleFull = useCallback(() => {
+    if (full) {
+      if (document.fullscreenElement) void document.exitFullscreen().catch(() => {});
+      setFull(false);
+      return;
+    }
+    setFull(true);
+    try { stage.current?.requestFullscreen?.()?.catch(() => {}); } catch { /* The fallback stays active. */ }
+  }, [full]);
+  useEffect(() => {
+    const onChange = () => { if (!document.fullscreenElement) setFull(false); };
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setFull(false); };
+    document.addEventListener('fullscreenchange', onChange);
+    window.addEventListener('keydown', onKey);
+    const overflow = document.body.style.overflow;
+    if (full) document.body.style.overflow = 'hidden';
+    return () => { document.removeEventListener('fullscreenchange', onChange); window.removeEventListener('keydown', onKey); document.body.style.overflow = overflow; };
+  }, [full]);
 
   const items = useMemo(() => Object.fromEntries((data?.ITEMS || []).map(i => [i.id, i])), [data]);
   const activeStory = data?.STORIES.find(s => s.id === story?.id) || null;
@@ -82,7 +105,8 @@ export default function WorldExplorer({world, brand, intro}: {world: string; bra
         <a className="wx-back" href="/links">← Site index</a>
       </header>
       <section className="wx-workspace">
-        <div className="wx-world">
+        <div className={full ? 'wx-world wx-full' : 'wx-world'} ref={stage}>
+          <button type="button" className="wx-full-toggle" onClick={toggleFull} aria-pressed={full}>{full ? 'Exit full screen' : 'Full screen'}</button>
           <iframe ref={frame} title={`${brand.title}: interactive miniature world`} src={`/lab-worlds/${world}.html?embed=1&controls=compact`} allow="fullscreen"/>
           {!ready && <p className="wx-loading" role="status">Preparing the world…</p>}
         </div>

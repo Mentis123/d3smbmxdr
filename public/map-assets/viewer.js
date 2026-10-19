@@ -6,6 +6,7 @@ import {MINING_VIEWS} from './mining-layout.js';
 import {createPipeline} from './pipeline.js';
 import {createNavigation} from './navigation.js';
 import {compileShot,auditShot} from './flythrough.js';
+import {createPinsLayer} from './pins-layer.js';
 import {SHOTS,getShot} from './shots/index.js';
 import {reservoirOutline,riverCenter,riverHalfWidth} from './hydro-profile.js';
 import {auditGeometry,auditLandmarks} from './geometry-audit.js';
@@ -34,7 +35,7 @@ function setCameraToolsOpen(open,{focus=false}={}){
 if(params.get('controls')==='compact'){
   document.body.classList.add('compact-controls');
   const toolbar=document.querySelector('.toolbar');toolbar.id='camera-tools-actions';
-  for(const child of toolbar.children)if(!['pan','fly','reset','pause'].includes(child.dataset.action))child.dataset.cameraAdvanced='true';
+  for(const child of toolbar.children)if(!['pan','fly','reset','pause','pins'].includes(child.dataset.action))child.dataset.cameraAdvanced='true';
   cameraToolsToggle=document.createElement('button');cameraToolsToggle.className='camera-tools-toggle';cameraToolsToggle.textContent='Camera controls';cameraToolsToggle.setAttribute('aria-expanded','false');cameraToolsToggle.setAttribute('aria-controls','camera-tools-panel');
   cameraToolsToggle.addEventListener('click',()=>setCameraToolsOpen(!document.body.classList.contains('camera-tools-open')));
   cameraToolsPanel=document.createElement('section');cameraToolsPanel.className='camera-tools-panel';cameraToolsPanel.id='camera-tools-panel';cameraToolsPanel.setAttribute('aria-label','Camera controls');
@@ -97,7 +98,7 @@ async function handleExhibit(data){
 function fit(){if(!renderer||!camera)return;const w=host.clientWidth,h=host.clientHeight;if(w<1||h<1)return;if(!exhibitSaved){zoom=clampZoom(zoom,w,h);targetZoom=clampZoom(targetZoom,w,h);}renderer.setPixelRatio(resolutionFor(effectiveProfile,{width:w,height:h,deviceDpr:devicePixelRatio,mobile:mobileDevice,capture}));renderer.setSize(w,h);pipeline?.resize(w,h,renderer.getPixelRatio(),effectiveProfile.bloom);if(!exhibitSaved){camera.aspect=w/h;camera.updateProjectionMatrix();if(!exhibit)positionCamera();}}
 function positionCamera(){if(shot){placeShotCamera();return;}if(navigation?.mode==='fly')return;const dist=orbitDistance(host.clientWidth,host.clientHeight);const direction=new THREE.Vector3(Math.sin(azimuth)*Math.cos(tilt),Math.sin(tilt),Math.cos(azimuth)*Math.cos(tilt));camera.position.copy(target).addScaledVector(direction,Math.max(MIN_ORBIT_DISTANCE,dist/zoom));camera.lookAt(target);camera.updateMatrixWorld();}
 function metrics(){const gl=renderer.getContext();const ext=gl.getExtension('WEBGL_debug_renderer_info');const box=new THREE.Box3().setFromObject(world.root),xs=[],ys=[];for(const x of [box.min.x,box.max.x])for(const y of [box.min.y,box.max.y])for(const z of [box.min.z,box.max.z]){const p=new THREE.Vector3(x,y,z).project(camera);xs.push(p.x);ys.push(p.y);}return{stage:world.stats.stage,seed:SEED,time:elapsed,paused,yaw,tilt,zoom,quality,adaptive:tuner.metrics(),effectiveQuality:effectiveProfile.name,navigation:navigation?.metrics(),viewport:[host.clientWidth,host.clientHeight],dpr:renderer.getPixelRatio(),projectedBounds:{minX:Math.min(...xs),maxX:Math.max(...xs),minY:Math.min(...ys),maxY:Math.max(...ys)},camera:{position:camera.position.toArray(),quaternion:camera.quaternion.toArray(),target:target.toArray(),fov:camera.fov,near:camera.near,far:camera.far},renderer:ext?gl.getParameter(ext.UNMASKED_RENDERER_WEBGL):gl.getParameter(gl.RENDERER),threeRevision:THREE.REVISION,calls:pipeline.stats.calls,triangles:pipeline.stats.triangles,postprocess:pipeline.stats.postprocessEnabled,countsNote:'calls/triangles describe main scene pass, excluding reservoir reflection, shadow and bloom passes',geometryCount:renderer.info.memory.geometries,textures:renderer.info.memory.textures,frameTimes:[...frameTimes],activity:world.activityDiagnostics?.(elapsed),infrastructure:world.infrastructureDiagnostics?.(elapsed),reflection:world.reflection?.stats,terrain:world.terrainDiagnostics?.(),sceneStats:world.stats,lab:labLayer?.diagnostics()};}
-function render(){if(exhibit){exhibit.update(0);renderer.render(exhibit.scene,exhibit.camera);return;}if(exhibitSaved){pipeline.render(world.scene,camera,effectiveProfile.bloom);return;}positionCamera();navigation?.update(0);world.root.rotation.y=yaw;world.update(elapsed,0);world.onCamera?.(camera);labLayer?.update(camera);world.reflection?.render(renderer,camera,effectiveProfile.index>=3&&!mobileDevice&&!params.has('material'));pipeline.render(world.scene,camera,effectiveProfile.bloom);}
+function render(){if(exhibit){exhibit.update(0);renderer.render(exhibit.scene,exhibit.camera);return;}if(exhibitSaved){pipeline.render(world.scene,camera,effectiveProfile.bloom);return;}positionCamera();navigation?.update(0);world.root.rotation.y=yaw;world.update(elapsed,0);world.onCamera?.(camera);labLayer?.update(camera);world.reflection?.render(renderer,camera,effectiveProfile.index>=3&&!mobileDevice&&!params.has('material'));pipeline.render(world.scene,camera,effectiveProfile.bloom);if(pinsLayer){pinsLayer.setSuppressed(!!shot&&!shot.compiled.spec.pins);pinsLayer.update(camera,{coarse:mobileDevice||document.body.classList.contains('touch-ui'),rangeScale:orbitDistance(host.clientWidth,host.clientHeight)/36});}}
 function pauseButton(){const b=document.querySelector('[data-action=pause]');b.textContent=paused?'Play':'Pause';b.setAttribute('aria-pressed',String(paused));}
 // ---- Fly-through player. A shot is compiled against the live scene (see flythrough.js) and
 // drives camera position, look target, fov and the turntable yaw by scene time, so playback is
@@ -231,10 +232,23 @@ function setupStudio(){
 const flythrough={
   list:()=>Object.values(SHOTS).filter(s=>(s.world||'energy')===(isMining?'mining':'energy')).map(s=>({name:s.name,title:s.title,duration:s.keys[s.keys.length-1].t})),
   glideTo,views:()=>Object.keys(views),
+  // Authoring helpers: actor schedules and where an actor is at a scene time.
+  actors:()=>Object.fromEntries(Object.entries(world.actors||{}).map(([k,a])=>[k,{cycle:a.cycle,phases:a.phases}])),
+  actorAt:(name,t)=>world.actors?.[name]?.stateAt(t)??null,
   play:playShot,stop:()=>stopShot('stopped'),seek:seekShot,status,
   compile:nameOrSpec=>{const c=compileNamed(nameOrSpec);return {name:c.name,duration:c.duration,startSceneTime:c.startSceneTime,yaw:c.yaw};},
   audit:(nameOrSpec,opts={})=>auditShot(compileNamed(nameOrSpec),{height:world.height,waterLevel,actors:world.actors,...opts}),
 };
+// ---- Location pins. One state shared by the toolbar button, the P key, the parent page's switch
+// (postMessage) and ?pins=0|1; remembered per browser. Off by default in capture mode (so diagnostic
+// captures stay unchanged) and alongside the AI Lab layer (its own hotspots carry those places).
+let pinsLayer=null,pinsOn=true;
+function setPins(on,{persist=true}={}){
+  pinsOn=!!on;pinsLayer?.setVisible(pinsOn);
+  const b=document.querySelector('[data-action=pins]');if(b)b.setAttribute('aria-pressed',String(pinsOn));
+  if(persist)try{localStorage.setItem('tabletop-pins',pinsOn?'1':'0');}catch{}
+  if(window.parent!==window)window.parent.postMessage({type:'worlds:pins-state',on:pinsOn},location.origin);
+}
 // Glide: an orbital move from wherever the camera is to a preset, over the same orbit parameters
 // the user drives (target, azimuth, tilt, yaw, zoom, fov), eased, ending exactly on setView(name).
 let glide=null;
@@ -247,13 +261,16 @@ function selectWorldHotspot(spot,notify=true){
   glideTo(spot.view);
   if(notify&&window.parent!==window)window.parent.postMessage({type:'world:hotspot',world:worldKind,id:spot.id},location.origin);
 }
+// A view may carry portraitZoom: on tall, narrow frames (phones) the camera comes that much closer, because the
+// orbit distance grows with 1/aspect. Views without it (energy, mining) frame exactly as before.
+function viewZoom(v){return v.zoom*(v.portraitZoom&&host.clientWidth<host.clientHeight*.9?v.portraitZoom:1);}
 function glideTo(name,seconds=1.6){
   if(!Object.hasOwn(views,name))return false;
   if(shot)stopShot('glide');navigation?.exitFly();
   const v=views[name],reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
   if(reduce||seconds<=0){glide=null;setView(name);return true;}
   let dYaw=(v.yaw-yaw)%(Math.PI*2);if(dYaw>Math.PI)dYaw-=Math.PI*2;if(dYaw<-Math.PI)dYaw+=Math.PI*2;
-  glide={name,t0:performance.now(),ms:seconds*1000,from:{target:target.clone(),azimuth,tilt,yaw,zoom,fov:camera.fov},to:{target:new THREE.Vector3().fromArray(v.target),azimuth:v.azimuth??Math.atan2(12,23),tilt:v.tilt??openingTilt,yaw:yaw+dYaw,zoom:v.zoom,fov:v.fov||42}};
+  glide={name,t0:performance.now(),ms:seconds*1000,from:{target:target.clone(),azimuth,tilt,yaw,zoom,fov:camera.fov},to:{target:new THREE.Vector3().fromArray(v.target),azimuth:v.azimuth??Math.atan2(12,23),tilt:v.tilt??openingTilt,yaw:yaw+dYaw,zoom:viewZoom(v),fov:v.fov||42}};
   return true;
 }
 function stepGlide(now){
@@ -265,11 +282,11 @@ function stepGlide(now){
   const fov=L(g.from.fov,g.to.fov,e);if(camera.fov!==fov){camera.fov=fov;camera.updateProjectionMatrix();}
   if(u>=1){glide=null;setView(g.name);}
 }
-function setView(name){navigation?.exitFly();const v=views[name]||views.hero;camera.fov=v.fov||42;camera.updateProjectionMatrix();azimuth=v.azimuth??Math.atan2(12,23);tilt=targetTilt=v.tilt??openingTilt;yaw=targetYaw=v.yaw;zoom=targetZoom=v.zoom;target.fromArray(v.target);render();}
+function setView(name){navigation?.exitFly();const v=views[name]||views.hero;camera.fov=v.fov||42;camera.updateProjectionMatrix();azimuth=v.azimuth??Math.atan2(12,23);tilt=targetTilt=v.tilt??openingTilt;yaw=targetYaw=v.yaw;zoom=targetZoom=viewZoom(v);target.fromArray(v.target);render();}
 function reset(){azimuth=Math.atan2(12,23);targetTilt=openingTilt;target.set(0,1,0);targetYaw=0;targetZoom=1;if(matchMedia('(prefers-reduced-motion: reduce)').matches){yaw=0;zoom=1;tilt=targetTilt;}}
 function animate(now){if(disposed)return;if(document.hidden||host.clientWidth<1||host.clientHeight<1){last=0;raf=requestAnimationFrame(animate);return;}const rawDt=last?(now-last)/1000:0,dt=Math.min(rawDt,shot?.25:.05);last=now;if(rawDt>0){frameTimes.push(rawDt*1000);if(frameTimes.length>2000)frameTimes.shift();}if(exhibit){exhibit.update(dt);renderer.render(exhibit.scene,exhibit.camera);raf=requestAnimationFrame(animate);return;}if(exhibitSaved){render();raf=requestAnimationFrame(animate);return;}if(!paused){elapsed+=dt;if(!capture&&!shot&&rawDt>0)tuner.sample(rawDt*1000,now);}if(shot&&!paused)tickShot();if(glide)stepGlide(now);const k=1-Math.exp(-dt*10);yaw+=(targetYaw-yaw)*k;tilt+=(targetTilt-tilt)*k;zoom+=(targetZoom-zoom)*k;navigation?.update(dt);render();raf=requestAnimationFrame(animate);}
-function action(name){if(name==='mouse-look')setCameraToolsOpen(false);if(navigation?.action(name))return;if(name==='rotate-left')targetYaw-=Math.PI/8;if(name==='rotate-right')targetYaw+=Math.PI/8;if(name==='zoom-in')targetZoom=clampZoom(targetZoom*1.2,host.clientWidth,host.clientHeight);if(name==='zoom-out')targetZoom=clampZoom(targetZoom/1.2,host.clientWidth,host.clientHeight);if(name==='reset')reset();if(name==='pause'){paused=!paused;tuner.reset(performance.now());pauseButton();}if(name==='retry')location.reload();}
-function key(e){if(e.target!==host||e.shiftKey||navigation?.mode==='fly')return;const map={ArrowLeft:'rotate-left',ArrowRight:'rotate-right','+':'zoom-in','=':'zoom-in','-':'zoom-out',Home:'reset',' ':'pause'};if(map[e.key]){e.preventDefault();action(map[e.key]);}}
+function action(name){if(name==='mouse-look')setCameraToolsOpen(false);if(navigation?.action(name))return;if(name==='rotate-left')targetYaw-=Math.PI/8;if(name==='rotate-right')targetYaw+=Math.PI/8;if(name==='zoom-in')targetZoom=clampZoom(targetZoom*1.2,host.clientWidth,host.clientHeight);if(name==='zoom-out')targetZoom=clampZoom(targetZoom/1.2,host.clientWidth,host.clientHeight);if(name==='reset')reset();if(name==='pause'){paused=!paused;tuner.reset(performance.now());pauseButton();}if(name==='retry')location.reload();if(name==='pins')setPins(!pinsOn);}
+function key(e){if(e.target!==host||e.shiftKey||navigation?.mode==='fly')return;const map={p:'pins',P:'pins',ArrowLeft:'rotate-left',ArrowRight:'rotate-right','+':'zoom-in','=':'zoom-in','-':'zoom-out',Home:'reset',' ':'pause'};if(map[e.key]){e.preventDefault();action(map[e.key]);}}
 const onResize=()=>fit(),click=e=>{const b=e.target.closest('[data-action]');if(b)action(b.dataset.action);};
 function applyQualityProfile(){effectiveProfile=tuner.profile();if(!renderer||!world)return;renderer.shadowMap.enabled=effectiveProfile.shadows;const shadow=world.key.shadow;if(shadow.mapSize.x!==effectiveProfile.shadowSize){shadow.map?.dispose();shadow.map=null;shadow.mapSize.set(effectiveProfile.shadowSize,effectiveProfile.shadowSize);shadow.needsUpdate=true;}const spray=world.root.getObjectByName('spillway-droplets-and-spray');if(spray)spray.geometry.setDrawRange(0,Math.floor(world.stats.sprayParticles*effectiveProfile.spray));let mistIndex=0;world.root.traverse(o=>{if(o.name==='impact-mist')o.visible=!o.userData.diagnosticHidden&&mistIndex++<Math.ceil(42*effectiveProfile.mist);});const auto=qSelect.querySelector('option[value=auto]');if(auto)auto.textContent='Auto · '+effectiveProfile.name;fit();}
 const onQuality=()=>{quality=qSelect.value;try{localStorage.setItem('tabletop-quality',quality);}catch{}tuner.setMode(quality,performance.now());};
@@ -295,14 +312,14 @@ try{
   navigation=createNavigation({host,camera,captureOnFly:params.get('controls')!=='compact',getOrbit:()=>({target,yaw,tilt,zoom,targetZoom}),setOrbit(s){if(s.target)target.copy(s.target);if(s.azimuth!==undefined)azimuth=s.azimuth;if(s.deltaYaw)targetYaw+=s.deltaYaw;if(s.deltaTilt!==undefined)targetTilt=THREE.MathUtils.clamp(targetTilt+s.deltaTilt,-Math.PI/2+.03,Math.PI/2-.03);if(s.tilt!==undefined)targetTilt=s.tilt;if(s.yaw!==undefined)targetYaw=s.yaw;if(s.zoom!==undefined)targetZoom=clampZoom(s.zoom,host.clientWidth,host.clientHeight);if(s.immediate){yaw=targetYaw;zoom=targetZoom;tilt=targetTilt;}},resetOrbit:reset,onChange({mode,tool,locked}){
     const flying=mode==='fly',wasFlying=document.body.classList.contains('flying');if(flying&&!wasFlying)setCameraToolsOpen(false);document.body.classList.toggle('mouse-locked',locked);const fly=document.querySelector('[data-action=fly]');fly.textContent=flying?'Exit fly':'Fly';fly.setAttribute('aria-pressed',String(flying));document.querySelector('[data-action=pan]').setAttribute('aria-pressed',String(tool==='pan'));document.querySelector('[data-action=mouse-look]').hidden=!flying||locked;
     document.body.classList.toggle('flying',flying);document.querySelector('#hint').textContent=flying?'WASD move · Q/E down/up · Shift faster · '+(locked?'Mouse look':'Drag to look')+' · Esc return':(tool==='pan'?'Drag to pan':'Drag rotate/tilt · Shift/right-drag pan')+' · Alt-drag crane · Scroll zoom';
-    if(document.body.classList.contains('touch-ui')){document.querySelector('[data-action=mouse-look]').hidden=true;document.querySelector('#hint').textContent=flying?'Hold arrows to move · Drag to look · â†‘/â†“ height':(tool==='pan'?'Drag to pan':'One finger: rotate / tilt')+' · Two fingers: pan / pinch zoom';}
+    if(document.body.classList.contains('touch-ui')){document.querySelector('[data-action=mouse-look]').hidden=true;document.querySelector('#hint').textContent=flying?'Hold arrows to move · Drag to look · ↑/↓ height':(tool==='pan'?'Drag to pan':'One finger: rotate / tilt')+' · Two fingers: pan / pinch zoom';}
     document.querySelector('#navigation-status').textContent=flying?'Fly mode. WASD moves, Q and E change height. Escape returns to tabletop.':'Tabletop mode';
   }});
   host.addEventListener('keydown',key);window.addEventListener('resize',onResize);document.addEventListener('click',click);qSelect.addEventListener('change',onQuality);document.addEventListener('visibilitychange',onVisibility);resizeObserver=new ResizeObserver(fit);resizeObserver.observe(host);window.visualViewport?.addEventListener('resize',onResize);
   const onWorldFocus=e=>{if(e.origin!==location.origin||e.source!==window.parent)return;
     if(exhibitMode&&e.data?.type==='scene:fullscreen'){sceneFullscreen=e.data.active===true;return;}
     if(exhibitMode&&typeof e.data?.type==='string'&&e.data.type.startsWith('exhibit:')){handleExhibit(e.data);return;}
-    if(e.data?.type==='worlds:focus'&&Object.hasOwn(views,e.data.view))glideTo(e.data.view,e.data.instant?0:1.6);
+    if(e.data?.type==='worlds:focus'&&Object.hasOwn(views,e.data.view)){glideTo(e.data.view,e.data.instant?0:1.6);pinsLayer?.selectView(e.data.view);}if(e.data?.type==='worlds:pins')setPins(!!e.data.on);
     if(e.data?.type==='world:story'&&world.setStory){const view=world.setStory(e.data.id??null,e.data.step??0);if(view&&Object.hasOwn(views,view))glideTo(view);render();}
     if(e.data?.type==='world:select'){const spot=world.hotspots?.find(s=>s.id===e.data.id);if(spot)selectWorldHotspot(spot,false);}if(labLayer&&e.data?.type==='lab:conditions'){labLayer.apply(e.data.conditions);render();window.parent.postMessage({type:'lab:applied',state:labLayer.diagnostics()},location.origin);}};
   window.addEventListener('message',onWorldFocus);
@@ -311,7 +328,14 @@ try{
   host.addEventListener('pointerdown',()=>{glide=null;if(shot)stopShot('grabbed');},true);
   window.addEventListener('keydown',e=>{if(shot&&e.code==='Escape'){e.preventDefault();stopShot('escaped');}},true);
   window.__tabletop={ready:false,flythrough,exhibit:{prepare:prepareExhibit,metrics:()=>exhibit?.metrics()||null,setTime:t=>{exhibit?.setTime(t);render();}},setLabState:s=>labLayer?.apply(s),setState(s={}){if(s.view)setView(s.view);if(s.timeSeconds!==undefined)elapsed=s.timeSeconds;if(s.paused!==undefined)paused=s.paused;if(s.yaw!==undefined)yaw=targetYaw=s.yaw;if(s.zoom!==undefined)zoom=targetZoom=clampZoom(s.zoom,host.clientWidth,host.clientHeight);if(s.quality){quality=s.quality;qSelect.value=quality;onQuality();}pauseButton();render();return metrics();},metrics,auditHydro:()=>world.hydroDiagnostics?.(),auditInfrastructure:()=>isMining?world.audit():auditInfrastructure(world),auditGeometry:()=>auditGeometry(world.root),auditLandmarks:()=>isMining?world.audit():auditLandmarks(world),clearFrameTimes(){frameTimes=[];},reset(){navigation.reset();yaw=targetYaw;zoom=targetZoom;tilt=targetTilt;render();},dispose};
-  renderer.compile(world.scene,camera);setView(params.get('view')||'hero');loading.hidden=true;window.__tabletop.ready=true;if(extra&&window.parent!==window)window.parent.postMessage({type:'world:ready',world:worldKind},location.origin);if(labLayer&&window.parent!==window)window.parent.postMessage({type:'lab:ready',industry:isMining?'mining':'energy'},location.origin);raf=requestAnimationFrame(animate);
+  renderer.compile(world.scene,camera);setView(params.get('view')||'hero');
+  // Location pins belong to the energy and mining maps; extra worlds (datacenter, nextdc) use their own hotspots.
+  if(!extra){pinsLayer=createPinsLayer(world,isMining?'mining':'energy',host,{onSelect:p=>{glideTo(p.view);if(window.parent!==window)window.parent.postMessage({type:'worlds:location',view:p.view,id:p.id},location.origin);}});
+  {const q=params.get('pins');let saved=null;try{saved=localStorage.getItem('tabletop-pins');}catch{}
+   setPins(q==='1'?true:q==='0'?false:(capture||labLayer)?false:saved!=='0',{persist:q==='0'||q==='1'});}
+  window.__tabletop.pins={set:on=>setPins(on),toggle:()=>setPins(!pinsOn),diagnostics:()=>pinsLayer.diagnostics(),select:id=>pinsLayer.select(id)};
+  if(window.parent!==window)window.parent.postMessage({type:'worlds:ready',world:isMining?'mining':'energy',pins:pinsOn},location.origin);}
+  loading.hidden=true;window.__tabletop.ready=true;if(extra&&window.parent!==window)window.parent.postMessage({type:'world:ready',world:worldKind},location.origin);if(labLayer&&window.parent!==window)window.parent.postMessage({type:'lab:ready',industry:isMining?'mining':'energy'},location.origin);raf=requestAnimationFrame(animate);
   if(params.get('studio')==='1')setupStudio();
   else if(params.get('shot')){try{playShot(params.get('shot'),{loop:params.get('loop')==='1',record:params.get('record')==='1'});}catch(e){console.error(e);}}
 }catch(e){navigation?.dispose();loading.hidden=true;error.hidden=false;document.querySelector('#error-message').textContent='WebGL is unavailable or a scene asset could not load. Check your connection and browser hardware acceleration, then try again.';world?.dispose();pipeline?.dispose();renderer?.dispose();renderer?.forceContextLoss();console.error(e);document.addEventListener('click',click);}

@@ -14,6 +14,11 @@ const nextConfig = {
   },
   async rewrites() {
     return [
+      // Static pages have no icon link, so browsers ask for /favicon.ico; serve the SVG icon instead of a 404.
+      {
+        source: '/favicon.ico',
+        destination: '/favicon.svg',
+      },
       {
         source: '/localdesk',
         destination: '/localdesk.html',

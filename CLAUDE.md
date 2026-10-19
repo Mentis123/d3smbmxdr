@@ -8,6 +8,8 @@ When you add, remove, or rename any page or route on this site, you **must** upd
 - Then Apps, then APIs.
 - Each entry needs: title, badge type, path, and a 1-2 sentence description.
 - All links use `target="_blank"`.
+- The **Related Sites** section cross-links `adamrappaport.vercel.app/links` (the personal site's own index, which links back here) and Cisco Live. Keep both directions when either site changes.
+- `/contributions` is deliberately not listed (a personal value summary) until the owner decides.
 
 ## Deployment
 
@@ -64,7 +66,9 @@ After any shared-module change, compare paused, fixed-time frames of `/lab-world
 - **`app/globals.css` styles every `header` and `footer`** (white background, padding). Scoped page CSS must reset them, as `lab.css` and `nextdc.css` do. Learned when `/nextdc` shipped a white header bar in its first build.
 - **Validating a Next route** (the static-server recipe above cannot render one): `npm ci`, then `npx tsc --noEmit`, `npx next build`, and `npx next start -p 3107` (a production server, not the dev server). Probe it headless, and reach into the iframe with `page.frames()` to click pins and read `__tabletop`. Delete `tsconfig.tsbuildinfo` afterwards; it is a build artefact.
 - **Stopping servers safely:** `ss` is not installed. Scan `/proc/*/cmdline` with the pattern split across quotes (`pat="next-""server"`), so the match cannot hit your own shell's command text. Two shells were killed this way before.
-- `/favicon.ico` returns 404 site-wide. A single 404 console line on any page is that, not the page under test.
+- The site icon is `app/icon.svg` (app routes) and `public/favicon.svg`, and `/favicon.ico` rewrites to it, so static pages get it too. A 404 in the console now means a real missing asset.
+- `WorldExplorer` has a Full screen button: native fullscreen where the browser allows it, a fixed viewport fallback otherwise (iPhone Safari). It keeps the same iframe, so the world never reloads.
+- Views may carry `portraitZoom` (applied by the shared viewer on tall, narrow frames). The datacenter and NEXTDC views use it so phones see the world closer; desktop framing is unchanged.
 
 Learned 19 Oct 2026 (`/nextdc`): checking the kit first meant the world, pins, controls and host pattern were all reuse. The new code was the scene, its data module, four generic viewer hooks and the panel.
 

@@ -31,7 +31,7 @@ export const DC_ANCHORS = {
 };
 
 // Views for the shared viewer (same shape as MINING_VIEWS). Distance is about 36 / zoom on a desktop screen.
-export const DATACENTER_VIEWS = {
+const DATACENTER_VIEWS_BASE = {
   hero: {yaw: 0, target: [-0.4, 2.6, -0.2], zoom: 1.5, tilt: 0.62, azimuth: 0.18, fov: 38},
   // Opening step: the ten racks and the question over them.
   hungryWide: {yaw: 0, target: [-6.4, 3.0, 3.8], zoom: 2.4, tilt: 0.44, azimuth: 0.3, fov: 38},
@@ -40,6 +40,8 @@ export const DATACENTER_VIEWS = {
   heavy: {yaw: 0, target: [5.6, 2.9, 3.8], zoom: 3.4, tilt: 0.4, azimuth: 0.1, fov: 38},
   ready: {yaw: 0, target: [-2.6, 2.8, -3.0], zoom: 2.2, tilt: 0.75, azimuth: 0.28, fov: 38},
 };
+// On phones the hero pulls in a little and close-ups a little more (viewer.js viewZoom), keeping the outer cards in frame.
+export const DATACENTER_VIEWS = Object.fromEntries(Object.entries(DATACENTER_VIEWS_BASE).map(([id, v]) => [id, {...v, portraitZoom: id === 'hero' ? 1.3 : 1.25}]));
 
 // Pins. Captions are each card's lead line from datacenter-data.js, so the world and the panel say the same thing.
 const LEAD = Object.fromEntries(DC_ITEMS.map(i => [i.id, `${i.label}: ${i.lead}`]));

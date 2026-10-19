@@ -59,3 +59,22 @@ body.compact-controls.camera-tools-open .flight-pad,body.compact-controls.camera
 .camera-tools-panel,.camera-tools-toggle,.compact-fly-bar{font-family:"Helvetica Neue",Arial,sans-serif}
 /* Long hotspot captions wrap inside their half of the bottom bar instead of running under the hint. */
 .scene-note{max-width:min(58vw,820px)}
+
+/* Location pins (pins-layer.js): the AI Lab hotspot's family, a tier quieter. */
+.loc-pins{position:absolute;inset:0;pointer-events:none;z-index:3;overflow:hidden}
+.loc-pin{position:absolute;left:0;top:0;display:flex;flex-direction:column;align-items:center;padding:0;margin:0;border:0;background:none;min-height:0;pointer-events:auto;cursor:pointer;transition:opacity .25s;will-change:transform}
+.loc-pin:hover,.loc-pin:active{background:none}
+.loc-pin-label{font:600 11px/1 'Helvetica Neue',Arial,sans-serif;color:#e8f6ff;background:#000025d9;border:1px solid #78dcff8c;border-radius:20px;padding:5px 9px;white-space:nowrap;opacity:.8;transition:opacity .2s,box-shadow .2s,border-color .2s,padding .2s}
+.loc-pin-stem{width:1px;height:14px;background:linear-gradient(#78dcffcc,#78dcff33)}
+.loc-pin-dot{position:relative;width:8px;height:8px;border-radius:50%;background:#00aeff;box-shadow:0 0 0 2px #000025,0 0 0 3px #78dcffaa;transform:translateY(4px)}
+.loc-pin-dot::before{content:'';position:absolute;inset:-18px}
+.loc-pin:hover .loc-pin-label,.loc-pin:focus-visible .loc-pin-label{opacity:1;border-color:#78dcff;box-shadow:0 0 24px #00aeff55}
+.loc-pin:focus-visible{outline:none}.loc-pin:focus-visible .loc-pin-label{outline:2px solid #91e9ff;outline-offset:2px}
+.loc-pin.selected .loc-pin-label{opacity:1;font-size:12px;padding:8px 12px;background:#000025f2;border-color:#78dcff;box-shadow:0 0 24px #00aeff59}
+.loc-pin.selected .loc-pin-dot::after{content:'';position:absolute;left:50%;top:50%;width:30px;height:30px;margin:-15px 0 0 -15px;border-radius:50%;border:2px solid #00aeff;opacity:.85;animation:loc-pin-ring 1.6s ease-out 1}
+@keyframes loc-pin-ring{from{transform:scale(.3);opacity:1}to{transform:scale(1);opacity:.85}}
+@media(prefers-reduced-motion:reduce){.loc-pin.selected .loc-pin-dot::after{animation:none}}
+.loc-pin.no-label .loc-pin-label,.loc-pin.no-label .loc-pin-stem{visibility:hidden}
+.loc-pin.occluded{opacity:.28!important}.loc-pin.occluded .loc-pin-label,.loc-pin.occluded .loc-pin-stem{visibility:hidden}
+.exhibit-active .loc-pins,body.studio-playing .loc-pins{display:none!important}
+.toolbar button[data-action=pins][aria-pressed=false]{opacity:.7}

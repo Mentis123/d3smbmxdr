@@ -42,6 +42,10 @@ The energy, mining and datacenter worlds are **owned by `Mentis123/adamrappaport
 
 Learned 19 Oct 2026: the old `/datacenter` page had its own controls and boxes and looked basic. Don't add a page that builds its own toolbar, viewer or scene. Add a world to the shared viewer instead.
 
+Learned 19 Oct 2026 (second pass): the datacenter drew a raised access floor under the AI racks, the opposite of the infographic's structure point. AI racks weigh 2,000–5,000+ lb and many raised floors cannot carry that. The world uses a saw-cut slab on grade. Read `adamrappaport/docs/DATACENTER-DESIGN.md` before changing the scene or its captions.
+
+Known shared-viewer issue: long hotspot captions wrap over the bottom toolbar at 1440 px. Fix it in `viewer.js` (the `#view-label` area), not per world.
+
 ## Build from what already exists (reuse, repurpose, regenerate)
 
 Before writing any new 3D scene, diagram, texture or page chrome, look at what the site already has and decide deliberately which of three paths to take. Write the decision down in the PR or commit message.

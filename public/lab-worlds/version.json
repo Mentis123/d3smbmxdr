@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "sourceRepository": "Mentis123/adamrappaport",
-  "sourceCommit": "0ddcf13a4b9d896dabcdd9f1cc38cccfacea1bc5",
+  "sourceCommit": "e0daecc8a0343f5825ce61bb17ec4ca442a096ea",
   "experience": "ai-lab",
   "runtimeDependency": "Self-hosted static files; no personal-site requests",
   "files": {
@@ -10,7 +10,7 @@
     "public/map-assets/asset-manifest.json": "66953befffd969e19c5ba448f4eee3c9390d3b4cb91a72fcb6510094dfb93ad6",
     "public/map-assets/builder-utils.js": "4d0f2d3a6d268936522572c09ce84763af9c837b096af8f603fe9414b8eb5768",
     "public/map-assets/camera-limits.js": "81debf1686fc3993a460450ae77f2e7704804ff5a046e06b516660c12bd8598d",
-    "public/map-assets/datacenter-scene.js": "7a4a62ae6bc17df327970e8c41cefc6f0a73ddadc15f9d21ed963b6430fb2c61",
+    "public/map-assets/datacenter-scene.js": "3a7f8a467f49c8c609ddb030a64918704836cbc88ba7f88b889ee9c356a187cc",
     "public/map-assets/electrical.js": "cc49e083143cab12430332dad6ef3a182d48c4654e227912b22aca587d3ae7a3",
     "public/map-assets/exhibit-workflows.js": "e1994963f256f2a0184ab00307d57e483f75f18fd3bf7764caa8f908d80643e9",
     "public/map-assets/exhibits.js": "648bd7dfcc27328633ec91aaac4c5a1aaf4a91b77b7a64005636e052ad270704",

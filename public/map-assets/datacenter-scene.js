@@ -29,33 +29,30 @@ export const DATACENTER_VIEWS = {
 // Pins for the shared hotspot layer. Pin 2 toggles the air-only view, so the air limit and the liquid path are one comparison.
 export const DC_HOTSPOTS = [
   {id: 'power', label: '1 · Too hungry', view: 'power', anchor: DC_ANCHORS.power,
-    caption: 'Power density shock. Many racks were designed for about 10 kW; an AI rack can need 100–250+ kW. AI needs more power per rack, not more racks.'},
+    caption: 'Power density shock. A rack designed for about 10 kW can need 250 kW for AI. AI needs more power per rack, not more racks.'},
   {id: 'cooling', label: '2 · Too hot', view: 'cooling', anchor: DC_ANCHORS.cooling, cooling: 'air',
-    caption: 'Air cooling hits its limit at AI density. Select again to switch between air-only and the liquid loop.'},
+    caption: 'Air cooling hits its limit at AI density. Air alone cannot carry the heat, so the plan needs liquid-assisted cooling. Select again to compare air-only with the liquid loop.'},
   {id: 'structure', label: '3 · Too heavy', view: 'structure', anchor: DC_ANCHORS.structure,
-    caption: 'Structural constraints. AI racks weigh about 2,000–5,000+ lb each. Check floor loading, cable and pipe paths before they arrive.'},
+    caption: 'Structural constraints. An AI rack weighs about 2,000–5,000+ lb. Many raised floors cannot take that load, so check the slab and floor loading before the racks arrive.'},
 ];
 
-function tileTexture() {
-  // 600 mm raised-floor tiles with pedestal dots, drawn procedurally so the miniature needs no image asset.
+function concreteSlabTexture() {
+  // One 3 m saw-cut slab panel, repeated across the pad. Drawn procedurally so the miniature needs no image asset.
   const canvas = document.createElement('canvas');
   canvas.width = canvas.height = 512;
   const g = canvas.getContext('2d');
-  g.fillStyle = '#1b2b3c';
+  g.fillStyle = '#58636b';
   g.fillRect(0, 0, 512, 512);
-  for (let i = 0; i < 2; i++) for (let j = 0; j < 2; j++) {
-    const x = i * 256, y = j * 256;
-    const shade = (i + j) % 2 ? '#213348' : '#1d2e41';
-    g.fillStyle = shade;
-    g.fillRect(x + 3, y + 3, 250, 250);
-    g.fillStyle = '#4b6e8c';
-    g.beginPath();
-    g.arc(x + 128, y + 128, 4, 0, Math.PI * 2);
-    g.fill();
+  // Light mottling so the slab does not read as a flat plane.
+  for (let i = 0; i < 90; i++) {
+    const x = (i * 97) % 512, y = (i * 181) % 512;
+    g.fillStyle = i % 2 ? 'rgba(255,255,255,0.025)' : 'rgba(0,0,0,0.04)';
+    g.fillRect(x, y, 40 + (i % 5) * 18, 30 + (i % 4) * 14);
   }
-  g.strokeStyle = '#4a7396';
-  g.lineWidth = 2;
-  g.strokeRect(1, 1, 510, 510);
+  // Saw-cut joints on the panel edges. Panels are the only grid on the floor: there are no tiles or pedestals.
+  g.strokeStyle = '#2e363c';
+  g.lineWidth = 5;
+  g.strokeRect(2, 2, 508, 508);
   const texture = new THREE.CanvasTexture(canvas);
   texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
   texture.colorSpace = THREE.SRGBColorSpace;
@@ -94,9 +91,10 @@ export function createDatacenterScene() {
   padBox(0, 0, padZ, 19.6, DECK * 0.5, 15.0, concrete);
   padBox(0, DECK * 0.5, padZ, 18.8, DECK * 0.5, 14.0, concrete);
   pad.finish();
-  const deckTexture = tileTexture();
-  deckTexture.repeat.set(16, 12);
-  const deck = new THREE.Mesh(new THREE.PlaneGeometry(18.8, 14), new THREE.MeshStandardMaterial({map: deckTexture, roughness: 0.78, metalness: 0.18}));
+  // Structural slab on grade, not a raised access floor: AI racks concentrate 2,000–5,000+ lb per footprint.
+  const slabTexture = concreteSlabTexture();
+  slabTexture.repeat.set(6.3, 4.7);
+  const deck = new THREE.Mesh(new THREE.PlaneGeometry(18.8, 14), new THREE.MeshStandardMaterial({map: slabTexture, roughness: 0.9, metalness: 0.02}));
   deck.rotation.x = -Math.PI / 2;
   deck.position.set(0, DECK + 0.004, padZ);
   deck.receiveShadow = true;

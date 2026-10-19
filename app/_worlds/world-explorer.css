@@ -1,0 +1,79 @@
+/* Shared world host page (WorldExplorer). Data#3 tokens as in app/ai-lab/lab.css, scoped to .wx-shell. */
+.wx-shell{--blue-black:#000025;--surface:#06122b;--line:#78dcff33;--line-soft:#78dcff1f;--light-blue:#00aeff;--pale:#78dcff;--text:#eee;--muted:#b1c5d8;background:radial-gradient(ellipse at 85% 0,#00aeff13,transparent 45%),var(--blue-black);color:var(--text);min-height:100vh;font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;line-height:1.55;color-scheme:dark;padding:0 24px 32px}
+.wx-shell *{box-sizing:border-box}
+.wx-shell a{color:inherit;text-decoration:none}
+.wx-shell h1,.wx-shell h2,.wx-shell p,.wx-shell dl,.wx-shell dd{margin:0}
+.wx-shell sup{font-size:.55em;vertical-align:super}
+.wx-shell button{font:inherit;color:inherit;cursor:pointer;touch-action:manipulation}
+.wx-shell button:focus-visible,.wx-shell a:focus-visible,.wx-shell summary:focus-visible{outline:3px solid #0ff;outline-offset:3px}
+/* app/globals.css styles every header white with its own padding; reset it here, as the AI Lab does. */
+.wx-nav{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:18px 0;background:transparent;border-bottom:1px solid var(--line-soft)}
+.wx-brand{display:flex;align-items:center;gap:16px}
+.wx-brand>span{font-size:24px;font-weight:800;letter-spacing:-1px}
+.wx-brand>i{height:30px;width:1px;background:#78dcff40}
+.wx-brand strong{font-size:16px}
+.wx-brand small{display:block;color:var(--muted);font:9px/1.5 ui-monospace,monospace;letter-spacing:1.4px}
+.wx-back{font-size:12px;color:var(--pale)!important}
+.wx-workspace{display:grid;grid-template-columns:minmax(0,1fr) 390px;gap:20px;padding-top:18px;align-items:start}
+.wx-world{position:sticky;top:12px;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#030a16;min-width:0}
+.wx-world iframe{display:block;width:100%;height:clamp(520px,calc(100svh - 110px),900px);border:0}
+.wx-loading{position:absolute;inset:auto 0 0 0;padding:10px 14px;font-size:12px;color:var(--muted);background:#06122bd9}
+.wx-panel{display:grid;gap:22px;min-width:0;padding:22px;border:1px solid var(--line);border-radius:14px;background:var(--surface)}
+.wx-eyebrow{font:10px/1.6 ui-monospace,monospace;letter-spacing:1.6px;color:var(--pale);margin-bottom:8px!important}
+.wx-intro h1{font-size:28px;line-height:1.15;letter-spacing:-.6px;margin-bottom:10px}
+.wx-intro p:last-child,.wx-muted{color:var(--muted);font-size:14px}
+.wx-error{color:#ffd38a;font-size:14px}
+.wx-story h2,.wx-item h2{font-size:24px;line-height:1.2;letter-spacing:-.4px;margin:4px 0 10px}
+.wx-caption{font-size:16px;color:var(--text)}
+.wx-steps{display:flex;gap:8px;margin-top:16px}
+.wx-steps button,.wx-stories button,.wx-chips button{border:1px solid #78dcff40;background:#00aeff0b;border-radius:6px;min-height:44px;padding:8px 12px;font-size:13px;text-align:left}
+.wx-steps button{flex:1;text-align:center}
+.wx-steps button:disabled{opacity:.4;cursor:default}
+.wx-shell .wx-primary{background:var(--light-blue);color:var(--blue-black);font-weight:700;border-color:var(--light-blue)}
+.wx-text{background:none;border:0;color:var(--pale);text-decoration:underline;text-underline-offset:3px;padding:10px 0 0;font-size:13px;min-height:44px}
+.wx-stories{display:grid;gap:6px}
+.wx-stories button strong{display:block;font-size:14px}
+.wx-stories button small{display:block;font-size:12px;color:var(--muted);margin-top:2px}
+.wx-stories button[aria-pressed=true],.wx-chips button[aria-pressed=true]{border-color:var(--light-blue);background:#00aeff1f}
+.wx-steps button:hover:not(:disabled),.wx-stories button:hover,.wx-chips button:hover{border-color:var(--light-blue)}
+.wx-chips{display:flex;flex-wrap:wrap;gap:6px}
+.wx-chips button{border-left:3px solid var(--c);font-size:12px;padding:8px 10px}
+.wx-item-head{display:flex;justify-content:space-between;align-items:center}
+.wx-close{background:none;border:1px solid #78dcff40;border-radius:6px;width:44px;height:44px;font-size:22px;line-height:1}
+.wx-explain{display:grid;gap:4px}
+.wx-explain dt{font:10px/1.6 ui-monospace,monospace;letter-spacing:1.2px;color:var(--pale);text-transform:uppercase;margin-top:10px}
+.wx-explain dd{font-size:14px;color:var(--text)}
+.wx-vendor{margin-top:14px;border:1px solid var(--line-soft);border-radius:6px;font-size:13px}
+.wx-vendor summary{cursor:pointer;padding:12px;min-height:44px;color:var(--pale)}
+.wx-vendor p{padding:0 12px 12px;color:var(--muted)}
+.wx-badge{display:inline-block;border:1px solid var(--c);color:var(--c);border-radius:999px;padding:2px 10px;font:600 11px/1.6 "Helvetica Neue",Arial,sans-serif;letter-spacing:.4px;margin-right:8px}
+.wx-legend ul{list-style:none;margin:0;padding:0;display:grid;gap:8px;font-size:12px;color:var(--muted)}
+.wx-legend li{display:flex;align-items:baseline;gap:4px;flex-wrap:wrap}
+.wx-disclaimer{font-size:11px;color:var(--muted);border-top:1px solid var(--line-soft);padding-top:14px}
+@media(max-width:980px){.wx-workspace{grid-template-columns:1fr}.wx-world{position:relative;top:0}.wx-world iframe{height:62svh;min-height:420px}}
+@media(max-width:600px){.wx-shell{padding:0 16px 24px}.wx-brand{gap:12px}.wx-brand>span{font-size:21px}.wx-panel{padding:18px}.wx-intro h1{font-size:25px}}
+@media(prefers-reduced-motion:reduce){.wx-shell *{transition:none!important}}
+
+/* Infographic-style cards, the opening quote, outcomes and the closing line (datacenter). */
+.wx-item{border-left:3px solid var(--c);padding-left:14px}
+.wx-kicker{font:10px/1.6 ui-monospace,monospace;letter-spacing:1.4px;text-transform:uppercase;color:var(--c)}
+.wx-lead{font-size:16px;color:var(--text);margin-bottom:12px!important}
+.wx-facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin:0 0 12px}
+.wx-facts>div{border:1px solid var(--line-soft);border-radius:8px;padding:10px;background:#00aeff07}
+.wx-facts dt{font-size:11px;color:var(--muted)}
+.wx-facts dd{font-size:17px;font-weight:700;color:var(--c);margin-top:2px}
+.wx-checklist{list-style:none;margin:0 0 12px;padding:0;display:grid;gap:8px}
+.wx-checklist li{display:grid;grid-template-columns:22px 1fr;column-gap:8px}
+.wx-checklist li::before{content:"\2713";grid-row:span 2;display:grid;place-items:center;width:22px;height:22px;border-radius:50%;border:1px solid var(--c);color:var(--c);font-size:12px}
+.wx-checklist strong{font-size:14px}
+.wx-checklist span{font-size:12px;color:var(--muted)}
+.wx-takeaway{font-size:15px;font-weight:600;color:var(--text);border:1px solid var(--line);border-radius:8px;padding:12px 14px;background:#00aeff0a}
+.wx-inworld{margin-top:12px!important;font-size:12px;color:var(--muted)}
+.wx-inworld b{display:block;font:10px/1.6 ui-monospace,monospace;letter-spacing:1.2px;color:var(--pale);text-transform:uppercase}
+.wx-quote{font-size:18px;font-style:italic;color:var(--text);border-left:3px solid #2aa8ff;padding:4px 0 4px 12px;margin:4px 0 12px!important}
+.wx-start{width:100%;margin-top:16px;padding:12px 14px!important;font-size:15px!important;text-align:center!important;border-radius:8px}
+.wx-outcomes ul{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.wx-outcomes li{border-left:3px solid var(--c);padding-left:12px}
+.wx-outcomes strong{display:block;font-size:14px;color:var(--c)}
+.wx-outcomes span{font-size:13px;color:var(--muted)}
+.wx-tagline{margin-top:14px!important;font:11px/1.7 ui-monospace,monospace;letter-spacing:1.6px;text-transform:uppercase;color:var(--pale)}

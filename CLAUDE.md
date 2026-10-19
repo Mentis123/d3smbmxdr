@@ -50,7 +50,15 @@ After any shared-module change, compare paused, fixed-time frames of `/lab-world
 
 ## World host pages (a 3D world plus a side panel)
 
-`/ai-lab/*` and `/nextdc` embed a synced world in an iframe (`/lab-worlds/<name>.html?embed=1&controls=compact`) with a Next route beside it for the words. The world carries pins and light; the panel carries the explanation. Messages, hooks and the data-module pattern are in `adamrappaport/docs/SHARED-WORLDS.md`.
+`/ai-lab/*`, `/nextdc` and `/datacenter` embed a synced world in an iframe (`/lab-worlds/<name>.html?embed=1&controls=compact`) with a Next route beside it for the words. The world carries pins and light; the panel carries the explanation. Messages, hooks and the data-module pattern are in `adamrappaport/docs/SHARED-WORLDS.md`.
+
+- **One host component for every world: `app/_worlds/WorldExplorer.tsx`.** A route is three lines: `<WorldExplorer world="<name>" brand={...}/>`. It reads `/map-assets/<name>-data.js` and renders whatever that module provides:
+  - stories (step captions; the step's `focus` card is shown under the caption);
+  - cards (`lead`, `facts`, `checklist`, `takeaway`, `inWorld`, or `what`/`why`/`demo`/`next` with `vendor`);
+  - optionally `STATUSES`, `INTRO` (with a quote), `OUTCOMES` and `TAGLINE`.
+
+  Add a field to the data module and the component, not a new page. Learned 19 Oct 2026: the datacenter pro pass reused the NEXTDC panel by lifting it into this component.
+- `/datacenter` is an app route now, not a rewrite to `/lab-worlds/datacenter.html`; the bare wrapper still works on its own.
 
 - **One source for the words.** `/nextdc` imports `/map-assets/nextdc-data.js` at runtime with `import(/* webpackIgnore: true */ url)` and a variable URL, so the panel and the world read the same synced file.
 - **`app/globals.css` styles every `header` and `footer`** (white background, padding). Scoped page CSS must reset them, as `lab.css` and `nextdc.css` do. Learned when `/nextdc` shipped a white header bar in its first build.

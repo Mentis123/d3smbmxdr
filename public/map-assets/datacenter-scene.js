@@ -4,6 +4,7 @@ import {buildElectrical} from './electrical.js';
 import {createFlowMaterial} from './flow-effects.js';
 import {makeBatch, metal, slabTexture} from './builder-utils.js';
 import {LAYOUT} from './scene-layout.js';
+import {ITEMS as DC_ITEMS, STORIES as DC_STORIES, TAGLINE as DC_TAGLINE} from './datacenter-data.js';
 
 // AI-ready datacenter world: the "Your journey to AI-ready infrastructure" infographic as four dioramas.
 // Front row, left to right, are its three warning cards (too hungry, too hot, too heavy). Behind them is the
@@ -32,22 +33,21 @@ export const DC_ANCHORS = {
 // Views for the shared viewer (same shape as MINING_VIEWS). Distance is about 36 / zoom on a desktop screen.
 export const DATACENTER_VIEWS = {
   hero: {yaw: 0, target: [-0.4, 2.6, -0.2], zoom: 1.5, tilt: 0.62, azimuth: 0.18, fov: 38},
+  // Opening step: the ten racks and the question over them.
+  hungryWide: {yaw: 0, target: [-6.4, 3.0, 3.8], zoom: 2.4, tilt: 0.44, azimuth: 0.3, fov: 38},
   hungry: {yaw: 0, target: [-6.0, 4.3, 3.6], zoom: 2.5, tilt: 0.34, azimuth: 0.22, fov: 38},
   hot: {yaw: 0, target: [-0.3, 3.2, 3.8], zoom: 3.5, tilt: 0.36, azimuth: 0.12, fov: 38},
   heavy: {yaw: 0, target: [5.6, 2.9, 3.8], zoom: 3.4, tilt: 0.4, azimuth: 0.1, fov: 38},
   ready: {yaw: 0, target: [-2.6, 2.8, -3.0], zoom: 2.2, tilt: 0.75, azimuth: 0.28, fov: 38},
 };
 
-// Pins. Captions stay short: the scene's own placards carry the detail on every screen size.
+// Pins. Captions are each card's lead line from datacenter-data.js, so the world and the panel say the same thing.
+const LEAD = Object.fromEntries(DC_ITEMS.map(i => [i.id, `${i.label}: ${i.lead}`]));
 export const DC_HOTSPOTS = [
-  {id: 'hungry', label: '1 · Too hungry', view: 'hungry', anchor: DC_ANCHORS.hungry,
-    caption: 'Power density shock: racks built for about 10 kW, AI racks need 100–250+ kW. More power per rack, not more racks.'},
-  {id: 'hot', label: '2 · Too hot', view: 'hot', anchor: DC_ANCHORS.hot,
-    caption: 'Air cooling hits its limit. High-density AI racks need liquid-assisted cooling.'},
-  {id: 'heavy', label: '3 · Too heavy', view: 'heavy', anchor: DC_ANCHORS.heavy,
-    caption: 'AI racks weigh 2,000–5,000+ lb. Floor loading limits and cable and pipe paths get exceeded.'},
-  {id: 'ready', label: '4 · AI ready', view: 'ready', anchor: DC_ANCHORS.ready,
-    caption: 'AI ready: high-density power, a liquid cooling strategy, validated structure and GPU-ready infrastructure.'},
+  {id: 'hungry', label: '1 · Too hungry', view: 'hungry', anchor: DC_ANCHORS.hungry, caption: LEAD.hungry},
+  {id: 'hot', label: '2 · Too hot', view: 'hot', anchor: DC_ANCHORS.hot, caption: LEAD.hot},
+  {id: 'heavy', label: '3 · Too heavy', view: 'heavy', anchor: DC_ANCHORS.heavy, caption: LEAD.heavy},
+  {id: 'ready', label: '4 · AI ready', view: 'ready', anchor: DC_ANCHORS.ready, caption: LEAD.ready},
 ];
 
 // --- Procedural textures and labels (regenerated: the kit has no text or slab assets) ---
@@ -179,6 +179,72 @@ function warningSign() {
   return sprite;
 }
 
+// Speech bubble for the infographic's opening question, drawn as a billboard over the ten racks.
+function speechBubble(lines) {
+  const canvas = document.createElement('canvas');
+  canvas.width = 900;
+  canvas.height = 300;
+  const g = canvas.getContext('2d');
+  g.fillStyle = 'rgba(2,11,23,0.9)';
+  g.strokeStyle = '#2aa8ff';
+  g.lineWidth = 6;
+  roundRect(g, 8, 8, 884, 220, 44);
+  g.fill();
+  g.stroke();
+  g.beginPath();
+  g.moveTo(160, 224);
+  g.lineTo(130, 292);
+  g.lineTo(230, 224);
+  g.closePath();
+  g.fill();
+  g.stroke();
+  g.fillStyle = 'rgba(2,11,23,0.9)';
+  g.fillRect(150, 214, 90, 16);
+  g.fillStyle = '#e8f4ff';
+  g.font = '56px "Helvetica Neue", Arial, sans-serif';
+  g.textBaseline = 'middle';
+  lines.forEach((line, i) => g.fillText(line, 52, 82 + i * 76, 800));
+  const sprite = new THREE.Sprite(new THREE.SpriteMaterial({map: canvasTexture(canvas), transparent: true, depthTest: false, depthWrite: false, toneMapped: false}));
+  sprite.center.set(0.15, 0);
+  sprite.scale.set(2.7, 0.9, 1);
+  sprite.renderOrder = 12;
+  return sprite;
+}
+
+// A flat chevron on the deck, pointing along +x before rotation.
+function chevronGeometry() {
+  const shape = new THREE.Shape();
+  shape.moveTo(-0.1, 0.26);
+  shape.lineTo(0.16, 0);
+  shape.lineTo(-0.1, -0.26);
+  shape.lineTo(-0.2, -0.26);
+  shape.lineTo(0.06, 0);
+  shape.lineTo(-0.2, 0.26);
+  shape.closePath();
+  const geometry = new THREE.ShapeGeometry(shape);
+  geometry.rotateX(-Math.PI / 2);
+  return geometry;
+}
+
+// The infographic's closing line, lettered along the pad's front face; the three words take the card colours.
+function taglineStrip(text, width) {
+  const canvas = document.createElement('canvas');
+  canvas.width = 2048;
+  canvas.height = 110;
+  const g = canvas.getContext('2d');
+  g.font = '600 54px "Helvetica Neue", Arial, sans-serif';
+  g.textBaseline = 'middle';
+  const words = text.split(' ');
+  const colors = ['#2aa8ff', '#c24dff', '#22d6e8'];
+  const spaced = w => w.split('').join('\u200a');
+  let total = 0;
+  const parts = words.map((w, i) => { const t = spaced(w) + ' '; const m = g.measureText(t).width; total += m; return {t, m, c: colors[i] || '#e8f4ff'}; });
+  let x = (2048 - total) / 2;
+  for (const part of parts) { g.fillStyle = part.c; g.fillText(part.t, x, 58); x += part.m; }
+  const mesh = new THREE.Mesh(new THREE.PlaneGeometry(width, width * canvas.height / canvas.width), new THREE.MeshBasicMaterial({map: canvasTexture(canvas), transparent: true, toneMapped: false, depthWrite: false}));
+  return mesh;
+}
+
 function tubeFlow(parent, points, radius, options) {
   const curve = new THREE.CatmullRomCurve3(points.map(p => new THREE.Vector3(...p)), false, 'centripetal');
   const material = createFlowMaterial(options);
@@ -227,10 +293,12 @@ export function createDatacenterScene() {
 
   // Platforms: one per card, edged in its accent colour (bloom picks the edge up).
   const platforms = makeBatch(root, 'dc-platforms');
-  for (const zone of Object.values(ZONES)) {
+  const edges = {};
+  for (const [key, zone] of Object.entries(ZONES)) {
     const w = zone.x1 - zone.x0, d = zone.z1 - zone.z0, cx = (zone.x0 + zone.x1) / 2, cz = (zone.z0 + zone.z1) / 2;
     platforms.box(cx, DECK + 0.06, cz, w, 0.12, d, platformTop);
     const edge = glow(zone.accent);
+    edges[key] = edge;
     platforms.box(cx, TOP + 0.01, zone.z0 + 0.03, w, 0.03, 0.06, edge);
     platforms.box(cx, TOP + 0.01, zone.z1 - 0.03, w, 0.03, 0.06, edge);
     platforms.box(zone.x0 + 0.03, TOP + 0.01, cz, 0.06, 0.03, d, edge);
@@ -243,6 +311,11 @@ export function createDatacenterScene() {
   // With no pin selected every tag shows; once a pin is selected only that zone's tags do.
   const zoneTags = [];
   let activeZone = null;
+  // Journey state: the card in focus ('opener' and 'outcomes' are the first and last steps) and when it began.
+  // Embedded in a host page with a side panel, floating tags show only for the card in focus.
+  let focus = null, storyStart = 0;
+  const EMBED = new URLSearchParams(location.search).get('embed') === '1';
+  const placards = {};
   const place = (zone, ...sprites) => { for (const sprite of sprites) zoneTags.push({zone, sprite}); };
 
   // ---------------------------------------------------------------- 1 · TOO HUNGRY
@@ -268,10 +341,22 @@ export function createDatacenterScene() {
     for (const [sx, sz] of [[-1, -1], [1, -1], [1, 1], [-1, 1]]) b.beam([-4.55 + sx * 0.32, TOP + 2.4, 3.6 + sz * 0.32], [-4.55 + sx * 0.32, TOP + 2.4 + 250 * KW + 0.1, 3.6 + sz * 0.32], 0.02, steel);
     b.finish();
     const aiGauge = glow(0x1a6fd0);
-    const segments = makeBatch(root, 'dc-ai-gauge');
-    const seg = 250 * KW / 10;
-    for (let i = 0; i < 10; i++) segments.box(-4.55, TOP + 2.45 + i * seg + seg / 2, 3.6, 0.5, seg - 0.03, 0.5, aiGauge);
-    segments.finish();
+    const seg = 250 * KW / 10, gaugeSegs = [];
+    for (let i = 0; i < 10; i++) {
+      const piece = new THREE.Mesh(new THREE.BoxGeometry(0.5, seg - 0.03, 0.5), aiGauge);
+      piece.position.set(-4.55, TOP + 2.45 + i * seg + seg / 2, 3.6);
+      root.add(piece);
+      gaugeSegs.push(piece);
+    }
+    // When its step begins, the gauge fills from empty, 25 kW per segment.
+    updates.push(t => {
+      const lit = focus === 'hungry' ? Math.max(1, Math.min(10, Math.floor((t - storyStart) / 0.35) + 1)) : 10;
+      gaugeSegs.forEach((piece, i) => { piece.visible = i < lit; });
+    });
+    const bubble = speechBubble(['“I have ten racks.', 'I should be good, right?”']);
+    bubble.position.set(-8.3, TOP + 2.0, 3.7);
+    root.add(bubble);
+    updates.push(() => { bubble.visible = focus === 'opener' || (focus === null && activeZone === null); });
     flowMats.push(tubeFlow(root, [[-8.6, TOP + 1.0, 2.15], [-8.75, TOP + 1.62, 3.0], [-6.0, TOP + 1.62, 3.0]], 0.022, {...POWER, speed: 0.05, phase: 0.1}));
     flowMats.push(tubeFlow(root, [[-8.6, TOP + 1.0, 2.15], [-8.8, TOP + 1.62, 4.4], [-6.0, TOP + 1.62, 4.4]], 0.022, {...POWER, speed: 0.05, phase: 0.6}));
     flowMats.push(tubeFlow(root, [[-4.2, TOP + 1.6, 2.15], [-4.2, TOP + 2.75, 2.6], [-4.45, TOP + 2.6, 3.35], [-4.5, TOP + 2.42, 3.6]], 0.1, {...POWER, speed: 0.6, repeat: 4}));
@@ -281,7 +366,8 @@ export function createDatacenterScene() {
     const ai = tag(['MODERN AI RACK', '100–250+ kW in one rack'], zone.css, 2.0);
     ai.position.set(-5.9, TOP + 4.3, 3.6);
     place('hungry', trad, ai);
-    root.add(trad, ai, floorLabel(zone, 1, 'TOO HUNGRY · POWER DENSITY', 'AI doesn’t need more racks. It needs more power per rack.'));
+    placards.hungry = floorLabel(zone, 1, 'TOO HUNGRY · POWER DENSITY', 'AI doesn’t need more racks. It needs more power per rack.');
+    root.add(trad, ai, placards.hungry);
     updates.push(t => aiGauge.color.setRGB(0.05, 0.38 + 0.1 * Math.sin(t * 3), 0.85 + 0.1 * Math.sin(t * 3)));
   }
 
@@ -329,7 +415,8 @@ export function createDatacenterScene() {
       }
       geo.attributes.position.needsUpdate = true;
       geo.attributes.color.needsUpdate = true;
-      rackHot.emissive.setRGB(0.5 + 0.22 * Math.sin(t * 4), 0.1, 0.02);
+      const heat = focus === 'hot' ? Math.min(1, (t - storyStart) / 3) : 1;
+      rackHot.emissive.setRGB(0.06 + heat * (0.44 + 0.22 * Math.sin(t * 4)), 0.02 + 0.08 * heat, 0.02);
     });
     const warn = warningSign();
     warn.position.set(airX, TOP + 2.75, rz);
@@ -339,7 +426,8 @@ export function createDatacenterScene() {
     const liqTag = tag(['LIQUID COOLED', 'High capacity'], zone.css, 1.7);
     liqTag.position.set(liqX, TOP + 3.45, rz);
     place('hot', airTag, liqTag);
-    root.add(warn, airTag, liqTag, floorLabel(zone, 2, 'TOO HOT · COOLING REALITY', 'If your cooling strategy ends at air, your AI journey may end there too.'));
+    placards.hot = floorLabel(zone, 2, 'TOO HOT · COOLING REALITY', 'If your cooling strategy ends at air, your AI journey may end there too.');
+    root.add(warn, airTag, liqTag, placards.hot);
   }
 
   // ---------------------------------------------------------------- 3 · TOO HEAVY
@@ -425,7 +513,8 @@ export function createDatacenterScene() {
     const paths = tag(['CABLE & PIPE PATHS', 'Congested under the floor'], zone.css, 1.9);
     paths.position.set(7.2, TOP + 1.05, 4.75);
     place('heavy', weight, floorTag, paths);
-    root.add(warn, weight, floorTag, paths, floorLabel(zone, 3, 'TOO HEAVY · STRUCTURE', 'Not every datacenter can physically support modern AI racks.'));
+    placards.heavy = floorLabel(zone, 3, 'TOO HEAVY · STRUCTURE', 'Not every datacenter can physically support modern AI racks.');
+    root.add(warn, weight, floorTag, paths, placards.heavy);
   }
 
   // ---------------------------------------------------------------- 4 · AI READY
@@ -484,12 +573,35 @@ export function createDatacenterScene() {
     updates.push(t => { for (const fan of fans) fan.rotation.y = t * 5; });
 
     const checklist = tag(['AI READY DATACENTER', '✓ High-density power 100–250 kW+', '✓ Liquid cooling strategy', '✓ Structural validation', '✓ GPU-ready infrastructure'], zone.css, 2.6);
-    checklist.position.set(3.0, TOP + 4.6, -3.6);
+    // Back-left above the hall: inside the frame of the 'ready' view, clear of the rooftop coolers.
+    checklist.position.set(-6.0, TOP + 3.75, -6.0);
     const slabTag = tag(['SLAB ON GRADE', 'No raised floor under AI racks'], zone.css, 1.9);
-    slabTag.position.set(-7.6, TOP + 3.9, -5.6);
+    slabTag.position.set(-6.9, TOP + 0.9, 0.25);
     place('ready', checklist, slabTag);
-    root.add(checklist, slabTag, floorLabel(zone, 4, 'AI READY DATACENTER', 'Power, cooling and structure ready before the GPUs arrive.'));
+    placards.ready = floorLabel(zone, 4, 'AI READY DATACENTER', 'Power, cooling and structure ready before the GPUs arrive.');
+    root.add(checklist, slabTag, placards.ready);
   }
+
+  // Journey arrows on the deck, card to card (1 -> 2 -> 3 -> 4), in the colour of the card they leave.
+  const chevrons = [];
+  const chevGeo = chevronGeometry();
+  // [x, z, direction x, direction z, colour]: 1 -> 2 and 2 -> 3 run along +x; 3 -> 4 runs back (-z) to the hall.
+  for (const [x, z, dx, dz, color] of [[-3.25, 4.0, 1, 0, 0x2aa8ff], [2.6, 4.0, 1, 0, 0xc24dff], [3.2, 1.35, 0, -1, 0x22d6e8]]) {
+    for (let i = 0; i < 3; i++) {
+      const mat = new THREE.MeshBasicMaterial({color, transparent: true, opacity: 0.6, toneMapped: false, depthWrite: false});
+      const mesh = new THREE.Mesh(chevGeo, mat);
+      const along = (i - 1) * 0.14;
+      mesh.position.set(x + dx * along, DECK + 0.02, z + dz * along);
+      // Rotating by atan2(-dz, dx) turns the chevron's +x tip onto the direction of travel.
+      mesh.rotation.y = Math.atan2(-dz, dx);
+      mesh.renderOrder = 2;
+      root.add(mesh);
+      chevrons.push({mat, i});
+    }
+  }
+  const tagline = taglineStrip(DC_TAGLINE.toUpperCase(), 13.5);
+  tagline.position.set(0, DECK * 0.75, 6.6 + 0.012);
+  root.add(tagline);
 
   // Warning signs pulse; the floor warning only shows while the floor is giving way.
   updates.push(t => {
@@ -499,13 +611,37 @@ export function createDatacenterScene() {
       w.sprite.scale.setScalar(w.base * (1 + 0.12 * Math.sin(t * 5)));
     }
     for (const m of flowMats) m.uniforms.uTime.value = t;
-    for (const {zone, sprite} of zoneTags) sprite.visible = !activeZone || activeZone === zone;
+    // The card in focus stays lit; the others dim. The opening step belongs to card 1; the last step lights everything.
+    const card = focus === 'opener' ? 'hungry' : focus === 'outcomes' ? null : focus;
+    for (const [key, edge] of Object.entries(edges)) {
+      const k = !card || card === key ? 1 : 0.2;
+      edge.color.setHex(ZONES[key].accent).multiplyScalar(k);
+      if (placards[key]) placards[key].material.opacity = 0.3 + 0.7 * k;
+    }
+    // During the opening question only the speech bubble speaks; tags wait for the cards.
+    const shown = focus === 'opener' ? 'none' : card || activeZone;
+    for (const {zone, sprite} of zoneTags) sprite.visible = shown ? shown === zone : !EMBED;
+    // Chevrons run in sequence; brighter on the last step.
+    const bright = focus === 'outcomes' ? 1 : 0.7;
+    for (const {mat, i} of chevrons) mat.opacity = bright * (0.25 + 0.75 * Math.max(0, Math.sin((t * 2.2 - i * 0.9))));
   });
 
   // Selecting a pin narrows the tags to its zone; the heavy pin also replays the floor giving way.
   world.onHotspot = spot => {
     activeZone = spot.id;
+    focus = spot.id;
+    storyStart = lastT;
     if (spot.id === 'heavy') heavyStart = lastT;
+  };
+  // Journey steps (host page): focus a card, restart its animation, return the view to glide to.
+  world.setStory = (id, step = 0) => {
+    const story = DC_STORIES.find(s => s.id === id);
+    const current = story?.steps[Math.max(0, Math.min(story.steps.length - 1, step | 0))];
+    focus = current ? current.focus : null;
+    activeZone = null;
+    storyStart = lastT;
+    if (focus === 'heavy') heavyStart = lastT;
+    return current?.view || null;
   };
   world.hotspots = DC_HOTSPOTS;
   return world;

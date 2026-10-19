@@ -57,3 +57,5 @@ body.compact-controls.camera-tools-open .flight-pad,body.compact-controls.camera
 .exhibit-active .camera-tools-panel,.exhibit-active .compact-fly-bar{display:none!important}
 
 .camera-tools-panel,.camera-tools-toggle,.compact-fly-bar{font-family:"Helvetica Neue",Arial,sans-serif}
+/* Long hotspot captions wrap inside their half of the bottom bar instead of running under the hint. */
+.scene-note{max-width:min(58vw,820px)}

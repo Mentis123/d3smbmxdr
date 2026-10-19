@@ -44,7 +44,9 @@ Learned 19 Oct 2026: the old `/datacenter` page had its own controls and boxes a
 
 Learned 19 Oct 2026 (second pass): the datacenter drew a raised access floor under the AI racks, the opposite of the infographic's structure point. AI racks weigh 2,000–5,000+ lb and many raised floors cannot carry that. The world uses a saw-cut slab on grade. Read `adamrappaport/docs/DATACENTER-DESIGN.md` before changing the scene or its captions.
 
-Known shared-viewer issue: long hotspot captions wrap over the bottom toolbar at 1440 px. Fix it in `viewer.js` (the `#view-label` area), not per world.
+Learned 19 Oct 2026 (third pass): the datacenter is now the infographic's four cards as four platforms (too hungry, too hot, too heavy, AI ready), with the facts written into the scene as placards and tags because the viewer hides its caption on phones. Long captions now wrap within their half of the bottom bar (fixed once in `viewer.css`).
+
+After any shared-module change, compare paused, fixed-time frames of `/lab-worlds/energy.html` and `mining.html` before and after (`__tabletop.setState({view:'hero',timeSeconds:12,paused:true,quality:'low'})`, then a page screenshot clipped to `#scene`). Byte-identical frames mean no regression. This caught a one-line CSS change that shifted the energy and mining caption.
 
 ## Build before you design
 

@@ -236,10 +236,10 @@ const flythrough={
 // Glide: an orbital move from wherever the camera is to a preset, over the same orbit parameters
 // the user drives (target, azimuth, tilt, yaw, zoom, fov), eased, ending exactly on setView(name).
 let glide=null;
-// Datacenter pins: glide to the view, set the caption, and let pin 2 toggle air-only against the liquid loop.
+// Datacenter pins: mark the pin, let the world react (world.onHotspot), set the caption, glide to the view.
 function selectDatacenterHotspot(spot){
   labLayer?.select(spot.id);
-  world.setCooling?.(spot.cooling==='air'&&world.coolingMode!=='air'?'air':'liquid');
+  world.onHotspot?.(spot);
   const label=document.querySelector('#view-label');if(label)label.textContent=spot.caption;
   glideTo(spot.view);
 }

@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "sourceRepository": "Mentis123/adamrappaport",
-  "sourceCommit": "e0daecc8a0343f5825ce61bb17ec4ca442a096ea",
+  "sourceCommit": "c44366344653a25495f1aa273bd27dad39f26ddb",
   "experience": "ai-lab",
   "runtimeDependency": "Self-hosted static files; no personal-site requests",
   "files": {

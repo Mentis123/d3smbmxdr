@@ -46,6 +46,10 @@ Learned 19 Oct 2026 (second pass): the datacenter drew a raised access floor und
 
 Known shared-viewer issue: long hotspot captions wrap over the bottom toolbar at 1440 px. Fix it in `viewer.js` (the `#view-label` area), not per world.
 
+## Build before you design
+
+Order for any new page, world or infographic here: (1) source the facts and mark the owner's points as theirs, (2) check what the shared kit can build and its limits, probing the current page headless, (3) write the design, (4) build, validate and look at the screenshot. Read `adamrappaport/docs/DATACENTER-DESIGN.md` section 1 for the datacenter, and `adamrappaport/docs/SHARED-WORLDS.md` for the kit.
+
 ## Build from what already exists (reuse, repurpose, regenerate)
 
 Before writing any new 3D scene, diagram, texture or page chrome, look at what the site already has and decide deliberately which of three paths to take. Write the decision down in the PR or commit message.

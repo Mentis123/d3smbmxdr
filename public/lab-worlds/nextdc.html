@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#030a16">
+  <link rel="icon" href="data:,">
+  <title>Data#3 showcase concept | Data#3</title>
+  <meta name="description" content="Explore a living infrastructure miniature. Rotate the tabletop and follow the flow from water to power.">
+  <link rel="stylesheet" href="/map-assets/viewer.css">
+  <script type="importmap">{"imports":{"three":"/map-assets/vendor/three.module.min.js"}}</script>
+</head>
+<body data-world="nextdc">
+  <header class="masthead"><a href="/" class="brand">Data<sup>#</sup>3 <span>SHOWCASE CONCEPT</span></a><a class="back" href="/">← Back to home</a></header>
+  <main>
+    <section id="viewer" aria-label="Interactive infrastructure tabletop">
+      <div class="room" aria-hidden="true"><div class="room-screen left"></div><div class="room-screen right"></div><div class="room-strip s1"></div><div class="room-strip s2"></div><div class="room-strip s3"></div><div class="room-sill"></div></div>
+      <div class="scene-heading"><p class="eyebrow">CONCEPT / ONE CONNECTED DATACENTRE</p><h1>Outside, inside, connected.</h1><p class="subtitle">A conceptual facility, not NEXTDC's actual site or secure layout. Tap a pin.</p></div>
+      <div id="scene" tabindex="0" role="region" aria-label="3D tabletop. Touch: one finger rotates and tilts; two fingers pan and pinch to zoom. Fly has on-screen movement buttons and drag-to-look. Drag sideways to rotate and vertically to tilt, Shift or right drag to pan, Alt drag to crane. F enters Fly mode: WASD move, Q and E change height, mouse or drag looks around. Escape returns; Home resets."></div>
+      <div id="loading" role="status"><span class="loader"></span>Preparing your tabletop…</div>
+      <div id="error" role="alert" hidden><h2>The tabletop couldn’t load.</h2><p id="error-message">Your browser needs WebGL to explore this scene.</p><button data-action="retry">Try again</button></div>
+      <div class="viewer-bottom"><div class="scene-note"><span class="status-dot"></span><span id="view-label">Conceptual world. Not an actual site or secure layout</span></div><p id="hint">Drag to rotate <span>·</span> Scroll to zoom</p></div>
+      <span id="navigation-status" class="sr-only" role="status" aria-live="polite"></span><div class="fly-reticle" aria-hidden="true">+</div>
+      <div class="flight-pad" role="group" aria-label="Touch flight movement"><button data-move="forward" aria-label="Fly forward" aria-pressed="false">▲</button><button data-move="left" aria-label="Fly left" aria-pressed="false">◀</button><button data-move="back" aria-label="Fly backward" aria-pressed="false">▼</button><button data-move="right" aria-label="Fly right" aria-pressed="false">▶</button></div><div class="flight-height" role="group" aria-label="Touch flight height"><button data-move="up" aria-label="Fly up" aria-pressed="false">↑</button><button data-move="down" aria-label="Fly down" aria-pressed="false">↓</button></div>
+      <div class="toolbar" role="group" aria-label="Tabletop controls"><button data-action="rotate-left" aria-label="Rotate left" title="Rotate left">↶</button><button data-action="rotate-right" aria-label="Rotate right" title="Rotate right">↷</button><span class="separator"></span><button data-action="zoom-out" aria-label="Zoom out" title="Zoom out">−</button><button data-action="zoom-in" aria-label="Zoom in" title="Zoom in">+</button><span class="separator"></span><button data-action="pan" aria-pressed="false" title="Toggle drag to pan (or hold Shift / right-drag)">Pan</button><button data-action="crane-up" aria-label="Crane up" title="Crane up (Page Up)">↑</button><button data-action="crane-down" aria-label="Crane down" title="Crane down (Page Down)">↓</button><button data-action="fly" aria-pressed="false" title="Fly with WASD, Q/E height, mouse look. Escape returns.">Fly</button><button data-action="mouse-look" hidden title="Capture mouse for free look; Escape releases">Mouse look</button><span class="separator"></span><button data-action="reset" title="Reset view">Reset</button><button data-action="pause" aria-pressed="false" title="Pause animation">Pause</button><label class="quality-label"><span class="sr-only">Render quality</span><select id="quality" aria-label="Render quality"><option value="auto">Auto</option><option value="high">High detail</option><option value="low">Low detail</option></select></label></div>
+    </section>
+  </main>
+  <footer class="credit"><p>© 2026 Data<sup>#</sup>3. Experience Vibe Coded by our resident <a href="https://www.linkedin.com/in/adam-aka-mentis" target="_blank" rel="noopener noreferrer">Tech Wizard</a>.</p></footer>
+  <script type="module">
+    import('/map-assets/viewer.js').catch(error=>{
+      document.querySelector('#loading').hidden=true;
+      document.querySelector('#error').hidden=false;
+      document.querySelector('#error-message').textContent='The scene files could not load. Check your connection and try again.';
+      document.querySelector('[data-action="retry"]').addEventListener('click',()=>location.reload());
+      console.error(error);
+    });
+  </script>
+</body>
+</html>

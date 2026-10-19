@@ -48,6 +48,18 @@ Learned 19 Oct 2026 (third pass): the datacenter is now the infographic's four c
 
 After any shared-module change, compare paused, fixed-time frames of `/lab-worlds/energy.html` and `mining.html` before and after (`__tabletop.setState({view:'hero',timeSeconds:12,paused:true,quality:'low'})`, then a page screenshot clipped to `#scene`). Byte-identical frames mean no regression. This caught a one-line CSS change that shifted the energy and mining caption.
 
+## World host pages (a 3D world plus a side panel)
+
+`/ai-lab/*` and `/nextdc` embed a synced world in an iframe (`/lab-worlds/<name>.html?embed=1&controls=compact`) with a Next route beside it for the words. The world carries pins and light; the panel carries the explanation. Messages, hooks and the data-module pattern are in `adamrappaport/docs/SHARED-WORLDS.md`.
+
+- **One source for the words.** `/nextdc` imports `/map-assets/nextdc-data.js` at runtime with `import(/* webpackIgnore: true */ url)` and a variable URL, so the panel and the world read the same synced file.
+- **`app/globals.css` styles every `header` and `footer`** (white background, padding). Scoped page CSS must reset them, as `lab.css` and `nextdc.css` do. Learned when `/nextdc` shipped a white header bar in its first build.
+- **Validating a Next route** (the static-server recipe above cannot render one): `npm ci`, then `npx tsc --noEmit`, `npx next build`, and `npx next start -p 3107` (a production server, not the dev server). Probe it headless, and reach into the iframe with `page.frames()` to click pins and read `__tabletop`. Delete `tsconfig.tsbuildinfo` afterwards; it is a build artefact.
+- **Stopping servers safely:** `ss` is not installed. Scan `/proc/*/cmdline` with the pattern split across quotes (`pat="next-""server"`), so the match cannot hit your own shell's command text. Two shells were killed this way before.
+- `/favicon.ico` returns 404 site-wide. A single 404 console line on any page is that, not the page under test.
+
+Learned 19 Oct 2026 (`/nextdc`): checking the kit first meant the world, pins, controls and host pattern were all reuse. The new code was the scene, its data module, four generic viewer hooks and the panel.
+
 ## Build before you design
 
 Order for any new page, world or infographic here: (1) source the facts and mark the owner's points as theirs, (2) check what the shared kit can build and its limits, probing the current page headless, (3) write the design, (4) build, validate and look at the screenshot. Read `adamrappaport/docs/DATACENTER-DESIGN.md` section 1 for the datacenter, and `adamrappaport/docs/SHARED-WORLDS.md` for the kit.

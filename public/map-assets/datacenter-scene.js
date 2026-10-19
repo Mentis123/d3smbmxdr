@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import {createWorldShell} from './world-shell.js';
 import {buildElectrical} from './electrical.js';
 import {createFlowMaterial} from './flow-effects.js';
-import {makeBatch, metal} from './builder-utils.js';
+import {makeBatch, metal, slabTexture} from './builder-utils.js';
 import {LAYOUT} from './scene-layout.js';
 
 // AI-ready datacenter world: the "Your journey to AI-ready infrastructure" infographic as four dioramas.
@@ -56,25 +56,6 @@ function canvasTexture(canvas) {
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
   texture.anisotropy = 8;
-  return texture;
-}
-
-function concreteSlabTexture() {
-  // One 3 m saw-cut slab panel, repeated. No tiles or pedestals: AI racks sit on a structural slab.
-  const canvas = document.createElement('canvas');
-  canvas.width = canvas.height = 512;
-  const g = canvas.getContext('2d');
-  g.fillStyle = '#58636b';
-  g.fillRect(0, 0, 512, 512);
-  for (let i = 0; i < 90; i++) {
-    g.fillStyle = i % 2 ? 'rgba(255,255,255,0.025)' : 'rgba(0,0,0,0.04)';
-    g.fillRect((i * 97) % 512, (i * 181) % 512, 40 + (i % 5) * 18, 30 + (i % 4) * 14);
-  }
-  g.strokeStyle = '#2e363c';
-  g.lineWidth = 5;
-  g.strokeRect(2, 2, 508, 508);
-  const texture = canvasTexture(canvas);
-  texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
   return texture;
 }
 
@@ -236,7 +217,7 @@ export function createDatacenterScene() {
   pad.box(0, DECK * 0.25, -0.4, 19.6, DECK * 0.5, 15.0, concrete);
   pad.box(0, DECK * 0.75, -0.4, 18.8, DECK * 0.5, 14.0, concrete);
   pad.finish();
-  const slab = concreteSlabTexture();
+  const slab = slabTexture();
   slab.repeat.set(6.3, 4.7);
   const deck = new THREE.Mesh(new THREE.PlaneGeometry(18.8, 14), new THREE.MeshStandardMaterial({map: slab, roughness: 0.9, metalness: 0.02}));
   deck.rotation.x = -Math.PI / 2;
@@ -529,3 +510,6 @@ export function createDatacenterScene() {
   world.hotspots = DC_HOTSPOTS;
   return world;
 }
+
+// Generic names the shared viewer loads every extra world by.
+export {createDatacenterScene as createWorld, DC_SEED as WORLD_SEED, DATACENTER_VIEWS as WORLD_VIEWS};

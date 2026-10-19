@@ -1,0 +1,142 @@
+// NEXTDC showcase world: the words, statuses and stories, written once.
+// The 3D world (nextdc-scene.js) reads ids from here; the d3smbmxdr /nextdc side panel imports this file at runtime.
+// No Three.js import, so a plain page can load it. Brief: docs/NEXTDC-DESIGN.md.
+//
+// Statuses are not sourced yet. Showcase equipment is 'planned' and everything else is 'illustrative' until the
+// owner confirms otherwise. Vendor-to-component mapping is a placeholder marked "to confirm".
+
+export const STATUSES = {
+  planned: {label: 'Planned', note: 'Intended for the showcase; not installed yet.', color: '#78dcff'},
+  installed: {label: 'Installed', note: 'In the cage now.', color: '#5dff6a'},
+  'demo-ready': {label: 'Demo-ready', note: 'Installed and ready to demonstrate.', color: '#ffd166'},
+  illustrative: {label: 'Illustrative', note: 'Conceptual only; not an actual site, layout or deployment.', color: '#9d9fa2'},
+};
+
+// Every pin. scope 'far' pins show from outside; 'near' pins show only when the camera is inside the cage.
+export const ITEMS = [
+  {id: 'power', label: 'Power', scope: 'far', status: 'illustrative',
+    what: 'Grid supply, a substation, generators and UPS that keep the facility running.',
+    why: 'Dense compute and AI raise the power each rack needs. A resilient supply keeps workloads up through outages.',
+    demo: 'Trace power from the grid to a rack in the showcase.',
+    next: 'Compare your power-per-rack needs with what a colocation hall can supply.'},
+  {id: 'cooling', label: 'Cooling', scope: 'far', status: 'illustrative',
+    what: 'Plant that removes the heat the racks produce.',
+    why: 'Every watt a rack uses becomes heat. Cooling capacity limits how dense a deployment can be.',
+    demo: 'Follow heat from the racks out to the rooftop plant.',
+    next: 'Check whether your densest workloads need more than air cooling.'},
+  {id: 'connectivity', label: 'Connectivity', scope: 'far', status: 'illustrative',
+    what: 'Diverse fibre paths into the building, a meet-me room and on-ramps to carriers and clouds.',
+    why: 'Workloads are only as useful as the paths to them. Diverse routes keep sites and clouds connected if one fails.',
+    demo: 'Show how an office, a branch and a cloud reach the cage.',
+    next: 'Map the sites and clouds your workloads need to reach.'},
+  {id: 'security', label: 'Security', scope: 'far', status: 'illustrative',
+    what: 'Perimeter fencing, controlled entry and camera coverage around the facility.',
+    why: 'Physical security is part of the trust customers place in where their data runs.',
+    demo: 'Walk through how access to a cage is controlled, in general terms.',
+    next: 'List the physical and compliance controls your workloads require.'},
+  {id: 'cage', label: 'Showcase cage', scope: 'far', status: 'planned',
+    what: 'The Data#3 showcase: a cage of racks where customers can see modern infrastructure working together.',
+    why: 'Seeing a workload run on real infrastructure answers questions a slide cannot.',
+    demo: 'Fly in and follow one workload through network, compute, storage and protection.',
+    next: 'Book a walkthrough of the showcase for your team.'},
+  {id: 'office', label: 'Office', scope: 'far', status: 'illustrative',
+    what: 'A customer office with a server room running today\'s workloads.',
+    why: 'Most modernisation journeys start with what runs on site now.',
+    demo: 'Show a workload leaving the office for a better-suited platform.',
+    next: 'Inventory the workloads still running on site.'},
+  {id: 'branch', label: 'Branch', scope: 'far', status: 'illustrative',
+    what: 'A branch location where people and devices create requests and data.',
+    why: 'Branches need fast, secure paths to the workloads they depend on, including AI.',
+    demo: 'Follow an AI request from the branch to where it runs.',
+    next: 'Identify the branch workloads that are sensitive to latency.'},
+  {id: 'industrial', label: 'Industrial site', scope: 'far', status: 'illustrative',
+    what: 'A plant or depot producing operational data at the edge.',
+    why: 'Operational data often needs local processing and a secure path back to central platforms.',
+    demo: 'Show edge data reaching central infrastructure over a diverse path.',
+    next: 'Find the operational data you would analyse if you could move it.'},
+  {id: 'cloud', label: 'Cloud', scope: 'far', status: 'illustrative',
+    what: 'A public cloud destination, connected through the facility.',
+    why: 'Some workloads belong in the cloud and some do not. The answer depends on cost, data and performance.',
+    demo: 'Compare running the same workload privately and in the cloud.',
+    next: 'Decide which workloads must stay private and which can move.'},
+  // Showcase equipment. Vendor and model are placeholders until the owner confirms them.
+  {id: 'net', label: 'Network', scope: 'near', status: 'planned',
+    what: 'Switching and firewalls that connect the cage to sites, clouds and each other.',
+    why: 'Every workload path in the showcase passes through the network, and so does every security control.',
+    demo: 'Show segmentation and a protected path from a branch to private infrastructure.',
+    next: 'Review how your sites reach your workloads today.',
+    vendor: 'Planned vendor: Cisco (to confirm). Model and configuration to confirm.'},
+  {id: 'compute', label: 'Compute', scope: 'near', status: 'planned',
+    what: 'Servers that run virtual machines and containers for everyday workloads.',
+    why: 'Modern platforms run more work in less space and power than ageing on-site servers.',
+    demo: 'Move a workload from the office onto modern compute.',
+    next: 'Pick one workload to modernise first.',
+    vendor: 'Planned vendor: HPE (to confirm). Model and configuration to confirm.'},
+  {id: 'storage', label: 'Storage', scope: 'near', status: 'planned',
+    what: 'Shared storage holding the data the workloads use.',
+    why: 'Data placement drives performance, protection and cost.',
+    demo: 'Show performance and capacity for a running workload.',
+    next: 'Estimate the data your first workloads need to bring.',
+    vendor: 'Planned vendor: to confirm. Model and configuration to confirm.'},
+  {id: 'gpu', label: 'AI / GPU', scope: 'near', status: 'planned',
+    what: 'GPU servers for training and running AI models on private infrastructure.',
+    why: 'Sensitive or steady AI work can be cheaper and safer to run privately than in the cloud.',
+    demo: 'Run an AI request on private GPU infrastructure and compare it with the cloud.',
+    next: 'Decide which AI workloads must stay close to your data.',
+    vendor: 'Planned vendor: Dell (to confirm). Model and configuration to confirm.'},
+  {id: 'backup', label: 'Backup and recovery', scope: 'near', status: 'planned',
+    what: 'Protected copies of workloads and data, kept separate from production.',
+    why: 'Recovery is what turns an incident into a delay rather than an outage.',
+    demo: 'Recover a workload after a simulated incident.',
+    next: 'Test how long your most important workload takes to recover.',
+    vendor: 'Planned vendor: to confirm. Model and configuration to confirm.'},
+  {id: 'ops', label: 'Operations', scope: 'near', status: 'planned',
+    what: 'Monitoring and management that watch every component and turn alerts into actions.',
+    why: 'Infrastructure is only as reliable as the way it is run.',
+    demo: 'Walk through an illustrative alert from detection to fix.',
+    next: 'Map who is alerted today, and what happens next.',
+    vendor: 'Tooling to confirm.'},
+];
+
+// Stories change the same world. Each step names a view to glide to, a caption for the panel, and the world state:
+// lit = connections or traces to light, focus = items to ring, dim = items taken offline, alert = item flashing red,
+// token = a workload path to animate, overlay 'monitor' = beacons over the equipment.
+export const STORIES = [
+  {id: 'tour', title: 'Start here: follow one workload', summary: 'The whole facility, into the showcase cage, then one workload through it.', steps: [
+    {view: 'hero', caption: 'The whole facility. Power, cooling, connectivity and security keep it running.', state: {}},
+    {view: 'cage', caption: 'Fly in. The roof comes away to reveal the Data#3 showcase cage.', state: {focus: ['cage']}},
+    {view: 'office', caption: 'Follow one workload. It starts in a customer\'s office server room.', state: {focus: ['office'], lit: ['office-dc'], token: 'office-to-compute'}},
+    {view: 'cage', caption: 'It arrives through the network and runs on compute in the showcase.', state: {focus: ['net', 'compute'], lit: ['office-dc', 'fibre-trace'], token: 'office-to-compute'}},
+  ]},
+  {id: 'modernise', title: 'We need to modernise', summary: 'Highlight the current workload, then reveal where else it could run.', steps: [
+    {view: 'office', caption: 'Today the workload runs in the office server room.', state: {focus: ['office']}},
+    {view: 'hero', caption: 'There are other destinations: modern private platforms, or the cloud.', state: {focus: ['cage', 'cloud'], lit: ['office-dc', 'dc-cloud']}},
+    {view: 'cage', caption: 'One option: modern compute and storage in the showcase.', state: {focus: ['compute', 'storage'], lit: ['office-dc', 'fibre-trace'], token: 'office-to-compute'}},
+    {view: 'cloud', caption: 'Another: the cloud, connected through the facility.', state: {focus: ['cloud'], lit: ['dc-cloud'], token: 'compute-to-cloud'}},
+  ]},
+  {id: 'recover', title: 'Can we recover?', summary: 'Dim the affected workload and light the recovery path.', steps: [
+    {view: 'office', caption: 'An incident takes the office workload offline.', state: {dim: ['office'], alert: 'office'}},
+    {view: 'backup', caption: 'Protected copies sit on the backup and recovery platform.', state: {dim: ['office'], focus: ['backup']}},
+    {view: 'hero', caption: 'Recovery runs from the protected copy back to the people who need it.', state: {focus: ['backup', 'office'], lit: ['office-dc', 'fibre-trace'], token: 'backup-restore'}},
+  ]},
+  {id: 'ai', title: 'Where should AI run?', summary: 'Follow a request from a branch to private infrastructure or the cloud.', steps: [
+    {view: 'branch', caption: 'A request starts at the branch.', state: {focus: ['branch']}},
+    {view: 'hero', caption: 'Decision point: data sensitivity, latency and cost decide where it runs.', state: {focus: ['branch', 'connectivity'], lit: ['branch-dc', 'branch-cloud']}},
+    {view: 'gpu', caption: 'Sensitive or steady work runs on private GPU infrastructure.', state: {focus: ['gpu'], lit: ['branch-dc', 'fibre-trace'], token: 'branch-ai-private'}},
+    {view: 'cloud', caption: 'Bursty or experimental work can run in the cloud.', state: {focus: ['cloud'], lit: ['branch-cloud'], token: 'branch-ai-cloud'}},
+  ]},
+  {id: 'support', title: 'What supports the racks?', summary: 'Trace power, cooling and connectivity from the facility to the equipment.', steps: [
+    {view: 'power', caption: 'Power: the grid, a substation and generators feed the hall.', state: {focus: ['power'], lit: ['power-trace']}},
+    {view: 'cooling', caption: 'Cooling: plant on the roof removes the heat the racks make.', state: {focus: ['cooling'], lit: ['cooling-trace']}},
+    {view: 'connectivity', caption: 'Connectivity: diverse fibre paths reach the meet-me room and the cage.', state: {focus: ['connectivity'], lit: ['fibre-trace', 'office-dc', 'branch-dc', 'industrial-dc']}},
+    {view: 'cage', caption: 'All three arrive at the racks.', state: {focus: ['cage'], lit: ['power-trace', 'cooling-trace', 'fibre-trace']}},
+  ]},
+  {id: 'ops', title: 'How do we operate it?', summary: 'Monitoring overlays and an illustrative alert-to-action sequence.', steps: [
+    {view: 'cage', caption: 'Monitoring covers every component in the showcase.', state: {overlay: 'monitor', focus: ['ops']}},
+    {view: 'storage', caption: 'An illustrative alert: storage latency rises.', state: {overlay: 'monitor', alert: 'storage'}},
+    {view: 'cage', caption: 'Operations traces the alert and acts on it.', state: {overlay: 'monitor', alert: 'storage', focus: ['ops'], token: 'ops-fix'}},
+    {view: 'cage', caption: 'Resolved. The alert clears and the action is recorded.', state: {overlay: 'monitor', focus: ['storage']}},
+  ]},
+];
+
+export const DISCLAIMER = 'Conceptual world. The facility and surroundings are illustrative, not NEXTDC\'s actual site or secure layout. Statuses and vendors are placeholders until confirmed.';

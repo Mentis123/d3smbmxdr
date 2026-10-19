@@ -32,6 +32,8 @@ export function createHotspotLayer(world, hotspots, host, onSelect) {
     // The selected pin wins when projected labels overlap; every pin stays reachable from the list of buttons.
     const ordered = [...markers].sort((a, b) => Number(b.spot === active) - Number(a.spot === active));
     for (const {spot, marker, width} of ordered) {
+      // A world can scope a pin (for example, only inside a cage) with spot.hidden().
+      if (spot.hidden?.()) { marker.hidden = true; continue; }
       projected.copy(spot.anchor);
       projected.y += 0.45;
       world.root.localToWorld(projected);

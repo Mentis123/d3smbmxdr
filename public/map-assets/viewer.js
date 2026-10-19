@@ -11,11 +11,13 @@ import {reservoirOutline,riverCenter,riverHalfWidth} from './hydro-profile.js';
 import {auditGeometry,auditLandmarks} from './geometry-audit.js';
 import {auditInfrastructure} from './infrastructure-audit.js';
 const params=new URLSearchParams(location.search), capture=params.get('capture')==='1';
-const isMining=document.body.dataset.world==='mining';
-const isDatacenter=document.body.dataset.world==='datacenter';
-const datacenter=isDatacenter?await import('./datacenter-scene.js'):null;
-const createScene=isMining?(await import('./mining-scene.js')).createMiningScene:isDatacenter?datacenter.createDatacenterScene:createEnergyScene;
-const SEED=isMining?181026:isDatacenter?datacenter.DC_SEED:ENERGY_SEED;
+const worldKind=document.body.dataset.world||'energy';
+const isMining=worldKind==='mining';
+// Worlds beyond energy and mining load their own module by these generic exports: createWorld, WORLD_SEED, WORLD_VIEWS.
+const EXTRA_WORLDS={datacenter:'./datacenter-scene.js',nextdc:'./nextdc-scene.js'};
+const extra=Object.hasOwn(EXTRA_WORLDS,worldKind)?await import(EXTRA_WORLDS[worldKind]):null;
+const createScene=isMining?(await import('./mining-scene.js')).createMiningScene:extra?extra.createWorld:createEnergyScene;
+const SEED=isMining?181026:extra?extra.WORLD_SEED:ENERGY_SEED;
 if(capture)document.body.classList.add('diagnostic');
 // embed=1: the scene is hosted inside another page (the /worlds explorer), which supplies its own chrome.
 if(params.get('embed')==='1')document.body.classList.add('embed');
@@ -64,7 +66,7 @@ const mobileDevice=matchMedia('(pointer:coarse)').matches;document.body.classLis
 const tuner=createAdaptiveQuality({mobile:mobileDevice,conservative:navigator.hardwareConcurrency<=4||(navigator.deviceMemory!==undefined&&navigator.deviceMemory<=4),mode:quality,now:performance.now(),onChange:()=>applyQualityProfile()});
 let effectiveProfile=tuner.profile();
 const qSelect=document.querySelector('#quality');qSelect.value=quality;
-const views=isMining?MINING_VIEWS:isDatacenter?datacenter.DATACENTER_VIEWS:{intake:{yaw:0,target:[-4.4,1.75,-1.05],zoom:3.3,tilt:.9,azimuth:Math.PI+.35,fov:38},maintenance:{yaw:0,target:[4.5,2,-6.65],zoom:6,tilt:.6,azimuth:1.1,fov:38},patrol:{yaw:0,target:[5.55,1.95,-.8],zoom:5,tilt:.72,azimuth:.4,fov:38},reference:{yaw:0,target:[.61875,.1,-.028125],zoom:1.4864516,tilt:.58775,azimuth:.2175},hero:{yaw:0,target:[0,1.0,0],zoom:1},quarter:{yaw:Math.PI/2,target:[0,1,0],zoom:1},rear:{yaw:Math.PI,target:[0,1,0],zoom:1},threeQuarter:{yaw:Math.PI*1.5,target:[0,1,0],zoom:1},dam:{yaw:0,target:[-4,1.0,.6],zoom:1.9},vehicle:{yaw:0,target:[-4.2,2.4,-.72],zoom:2.2},tanks:{yaw:0,target:[3.3,1.9,1.4],zoom:2.2},grid:{yaw:0,target:[7,2.2,-.8],zoom:2.2},town:{yaw:0,target:[3.8,2.0,-6.9],zoom:2.2},bridge:{yaw:Math.PI,target:[-6.5,1.6,6.8],zoom:2.2},'tank-detail':{yaw:0,target:[2.1,2.1,1.25],zoom:2.2,fov:24},'grid-detail':{yaw:0,target:[7.3,2.6,-.65],zoom:2.2,fov:28},'town-detail':{yaw:0,target:[2.5,2.7,-7],zoom:2.2,fov:24}};
+const views=isMining?MINING_VIEWS:extra?extra.WORLD_VIEWS:{intake:{yaw:0,target:[-4.4,1.75,-1.05],zoom:3.3,tilt:.9,azimuth:Math.PI+.35,fov:38},maintenance:{yaw:0,target:[4.5,2,-6.65],zoom:6,tilt:.6,azimuth:1.1,fov:38},patrol:{yaw:0,target:[5.55,1.95,-.8],zoom:5,tilt:.72,azimuth:.4,fov:38},reference:{yaw:0,target:[.61875,.1,-.028125],zoom:1.4864516,tilt:.58775,azimuth:.2175},hero:{yaw:0,target:[0,1.0,0],zoom:1},quarter:{yaw:Math.PI/2,target:[0,1,0],zoom:1},rear:{yaw:Math.PI,target:[0,1,0],zoom:1},threeQuarter:{yaw:Math.PI*1.5,target:[0,1,0],zoom:1},dam:{yaw:0,target:[-4,1.0,.6],zoom:1.9},vehicle:{yaw:0,target:[-4.2,2.4,-.72],zoom:2.2},tanks:{yaw:0,target:[3.3,1.9,1.4],zoom:2.2},grid:{yaw:0,target:[7,2.2,-.8],zoom:2.2},town:{yaw:0,target:[3.8,2.0,-6.9],zoom:2.2},bridge:{yaw:Math.PI,target:[-6.5,1.6,6.8],zoom:2.2},'tank-detail':{yaw:0,target:[2.1,2.1,1.25],zoom:2.2,fov:24},'grid-detail':{yaw:0,target:[7.3,2.6,-.65],zoom:2.2,fov:28},'town-detail':{yaw:0,target:[2.5,2.7,-7],zoom:2.2,fov:24}};
 let target=new THREE.Vector3(0,1,0);
 function prepareExhibit(){
   if(exhibitSaved)return;
@@ -95,7 +97,7 @@ async function handleExhibit(data){
 function fit(){if(!renderer||!camera)return;const w=host.clientWidth,h=host.clientHeight;if(w<1||h<1)return;if(!exhibitSaved){zoom=clampZoom(zoom,w,h);targetZoom=clampZoom(targetZoom,w,h);}renderer.setPixelRatio(resolutionFor(effectiveProfile,{width:w,height:h,deviceDpr:devicePixelRatio,mobile:mobileDevice,capture}));renderer.setSize(w,h);pipeline?.resize(w,h,renderer.getPixelRatio(),effectiveProfile.bloom);if(!exhibitSaved){camera.aspect=w/h;camera.updateProjectionMatrix();if(!exhibit)positionCamera();}}
 function positionCamera(){if(shot){placeShotCamera();return;}if(navigation?.mode==='fly')return;const dist=orbitDistance(host.clientWidth,host.clientHeight);const direction=new THREE.Vector3(Math.sin(azimuth)*Math.cos(tilt),Math.sin(tilt),Math.cos(azimuth)*Math.cos(tilt));camera.position.copy(target).addScaledVector(direction,Math.max(MIN_ORBIT_DISTANCE,dist/zoom));camera.lookAt(target);camera.updateMatrixWorld();}
 function metrics(){const gl=renderer.getContext();const ext=gl.getExtension('WEBGL_debug_renderer_info');const box=new THREE.Box3().setFromObject(world.root),xs=[],ys=[];for(const x of [box.min.x,box.max.x])for(const y of [box.min.y,box.max.y])for(const z of [box.min.z,box.max.z]){const p=new THREE.Vector3(x,y,z).project(camera);xs.push(p.x);ys.push(p.y);}return{stage:world.stats.stage,seed:SEED,time:elapsed,paused,yaw,tilt,zoom,quality,adaptive:tuner.metrics(),effectiveQuality:effectiveProfile.name,navigation:navigation?.metrics(),viewport:[host.clientWidth,host.clientHeight],dpr:renderer.getPixelRatio(),projectedBounds:{minX:Math.min(...xs),maxX:Math.max(...xs),minY:Math.min(...ys),maxY:Math.max(...ys)},camera:{position:camera.position.toArray(),quaternion:camera.quaternion.toArray(),target:target.toArray(),fov:camera.fov,near:camera.near,far:camera.far},renderer:ext?gl.getParameter(ext.UNMASKED_RENDERER_WEBGL):gl.getParameter(gl.RENDERER),threeRevision:THREE.REVISION,calls:pipeline.stats.calls,triangles:pipeline.stats.triangles,postprocess:pipeline.stats.postprocessEnabled,countsNote:'calls/triangles describe main scene pass, excluding reservoir reflection, shadow and bloom passes',geometryCount:renderer.info.memory.geometries,textures:renderer.info.memory.textures,frameTimes:[...frameTimes],activity:world.activityDiagnostics?.(elapsed),infrastructure:world.infrastructureDiagnostics?.(elapsed),reflection:world.reflection?.stats,terrain:world.terrainDiagnostics?.(),sceneStats:world.stats,lab:labLayer?.diagnostics()};}
-function render(){if(exhibit){exhibit.update(0);renderer.render(exhibit.scene,exhibit.camera);return;}if(exhibitSaved){pipeline.render(world.scene,camera,effectiveProfile.bloom);return;}positionCamera();navigation?.update(0);world.root.rotation.y=yaw;world.update(elapsed,0);labLayer?.update(camera);world.reflection?.render(renderer,camera,effectiveProfile.index>=3&&!mobileDevice&&!params.has('material'));pipeline.render(world.scene,camera,effectiveProfile.bloom);}
+function render(){if(exhibit){exhibit.update(0);renderer.render(exhibit.scene,exhibit.camera);return;}if(exhibitSaved){pipeline.render(world.scene,camera,effectiveProfile.bloom);return;}positionCamera();navigation?.update(0);world.root.rotation.y=yaw;world.update(elapsed,0);world.onCamera?.(camera);labLayer?.update(camera);world.reflection?.render(renderer,camera,effectiveProfile.index>=3&&!mobileDevice&&!params.has('material'));pipeline.render(world.scene,camera,effectiveProfile.bloom);}
 function pauseButton(){const b=document.querySelector('[data-action=pause]');b.textContent=paused?'Play':'Pause';b.setAttribute('aria-pressed',String(paused));}
 // ---- Fly-through player. A shot is compiled against the live scene (see flythrough.js) and
 // drives camera position, look target, fov and the turntable yaw by scene time, so playback is
@@ -236,12 +238,14 @@ const flythrough={
 // Glide: an orbital move from wherever the camera is to a preset, over the same orbit parameters
 // the user drives (target, azimuth, tilt, yaw, zoom, fov), eased, ending exactly on setView(name).
 let glide=null;
-// Datacenter pins: mark the pin, let the world react (world.onHotspot), set the caption, glide to the view.
-function selectDatacenterHotspot(spot){
+// Pins of extra worlds: mark the pin, let the world react (world.onHotspot), set the caption, glide to the view,
+// and tell a host page (an embedding iframe parent) which pin was chosen, unless the host asked for it.
+function selectWorldHotspot(spot,notify=true){
   labLayer?.select(spot.id);
   world.onHotspot?.(spot);
   const label=document.querySelector('#view-label');if(label)label.textContent=spot.caption;
   glideTo(spot.view);
+  if(notify&&window.parent!==window)window.parent.postMessage({type:'world:hotspot',world:worldKind,id:spot.id},location.origin);
 }
 function glideTo(name,seconds=1.6){
   if(!Object.hasOwn(views,name))return false;
@@ -274,10 +278,10 @@ let resizeObserver;
 try{
   renderer=new THREE.WebGLRenderer({alpha:true,antialias:true,preserveDrawingBuffer:capture,powerPreference:'high-performance'});renderer.setClearColor(0x000000,0);renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1;renderer.shadowMap.enabled=quality==='high';renderer.shadowMap.type=THREE.PCFSoftShadowMap;host.appendChild(renderer.domElement);pipeline=createPipeline(renderer);
   camera=new THREE.PerspectiveCamera(42,1,.1,160);world=createScene();await world.ready;
-  if(isDatacenter){
-    // Pins for the datacenter: same marker layer and camera glide as the lab, driven by world.hotspots.
+  if(extra&&world.hotspots){
+    // Pins for extra worlds: same marker layer and camera glide as the lab, driven by world.hotspots.
     const {createHotspotLayer}=await import('./hotspot-layer.js');
-    labLayer=createHotspotLayer(world,world.hotspots,host,selectDatacenterHotspot);
+    labLayer=createHotspotLayer(world,world.hotspots,host,selectWorldHotspot);
   }else if(params.get('experience')==='lab'){
     const {createLabLayer}=await import('./lab-layer.js');
     labLayer=createLabLayer(world,isMining?'mining':'energy',host,recipe=>{
@@ -298,14 +302,16 @@ try{
   const onWorldFocus=e=>{if(e.origin!==location.origin||e.source!==window.parent)return;
     if(exhibitMode&&e.data?.type==='scene:fullscreen'){sceneFullscreen=e.data.active===true;return;}
     if(exhibitMode&&typeof e.data?.type==='string'&&e.data.type.startsWith('exhibit:')){handleExhibit(e.data);return;}
-    if(e.data?.type==='worlds:focus'&&Object.hasOwn(views,e.data.view))glideTo(e.data.view,e.data.instant?0:1.6);if(labLayer&&e.data?.type==='lab:conditions'){labLayer.apply(e.data.conditions);render();window.parent.postMessage({type:'lab:applied',state:labLayer.diagnostics()},location.origin);}};
+    if(e.data?.type==='worlds:focus'&&Object.hasOwn(views,e.data.view))glideTo(e.data.view,e.data.instant?0:1.6);
+    if(e.data?.type==='world:story'&&world.setStory){const view=world.setStory(e.data.id??null,e.data.step??0);if(view&&Object.hasOwn(views,view))glideTo(view);render();}
+    if(e.data?.type==='world:select'){const spot=world.hotspots?.find(s=>s.id===e.data.id);if(spot)selectWorldHotspot(spot,false);}if(labLayer&&e.data?.type==='lab:conditions'){labLayer.apply(e.data.conditions);render();window.parent.postMessage({type:'lab:applied',state:labLayer.diagnostics()},location.origin);}};
   window.addEventListener('message',onWorldFocus);
   const dispose=()=>{if(disposed)return;disposed=true;document.removeEventListener('keydown',fullscreenEscape,true);window.removeEventListener('message',onWorldFocus);cancelAnimationFrame(raf);exhibit?.dispose();navigation.dispose();host.removeEventListener('keydown',key);window.removeEventListener('resize',onResize);document.removeEventListener('click',click);qSelect.removeEventListener('change',onQuality);document.removeEventListener('visibilitychange',onVisibility);resizeObserver?.disconnect();window.visualViewport?.removeEventListener('resize',onResize);labLayer?.dispose();pipeline.dispose();world.dispose();renderer.dispose();renderer.forceContextLoss();renderer.domElement.remove();};
   window.addEventListener('pagehide',dispose,{once:true});window.addEventListener('pageshow',e=>{if(e.persisted)location.reload();});
   host.addEventListener('pointerdown',()=>{glide=null;if(shot)stopShot('grabbed');},true);
   window.addEventListener('keydown',e=>{if(shot&&e.code==='Escape'){e.preventDefault();stopShot('escaped');}},true);
   window.__tabletop={ready:false,flythrough,exhibit:{prepare:prepareExhibit,metrics:()=>exhibit?.metrics()||null,setTime:t=>{exhibit?.setTime(t);render();}},setLabState:s=>labLayer?.apply(s),setState(s={}){if(s.view)setView(s.view);if(s.timeSeconds!==undefined)elapsed=s.timeSeconds;if(s.paused!==undefined)paused=s.paused;if(s.yaw!==undefined)yaw=targetYaw=s.yaw;if(s.zoom!==undefined)zoom=targetZoom=clampZoom(s.zoom,host.clientWidth,host.clientHeight);if(s.quality){quality=s.quality;qSelect.value=quality;onQuality();}pauseButton();render();return metrics();},metrics,auditHydro:()=>world.hydroDiagnostics?.(),auditInfrastructure:()=>isMining?world.audit():auditInfrastructure(world),auditGeometry:()=>auditGeometry(world.root),auditLandmarks:()=>isMining?world.audit():auditLandmarks(world),clearFrameTimes(){frameTimes=[];},reset(){navigation.reset();yaw=targetYaw;zoom=targetZoom;tilt=targetTilt;render();},dispose};
-  renderer.compile(world.scene,camera);setView(params.get('view')||'hero');loading.hidden=true;window.__tabletop.ready=true;if(labLayer&&window.parent!==window)window.parent.postMessage({type:'lab:ready',industry:isMining?'mining':'energy'},location.origin);raf=requestAnimationFrame(animate);
+  renderer.compile(world.scene,camera);setView(params.get('view')||'hero');loading.hidden=true;window.__tabletop.ready=true;if(extra&&window.parent!==window)window.parent.postMessage({type:'world:ready',world:worldKind},location.origin);if(labLayer&&window.parent!==window)window.parent.postMessage({type:'lab:ready',industry:isMining?'mining':'energy'},location.origin);raf=requestAnimationFrame(animate);
   if(params.get('studio')==='1')setupStudio();
   else if(params.get('shot')){try{playShot(params.get('shot'),{loop:params.get('loop')==='1',record:params.get('record')==='1'});}catch(e){console.error(e);}}
 }catch(e){navigation?.dispose();loading.hidden=true;error.hidden=false;document.querySelector('#error-message').textContent='WebGL is unavailable or a scene asset could not load. Check your connection and browser hardware acceleration, then try again.';world?.dispose();pipeline?.dispose();renderer?.dispose();renderer?.forceContextLoss();console.error(e);document.addEventListener('click',click);}

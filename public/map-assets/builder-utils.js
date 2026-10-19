@@ -12,3 +12,11 @@ export function makeBatch(root,prefix='detail'){
   };
 }
 export function metal(color=0x8c9ba3,roughness=.45,metalness=.65){return new THREE.MeshStandardMaterial({color,roughness,metalness});}
+// One 3 m saw-cut concrete slab panel as a repeating canvas texture (no image asset). Used for structural floors.
+export function slabTexture(){
+  const canvas=document.createElement('canvas');canvas.width=canvas.height=512;const g=canvas.getContext('2d');
+  g.fillStyle='#58636b';g.fillRect(0,0,512,512);
+  for(let i=0;i<90;i++){g.fillStyle=i%2?'rgba(255,255,255,0.025)':'rgba(0,0,0,0.04)';g.fillRect((i*97)%512,(i*181)%512,40+(i%5)*18,30+(i%4)*14);}
+  g.strokeStyle='#2e363c';g.lineWidth=5;g.strokeRect(2,2,508,508);
+  const texture=new THREE.CanvasTexture(canvas);texture.colorSpace=THREE.SRGBColorSpace;texture.anisotropy=8;texture.wrapS=texture.wrapT=THREE.RepeatWrapping;return texture;
+}

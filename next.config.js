@@ -1,6 +1,17 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  // pptxgenjs (the Decision Room's PowerPoint download) imports node:fs and node:https on
+  // code paths a browser never runs. Strip the scheme in client bundles so the package's
+  // own "browser" field maps those modules to empty.
+  webpack(config, { isServer, webpack }) {
+    if (!isServer) {
+      config.plugins.push(new webpack.NormalModuleReplacementPlugin(/^node:/, (resource) => {
+        resource.request = resource.request.replace(/^node:/, '');
+      }));
+    }
+    return config;
+  },
   async rewrites() {
     return [
       {

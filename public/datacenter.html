@@ -429,9 +429,11 @@ function startScene() {
   // Portrait screens need a longer lens to keep the room in frame.
   const baseRadius = () => (camera.aspect < 1.1 ? Math.min(30, 21 * (1.1 / camera.aspect) ** 0.6) : 21);
 
-  let last = performance.now(), elapsed = 0, heat = state.cooling === 'air' ? 1 : 0, first = true;
+  // The first rAF timestamp can precede the setup time, so start the clock on frame one and never run it backwards.
+  let last = null, elapsed = 0, heat = state.cooling === 'air' ? 1 : 0, first = true;
   function frame(now) {
-    const dt = Math.min((now - last) / 1000, 0.05);
+    if (last === null) last = now;
+    const dt = clamp((now - last) / 1000, 0, 0.05);
     last = now;
     if (state.playing) elapsed += dt;
     const t = elapsed;
@@ -452,7 +454,8 @@ function startScene() {
       f.mat.opacity = 0.95 * on;
       const speed = f.speed * (f.sys === 'power' ? 0.9 + 0.1 * Math.sin(t * 1.7) : 1);
       for (let i = 0; i < f.count; i++) {
-        f.curve.getPointAt((f.seed[i] + t * speed) % 1, tmp);
+        // Wrap into [0, 1) so the curve is never asked for a parameter outside its range.
+        f.curve.getPointAt(((f.seed[i] + t * speed) % 1 + 1) % 1, tmp);
         f.pos[i * 3] = tmp.x;
         f.pos[i * 3 + 1] = tmp.y;
         f.pos[i * 3 + 2] = tmp.z;

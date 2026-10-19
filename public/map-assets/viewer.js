@@ -80,7 +80,7 @@ async function handleExhibit(data){
     if(saved?.mode==='fly'){camera.position.copy(saved.position);camera.quaternion.copy(saved.quaternion);camera.updateMatrixWorld();navigation?.enterFly({capture:false});}
     reply('exhibit:closed');return;
   }
-  if(data.type==='exhibit:command'){if(['pause','replay','reset'].includes(data.action))exhibit?.command(data.action);return;}
+  if(data.type==='exhibit:command'){if(['pause','replay','reset','next'].includes(data.action))exhibit?.command(data.action);return;}
   if(data.type!=='exhibit:open'||!((isMining&&data.id==='mining.conveyor-vision')||(!isMining&&data.id==='energy.intake-vision')))return;
   const request=exhibitRequest=data.requestId;
   try{
@@ -119,11 +119,33 @@ function waterLevel(x,z){
   return -Infinity;
 }
 function compileNamed(nameOrSpec){const spec=typeof nameOrSpec==='string'?getShot(nameOrSpec):nameOrSpec;const here=isMining?'mining':'energy';if((spec.world||'energy')!==here)throw Error(`shot ${spec.name} is for the ${spec.world||'energy'} world; this is ${here}`);return compileShot(spec,shotContext(spec.yaw||0));}
+// Fade and backdrop live INSIDE the WebGL frame so a canvas recording carries them: a clip-space black
+// quad drawn last (fade) and the control-room image composited the way viewer.css shows it (backdrop),
+// which otherwise sits behind a transparent canvas as CSS and never reaches a WebM.
+let fadeQuad=null,roomTexture=null,roomImage=null;
+function ensureFadeQuad(){
+  if(fadeQuad)return fadeQuad;
+  fadeQuad=new THREE.Mesh(new THREE.PlaneGeometry(2,2),new THREE.ShaderMaterial({uniforms:{uFade:{value:0}},transparent:true,depthTest:false,depthWrite:false,
+    vertexShader:'void main(){gl_Position=vec4(position.xy,0.,1.);}',fragmentShader:'uniform float uFade;void main(){gl_FragColor=vec4(0.,0.,0.,uFade);}'}));
+  fadeQuad.name='shot-fade';fadeQuad.frustumCulled=false;fadeQuad.renderOrder=1e9;return fadeQuad;
+}
+function loadRoomImage(){if(roomImage)return roomImage;roomImage=new Image();roomImage.src='/map-assets/textures/control-room-v1.webp';return roomImage;}
+function roomBackdrop(){
+  const img=loadRoomImage(),w=Math.max(2,Math.round(host.clientWidth)),h=Math.max(2,Math.round(host.clientHeight));
+  if(roomTexture&&roomTexture.image.width===w&&roomTexture.image.height===h&&roomTexture.userData.loaded===img.complete)return roomTexture;
+  const c=document.createElement('canvas');c.width=w;c.height=h;const g=c.getContext('2d');
+  g.fillStyle='#020813';g.fillRect(0,0,w,h);
+  if(img.complete&&img.naturalWidth){const k=Math.max(w/img.naturalWidth,h/img.naturalHeight),iw=img.naturalWidth*k,ih=img.naturalHeight*k;g.globalAlpha=.48;g.drawImage(img,(w-iw)/2,(h-ih)/2,iw,ih);g.globalAlpha=1;}
+  const grad=g.createLinearGradient(0,0,0,h);grad.addColorStop(0,'#02081315');grad.addColorStop(.45,'#02081338');grad.addColorStop(1,'#020813c0');g.fillStyle=grad;g.fillRect(0,0,w,h);
+  roomTexture?.dispose();roomTexture=new THREE.CanvasTexture(c);roomTexture.colorSpace=THREE.SRGBColorSpace;roomTexture.userData.loaded=img.complete;return roomTexture;
+}
 function placeShotCamera(){
   const s=shot.compiled.sample(elapsed-shot.compiled.startSceneTime);
   camera.position.copy(localToWorld(s.position));camera.lookAt(localToWorld(s.lookAt));
   if(camera.fov!==s.fov){camera.fov=s.fov;camera.updateProjectionMatrix();}
   camera.updateMatrixWorld();shot.last=s;
+  ensureFadeQuad().material.uniforms.uFade.value=s.fade||0;
+  world.scene.background=roomBackdrop();
 }
 function tickShot(){const t=elapsed-shot.compiled.startSceneTime;if(t>=shot.compiled.duration){if(shot.loop)elapsed=shot.compiled.startSceneTime;else if(shot.hold){if(!shot.done){shot.done=true;if(recorder)finishRecording();shot.onEnd?.('held');}}else stopShot('finished');}}
 function playShot(nameOrSpec,{loop=false,record=false,hold=false,lockQuality=false,onEnd}={}){
@@ -131,10 +153,11 @@ function playShot(nameOrSpec,{loop=false,record=false,hold=false,lockQuality=fal
   const compiled=compileNamed(nameOrSpec);
   navigation?.exitFly();
   shotSaved={azimuth,tilt,targetTilt,yaw,targetYaw,zoom,targetZoom,target:target.clone(),fov:camera.fov,paused,elapsed};
-  shot={compiled,loop,hold,onEnd,done:false,last:null,startedAt:performance.now(),qualityBefore:lockQuality?quality:null};
+  shot={compiled,loop,hold,onEnd,done:false,last:null,startedAt:performance.now(),qualityBefore:lockQuality?quality:null,backgroundBefore:world.scene.background};
+  world.scene.add(ensureFadeQuad());loadRoomImage();
   if(lockQuality&&quality!=='high')tuner.setMode('high',performance.now());
   elapsed=compiled.startSceneTime;
-  const hintEl=document.querySelector('#hint');shotSaved.hint=hintEl.textContent;hintEl.textContent=`Fly-through: ${compiled.title} Â· Esc or drag to stop`;
+  const hintEl=document.querySelector('#hint');shotSaved.hint=hintEl.textContent;hintEl.textContent=`Fly-through: ${compiled.title} · Esc or drag to stop`;
   if(record)startRecording(compiled);
   render();
   return status();
@@ -142,6 +165,7 @@ function playShot(nameOrSpec,{loop=false,record=false,hold=false,lockQuality=fal
 function stopShot(reason='stopped'){
   if(!shot)return;const ended=shot,saved=shotSaved;shot=null;shotSaved=null;
   if(recorder)finishRecording();
+  if(fadeQuad)world.scene.remove(fadeQuad);world.scene.background=ended.backgroundBefore??null;
   if(ended.qualityBefore&&ended.qualityBefore!=='high')tuner.setMode(ended.qualityBefore,performance.now());
   if(saved){azimuth=saved.azimuth;tilt=saved.tilt;targetTilt=saved.targetTilt;yaw=saved.yaw;targetYaw=saved.targetYaw;zoom=saved.zoom;targetZoom=saved.targetZoom;target.copy(saved.target);camera.fov=saved.fov;camera.updateProjectionMatrix();}
   if(saved?.hint!==undefined)document.querySelector('#hint').textContent=saved.hint;
@@ -154,8 +178,8 @@ function status(){if(!shot)return {playing:false};if(shot.done)return {playing:f
 // device actually renders; the headless recorder (scripts/map-flythrough.mjs) is the frame-exact path.
 function startRecording(compiled){
   const canvas=renderer.domElement;if(!canvas.captureStream||typeof MediaRecorder==='undefined'){console.warn('MediaRecorder unavailable');return;}
-  const stream=canvas.captureStream(30),type=['video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm'].find(t=>MediaRecorder.isTypeSupported(t))||'';
-  const chunks=[];recorder=new MediaRecorder(stream,type?{mimeType:type,videoBitsPerSecond:12e6}:undefined);
+  const stream=canvas.captureStream(60),type=['video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm'].find(t=>MediaRecorder.isTypeSupported(t))||'';
+  const chunks=[];recorder=new MediaRecorder(stream,type?{mimeType:type,videoBitsPerSecond:16e6}:undefined);
   recorder.ondataavailable=e=>{if(e.data.size)chunks.push(e.data);};
   recorder.onstop=()=>{const blob=new Blob(chunks,{type:recorder.mimeType||'video/webm'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`${compiled.name}.webm`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),10000);recorder=null;};
   recorder.start(250);
@@ -170,11 +194,11 @@ function setupStudio(){
   const panel=document.createElement('div');panel.className='studio-panel';panel.setAttribute('role','dialog');panel.setAttribute('aria-label','Fly-through studio');
   const shots=flythrough.list(),pre=params.get('shot');
   panel.innerHTML=`<p class="studio-title">Fly-through studio</p>
-    <label>Shot <select id="studio-shot">${shots.map(s=>`<option value="${s.name}"${s.name===pre?' selected':''}>${s.title} Â· ${s.duration}s</option>`).join('')}</select></label>
-    <label>Countdown <select id="studio-count"><option value="3" selected>3 s</option><option value="5">5 s</option><option value="0">none</option></select></label>
-    <label class="studio-check"><input type="checkbox" id="studio-record"> Also save a WebM from the browser</label>
+    <label>Shot <select id="studio-shot">${shots.map(s=>`<option value="${s.name}"${s.name===pre?' selected':''}>${s.title} · ${s.duration}s</option>`).join('')}</select></label>
+    <label>Countdown <select id="studio-count">${[['3','3 s'],['5','5 s'],['0','none']].map(([v,l])=>`<option value="${v}"${(params.get('count')??'3')===v?' selected':''}>${l}</option>`).join('')}</select></label>
+    <label class="studio-check"><input type="checkbox" id="studio-record"${params.get('record')==='1'?' checked':''}> Also save a WebM from the browser</label>
     <button id="studio-play">Play</button>
-    <p class="studio-help">Start your recorder, then Play. The panel and cursor hide; the last frame holds. Space plays Â· Esc returns Â· H hides this panel.</p>`;
+    <p class="studio-help">Start your recorder, then Play. The panel and cursor hide; the last frame holds. Space plays · Esc returns · H hides this panel.</p>`;
   const count=document.createElement('div');count.className='studio-count';count.hidden=true;
   document.querySelector('#viewer').append(panel,count);
   let timer=0;
@@ -202,17 +226,39 @@ function setupStudio(){
 }
 const flythrough={
   list:()=>Object.values(SHOTS).filter(s=>(s.world||'energy')===(isMining?'mining':'energy')).map(s=>({name:s.name,title:s.title,duration:s.keys[s.keys.length-1].t})),
+  glideTo,views:()=>Object.keys(views),
   play:playShot,stop:()=>stopShot('stopped'),seek:seekShot,status,
   compile:nameOrSpec=>{const c=compileNamed(nameOrSpec);return {name:c.name,duration:c.duration,startSceneTime:c.startSceneTime,yaw:c.yaw};},
   audit:(nameOrSpec,opts={})=>auditShot(compileNamed(nameOrSpec),{height:world.height,waterLevel,actors:world.actors,...opts}),
 };
+// Glide: an orbital move from wherever the camera is to a preset, over the same orbit parameters
+// the user drives (target, azimuth, tilt, yaw, zoom, fov), eased, ending exactly on setView(name).
+let glide=null;
+function glideTo(name,seconds=1.6){
+  if(!Object.hasOwn(views,name))return false;
+  if(shot)stopShot('glide');navigation?.exitFly();
+  const v=views[name],reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(reduce||seconds<=0){glide=null;setView(name);return true;}
+  let dYaw=(v.yaw-yaw)%(Math.PI*2);if(dYaw>Math.PI)dYaw-=Math.PI*2;if(dYaw<-Math.PI)dYaw+=Math.PI*2;
+  glide={name,t0:performance.now(),ms:seconds*1000,from:{target:target.clone(),azimuth,tilt,yaw,zoom,fov:camera.fov},to:{target:new THREE.Vector3().fromArray(v.target),azimuth:v.azimuth??Math.atan2(12,23),tilt:v.tilt??openingTilt,yaw:yaw+dYaw,zoom:v.zoom,fov:v.fov||42}};
+  return true;
+}
+function stepGlide(now){
+  const g=glide,u=Math.min(1,(now-g.t0)/g.ms),e=u<.5?4*u*u*u:1-Math.pow(-2*u+2,3)/2,L=THREE.MathUtils.lerp;
+  target.lerpVectors(g.from.target,g.to.target,e);azimuth=L(g.from.azimuth,g.to.azimuth,e);tilt=targetTilt=L(g.from.tilt,g.to.tilt,e);
+  yaw=targetYaw=L(g.from.yaw,g.to.yaw,e);
+  // Zoom eases in log space so a 1x -> 6x move does not rush the far end.
+  zoom=targetZoom=Math.exp(L(Math.log(g.from.zoom),Math.log(g.to.zoom),e));
+  const fov=L(g.from.fov,g.to.fov,e);if(camera.fov!==fov){camera.fov=fov;camera.updateProjectionMatrix();}
+  if(u>=1){glide=null;setView(g.name);}
+}
 function setView(name){navigation?.exitFly();const v=views[name]||views.hero;camera.fov=v.fov||42;camera.updateProjectionMatrix();azimuth=v.azimuth??Math.atan2(12,23);tilt=targetTilt=v.tilt??openingTilt;yaw=targetYaw=v.yaw;zoom=targetZoom=v.zoom;target.fromArray(v.target);render();}
 function reset(){azimuth=Math.atan2(12,23);targetTilt=openingTilt;target.set(0,1,0);targetYaw=0;targetZoom=1;if(matchMedia('(prefers-reduced-motion: reduce)').matches){yaw=0;zoom=1;tilt=targetTilt;}}
-function animate(now){if(disposed)return;if(document.hidden||host.clientWidth<1||host.clientHeight<1){last=0;raf=requestAnimationFrame(animate);return;}const rawDt=last?(now-last)/1000:0,dt=Math.min(rawDt,shot?.25:.05);last=now;if(rawDt>0){frameTimes.push(rawDt*1000);if(frameTimes.length>2000)frameTimes.shift();}if(exhibit){exhibit.update(dt);renderer.render(exhibit.scene,exhibit.camera);raf=requestAnimationFrame(animate);return;}if(exhibitSaved){render();raf=requestAnimationFrame(animate);return;}if(!paused){elapsed+=dt;if(!capture&&!shot&&rawDt>0)tuner.sample(rawDt*1000,now);}if(shot&&!paused)tickShot();const k=1-Math.exp(-dt*10);yaw+=(targetYaw-yaw)*k;tilt+=(targetTilt-tilt)*k;zoom+=(targetZoom-zoom)*k;navigation?.update(dt);render();raf=requestAnimationFrame(animate);}
+function animate(now){if(disposed)return;if(document.hidden||host.clientWidth<1||host.clientHeight<1){last=0;raf=requestAnimationFrame(animate);return;}const rawDt=last?(now-last)/1000:0,dt=Math.min(rawDt,shot?.25:.05);last=now;if(rawDt>0){frameTimes.push(rawDt*1000);if(frameTimes.length>2000)frameTimes.shift();}if(exhibit){exhibit.update(dt);renderer.render(exhibit.scene,exhibit.camera);raf=requestAnimationFrame(animate);return;}if(exhibitSaved){render();raf=requestAnimationFrame(animate);return;}if(!paused){elapsed+=dt;if(!capture&&!shot&&rawDt>0)tuner.sample(rawDt*1000,now);}if(shot&&!paused)tickShot();if(glide)stepGlide(now);const k=1-Math.exp(-dt*10);yaw+=(targetYaw-yaw)*k;tilt+=(targetTilt-tilt)*k;zoom+=(targetZoom-zoom)*k;navigation?.update(dt);render();raf=requestAnimationFrame(animate);}
 function action(name){if(name==='mouse-look')setCameraToolsOpen(false);if(navigation?.action(name))return;if(name==='rotate-left')targetYaw-=Math.PI/8;if(name==='rotate-right')targetYaw+=Math.PI/8;if(name==='zoom-in')targetZoom=clampZoom(targetZoom*1.2,host.clientWidth,host.clientHeight);if(name==='zoom-out')targetZoom=clampZoom(targetZoom/1.2,host.clientWidth,host.clientHeight);if(name==='reset')reset();if(name==='pause'){paused=!paused;tuner.reset(performance.now());pauseButton();}if(name==='retry')location.reload();}
 function key(e){if(e.target!==host||e.shiftKey||navigation?.mode==='fly')return;const map={ArrowLeft:'rotate-left',ArrowRight:'rotate-right','+':'zoom-in','=':'zoom-in','-':'zoom-out',Home:'reset',' ':'pause'};if(map[e.key]){e.preventDefault();action(map[e.key]);}}
 const onResize=()=>fit(),click=e=>{const b=e.target.closest('[data-action]');if(b)action(b.dataset.action);};
-function applyQualityProfile(){effectiveProfile=tuner.profile();if(!renderer||!world)return;renderer.shadowMap.enabled=effectiveProfile.shadows;const shadow=world.key.shadow;if(shadow.mapSize.x!==effectiveProfile.shadowSize){shadow.map?.dispose();shadow.map=null;shadow.mapSize.set(effectiveProfile.shadowSize,effectiveProfile.shadowSize);shadow.needsUpdate=true;}const spray=world.root.getObjectByName('spillway-droplets-and-spray');if(spray)spray.geometry.setDrawRange(0,Math.floor(world.stats.sprayParticles*effectiveProfile.spray));let mistIndex=0;world.root.traverse(o=>{if(o.name==='impact-mist')o.visible=!o.userData.diagnosticHidden&&mistIndex++<Math.ceil(42*effectiveProfile.mist);});const auto=qSelect.querySelector('option[value=auto]');if(auto)auto.textContent='Auto Â· '+effectiveProfile.name;fit();}
+function applyQualityProfile(){effectiveProfile=tuner.profile();if(!renderer||!world)return;renderer.shadowMap.enabled=effectiveProfile.shadows;const shadow=world.key.shadow;if(shadow.mapSize.x!==effectiveProfile.shadowSize){shadow.map?.dispose();shadow.map=null;shadow.mapSize.set(effectiveProfile.shadowSize,effectiveProfile.shadowSize);shadow.needsUpdate=true;}const spray=world.root.getObjectByName('spillway-droplets-and-spray');if(spray)spray.geometry.setDrawRange(0,Math.floor(world.stats.sprayParticles*effectiveProfile.spray));let mistIndex=0;world.root.traverse(o=>{if(o.name==='impact-mist')o.visible=!o.userData.diagnosticHidden&&mistIndex++<Math.ceil(42*effectiveProfile.mist);});const auto=qSelect.querySelector('option[value=auto]');if(auto)auto.textContent='Auto · '+effectiveProfile.name;fit();}
 const onQuality=()=>{quality=qSelect.value;try{localStorage.setItem('tabletop-quality',quality);}catch{}tuner.setMode(quality,performance.now());};
 const onVisibility=()=>{last=0;tuner.reset(performance.now());if(document.hidden)navigation?.cancelInput();};
 let resizeObserver;
@@ -231,19 +277,19 @@ try{
   applyQualityProfile();pauseButton();
   navigation=createNavigation({host,camera,captureOnFly:params.get('controls')!=='compact',getOrbit:()=>({target,yaw,tilt,zoom,targetZoom}),setOrbit(s){if(s.target)target.copy(s.target);if(s.azimuth!==undefined)azimuth=s.azimuth;if(s.deltaYaw)targetYaw+=s.deltaYaw;if(s.deltaTilt!==undefined)targetTilt=THREE.MathUtils.clamp(targetTilt+s.deltaTilt,-Math.PI/2+.03,Math.PI/2-.03);if(s.tilt!==undefined)targetTilt=s.tilt;if(s.yaw!==undefined)targetYaw=s.yaw;if(s.zoom!==undefined)targetZoom=clampZoom(s.zoom,host.clientWidth,host.clientHeight);if(s.immediate){yaw=targetYaw;zoom=targetZoom;tilt=targetTilt;}},resetOrbit:reset,onChange({mode,tool,locked}){
     const flying=mode==='fly',wasFlying=document.body.classList.contains('flying');if(flying&&!wasFlying)setCameraToolsOpen(false);document.body.classList.toggle('mouse-locked',locked);const fly=document.querySelector('[data-action=fly]');fly.textContent=flying?'Exit fly':'Fly';fly.setAttribute('aria-pressed',String(flying));document.querySelector('[data-action=pan]').setAttribute('aria-pressed',String(tool==='pan'));document.querySelector('[data-action=mouse-look]').hidden=!flying||locked;
-    document.body.classList.toggle('flying',flying);document.querySelector('#hint').textContent=flying?'WASD move Â· Q/E down/up Â· Shift faster Â· '+(locked?'Mouse look':'Drag to look')+' Â· Esc return':(tool==='pan'?'Drag to pan':'Drag rotate/tilt Â· Shift/right-drag pan')+' Â· Alt-drag crane Â· Scroll zoom';
-    if(document.body.classList.contains('touch-ui')){document.querySelector('[data-action=mouse-look]').hidden=true;document.querySelector('#hint').textContent=flying?'Hold arrows to move Â· Drag to look Â· â†‘/â†“ height':(tool==='pan'?'Drag to pan':'One finger: rotate / tilt')+' Â· Two fingers: pan / pinch zoom';}
+    document.body.classList.toggle('flying',flying);document.querySelector('#hint').textContent=flying?'WASD move · Q/E down/up · Shift faster · '+(locked?'Mouse look':'Drag to look')+' · Esc return':(tool==='pan'?'Drag to pan':'Drag rotate/tilt · Shift/right-drag pan')+' · Alt-drag crane · Scroll zoom';
+    if(document.body.classList.contains('touch-ui')){document.querySelector('[data-action=mouse-look]').hidden=true;document.querySelector('#hint').textContent=flying?'Hold arrows to move · Drag to look · â†‘/â†“ height':(tool==='pan'?'Drag to pan':'One finger: rotate / tilt')+' · Two fingers: pan / pinch zoom';}
     document.querySelector('#navigation-status').textContent=flying?'Fly mode. WASD moves, Q and E change height. Escape returns to tabletop.':'Tabletop mode';
   }});
   host.addEventListener('keydown',key);window.addEventListener('resize',onResize);document.addEventListener('click',click);qSelect.addEventListener('change',onQuality);document.addEventListener('visibilitychange',onVisibility);resizeObserver=new ResizeObserver(fit);resizeObserver.observe(host);window.visualViewport?.addEventListener('resize',onResize);
   const onWorldFocus=e=>{if(e.origin!==location.origin||e.source!==window.parent)return;
     if(exhibitMode&&e.data?.type==='scene:fullscreen'){sceneFullscreen=e.data.active===true;return;}
     if(exhibitMode&&typeof e.data?.type==='string'&&e.data.type.startsWith('exhibit:')){handleExhibit(e.data);return;}
-    if(e.data?.type==='worlds:focus'&&Object.hasOwn(views,e.data.view))setView(e.data.view);if(labLayer&&e.data?.type==='lab:conditions'){labLayer.apply(e.data.conditions);render();window.parent.postMessage({type:'lab:applied',state:labLayer.diagnostics()},location.origin);}};
+    if(e.data?.type==='worlds:focus'&&Object.hasOwn(views,e.data.view))glideTo(e.data.view,e.data.instant?0:1.6);if(labLayer&&e.data?.type==='lab:conditions'){labLayer.apply(e.data.conditions);render();window.parent.postMessage({type:'lab:applied',state:labLayer.diagnostics()},location.origin);}};
   window.addEventListener('message',onWorldFocus);
   const dispose=()=>{if(disposed)return;disposed=true;document.removeEventListener('keydown',fullscreenEscape,true);window.removeEventListener('message',onWorldFocus);cancelAnimationFrame(raf);exhibit?.dispose();navigation.dispose();host.removeEventListener('keydown',key);window.removeEventListener('resize',onResize);document.removeEventListener('click',click);qSelect.removeEventListener('change',onQuality);document.removeEventListener('visibilitychange',onVisibility);resizeObserver?.disconnect();window.visualViewport?.removeEventListener('resize',onResize);labLayer?.dispose();pipeline.dispose();world.dispose();renderer.dispose();renderer.forceContextLoss();renderer.domElement.remove();};
   window.addEventListener('pagehide',dispose,{once:true});window.addEventListener('pageshow',e=>{if(e.persisted)location.reload();});
-  host.addEventListener('pointerdown',()=>{if(shot)stopShot('grabbed');},true);
+  host.addEventListener('pointerdown',()=>{glide=null;if(shot)stopShot('grabbed');},true);
   window.addEventListener('keydown',e=>{if(shot&&e.code==='Escape'){e.preventDefault();stopShot('escaped');}},true);
   window.__tabletop={ready:false,flythrough,exhibit:{prepare:prepareExhibit,metrics:()=>exhibit?.metrics()||null,setTime:t=>{exhibit?.setTime(t);render();}},setLabState:s=>labLayer?.apply(s),setState(s={}){if(s.view)setView(s.view);if(s.timeSeconds!==undefined)elapsed=s.timeSeconds;if(s.paused!==undefined)paused=s.paused;if(s.yaw!==undefined)yaw=targetYaw=s.yaw;if(s.zoom!==undefined)zoom=targetZoom=clampZoom(s.zoom,host.clientWidth,host.clientHeight);if(s.quality){quality=s.quality;qSelect.value=quality;onQuality();}pauseButton();render();return metrics();},metrics,auditHydro:()=>world.hydroDiagnostics?.(),auditInfrastructure:()=>isMining?world.audit():auditInfrastructure(world),auditGeometry:()=>auditGeometry(world.root),auditLandmarks:()=>isMining?world.audit():auditLandmarks(world),clearFrameTimes(){frameTimes=[];},reset(){navigation.reset();yaw=targetYaw;zoom=targetZoom;tilt=targetTilt;render();},dispose};
   renderer.compile(world.scene,camera);setView(params.get('view')||'hero');loading.hidden=true;window.__tabletop.ready=true;if(labLayer&&window.parent!==window)window.parent.postMessage({type:'lab:ready',industry:isMining?'mining':'energy'},location.origin);raf=requestAnimationFrame(animate);

@@ -10,6 +10,8 @@
 //   {object:'dam-pier', offset:[x,y,z]}       a named Object3D's local position plus an offset
 //   {actor:'dam-service-van', offset:[a,u,s]} a moving actor; offset is in the actor's frame:
 //                                             a = along its heading, u = up, s = to its right... see actorFrame
+// `fade` is an optional list of [t, amount] pairs (0 = clear, 1 = black), smoothstepped between
+// points, drawn in the WebGL frame so recordings carry it. e.g. fade:[[0,1],[3,0],[56,0],[60,1]].
 // `clock` pins the shot to the scene's animation clock so moving things are where the shot needs them:
 //   {sceneTime: 12}                                           start at this scene time
 //   {actor:'dam-service-van', phase:'outbound', progress:.15, atShotTime:8}
@@ -65,6 +67,9 @@ export function compileShot(spec,ctx={}){
   for(let i=1;i<keys.length;i++)if(!(keys[i].t>keys[i-1].t))throw Error(`keyframe ${i} is not later than keyframe ${i-1}`);
   if(keys[0].t!==0)throw Error('first keyframe must be at t=0');
   const duration=keys[keys.length-1].t,startSceneTime=solveStartSceneTime(spec.clock,ctx.actors);
+  const fades=(spec.fade||[]).map(([t,v])=>[+t,THREE.MathUtils.clamp(+v,0,1)]);
+  for(let i=1;i<fades.length;i++)if(!(fades[i][0]>fades[i-1][0]))throw Error(`fade point ${i} is not later than fade point ${i-1}`);
+  const fadeAt=t=>{if(!fades.length)return 0;if(t<=fades[0][0])return fades[0][1];for(let i=1;i<fades.length;i++){if(t<=fades[i][0]){const [t0,v0]=fades[i-1],[t1,v1]=fades[i];return THREE.MathUtils.lerp(v0,v1,EASE.smooth((t-t0)/(t1-t0)));}}return fades[fades.length-1][1];};
   const n=keys.length,posCurve=new THREE.CatmullRomCurve3([],false,'centripetal'),lookCurve=new THREE.CatmullRomCurve3([],false,'centripetal');
   const sample=(t)=>{
     t=THREE.MathUtils.clamp(t,0,duration);const sceneTime=startSceneTime+t;
@@ -73,7 +78,7 @@ export function compileShot(spec,ctx={}){
     let i=0;while(i<n-2&&t>=keys[i+1].t)i++;
     const k0=keys[i],k1=keys[i+1],local=(t-k0.t)/(k1.t-k0.t),ease=EASE[k1.ease||'linear']||EASE.linear,u=(i+ease(local))/(n-1);
     const fov0=k0.fov??spec.fov??42,fov1=k1.fov??spec.fov??42;
-    return {t,sceneTime,position:posCurve.getPoint(u),lookAt:lookCurve.getPoint(u),fov:THREE.MathUtils.lerp(fov0,fov1,ease(local)),segment:i};
+    return {t,sceneTime,position:posCurve.getPoint(u),lookAt:lookCurve.getPoint(u),fov:THREE.MathUtils.lerp(fov0,fov1,ease(local)),segment:i,fade:fadeAt(t)};
   };
   return {spec,name:spec.name,title:spec.title||spec.name,yaw:spec.yaw||0,duration,startSceneTime,sample};
 }

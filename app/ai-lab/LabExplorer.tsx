@@ -76,7 +76,7 @@ export default function LabExplorer({industry}:{industry:LabIndustry}){
   return()=>{clearTimeout(loadTimer.current);};
  },[id,ready,send]);
  const showModel=!!exhibit?.model&&!failed;
- const phaseLabel=phase===0?(industry==='mining'?'Material moving normally':'Water passing through the rack'):phase===1?(industry==='mining'?'Material gathering at the transfer point':'Debris gathering against the rack'):'Possible build-up · inspection advised';
+ const phaseLabel=phase===0?(industry==='mining'?'Material moving normally':'Water passing through the rack'):phase===1?(industry==='mining'?'Material gathering at the transfer point':'Debris gathering against the rack'):'AI flags a possible build-up for an operator to inspect';
  return <main className="al-container al-explorer al-exhibits" data-industry={industry}>
   <div><LabHeader/><div className="al-world-heading"><div><a className="al-back" href="/ai-lab">← Choose an industry</a><h1>{industry==='energy'?'Water and energy':'Mining operations'}</h1><p className="ex-intro">Look around. Select a marker to discover how AI helps.</p></div></div></div>
   <section className="ex-world" aria-label="Explore the industry world">
@@ -90,7 +90,8 @@ export default function LabExplorer({industry}:{industry:LabIndustry}){
      <button ref={fullscreenButton} className="ex-fullscreen-toggle" aria-label={fullscreen?'Exit full screen':'Full screen'} aria-pressed={fullscreen} onClick={()=>fullscreen?exitFullscreen():enterFullscreen()}>{fullscreen?'Exit full screen ×':'⛶ Full screen'}</button>
      {id&&showModel&&!loaded&&<p className="ex-loading" role="status">Preparing the close-up…</p>}
      {exhibit&&!showModel&&<div className="ex-flow-illustration"><span className="al-eyebrow">WORKFLOW OVERVIEW</span>{exhibit.flow.map((label,i)=><div key={label}><span>{i===0?'◎':i===1?'▤':'◉'}</span><strong>{label}</strong>{i<2&&<i>↓</i>}</div>)}</div>}
-    </div>{id&&showModel&&<><p className="ex-phase" aria-live="polite">{phaseLabel}</p><div className="ex-controls"><button onClick={()=>send('exhibit:command',{action:'pause'})}>{playing?'Pause':'Play'}</button><button onClick={()=>send('exhibit:command',{action:'replay'})}>Replay</button><button onClick={()=>send('exhibit:command',{action:'reset'})}>Reset view</button><span>Drag to rotate · pinch to zoom</span></div></>}
+     {id&&showModel&&<><p className="ex-phase" aria-live="polite"><span>{phase+1} / 3</span>{phaseLabel}</p><div className="ex-controls" aria-label="Animation playback"><button onClick={()=>send('exhibit:command',{action:'pause'})}>{playing?'Pause':'Play'}</button><button onClick={()=>send('exhibit:command',{action:'next'})} aria-label="Next animation step">Next →</button><button onClick={()=>send('exhibit:command',{action:'replay'})}>Replay</button><button onClick={()=>send('exhibit:command',{action:'reset'})}>Reset view</button></div></>}
+    </div>
     {failed&&!loaded&&<p className="ex-error" role="status">The 3D close-up is unavailable. You can still explore the explanation.</p>}</div>
     {exhibit&&<aside className="ex-copy"><div className="ex-benefit"><strong>{exhibit.benefit}</strong></div><h3 className="ex-context-title">How AI helps</h3><p className="ex-explanation">{exhibit.copy}</p><div className="ex-compute"><span>Where it runs</span><p>{exhibit.flow.join(' → ')}</p></div><p className="ex-disclosure">Illustrative demonstration · simulated inputs</p></aside>}</div>
    </dialog>

@@ -19,6 +19,23 @@ export const DC_ANCHORS = {
   structure: new THREE.Vector3(-3.0, DECK + 0.16, 2.0),
 };
 
+// Camera views for the shared viewer (same shape as MINING_VIEWS and the energy views).
+export const DATACENTER_VIEWS = {
+  hero: {yaw: 0, target: [-0.8, 1.6, -0.6], zoom: 1, tilt: 0.62, azimuth: 0.42, fov: 36},
+  power: {yaw: 0, target: [6.4, 2.6, 0.2], zoom: 2.1, tilt: 0.5, azimuth: 0.42, fov: 36},
+  cooling: {yaw: 0, target: [1.6, 2.4, -2.0], zoom: 2.2, tilt: 0.5, azimuth: 0.42, fov: 36},
+  structure: {yaw: 0, target: [-3.0, 1.8, 1.8], zoom: 2.3, tilt: 0.5, azimuth: 0.35, fov: 36},
+};
+// Pins for the shared hotspot layer. Pin 2 toggles the air-only view, so the air limit and the liquid path are one comparison.
+export const DC_HOTSPOTS = [
+  {id: 'power', label: '1 · Too hungry', view: 'power', anchor: DC_ANCHORS.power,
+    caption: 'Power density shock. Many racks were designed for about 10 kW; an AI rack can need 100–250+ kW. AI needs more power per rack, not more racks.'},
+  {id: 'cooling', label: '2 · Too hot', view: 'cooling', anchor: DC_ANCHORS.cooling, cooling: 'air',
+    caption: 'Air cooling hits its limit at AI density. Select again to switch between air-only and the liquid loop.'},
+  {id: 'structure', label: '3 · Too heavy', view: 'structure', anchor: DC_ANCHORS.structure,
+    caption: 'Structural constraints. AI racks weigh about 2,000–5,000+ lb each. Check floor loading, cable and pipe paths before they arrive.'},
+];
+
 function tileTexture() {
   // 600 mm raised-floor tiles with pedestal dots, drawn procedurally so the miniature needs no image asset.
   const canvas = document.createElement('canvas');
@@ -255,6 +272,7 @@ export function createDatacenterScene() {
     air.visible = mode === 'air';
     for (const {mat} of ledAI) mat.color.set(mode === 'air' ? 0xff7a3d : 0x7fe9ff);
     world.coolingMode = mode;
+    world.updateHeat?.();
   }
   setCooling('liquid');
   world.setCooling = setCooling;
@@ -264,7 +282,6 @@ export function createDatacenterScene() {
   };
   world.updateHeat = () => world.setHeat(world.coolingMode === 'air' ? 1 : 0);
   world.updateHeat();
-  world.anchors = DC_ANCHORS;
-  world.powerFlows = powerGroup;
+  world.hotspots = DC_HOTSPOTS;
   return world;
 }

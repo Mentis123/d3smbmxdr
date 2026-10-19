@@ -12,8 +12,10 @@ import {auditGeometry,auditLandmarks} from './geometry-audit.js';
 import {auditInfrastructure} from './infrastructure-audit.js';
 const params=new URLSearchParams(location.search), capture=params.get('capture')==='1';
 const isMining=document.body.dataset.world==='mining';
-const createScene=isMining?(await import('./mining-scene.js')).createMiningScene:createEnergyScene;
-const SEED=isMining?181026:ENERGY_SEED;
+const isDatacenter=document.body.dataset.world==='datacenter';
+const datacenter=isDatacenter?await import('./datacenter-scene.js'):null;
+const createScene=isMining?(await import('./mining-scene.js')).createMiningScene:isDatacenter?datacenter.createDatacenterScene:createEnergyScene;
+const SEED=isMining?181026:isDatacenter?datacenter.DC_SEED:ENERGY_SEED;
 if(capture)document.body.classList.add('diagnostic');
 // embed=1: the scene is hosted inside another page (the /worlds explorer), which supplies its own chrome.
 if(params.get('embed')==='1')document.body.classList.add('embed');
@@ -62,7 +64,7 @@ const mobileDevice=matchMedia('(pointer:coarse)').matches;document.body.classLis
 const tuner=createAdaptiveQuality({mobile:mobileDevice,conservative:navigator.hardwareConcurrency<=4||(navigator.deviceMemory!==undefined&&navigator.deviceMemory<=4),mode:quality,now:performance.now(),onChange:()=>applyQualityProfile()});
 let effectiveProfile=tuner.profile();
 const qSelect=document.querySelector('#quality');qSelect.value=quality;
-const views=isMining?MINING_VIEWS:{intake:{yaw:0,target:[-4.4,1.75,-1.05],zoom:3.3,tilt:.9,azimuth:Math.PI+.35,fov:38},maintenance:{yaw:0,target:[4.5,2,-6.65],zoom:6,tilt:.6,azimuth:1.1,fov:38},patrol:{yaw:0,target:[5.55,1.95,-.8],zoom:5,tilt:.72,azimuth:.4,fov:38},reference:{yaw:0,target:[.61875,.1,-.028125],zoom:1.4864516,tilt:.58775,azimuth:.2175},hero:{yaw:0,target:[0,1.0,0],zoom:1},quarter:{yaw:Math.PI/2,target:[0,1,0],zoom:1},rear:{yaw:Math.PI,target:[0,1,0],zoom:1},threeQuarter:{yaw:Math.PI*1.5,target:[0,1,0],zoom:1},dam:{yaw:0,target:[-4,1.0,.6],zoom:1.9},vehicle:{yaw:0,target:[-4.2,2.4,-.72],zoom:2.2},tanks:{yaw:0,target:[3.3,1.9,1.4],zoom:2.2},grid:{yaw:0,target:[7,2.2,-.8],zoom:2.2},town:{yaw:0,target:[3.8,2.0,-6.9],zoom:2.2},bridge:{yaw:Math.PI,target:[-6.5,1.6,6.8],zoom:2.2},'tank-detail':{yaw:0,target:[2.1,2.1,1.25],zoom:2.2,fov:24},'grid-detail':{yaw:0,target:[7.3,2.6,-.65],zoom:2.2,fov:28},'town-detail':{yaw:0,target:[2.5,2.7,-7],zoom:2.2,fov:24}};
+const views=isMining?MINING_VIEWS:isDatacenter?datacenter.DATACENTER_VIEWS:{intake:{yaw:0,target:[-4.4,1.75,-1.05],zoom:3.3,tilt:.9,azimuth:Math.PI+.35,fov:38},maintenance:{yaw:0,target:[4.5,2,-6.65],zoom:6,tilt:.6,azimuth:1.1,fov:38},patrol:{yaw:0,target:[5.55,1.95,-.8],zoom:5,tilt:.72,azimuth:.4,fov:38},reference:{yaw:0,target:[.61875,.1,-.028125],zoom:1.4864516,tilt:.58775,azimuth:.2175},hero:{yaw:0,target:[0,1.0,0],zoom:1},quarter:{yaw:Math.PI/2,target:[0,1,0],zoom:1},rear:{yaw:Math.PI,target:[0,1,0],zoom:1},threeQuarter:{yaw:Math.PI*1.5,target:[0,1,0],zoom:1},dam:{yaw:0,target:[-4,1.0,.6],zoom:1.9},vehicle:{yaw:0,target:[-4.2,2.4,-.72],zoom:2.2},tanks:{yaw:0,target:[3.3,1.9,1.4],zoom:2.2},grid:{yaw:0,target:[7,2.2,-.8],zoom:2.2},town:{yaw:0,target:[3.8,2.0,-6.9],zoom:2.2},bridge:{yaw:Math.PI,target:[-6.5,1.6,6.8],zoom:2.2},'tank-detail':{yaw:0,target:[2.1,2.1,1.25],zoom:2.2,fov:24},'grid-detail':{yaw:0,target:[7.3,2.6,-.65],zoom:2.2,fov:28},'town-detail':{yaw:0,target:[2.5,2.7,-7],zoom:2.2,fov:24}};
 let target=new THREE.Vector3(0,1,0);
 function prepareExhibit(){
   if(exhibitSaved)return;
@@ -234,6 +236,13 @@ const flythrough={
 // Glide: an orbital move from wherever the camera is to a preset, over the same orbit parameters
 // the user drives (target, azimuth, tilt, yaw, zoom, fov), eased, ending exactly on setView(name).
 let glide=null;
+// Datacenter pins: glide to the view, set the caption, and let pin 2 toggle air-only against the liquid loop.
+function selectDatacenterHotspot(spot){
+  labLayer?.select(spot.id);
+  world.setCooling?.(spot.cooling==='air'&&world.coolingMode!=='air'?'air':'liquid');
+  const label=document.querySelector('#view-label');if(label)label.textContent=spot.caption;
+  glideTo(spot.view);
+}
 function glideTo(name,seconds=1.6){
   if(!Object.hasOwn(views,name))return false;
   if(shot)stopShot('glide');navigation?.exitFly();
@@ -265,7 +274,11 @@ let resizeObserver;
 try{
   renderer=new THREE.WebGLRenderer({alpha:true,antialias:true,preserveDrawingBuffer:capture,powerPreference:'high-performance'});renderer.setClearColor(0x000000,0);renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1;renderer.shadowMap.enabled=quality==='high';renderer.shadowMap.type=THREE.PCFSoftShadowMap;host.appendChild(renderer.domElement);pipeline=createPipeline(renderer);
   camera=new THREE.PerspectiveCamera(42,1,.1,160);world=createScene();await world.ready;
-  if(params.get('experience')==='lab'){
+  if(isDatacenter){
+    // Pins for the datacenter: same marker layer and camera glide as the lab, driven by world.hotspots.
+    const {createHotspotLayer}=await import('./hotspot-layer.js');
+    labLayer=createHotspotLayer(world,world.hotspots,host,selectDatacenterHotspot);
+  }else if(params.get('experience')==='lab'){
     const {createLabLayer}=await import('./lab-layer.js');
     labLayer=createLabLayer(world,isMining?'mining':'energy',host,recipe=>{
       if(!exhibitMode){labLayer.apply({recipeId:recipe.id});setView(recipe.view);}

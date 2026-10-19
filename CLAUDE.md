@@ -30,6 +30,18 @@ Use this when a page renders in the browser (WebGL, canvas, JS-driven UI) and a 
 - **Expect SwiftShader warnings** (`Automatic fallback to software WebGL`, `GPU stall due to ReadPixels`). They come from the sandbox, not the page. Treat only `pageerror` and app-level `console.error` as failures.
 - **Stop the server by PID** when done (`ps -eo pid,args | grep "[h]ttp.server 8765"`). Don't `pkill -f` on the same pattern, since it can match your own shell.
 
+## Shared 3D structures (consumer rules)
+
+The energy, mining and datacenter worlds are **owned by `Mentis123/adamrappaport`**. This repo only serves synced copies:
+
+- `public/map-assets/*` and `public/lab-worlds/{energy,mining,datacenter}.html` are copies. **Never edit them here.** Change the canonical repo and re-sync.
+- `public/lab-worlds/version.json` pins the canonical commit and every file hash. A sync is only valid when `--check` passes.
+- Canonical map and rules: `adamrappaport/docs/SHARED-WORLDS.md` (modules, world/view/hotspot/wrapper contracts, how to add a world, the headless checklist).
+- Routes: `/datacenter` rewrites to `/lab-worlds/datacenter.html`, the shared viewer with `body[data-world="datacenter"]`. `/ai-lab` links to the energy and mining copies.
+- Re-sync from a checkout of the canonical repo: `node scripts/sync-lab-worlds.mjs /home/user/d3smbmxdr`, then the same command with `--check`. Commit the synced output here with the route or page change.
+
+Learned 19 Oct 2026: the old `/datacenter` page had its own controls and boxes and looked basic. Don't add a page that builds its own toolbar, viewer or scene. Add a world to the shared viewer instead.
+
 ## Build from what already exists (reuse, repurpose, regenerate)
 
 Before writing any new 3D scene, diagram, texture or page chrome, look at what the site already has and decide deliberately which of three paths to take. Write the decision down in the PR or commit message.

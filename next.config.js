@@ -16,7 +16,7 @@ const nextConfig = {
     return [
       {
         source: '/datacenter',
-        destination: '/datacenter.html',
+        destination: '/lab-worlds/datacenter.html',
       },
       {
         source: '/localdesk',

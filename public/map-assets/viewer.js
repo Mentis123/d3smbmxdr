@@ -81,7 +81,7 @@ async function handleExhibit(data){
     reply('exhibit:closed');return;
   }
   if(data.type==='exhibit:command'){if(['pause','replay','reset','next'].includes(data.action))exhibit?.command(data.action);return;}
-  if(data.type!=='exhibit:open'||!((isMining&&data.id==='mining.conveyor-vision')||(!isMining&&data.id==='energy.intake-vision')))return;
+  if(data.type!=='exhibit:open'||!(isMining?['mining.conveyor-vision','mining.procedure-control','mining.historian-gap']:['energy.intake-vision','energy.drawing-search','energy.alarm-investigation']).includes(data.id))return;
   const request=exhibitRequest=data.requestId;
   try{
     const {createExhibit}=await import('./exhibits.js');if(request!==exhibitRequest)return;

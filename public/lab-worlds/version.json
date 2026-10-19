@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "sourceRepository": "Mentis123/adamrappaport",
-  "sourceCommit": "76496ed0c320139d1bc31740eaa7e9b1c535a22c",
+  "sourceCommit": "141376dd256ea066afdb42e4629223b92b110424",
   "experience": "ai-lab",
   "runtimeDependency": "Self-hosted static files; no personal-site requests",
   "files": {
@@ -11,7 +11,8 @@
     "public/map-assets/builder-utils.js": "4d0f2d3a6d268936522572c09ce84763af9c837b096af8f603fe9414b8eb5768",
     "public/map-assets/camera-limits.js": "81debf1686fc3993a460450ae77f2e7704804ff5a046e06b516660c12bd8598d",
     "public/map-assets/electrical.js": "cc49e083143cab12430332dad6ef3a182d48c4654e227912b22aca587d3ae7a3",
-    "public/map-assets/exhibits.js": "ab5e685c47281cd264e79b09d4bc91108e0eb2dc39f5fb8ba355480130c7440e",
+    "public/map-assets/exhibit-workflows.js": "e1994963f256f2a0184ab00307d57e483f75f18fd3bf7764caa8f908d80643e9",
+    "public/map-assets/exhibits.js": "648bd7dfcc27328633ec91aaac4c5a1aaf4a91b77b7a64005636e052ad270704",
     "public/map-assets/expansion.js": "aca30063e9af4c6c23d7c9b419bae582fe7d2288be0c47a8a5feacde98294de3",
     "public/map-assets/flow-effects.js": "4b1fe69a494284e1a342ce895b94ba2eb7aac796cbebefcf7b55e57b1a8749a4",
     "public/map-assets/flythrough.js": "f4ed55a4aa5d2a0c849979db1f17416e71c4937715ccc1be76263dd2308993e4",
@@ -67,7 +68,7 @@
     "public/map-assets/vendor/three.core.min.js": "61ba0df005b05991361d040d8ff670e1aadfd0ce7aeebd1fdb0725957a8957de",
     "public/map-assets/vendor/three.module.min.js": "e2b5ee6bccd38fd6d8a2428546b83c5f2426d84b152ef82be8055556e3b40eb6",
     "public/map-assets/viewer.css": "416f2c9a0690c6514b58c2c03130f9ba2763114024546849840df3e5c9f248d8",
-    "public/map-assets/viewer.js": "7187cd4c8e47537978722feafac793eaef215f403993c682ea5ab87da1a8edc5",
+    "public/map-assets/viewer.js": "ab3b89844e7b078a46bf9d06bb5fb867cdf48add6e6ce24ccb3719b650b52b5a",
     "public/map-assets/water.js": "1e58fcdf54d9dd65652798778d983d303438ff9691e04707b878309634f66816",
     "public/map-assets/world-shell.js": "d512261ac1f602441e05506e51478605b1b1a795f4e03011229f06f783c75250",
     "public/lab-worlds/energy.html": "64a2d754669178638ab8dfcec65d965a1dd26c03ddd2b52b288447e428850983",

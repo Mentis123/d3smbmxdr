@@ -1,8 +1,9 @@
 import * as THREE from 'three';
+import {buildWorkflow} from './exhibit-workflows.js';
 
 // Isolated, deterministic museum exhibits. Shares the world's WebGL renderer, never its resources.
 export function createExhibit(id, host, notify) {
-  if(!['mining.conveyor-vision','energy.intake-vision'].includes(id))throw Error('Unsupported exhibit');
+  if(!['mining.conveyor-vision','energy.intake-vision','energy.drawing-search','energy.alarm-investigation','mining.procedure-control','mining.historian-gap'].includes(id))throw Error('Unsupported exhibit');
   const mining=id.startsWith('mining'),scene=new THREE.Scene();scene.background=new THREE.Color(0x071322);
   scene.fog=new THREE.Fog(0x071322,18,38);
   const root=new THREE.Group();scene.add(root);
@@ -24,7 +25,7 @@ export function createExhibit(id, host, notify) {
   box(7,.3,4.4,mat(0x132c3d,{metalness:.5}),0,-.2,0);
   box(6.85,.045,4.25,concrete,0,-.025,0);
   for(const z of [-2.16,2.16])box(6.8,.025,.025,cyan,0,-.06,z);
-  const moving=[],pile=[],flows=[];let roller,water,outline;
+  const moving=[],pile=[],flows=[];let roller,water,outline,workflow;
   function inspectionCamera(x,y,z,look){
     bar([x,0,z],[x,y,z],.045,steel);bar([x,y,z],[x-.45,y,z],.04,steel);
     const body=box(.38,.23,.24,steel,x-.48,y,z);const lens=cylinder(.075,.08,dark,x-.48,y-.15,z);lens.rotation.x=Math.PI/2;
@@ -32,7 +33,7 @@ export function createExhibit(id, host, notify) {
     const g=new THREE.ConeGeometry(.65,1.4,4,1,true);const m=mat(0x00aeff,{transparent:true,opacity:.065,depthWrite:false,side:THREE.DoubleSide});
     const cone=mesh(g,m,x-.48,y-.65,z);cone.rotation.z=Math.PI;return body;
   }
-  if(mining){
+  if(id==='mining.conveyor-vision'){
     box(5.6,.19,1.2,dark,0,.92,0);
     box(5.65,.06,1.05,rubber,0,1.06,0);
     for(let i=0;i<11;i++){const x=-2.55+i*.51;const r=cylinder(.12,1.32,steel,x,.83,0);r.rotation.x=Math.PI/2;if(i==0)roller=r;}
@@ -51,7 +52,7 @@ export function createExhibit(id, host, notify) {
     bar([.1,.9,-1.25],[.9,2.7,-.8],.018,dark);
     bar([2.7,0,1.3],[2.7,1.5,1.3],.045,steel);box(.75,.47,.12,dark,2.7,1.65,1.3);box(.62,.34,.015,cyan,2.7,1.65,1.37);
     outline=mesh(new THREE.TorusGeometry(.6,.018,8,64),amber,1.94,1.32,0);outline.rotation.x=-Math.PI/2;
-  }else{
+  }else if(id==='energy.intake-vision'){
     // Open-sided intake chamber: opaque wall piers and rack, water outside the wall.
     box(6.5,.18,3.9,concrete,0,.08,0);
     for(const x of [-2.2,2.2])box(1.2,2.6,.7,concrete,x,1.4,-.4);
@@ -71,6 +72,7 @@ export function createExhibit(id, host, notify) {
     bar([-2.7,3.2,-.6],[2.7,3.2,-.6],.025,yellow);
     outline=mesh(new THREE.TorusGeometry(1.05,.018,8,64),amber,0,1.4,.3);outline.scale.y=.48;
   }
+  if(!outline)workflow=buildWorkflow(id,{root,box,cylinder,bar,mesh,mat,steel,dark,yellow,cyan,amber,concrete});
   let time=0,playing=!matchMedia('(prefers-reduced-motion: reduce)').matches,angle=.55,elevation=.42,distance=10.8,lastPhase=-1;
   // Fit actual mesh corners, rather than a conservative empty bounding box or fixed distance.
   root.updateMatrixWorld(true);
@@ -100,10 +102,11 @@ export function createExhibit(id, host, notify) {
   }
   function framing(){const bounds={minX:Infinity,maxX:-Infinity,minY:Infinity,maxY:-Infinity};for(const p of framePoints){const v=p.clone().add(frameCenter).project(camera);bounds.minX=Math.min(bounds.minX,v.x);bounds.maxX=Math.max(bounds.maxX,v.x);bounds.minY=Math.min(bounds.minY,v.y);bounds.maxY=Math.max(bounds.maxY,v.y);}return bounds;}
 
-  function update(dt){if(playing)time+=dt;const t=time%36,amount=THREE.MathUtils.smoothstep(t,10,20),phase=t<10?0:t<20?1:2;
+  function update(dt){if(playing)time+=dt;const t=time%24,amount=THREE.MathUtils.smoothstep(t,8,16),phase=t<8?0:t<16?1:2;
     moving.forEach(o=>{o.position.set(-2.6+((o.userData.offset+time*.13)%1)*5.2,1.18,o.userData.lane);o.rotation.z=time*1.2+o.userData.offset;});
     pile.forEach((o,i)=>{const s=Math.max(.001,THREE.MathUtils.clamp(amount*pile.length-i,0,1));o.scale.setScalar(s);});
-    outline.visible=phase===2;outline.material.emissiveIntensity=.45+Math.sin(time*3)*.15;
+    if(outline){outline.visible=phase===2;outline.material.emissiveIntensity=.45+Math.sin(time*3)*.15;}
+    workflow?.update(t,phase);
     flows.forEach((o,i)=>{const x=-2.1+(i%8)*.58;o.position.set(x,.55+(i%3)*.28,1.7-((time*.6+i*.13)%1.6));o.visible=!(amount>.5&&Math.abs(x)<.9);});
     if(water){const a=water.geometry.attributes.position;for(let i=0;i<a.count;i++)a.setY(i,.012*Math.sin(a.getX(i)*6+time*1.5)+.008*Math.sin(a.getZ(i)*8-time));a.needsUpdate=true;water.geometry.computeVertexNormals();}
     if(phase!==lastPhase){lastPhase=phase;notify({phase,playing,time:t});}pose();
@@ -113,9 +116,9 @@ export function createExhibit(id, host, notify) {
   function move(e){if(!points.has(e.pointerId))return;stop(e);const old=points.get(e.pointerId);points.set(e.pointerId,{x:e.clientX,y:e.clientY});if(points.size===2){const [a,b]=[...points.values()],d=Math.hypot(a.x-b.x,a.y-b.y);if(gesture)distance=THREE.MathUtils.clamp(distance*gesture/d,6.5,16);gesture=d;}else{angle-=(e.clientX-old.x)*.007;elevation=THREE.MathUtils.clamp(elevation+(e.clientY-old.y)*.005,.08,1.2);}pose();}
   function up(e){if(!points.has(e.pointerId))return;stop(e);points.delete(e.pointerId);gesture=null;if(host.hasPointerCapture(e.pointerId))host.releasePointerCapture(e.pointerId);}
   function wheel(e){stop(e);e.preventDefault();distance=THREE.MathUtils.clamp(distance*Math.exp(e.deltaY*.001),6.5,16);pose();}
-  function keydown(e){if(e.key==='Escape'){stop(e);e.preventDefault();notify({close:true});return;}if(e.target!==host)return;if(e.code==='KeyF'||e.key==='Home'){stop(e);e.preventDefault();if(e.key==='Home'){angle=.55;elevation=.42;distance=10.8;pose();}return;}if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','+','-',' '].includes(e.key)){stop(e);e.preventDefault();if(e.key==='ArrowLeft')angle-=.15;if(e.key==='ArrowRight')angle+=.15;if(e.key==='ArrowUp')elevation=Math.min(1.2,elevation+.1);if(e.key==='ArrowDown')elevation=Math.max(.08,elevation-.1);if(e.key==='+')distance=Math.max(6.5,distance/1.1);if(e.key==='-')distance=Math.min(16,distance*1.1);if(e.key===' ')playing=!playing;pose();notify({phase:lastPhase,playing,time:time%36});}}
+  function keydown(e){if(e.key==='Escape'){stop(e);e.preventDefault();notify({close:true});return;}if(e.target!==host)return;if(e.code==='KeyF'||e.key==='Home'){stop(e);e.preventDefault();if(e.key==='Home'){angle=.55;elevation=.42;distance=10.8;pose();}return;}if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','+','-',' '].includes(e.key)){stop(e);e.preventDefault();if(e.key==='ArrowLeft')angle-=.15;if(e.key==='ArrowRight')angle+=.15;if(e.key==='ArrowUp')elevation=Math.min(1.2,elevation+.1);if(e.key==='ArrowDown')elevation=Math.max(.08,elevation-.1);if(e.key==='+')distance=Math.max(6.5,distance/1.1);if(e.key==='-')distance=Math.min(16,distance*1.1);if(e.key===' ')playing=!playing;pose();notify({phase:lastPhase,playing,time:time%24});}}
   const listeners=[['pointerdown',down],['pointermove',move],['pointerup',up],['pointercancel',up],['wheel',wheel]];
   listeners.forEach(([n,f])=>host.addEventListener(n,f,{capture:true,passive:false}));document.addEventListener('keydown',keydown,true);
   update(0);
-  return{scene,camera,update,command(action){if(action==='pause')playing=!playing;if(action==='next'){time=lastPhase===0?10:lastPhase===1?20:0;playing=false;update(0);}if(action==='replay'){time=0;playing=true;}if(action==='reset'){angle=.55;elevation=.42;distance=10.8;}notify({phase:lastPhase,playing,time:time%36});},setTime(t){time=t;playing=false;update(0);},metrics:()=>({id,time:time%36,playing,phase:lastPhase,angle,elevation,distance,fittedDistance,framing:framing()}),dispose(){listeners.forEach(([n,f])=>host.removeEventListener(n,f,true));document.removeEventListener('keydown',keydown,true);points.clear();geometries.forEach(g=>g.dispose());materials.forEach(m=>m.dispose());textures.forEach(t=>t.dispose());key.shadow.map?.dispose();}};
+  return{scene,camera,update,command(action){if(action==='pause')playing=!playing;if(action==='next'){time=lastPhase===0?8:lastPhase===1?16:0;playing=false;update(0);}if(action==='replay'){time=0;playing=true;}if(action==='reset'){angle=.55;elevation=.42;distance=10.8;}notify({phase:lastPhase,playing,time:time%24});},setTime(t){time=t;playing=false;update(0);},metrics:()=>({id,time:time%24,playing,phase:lastPhase,angle,elevation,distance,fittedDistance,framing:framing(),workflow:workflow?.metrics()}),dispose(){listeners.forEach(([n,f])=>host.removeEventListener(n,f,true));document.removeEventListener('keydown',keydown,true);points.clear();geometries.forEach(g=>g.dispose());materials.forEach(m=>m.dispose());textures.forEach(t=>t.dispose());key.shadow.map?.dispose();}};
 }

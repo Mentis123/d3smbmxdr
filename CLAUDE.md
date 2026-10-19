@@ -30,6 +30,16 @@ Use this when a page renders in the browser (WebGL, canvas, JS-driven UI) and a 
 - **Expect SwiftShader warnings** (`Automatic fallback to software WebGL`, `GPU stall due to ReadPixels`). They come from the sandbox, not the page. Treat only `pageerror` and app-level `console.error` as failures.
 - **Stop the server by PID** when done (`ps -eo pid,args | grep "[h]ttp.server 8765"`). Don't `pkill -f` on the same pattern, since it can match your own shell.
 
+## Build from what already exists (reuse, repurpose, regenerate)
+
+Before writing any new 3D scene, diagram, texture or page chrome, look at what the site already has and decide deliberately which of three paths to take. Write the decision down in the PR or commit message.
+
+- **Reuse** as-is when a module already does the job: `public/map-assets/` (world shell, substation, tanks, flow and water shaders, pipeline, builder utilities) and `public/lab-worlds/` for the energy and mining worlds.
+- **Repurpose** when the module is close but its coordinates or labels belong to another scene: keep the geometry recipe and change the placement, datum or wording. Example: `buildElectrical` placed at `LAYOUT.yard` on the datacenter pad.
+- **Regenerate** only when nothing usable exists, and do it procedurally (canvas textures, batched boxes) so no new binary asset is needed. Say which part was regenerated and why.
+
+Do not hand-build a stand-in for something a sibling world already renders well. The `/datacenter` page first shipped as basic boxes while the energy and mining worlds had a real substation, pipes, basin water and a shell that were never used. Check the sibling modules first, then the textures in `public/map-assets/textures/` and `public/decision-room-art/`, then generate.
+
 ## Keep these instructions current
 
 When you learn something that would have saved time or prevented a mistake on this site, add it here in the same change: a build step, a gotcha, a validation method, or a rule that turned out to be wrong. Keep each addition short and specific, and say what it was learned from.

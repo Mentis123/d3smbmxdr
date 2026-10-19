@@ -142,25 +142,25 @@ p,h1,h2{margin:0}
 
 <script type="module">
 import * as THREE from 'three';
+import {createDatacenterScene, DC_ANCHORS} from '/map-assets/datacenter-scene.js';
+import {createPipeline} from '/map-assets/pipeline.js';
 
-const C = {steel:0x1b2c42, edge:0x5d8fb8, floor:0x081528, wall:0x0a1a31, busPipe:0x6b5520, power:0xffd166, supply:0x2f7fbf, supplyGlow:0x9fe6ff, ret:0x9a5a3a, retGlow:0xffb27a, struct:0xff8a5c, led:0x4cff9a, hot:0xff7a3d, cool:0x7fe9ff};
-const CENTER = new THREE.Vector3(0.6, 1.3, 0);
 const PINS = [
-  {id:'power', n:1, label:'Too hungry', color:'#ffd166', anchor:new THREE.Vector3(-6.8, 3.2, -6.4)},
-  {id:'cooling', n:2, label:'Too hot', color:'#4fc3ff', anchor:new THREE.Vector3(2.1, 2.2, 0)},
-  {id:'structure', n:3, label:'Too heavy', color:'#ff8a5c', anchor:new THREE.Vector3(3.4, 0.1, 5.9)},
+  {id: 'power', n: 1, label: 'Too hungry', color: '#ffd166'},
+  {id: 'cooling', n: 2, label: 'Too hot', color: '#4fc3ff'},
+  {id: 'structure', n: 3, label: 'Too heavy', color: '#ff8a5c'},
 ];
-const ANCHOR = Object.fromEntries(PINS.map(p => [p.id, p.anchor]));
 const CHIP = {
   air: 'AIR ONLY · air is at its limit for AI-density racks',
   liquid: 'LIQUID LOOP · heat leaves the AI racks through the CDU',
 };
+const CENTER = new THREE.Vector3(-0.8, 2.2, -0.6);
 
-const state = {focus: null, cooling: 'liquid', playing: !matchMedia('(prefers-reduced-motion: reduce)').matches, yaw: 0.42, pitch: 0.5, zoom: 1};
+const state = {focus: null, cooling: 'liquid', playing: !matchMedia('(prefers-reduced-motion: reduce)').matches, yaw: 0.55, pitch: 0.42, zoom: 1};
 const $ = id => document.getElementById(id);
 const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
 
-// Page-level controls and cards work even if WebGL fails.
+// Pins and cards are wired before WebGL so they keep working if the scene fails to start.
 const cards = [...document.querySelectorAll('[data-pin]')];
 const pinLayer = $('pins');
 const pinEls = PINS.map(p => {
@@ -173,7 +173,7 @@ const pinEls = PINS.map(p => {
   el.setAttribute('aria-label', `Pin ${p.n}: ${p.label}. Show this check.`);
   el.addEventListener('click', () => focusPin(p.id));
   pinLayer.appendChild(el);
-  return {id: p.id, anchor: p.anchor, el};
+  return {id: p.id, anchor: DC_ANCHORS[p.id], el};
 });
 
 function focusPin(id) {
@@ -186,7 +186,8 @@ let scene = null;
 function setCooling(mode) {
   state.cooling = mode;
   for (const b of document.querySelectorAll('[data-cooling]')) b.setAttribute('aria-pressed', String(b.dataset.cooling === mode));
-  scene?.refreshMode();
+  $('mode-chip').textContent = CHIP[mode];
+  scene?.setCooling(mode);
 }
 for (const b of document.querySelectorAll('[data-cooling]')) b.addEventListener('click', () => setCooling(b.dataset.cooling));
 $('pause').addEventListener('click', () => {
@@ -195,176 +196,25 @@ $('pause').addEventListener('click', () => {
   $('pause').setAttribute('aria-pressed', String(!state.playing));
 });
 $('reset').addEventListener('click', () => {
-  Object.assign(state, {yaw: 0.42, pitch: 0.5, zoom: 1});
+  Object.assign(state, {yaw: 0.55, pitch: 0.42, zoom: 1});
   focusPin(null);
 });
 
-function curveFrom(points) {
-  return new THREE.CatmullRomCurve3(points.map(p => new THREE.Vector3(...p)), false, 'centripetal');
-}
-function tube(parent, points, color, radius = 0.05) {
-  const curve = curveFrom(points);
-  const mesh = new THREE.Mesh(new THREE.TubeGeometry(curve, points.length * 16, radius, 8, false), new THREE.MeshStandardMaterial({color, roughness: 0.35, metalness: 0.6}));
-  parent.add(mesh);
-  return curve;
-}
-
-// A pipe or busway with particles that travel along it at the speed of its load.
-const flows = [];
-function flow(parent, o) {
-  const curve = curveFrom(o.points);
-  const tubeMesh = new THREE.Mesh(new THREE.TubeGeometry(curve, o.points.length * 16, o.radius ?? 0.05, 8, false), new THREE.MeshStandardMaterial({color: o.pipe, roughness: 0.35, metalness: 0.6}));
-  const pos = new Float32Array(o.count * 3);
-  const geo = new THREE.BufferGeometry();
-  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-  const mat = new THREE.PointsMaterial({color: o.glow, size: o.size ?? 0.16, transparent: true, opacity: 0.95, depthWrite: false, blending: THREE.AdditiveBlending});
-  const group = new THREE.Group();
-  const points = new THREE.Points(geo, mat);
-  // Positions are rewritten every frame, so the cached bounds would be stale.
-  points.frustumCulled = false;
-  group.add(tubeMesh, points);
-  parent.add(group);
-  const f = {...o, curve, pos, geo, mat, group, seed: Array.from({length: o.count}, (_, i) => (i * 0.618034) % 1), speed: o.speed ?? 0.1};
-  flows.push(f);
-  return f;
-}
-
-function edges(mesh) {
-  mesh.add(new THREE.LineSegments(new THREE.EdgesGeometry(mesh.geometry), new THREE.LineBasicMaterial({color: C.edge, transparent: true, opacity: 0.4})));
-}
-function solid(parent, w, h, d, x, y, z, color = C.steel) {
-  const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), new THREE.MeshStandardMaterial({color, roughness: 0.6, metalness: 0.3}));
-  mesh.position.set(x, y + h / 2, z);
-  edges(mesh);
-  parent.add(mesh);
-  return mesh;
-}
-
 function startScene() {
   const host = $('scene');
-  const renderer = new THREE.WebGLRenderer({antialias: true, alpha: true});
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  const world = createDatacenterScene();
+  const camera = new THREE.PerspectiveCamera(32, 1, 0.1, 300);
+  const renderer = new THREE.WebGLRenderer({alpha: true, antialias: true, powerPreference: 'high-performance'});
+  renderer.setClearColor(0x000000, 0);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1;
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   host.appendChild(renderer.domElement);
+  const pipeline = createPipeline(renderer);
 
-  const world = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(36, 1, 0.1, 200);
-  const target = CENTER.clone(), goal = CENTER.clone();
-  world.add(new THREE.HemisphereLight(0xb8e6ff, 0x050a16, 1.15));
-  const key = new THREE.DirectionalLight(0xe6f6ff, 1.7);
-  key.position.set(9, 16, 11);
-  world.add(key);
-  const fill = new THREE.DirectionalLight(0x3a8fd6, 0.7);
-  fill.position.set(-12, 7, -8);
-  world.add(fill);
-
-  // Room: slab, grid, two walls.
-  const slab = new THREE.Mesh(new THREE.PlaneGeometry(24, 18), new THREE.MeshStandardMaterial({color: C.floor, roughness: 0.95}));
-  slab.rotation.x = -Math.PI / 2;
-  slab.position.y = -0.02;
-  world.add(slab);
-  const grid = new THREE.GridHelper(24, 24, 0x2a6f9e, 0x123552);
-  grid.position.y = 0.01;
-  world.add(grid);
-  const back = new THREE.Mesh(new THREE.PlaneGeometry(24, 5), new THREE.MeshStandardMaterial({color: C.wall, side: THREE.DoubleSide}));
-  back.position.set(0, 2.5, -9);
-  world.add(back);
-  const side = new THREE.Mesh(new THREE.PlaneGeometry(18, 5), new THREE.MeshStandardMaterial({color: C.wall, side: THREE.DoubleSide}));
-  side.rotation.y = Math.PI / 2;
-  side.position.set(-12, 2.5, 0);
-  world.add(side);
-
-  const G = {power: new THREE.Group(), liquid: new THREE.Group(), air: new THREE.Group(), structure: new THREE.Group()};
-  Object.values(G).forEach(g => world.add(g));
-
-  // 1 · Too hungry: utility feed, transformer, switchgear and busway.
-  solid(G.power, 2.2, 0.25, 2.2, -9.2, 0, -6.4, 0x1f3146);
-  const transformer = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 0.8, 1.5, 20), new THREE.MeshStandardMaterial({color: 0x2c4664, roughness: 0.5, metalness: 0.5}));
-  transformer.position.set(-9.2, 0.25 + 0.75, -6.4);
-  G.power.add(transformer);
-  solid(G.power, 1.3, 2.2, 1.0, -9.2, 0, -3.2);
-  flow(G.power, {sys: 'power', points: [[-9.2, 1.75, -6.4], [-9.2, 3.2, -6.4], [3.4, 3.2, -6.4], [3.4, 3.2, 5.4]], pipe: C.busPipe, glow: C.power, radius: 0.07, count: 30, speed: 0.11, size: 0.2});
-  flow(G.power, {sys: 'power', points: [[-4.6, 3.2, -6.4], [-4.6, 3.2, 5.4]], pipe: C.busPipe, glow: C.power, radius: 0.07, count: 16, speed: 0.09, size: 0.2});
-
-  // Racks: standard enterprise row (left) and AI row (right).
-  const RACKS = [];
-  const ZS = [-4.5, -2.7, -0.9, 0.9, 2.7, 4.5];
-  function rack(x, z, ai, index) {
-    const d = ai ? 1.25 : 1.0, w = ai ? 0.8 : 0.7, h = ai ? 2.45 : 2.0;
-    const body = solid(world, d, h, w, x, 0, z, ai ? 0x17324f : 0x1a2636);
-    const face = ai ? -1 : 1;
-    const leds = [];
-    for (let j = 0; j < 5; j++) {
-      const mat = new THREE.MeshBasicMaterial({color: C.led});
-      const led = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.1, 0.05), mat);
-      led.position.set(x + face * (d / 2 + 0.012), h * (0.2 + j * 0.16), z);
-      world.add(led);
-      leds.push(mat);
-    }
-    RACKS.push({ai, body, leds, phase: index * 1.37, rate: ai ? 1.8 : 1.1});
-    if (ai) {
-      const corners = [[-1, -1], [1, -1], [1, 1], [-1, 1]].map(([sx, sz]) => new THREE.Vector3(x + sx * (d / 2 + 0.14), 0.04, z + sz * (w / 2 + 0.14)));
-      G.structure.add(new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints(corners), new THREE.LineBasicMaterial({color: C.struct, transparent: true, opacity: 0.9})));
-    }
-  }
-  ZS.forEach((z, i) => rack(-4.6, z, false, i));
-  ZS.forEach((z, i) => rack(3.4, z, true, i + 6));
-
-  // Floor load zone under the AI row, lit when the structure check is active.
-  const plate = new THREE.Mesh(new THREE.PlaneGeometry(1.9, 11.6), new THREE.MeshBasicMaterial({color: C.struct, transparent: true, opacity: 0.14, depthWrite: false}));
-  plate.rotation.x = -Math.PI / 2;
-  plate.position.set(3.4, 0.02, 0);
-  G.structure.add(plate);
-
-  // 2 · Too hot, liquid path: CDU, supply and return manifolds, branches, dry cooler.
-  solid(G.liquid, 1.8, 1.8, 1.0, -0.6, 0, -6.4, 0x233b58);
-  flow(G.liquid, {sys: 'cooling', points: [[-0.6, 1.8, -6.4], [-0.6, 2.2, -6.4], [2.1, 2.2, -6.4], [2.1, 2.2, 5.2]], pipe: C.supply, glow: C.supplyGlow, radius: 0.05, count: 22, speed: 0.09});
-  flow(G.liquid, {sys: 'cooling', points: [[2.1, 1.8, 5.2], [2.1, 1.8, -5.9], [-0.2, 1.8, -5.9], [-0.2, 1.8, -6.0]], pipe: C.ret, glow: C.retGlow, radius: 0.05, count: 18, speed: 0.07});
-  for (const z of ZS) {
-    tube(G.liquid, [[2.1, 2.2, z], [2.8, 2.2, z]], C.supply, 0.04);
-    tube(G.liquid, [[2.8, 1.8, z], [2.1, 1.8, z]], C.ret, 0.04);
-  }
-  solid(G.liquid, 2.6, 2.2, 0.7, 7.4, 0.3, -7.5, 0x1d3550);
-  const fan = new THREE.Group();
-  fan.position.set(7.4, 1.4, -7.1);
-  for (let k = 0; k < 3; k++) {
-    // Each arm pivots at the hub, so the blade sits out from the centre.
-    const arm = new THREE.Group();
-    arm.rotation.z = (k * Math.PI * 2) / 3;
-    const blade = new THREE.Mesh(new THREE.BoxGeometry(0.12, 1.2, 0.03), new THREE.MeshStandardMaterial({color: 0x9ed9f2, roughness: 0.4}));
-    blade.position.y = 0.5;
-    arm.add(blade);
-    fan.add(arm);
-  }
-  G.liquid.add(fan);
-  const fanRing = new THREE.Mesh(new THREE.TorusGeometry(0.75, 0.04, 8, 32), new THREE.MeshBasicMaterial({color: C.edge}));
-  fanRing.position.copy(fan.position);
-  G.liquid.add(fanRing);
-  flow(G.liquid, {sys: 'cooling', points: [[0.3, 1.2, -6.4], [3.0, 1.2, -7.5], [6.1, 1.2, -7.5]], pipe: C.ret, glow: C.retGlow, radius: 0.045, count: 10, speed: 0.08, size: 0.14});
-
-  // 2 · Too hot, air path: CRAH and cold-aisle air that warms as it reaches the AI row.
-  solid(G.air, 4.0, 2.4, 1.0, -0.5, 0, 7.5, 0x1e3a57);
-  for (let k = 0; k < 4; k++) {
-    const vent = new THREE.Mesh(new THREE.PlaneGeometry(0.9, 0.9), new THREE.MeshBasicMaterial({color: 0x2f8fd0, transparent: true, opacity: 0.35, depthWrite: false}));
-    vent.rotation.x = -Math.PI / 2;
-    vent.position.set(-1.2, 0.02, -4 + k * 2.7);
-    G.air.add(vent);
-  }
-  const AIR_N = 240;
-  const airPos = new Float32Array(AIR_N * 3), airCol = new Float32Array(AIR_N * 3), airX0 = new Float32Array(AIR_N), airZ = new Float32Array(AIR_N), airPhase = new Float32Array(AIR_N);
-  for (let i = 0; i < AIR_N; i++) {
-    airX0[i] = -3.2 + ((i * 0.618) % 1) * 3.8;
-    airZ[i] = -5.2 + ((i * 0.381) % 1) * 10.4;
-    airPhase[i] = (i * 0.7071) % 1;
-  }
-  const airGeo = new THREE.BufferGeometry();
-  airGeo.setAttribute('position', new THREE.BufferAttribute(airPos, 3));
-  airGeo.setAttribute('color', new THREE.BufferAttribute(airCol, 3));
-  const airPoints = new THREE.Points(airGeo, new THREE.PointsMaterial({size: 0.13, vertexColors: true, transparent: true, opacity: 0.85, depthWrite: false, blending: THREE.AdditiveBlending}));
-  airPoints.frustumCulled = false;
-  G.air.add(airPoints);
-
-  // Bounding ring and pin focus marker.
+  // Focus marker: the energy world's own pin ring, reused as a sprite above the active anchor.
   const ringCanvas = document.createElement('canvas');
   ringCanvas.width = ringCanvas.height = 128;
   const g2 = ringCanvas.getContext('2d');
@@ -375,22 +225,21 @@ function startScene() {
   g2.stroke();
   const focusRing = new THREE.Sprite(new THREE.SpriteMaterial({map: new THREE.CanvasTexture(ringCanvas), transparent: true, depthWrite: false, depthTest: false}));
   focusRing.visible = false;
-  world.add(focusRing);
+  world.scene.add(focusRing);
 
-  const cool = new THREE.Color(0x7fd8ff), warmC = new THREE.Color(0xff8a4c), tmp = new THREE.Vector3(), ledHot = new THREE.Color(C.hot), ledCool = new THREE.Color(C.cool), ledStd = new THREE.Color(C.led), tint = new THREE.Color();
+  const target = CENTER.clone(), goal = CENTER.clone(), tmp = new THREE.Vector3();
   const chip = $('mode-chip');
-
-  function refreshMode() {
-    G.liquid.visible = state.cooling === 'liquid';
-    G.air.visible = state.cooling === 'air';
-    chip.textContent = CHIP[state.cooling];
-  }
-  refreshMode();
+  chip.textContent = CHIP[state.cooling];
+  world.setCooling(state.cooling);
+  world.updateHeat();
 
   function resize() {
     const w = host.clientWidth, h = host.clientHeight;
     if (!w || !h) return;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    renderer.setPixelRatio(dpr);
     renderer.setSize(w, h, false);
+    pipeline.resize(w, h, dpr);
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
   }
@@ -426,89 +275,42 @@ function startScene() {
     state.zoom = clamp(state.zoom * Math.exp(e.deltaY * 0.001), 0.55, 1.7);
   }, {passive: false});
 
-  // Portrait screens need a longer lens to keep the room in frame.
-  const baseRadius = () => (camera.aspect < 1.1 ? Math.min(30, 21 * (1.1 / camera.aspect) ** 0.6) : 21);
+  // Portrait screens need a longer lens to keep the pad in frame.
+  const baseRadius = () => (camera.aspect < 1.1 ? Math.min(44, 30 * (1.1 / camera.aspect) ** 0.6) : 30);
 
-  // The first rAF timestamp can precede the setup time, so start the clock on frame one and never run it backwards.
-  let last = null, elapsed = 0, heat = state.cooling === 'air' ? 1 : 0, first = true;
+  let last = null, elapsed = 0, first = true;
   function frame(now) {
     if (last === null) last = now;
     const dt = clamp((now - last) / 1000, 0, 0.05);
     last = now;
     if (state.playing) elapsed += dt;
-    const t = elapsed;
 
     goal.copy(CENTER);
-    if (state.focus) goal.lerp(ANCHOR[state.focus], 0.45);
+    if (state.focus) goal.lerp(DC_ANCHORS[state.focus], 0.4);
     target.lerp(goal, 1 - Math.exp(-dt * 3.5));
     const r = baseRadius() * state.zoom;
-    const yaw = state.yaw + (state.playing ? Math.sin(t * 0.16) * 0.09 : 0);
+    const yaw = state.yaw + (state.playing ? Math.sin(elapsed * 0.14) * 0.06 : 0);
     camera.position.set(target.x + r * Math.cos(state.pitch) * Math.sin(yaw), target.y + r * Math.sin(state.pitch), target.z + r * Math.cos(state.pitch) * Math.cos(yaw));
     camera.lookAt(target);
 
-    heat += ((state.cooling === 'air' ? 1 : 0) - heat) * (1 - Math.exp(-dt * 4));
-
-    // Flows: emphasise the focused system, travel speed follows the load.
-    for (const f of flows) {
-      const on = !state.focus || state.focus === f.sys ? 1 : 0.3;
-      f.mat.opacity = 0.95 * on;
-      const speed = f.speed * (f.sys === 'power' ? 0.9 + 0.1 * Math.sin(t * 1.7) : 1);
-      for (let i = 0; i < f.count; i++) {
-        // Wrap into [0, 1) so the curve is never asked for a parameter outside its range.
-        f.curve.getPointAt(((f.seed[i] + t * speed) % 1 + 1) % 1, tmp);
-        f.pos[i * 3] = tmp.x;
-        f.pos[i * 3 + 1] = tmp.y;
-        f.pos[i * 3 + 2] = tmp.z;
-      }
-      f.geo.attributes.position.needsUpdate = true;
-    }
-
-    // Air: cold air rises from the aisle floor and warms toward the AI row.
-    if (G.air.visible) {
-      for (let i = 0; i < AIR_N; i++) {
-        const y = 0.1 + ((airPhase[i] + t * 0.22) % 1) * 3.2;
-        const x = airX0[i] + y * 0.35 + Math.sin(y * 2.1 + i) * 0.05;
-        airPos[i * 3] = x;
-        airPos[i * 3 + 1] = y;
-        airPos[i * 3 + 2] = airZ[i];
-        tint.copy(cool).lerp(warmC, clamp((x - 1.0) / 1.6, 0, 1));
-        airCol[i * 3] = tint.r;
-        airCol[i * 3 + 1] = tint.g;
-        airCol[i * 3 + 2] = tint.b;
-      }
-      airGeo.attributes.position.needsUpdate = true;
-      airGeo.attributes.color.needsUpdate = true;
-    }
-
-    // Racks: LEDs blink on their own phase; AI racks glow hot under air-only.
-    for (const rk of RACKS) {
-      rk.body.material.emissive.setRGB(0.5 * heat * (rk.ai ? 1 : 0), 0.16 * heat * (rk.ai ? 1 : 0), 0.04 * heat * (rk.ai ? 1 : 0));
-      rk.leds.forEach((mat, j) => {
-        const blink = 0.4 + 0.6 * (0.5 + 0.5 * Math.sin(t * rk.rate + rk.phase * 2.3 + j * 1.1));
-        const base = rk.ai ? tint.copy(ledCool).lerp(ledHot, heat) : ledStd;
-        mat.color.copy(base).multiplyScalar(blink);
-      });
-    }
-
-    fan.rotation.z -= dt * (state.cooling === 'liquid' ? 5 : 3);
-    plate.material.opacity = (state.focus === 'structure' ? 0.42 : 0.14) + 0.05 * Math.sin(t * 1.8);
-
-    // Focus marker on the active pin.
+    world.update(elapsed, dt);
     focusRing.visible = !!state.focus;
     if (state.focus) {
-      focusRing.position.copy(ANCHOR[state.focus]);
+      focusRing.position.copy(DC_ANCHORS[state.focus]);
       focusRing.material.color.set(PINS.find(p => p.id === state.focus).color);
-      focusRing.scale.setScalar(1.1 + 0.18 * Math.sin(t * 4));
+      focusRing.scale.setScalar(1.1 + 0.18 * Math.sin(elapsed * 4));
     }
 
     camera.updateMatrixWorld();
-    renderer.render(world, camera);
+    pipeline.render(world.scene, camera, true);
 
     // Pins: project each anchor into the stage every frame.
     const w = host.clientWidth, h = host.clientHeight;
     for (const p of pinEls) {
       tmp.copy(p.anchor).project(camera);
-      const x = (tmp.x * 0.5 + 0.5) * w, y = (-tmp.y * 0.5 + 0.5) * h;
+      // Keep the label inside the stage; the stem still points at the anchor.
+      const half = p.el.offsetWidth / 2 + 8;
+      const x = clamp((tmp.x * 0.5 + 0.5) * w, half, w - half), y = (-tmp.y * 0.5 + 0.5) * h;
       p.el.hidden = !(tmp.z < 1 && Math.abs(tmp.x) < 1.05 && Math.abs(tmp.y) < 1.05);
       p.el.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) translate(-50%, -100%)`;
       p.el.setAttribute('aria-pressed', String(state.focus === p.id));
@@ -521,8 +323,7 @@ function startScene() {
     requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
-
-  return {refreshMode};
+  return world;
 }
 
 try {

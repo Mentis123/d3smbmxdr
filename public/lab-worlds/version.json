@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "sourceRepository": "Mentis123/adamrappaport",
-  "sourceCommit": "9d1b90e1af7fed275d5774bdf53a1e112c5da8bd",
+  "sourceCommit": "b85e23d8dffcbb6354f91a639adebb31904d08e7",
   "experience": "ai-lab",
   "runtimeDependency": "Self-hosted static files; no personal-site requests",
   "files": {
@@ -36,8 +36,8 @@
     "public/map-assets/mining-vehicles.js": "a9b62cfabcda577d5dac599e32227bd1692d8f445f302bd91bfdf48fe66239cf",
     "public/map-assets/models/rock-face/cliff-solid-v2.glb": "827a5735800041127168231062285fbfbae19ea20fa61a9daf2d9d78eec02b1a",
     "public/map-assets/navigation.js": "617452eaa88db40d248c2762354e52ee8c73414981dabd320e94203299678a7d",
-    "public/map-assets/nextdc-data.js": "2dce0ff9a3f292927533639effeecedc4baf2251c2385841901789071e9fc482",
-    "public/map-assets/nextdc-scene.js": "733f8674353903add553b085b854ae108d2369c75cf2801d264235d1c6ac49e5",
+    "public/map-assets/nextdc-data.js": "25d86e85124443d51de9a805f477f0c065196dead7924b7a27b21bf79c25ab17",
+    "public/map-assets/nextdc-scene.js": "95921de9a5de8c760f1ec0577c6130776f3a4a77ee1375ff58eaa95c7e015f8a",
     "public/map-assets/pins-layer.js": "54a13a359160fc898fba2f161698e69b2657e8b0cd6ddcd574392b7b177bcd66",
     "public/map-assets/pins.js": "d0dcbd2840758a928447ddffbef0c340a45f973f1b64c338749280bd469366ff",
     "public/map-assets/pipeline.js": "30e264dc997566d855d23dcd809b2d43e1bbbd3dde7b4fc37ea1184480471c16",
@@ -82,6 +82,6 @@
     "public/lab-worlds/energy.html": "867f380854f9eb924bbdb32cb786364719a1ae50e34fa755f84fa92e68c3f362",
     "public/lab-worlds/mining.html": "17d462bbf88e6efdc9fe4b8a40abfd9d7834a787ad613194a04b721bf3e8a336",
     "public/lab-worlds/datacenter.html": "85ced5d466f9fc5f1f224515f308c71353d34d7f398a1c4c0584083ab714cc96",
-    "public/lab-worlds/nextdc.html": "64367b44a86ca6175ceb22376c12dbe371b7c6394c8852d9cbf882f0ac8ae6fd"
+    "public/lab-worlds/nextdc.html": "bfcd48ab54aca417f42bb6f8b7ec65fb599377821862028731b26d6db4b65a15"
   }
 }

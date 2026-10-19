@@ -219,7 +219,7 @@ function ItemCard({item, status, onClose}: {item: Item; status: Status | null; o
       {item.inWorld && <p className="wx-inworld"><b>In the world</b>{item.inWorld}</p>}
       {item.vendor && (
         <details className="wx-vendor">
-          <summary>Equipment details</summary>
+          <summary>Partner and equipment</summary>
           <p>{item.vendor}</p>
         </details>
       )}

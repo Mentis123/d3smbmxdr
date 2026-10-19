@@ -30,6 +30,7 @@ const ANCHORS = {
   connectivity: [-2.6, DECK + 0.6, 1.0],
   security: [2.6, DECK + 1.3, 0.9],
   cage: [-5.2, DECK + 2.9, -2.1],
+  facility: [0.2, DECK + 4.4, -4.3],
   office: [-7.0, 2.6, 4.8],
   branch: [-1.6, 1.9, 5.2],
   industrial: [5.8, 2.6, 4.9],
@@ -39,8 +40,11 @@ const ANCHORS = {
 };
 
 // Views for the shared viewer. Distance is about 36 / zoom on a desktop screen.
+// The hero is the partner showcase (close enough that the roof is away and the rack pins show); 'facility' is the
+// whole campus for context.
 const NEXTDC_VIEWS_BASE = {
-  hero: {yaw: 0, target: [-0.6, 2.4, -1.0], zoom: 1.12, tilt: 0.62, azimuth: 0.25, fov: 38},
+  hero: {yaw: 0, target: [CAGE_CENTER.x, DECK + 1.5, CAGE_CENTER.z], zoom: 4.2, tilt: 0.6, azimuth: 0.3, fov: 38},
+  facility: {yaw: 0, target: [-0.6, 2.4, -1.0], zoom: 1.12, tilt: 0.62, azimuth: 0.25, fov: 38},
   cage: {yaw: 0, target: [CAGE_CENTER.x, DECK + 0.9, CAGE_CENTER.z], zoom: 4.4, tilt: 0.78, azimuth: 0.18, fov: 38},
   power: {yaw: 0, target: [6.6, DECK + 1.2, -0.8], zoom: 2.8, tilt: 0.5, azimuth: 0.55, fov: 38},
   cooling: {yaw: 0, target: [0.2, DECK + 3.2, -4.0], zoom: 3.0, tilt: 0.7, azimuth: 0.3, fov: 38},
@@ -52,8 +56,8 @@ const NEXTDC_VIEWS_BASE = {
   cloud: {yaw: 0, target: [-1.0, 6.6, -6.4], zoom: 1.9, tilt: 0.32, azimuth: 0.2, fov: 38},
   ...Object.fromEntries(RACK_ORDER.map(id => [id, {yaw: 0, target: [RACK_X[id], DECK + 1.0, RACK_Z], zoom: 6.4, tilt: 0.5, azimuth: 0.12, fov: 38}])),
 };
-// On phones the hero pulls in a little and close-ups a little more (viewer.js viewZoom), keeping the outer cards in frame.
-export const NEXTDC_VIEWS = Object.fromEntries(Object.entries(NEXTDC_VIEWS_BASE).map(([id, v]) => [id, {...v, portraitZoom: id === 'hero' ? 1.3 : 1.25}]));
+// On phones the facility view pulls in a little and close-ups a little more (viewer.js viewZoom), keeping the outer cards in frame.
+export const NEXTDC_VIEWS = Object.fromEntries(Object.entries(NEXTDC_VIEWS_BASE).map(([id, v]) => [id, {...v, portraitZoom: id === 'facility' ? 1.3 : 1.25}]));
 
 // Ground rings for focus and alerts, sized per item.
 const RINGS = {
@@ -382,14 +386,16 @@ export function createNextdcScene() {
     } else token.visible = false;
   });
 
-  // Roof fade and pin scope follow the camera's distance to the cage.
+  // Roof fade and pin scope follow how wide a slice of the world is in frame at the cage, not raw distance: a tall
+  // phone frame sits the camera further back for the same framing, and the roof must still come away there.
   const cageWorld = new THREE.Vector3();
   world.onCamera = camera => {
     cageWorld.copy(CAGE_CENTER);
     root.localToWorld(cageWorld);
     const dist = camera.position.distanceTo(cageWorld);
-    near = dist < 10.5;
-    const opacity = THREE.MathUtils.smoothstep(dist, 8, 16);
+    const span = 2 * dist * Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2) * camera.aspect;
+    near = span < 9.5;
+    const opacity = THREE.MathUtils.smoothstep(span, 7, 13.5);
     roofMat.opacity = opacity;
     roofMat.depthWrite = opacity > 0.98;
     roof.visible = frontWall.visible = opacity > 0.02;
@@ -407,14 +413,14 @@ export function createNextdcScene() {
   world.onHotspot = spot => { selected = spot.id; };
   applyLinks();
 
-  // Pins come from the shared data: status in the label, cage pins only inside the cage, far pins only outside.
+  // Pins come from the shared data: status in the label, rack pins only at the cage, far pins only outside.
   world.hotspots = ITEMS.map(item => ({
     id: item.id,
-    label: `${item.label} · ${STATUSES[item.status].label.toLowerCase()}`,
+    label: `${item.pin || item.label} · ${STATUSES[item.status].label.toLowerCase()}`,
     caption: item.what,
     view: item.id,
     anchor: new THREE.Vector3(...ANCHORS[item.id]),
-    hidden: () => (item.scope === 'near' ? !near : near),
+    hidden: () => (item.scope === 'any' ? false : item.scope === 'near' ? !near : near),
   }));
   world.nextdc = {items: ITEMS.map(i => i.id), stories: STORIES.map(s => s.id), get near() { return near; }, get state() { return state; }};
   return world;

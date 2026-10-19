@@ -15,6 +15,10 @@ const nextConfig = {
   async rewrites() {
     return [
       {
+        source: '/datacenter',
+        destination: '/datacenter.html',
+      },
+      {
         source: '/localdesk',
         destination: '/localdesk.html',
       },

@@ -399,7 +399,7 @@ function registerDecisionRoomRoutes(app: Express) {
   // Public: which scenario a new room of each edition will run, so the edition pages describe it truthfully.
   app.get("/api/decision-room/editions", async (_req, res, next) => { try {
     const of = (variant: string) => scenarioInfo(SCENARIOS[scenarioKeyForNewRoom(variant)]);
-    res.json({ "ciso-basecamp": of("riverbend"), "agent-0": of("agent0") });
+    res.json({ "ciso-basecamp": of("riverbend"), "agent-0": of("agent0"), coastwater: of("coastwater") });
   } catch (e) { fail(e, res, next); } });
 
   // Facilitator-only review pack: the whole scenario, including preferences, consequences and branches.
@@ -416,7 +416,7 @@ function registerDecisionRoomRoutes(app: Express) {
     if (!ensureAdmin(req, res) || rejectMissingDatabase(res)) return;
     const input = createSchema.parse(req.body ?? {}); await ensureTables();
     const sessionId = randomUUID(), joinCode = code(), displayToken = token();
-    const variant = input.variant === "agent0" ? "agent0" : VARIANT;
+    const variant = input.variant === "coastwater" ? "coastwater" : input.variant === "agent0" ? "agent0" : VARIANT;
     // Pinned for life: later content revisions never change what this room's choices meant.
     const scenario = scenarioKeyForNewRoom(variant);
     const session: Session = { id: sessionId, joinCode, name: input.name, variant, scenario, status: "lobby", activeRound: 1, resultsVisible: false, revision: 1, displayTokenHash: sha(displayToken), roundStartedAt: null, roundClosedAt: null, launchedAt: null };

@@ -14,7 +14,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { QRCodeSVG } from "qrcode.react";
 import { AlertTriangle, ArrowRight, Check, Copy, Download, Eye, FileText, Printer, LockKeyhole, Monitor, Play, Radio, RotateCcw, ShieldCheck, Square, Users, Zap } from "lucide-react";
 import "./decision-room.css";
@@ -22,6 +22,7 @@ import { downloadRoundsDeck, type RoundsModel, type RoundsRow } from "./rounds-d
 import ExplainMore from "./ExplainMore";
 import type { Briefing, Condition, Consequence, Dashboard, FactState, Guidance, Launch, MeterDef, PublicRound, Reveal, RunPlan, RunSegment, Scenario, ScenarioInfo, Tone } from "../../lib/decision-room/types";
 import VersionHub, { EditionIntro, HomeFooter, editions, type Edition } from "./VersionHub";
+import CoastwaterPresenter from "./CoastwaterPresenter";
 
 /* ------------------------------------------------------------------ types */
 
@@ -194,7 +195,7 @@ function SplitBars({ split, options }: { split: Split; options?: { key: string; 
 
 function Landing({ presetCode, edition }: { presetCode?: string; edition?: Edition }) {
   const [, navigate] = useLocation();
-  const [mode, setMode] = useState<"join" | "facilitate" | "display">("join");
+  const [mode, setMode] = useState<"join" | "facilitate" | "display">(edition === "coastwater" ? "facilitate" : "join");
   const [error, setError] = useState(""); const [busy, setBusy] = useState(false);
   const [joinCode, setJoinCode] = useState(presetCode || ""); const [teamCode, setTeamCode] = useState(""); const [teamName, setTeamName] = useState("");
   const [tables, setTables] = useState<{ teamCode: string; displayName: string; taken: boolean }[] | null>(null);
@@ -232,7 +233,7 @@ function Landing({ presetCode, edition }: { presetCode?: string; edition?: Editi
     return () => { alive = false; clearInterval(id); };
   }, [waiting?.token, waiting?.status, navigate]);
   const [adminKey, setAdminKey] = useState(() => { try { return localStorage.getItem("decision-room-admin-key") || ""; } catch { return ""; } });
-  const [tableCount, setTableCount] = useState(8);
+  const [tableCount, setTableCount] = useState(edition === "coastwater" ? 4 : 8);
   const [sessionId, setSessionId] = useState(""); const [displayToken, setDisplayToken] = useState("");
 
   async function join() {
@@ -250,9 +251,9 @@ function Landing({ presetCode, edition }: { presetCode?: string; edition?: Editi
   async function create() {
     setBusy(true); setError("");
     try {
-      const data = await request<{ sessionId: string; joinCode: string; displayToken: string }>(`${API}/sessions`, json({ tableCount, ...(edition ? { name: editions[edition].title, variant: edition === "agent-0" ? "agent0" : "riverbend" } : {}) }, { "x-admin-key": adminKey }));
+      const data = await request<{ sessionId: string; joinCode: string; displayToken: string }>(`${API}/sessions`, json({ tableCount, ...(edition ? { name: editions[edition].title, variant: edition === "coastwater" ? "coastwater" : edition === "agent-0" ? "agent0" : "riverbend" } : {}) }, { "x-admin-key": adminKey }));
       try { localStorage.setItem("decision-room-admin-key", adminKey); localStorage.setItem(`decision-room-display:${data.sessionId}`, data.displayToken); } catch { /* ignore */ }
-      navigate(`/decision-room/admin/${data.sessionId}`);
+      navigate(edition === "coastwater" ? `/decision-room/coastwater/present?room=${data.sessionId}` : `/decision-room/admin/${data.sessionId}`);
     } catch (e) { setError((e as Error).message); } finally { setBusy(false); }
   }
   function openDisplay() { try { localStorage.setItem(`decision-room-display:${sessionId}`, displayToken); } catch { /* ignore */ } navigate(`/decision-room/console/${sessionId}?displayToken=${encodeURIComponent(displayToken)}`); }
@@ -274,7 +275,7 @@ function Landing({ presetCode, edition }: { presetCode?: string; edition?: Editi
             : <><label>Table number<input value={teamCode} onChange={(e) => setTeamCode(e.target.value)} placeholder="1" maxLength={12} inputMode="numeric" /></label>{tablesError && joinCode.trim().length >= 6 ? <p className="dr-hint">{/not found/i.test(tablesError) ? "No room with that code yet. Check the code on the big screen." : tablesError}</p> : null}</>}
           {pickedTaken && picked ? <div className="dr-banner dr-banner--warn">Table {picked.teamCode} is already joined{picked.displayName !== `Table ${picked.teamCode}` ? <> as <b>{picked.displayName}</b></> : null}. If this is your table, we will ask that device to approve the handover. If it has been closed or switched off, you get straight in.</div> : null}
           <label>Team name<input value={teamName} onChange={(e) => setTeamName(e.target.value)} placeholder={pickedTaken && picked ? `${picked.displayName} (keep)` : "e.g. The Night Shift"} maxLength={40} autoComplete="off" /></label><button className="dr-primary" disabled={busy || !joinCode || !teamCode} onClick={join}>{pickedTaken ? "Ask to take over" : "Join room"} <ArrowRight /></button></>}
-          {mode === "facilitate" && <><h2>Create a live room</h2><p className="dr-hint">Adam only. One room per session; never reuse the morning room for the afternoon.</p><label>Facilitator key<input type="password" value={adminKey} onChange={(e) => setAdminKey(e.target.value)} autoComplete="off" /></label><label>Tables in the room<input type="number" min={2} max={50} value={tableCount} onChange={(e) => setTableCount(Number(e.target.value))} /></label><button className="dr-primary" disabled={busy || !adminKey} onClick={create}>Create room <ArrowRight /></button></>}
+          {mode === "facilitate" && <><h2>Create a live room</h2><p className="dr-hint">Facilitator access. Create a new room for each workshop.</p><label>Facilitator key<input type="password" value={adminKey} onChange={(e) => setAdminKey(e.target.value)} autoComplete="off" /></label><label>Tables in the room<input type="number" min={2} max={50} value={tableCount} onChange={(e) => setTableCount(Number(e.target.value))} /></label><button className="dr-primary" disabled={busy || !adminKey} onClick={create}>Create room <ArrowRight /></button></>}
           {mode === "display" && <><h2>Open a presenter console</h2><p className="dr-hint">Normally you open the console from the facilitator page with one click. This is the recovery path.</p><label>Session ID<input value={sessionId} onChange={(e) => setSessionId(e.target.value)} /></label><label>Display token<input type="password" value={displayToken} onChange={(e) => setDisplayToken(e.target.value)} /></label><button className="dr-primary" disabled={!sessionId || !displayToken} onClick={openDisplay}>Open console <Monitor /></button></>}
           <ErrorText message={error} />
         </section>
@@ -359,7 +360,7 @@ function Participant({ code }: { code: string }) {
         {results.consequence ? <div className="dr-conseq"><span className="tag">Your call · {decision?.optionKey}</span><strong>{results.consequence.you}</strong><p>{results.consequence.body}</p><div className="dr-changes">{results.consequence.changes.map((ch) => <span className={`chg chg--${ch.d}`} key={ch.t}>{ch.t}</span>)}</div></div> : <p className="dr-hint">Your table did not lock a call this round, so there is no consequence to show.</p>}
         {results.reveal ? <RevealBlock reveal={results.reveal} /> : null}
       </section>
-    : state === "closed" ? <section className="dr-card dr-wait"><Square className="dr-wait-icon" /><h2>Round closed.</h2><p>Richard is walking the options on the screen. Your call{locked ? ` was ${decision?.optionKey}` : " was not locked"}.</p></section>
+    : state === "closed" ? <section className="dr-card dr-wait"><Square className="dr-wait-icon" /><h2>Round closed.</h2><p>{data.scenario.family === "coastwater" ? "Discuss the different views with your facilitator. New information follows on the screen." : "Richard is walking the options on the screen."} Your call{locked ? ` was ${decision?.optionKey}` : " was not locked"}.</p></section>
     : locked ? <section className="dr-card dr-locked-card"><h2><LockKeyhole /> Locked: {decision?.optionKey}</h2>{decision?.rationale ? <p>“{decision.rationale}”</p> : null}<p className="dr-hint">Confidence {decision?.confidence} of 5. Keep talking — the reveal will not wait for perfect certainty. Ask Adam if this must change.</p></section>
     : <section className="dr-card dr-form dr-vote">
         <div className="dr-options">{round.options.map((o) => <button key={o.key} className={optionKey === o.key ? "selected" : ""} aria-pressed={optionKey === o.key} disabled={saving} onClick={() => { setOptionKey(o.key); setDirty(true); }}><b>{o.key}</b><span>{o.label}{o.cost ? <small className="dr-opt-cost">{o.cost}</small> : null}</span></button>)}</div>
@@ -547,7 +548,7 @@ function Admin({ id }: { id: string }) {
   const { session, counts, round } = data;
   const state = session.roundState;
   const joinUrl = `${location.origin}/decision-room/join/${session.joinCode}`;
-  const consoleUrl = `/decision-room/console/${id}?displayToken=${encodeURIComponent(displayToken)}`;
+  const consoleUrl = data.scenario.family === "coastwater" ? `/decision-room/coastwater/present?room=${id}` : `/decision-room/console/${id}?displayToken=${encodeURIComponent(displayToken)}`;
   const clock = countdown(session.roundStartedAt, session.durationSeconds, now);
   const featured = (data.decisions ?? []).filter((d) => d.isFeatured).length;
   const steps: { label: string; action: string; enabled: boolean; primary?: boolean; icon: ReactNode }[] = [
@@ -857,9 +858,11 @@ function ReviewPack({ family }: { family: string }) {
 
 export default function DecisionRoom() {
   const [path] = useLocation();
+  const search = useSearchParams();
   const parts = path.split("/").filter(Boolean);
   if (parts[1] === "agent-0" && parts[2] === "review") return <ReviewPack family="ironvale" />;
-  if (parts[1] === "ciso-basecamp" || parts[1] === "agent-0") return <Landing key={parts[1]} edition={parts[1]} />;
+  if (parts[1] === "coastwater" && parts[2] === "present") return <CoastwaterPresenter key={search.get("room") || "rehearsal"} room={search.get("room") || ""} />;
+  if (parts[1] === "ciso-basecamp" || parts[1] === "agent-0" || parts[1] === "coastwater") return <Landing key={parts[1]} edition={parts[1]} />;
   if (parts[1] === "join") return <Landing presetCode={parts[2]} />;
   if (parts[1] === "session" && parts[2]) return <Participant code={parts[2].toUpperCase()} />;
   if (parts[1] === "console" && parts[2]) return <Console id={parts[2]} />;

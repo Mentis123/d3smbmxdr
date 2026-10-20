@@ -95,3 +95,7 @@ When you learn something that would have saved time or prevented a mistake on th
 - Static HTML pages go in `public/`
 - Next.js routes in `app/`
 - Rewrites defined in `next.config.js`
+
+## Coastwater presenter
+
+`/decision-room/coastwater/present` is the facilitator presentation. Optional `?room=<session id>` connects its Next button to the existing live room actions. Position and boundary notes are browser-local; votes remain server-side. Keep header and footer visible at 720p and let only the central stage scroll. Content lives in `lib/decision-room/coastwater-content.ts` and feeds both the presenter and the revision-pinned scenario.

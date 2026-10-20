@@ -177,7 +177,7 @@ export type RunPlan = {
 export type Scenario = {
   /** Persisted on the room, e.g. "riverbend@1". Never reuse a key for different content. */
   key: string;
-  family: "riverbend" | "ironvale";
+  family: "riverbend" | "ironvale" | "coastwater";
   revision: string;
   /** "live" = approved for customer rooms; "preview" = review/rehearsal only. */
   status: "live" | "preview";

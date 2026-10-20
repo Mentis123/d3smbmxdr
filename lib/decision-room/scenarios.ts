@@ -15,15 +15,17 @@
 
 import { RIVERBEND } from "./content";
 import { IRONVALE } from "./ironvale";
+import { COASTWATER } from "./coastwater";
 import { AGENT0_PRODUCTION_RELEASE } from "./release";
 import type { Condition, Consequence, Dashboard, FactState, PublicRound, RoundContent, Scenario, ScenarioInfo, StageStatus } from "./types";
 
-export const SCENARIOS: Record<string, Scenario> = { [RIVERBEND.key]: RIVERBEND, [IRONVALE.key]: IRONVALE };
+export const SCENARIOS: Record<string, Scenario> = { [RIVERBEND.key]: RIVERBEND, [IRONVALE.key]: IRONVALE, [COASTWATER.key]: COASTWATER };
 /** What a room created before scenario pinning ran. */
 export const LEGACY_SCENARIO_KEY = RIVERBEND.key;
 
 /** The scenario a new room of this variant is pinned to. */
 export function scenarioKeyForNewRoom(variant: string) {
+  if (variant === "coastwater") return COASTWATER.key;
   if (variant !== "agent0") return RIVERBEND.key;
   const configured = (process.env.DECISION_ROOM_AGENT0_SCENARIO ?? "").trim();
   if (configured) return SCENARIOS[configured] ? configured : RIVERBEND.key;

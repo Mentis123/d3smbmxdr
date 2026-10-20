@@ -3,7 +3,7 @@ import { ArrowDown, ArrowLeft, ArrowRight, Activity, Radio, ShieldCheck } from "
 import "./version-hub.css";
 import ExplainMore from "./ExplainMore";
 
-export type Edition = "ciso-basecamp" | "agent-0";
+export type Edition = "ciso-basecamp" | "agent-0" | "coastwater";
 export const editions = {
   "ciso-basecamp": {
     number: "01", title: "CISO Basecamp", label: "Original edition", status: "Customer tested",
@@ -18,6 +18,13 @@ export const editions = {
     line: "The mine keeps moving. Who decides what stops?",
     description: "Ironvale Mining runs a maintenance agent across its operations. Six decisions, from the SOC to the board, on what the agent may touch while the mine keeps moving.",
     tags: ["Agentic AI", "Mining operations", "Six decisions"],
+  },
+  coastwater: {
+    number: "03", title: "Coastwater", label: "Board workshop", status: "Ready to run",
+    image: "/map-assets/poster.jpg", imageAlt: "A regional water utility landscape, the fictional setting for Coastwater's AI governance workshop",
+    line: "The pilot that became policy.",
+    description: "Useful AI spreads across a regional water utility. Six board decisions about permission, evidence and accountability. Present every step from the app.",
+    tags: ["AI governance", "Board and senior leaders", "Six decisions"],
   },
 } as const;
 
@@ -40,7 +47,7 @@ export default function VersionHub() {
     <section className="vh-intro" aria-labelledby="vh-title">
       <div><div className="vh-eyebrow"><Radio size={14} /> HUMAN JUDGEMENT. REAL CONSEQUENCES.</div>
         <h1 id="vh-title">The room is yours.<br /><span>Make the call.</span></h1>
-        <p>An unfolding cyber incident. A table of competing perspectives.<br className="vh-desktop-break" /> Choose your experience and put your decisions to the test.</p>
+        <p>A critical decision. A table of competing perspectives.<br className="vh-desktop-break" /> Choose your experience and put your judgement to the test.</p>
       </div>
       <div className="vh-instrument" aria-label="Tabletop format: six rounds, one device per table, every decision matters">
         <div className="vh-instrument-label"><Activity size={14} /> DECISION SIGNAL <span>ILLUSTRATIVE</span></div>
@@ -48,10 +55,10 @@ export default function VersionHub() {
         <div className="vh-instrument-stats"><div><b>06</b><small>ROUNDS</small></div><div><b>01</b><small>DEVICE / TABLE</small></div><div><b>A–D</b><small>YOUR CALL</small></div></div>
       </div>
     </section>
-    <div className="vh-section-label"><span><i />SELECT YOUR EXPERIENCE</span><small>02 EDITIONS <ArrowDown size={13} /></small></div>
+    <div className="vh-section-label"><span><i />SELECT YOUR EXPERIENCE</span><small>03 EXPERIENCES <ArrowDown size={13} /></small></div>
     <section className="vh-editions" aria-label="Tabletop versions">
-      {(Object.keys(editions) as Edition[]).map((id) => { const e = editions[id]; return <a key={id} className={`vh-tile vh-tile--${id}`} href={`/decision-room/${id}`} target="_blank" rel="noopener noreferrer" aria-label={`Open V${e.number === "01" ? "1" : "2"}: ${e.title}, opens in a new tab`}>
-        <div className="vh-art"><img src={e.image} alt={e.imageAlt} width="1200" height="800" fetchPriority="high" /><div className="vh-art-scan" aria-hidden="true" /><div className="vh-tile-top"><span className="vh-version">V{e.number === "01" ? "1" : "2"} <i /> {e.label}</span><span className="vh-status"><i />{e.status}</span></div><span className="vh-art-caption" aria-hidden="true">{id === "agent-0" ? "IRONVALE / MINING OPERATIONS" : "RIVERBEND / WATER & ENERGY"}</span></div>
+      {(Object.keys(editions) as Edition[]).map((id) => { const e = editions[id]; return <a key={id} className={`vh-tile vh-tile--${id}`} href={`/decision-room/${id}`} target="_blank" rel="noopener noreferrer" aria-label={`Open ${e.title}, opens in a new tab`}>
+        <div className="vh-art"><img src={e.image} alt={e.imageAlt} width="1200" height="800" fetchPriority="high" /><div className="vh-art-scan" aria-hidden="true" /><div className="vh-tile-top"><span className="vh-version">{e.number} <i /> {e.label}</span><span className="vh-status"><i />{e.status}</span></div><span className="vh-art-caption" aria-hidden="true">{id === "coastwater" ? "COASTWATER / AI GOVERNANCE" : id === "agent-0" ? "IRONVALE / MINING OPERATIONS" : "RIVERBEND / WATER & ENERGY"}</span></div>
         <div className="vh-tile-copy"><div className="vh-title-row"><h2>{e.title}</h2><span className="vh-open"><ArrowRight size={23} /></span></div><p className="vh-tagline">{e.line}</p><p className="vh-description">{e.description}</p><div className="vh-tags">{e.tags.map((tag) => <span key={tag}>{tag}</span>)}</div><div className="vh-tile-bottom"><span>Enter {e.title}</span><span>EXP / {e.number} <ArrowRight size={15} /></span></div></div>
       </a>; })}
     </section>
@@ -87,11 +94,12 @@ export function EditionIntro({ edition }: { edition: Edition }) {
     : "Set at Ironvale Mining, where a maintenance agent works across the operation. Six rounds, from the SOC to the board, each with a sourced briefing. A preview edition, in review with Rich and Scott.";
   return <section className={`vh-edition-intro vh-edition-intro--${edition}`}>
     <a className="vh-back" href="/decision-room"><ArrowLeft size={15} />All experiences</a>
-    <div className="vh-eyebrow">V{e.number === "01" ? "1" : "2"} / {e.label} <span className="vh-status"><i />{e.status}</span></div>
+    <div className="vh-eyebrow">{e.number} / {e.label} <span className="vh-status"><i />{e.status}</span></div>
     <img className="vh-edition-art" src={e.image} alt="" width="1200" height="800" />
     <h1>{e.title}</h1><p className="vh-edition-line">{e.line}</p>
-    <p>{edition === "agent-0" ? (family === "riverbend" ? "Mining preview. New rooms currently use the original scenario." : "A facilitated mining tabletop. One device per table.") : "Six rounds. One device per table."}</p>
-    <ExplainMore title={`About ${e.title}`}><p>{edition === "agent-0" ? agent0 : "One device per table. Six rounds, from the SOC floor to the boardroom. Vote A–D, say why, lock it — then see where the room landed."}</p><p>{e.description}</p><div className="vh-tags">{e.tags.map((tag) => <span key={tag}>{tag}</span>)}</div></ExplainMore>
+    <p>{edition === "coastwater" ? "Act as Coastwater's board. Six decisions. Different views welcome." : edition === "agent-0" ? (family === "riverbend" ? "Mining preview. New rooms currently use the original scenario." : "A facilitated mining tabletop. One device per table.") : "Six rounds. One device per table."}</p>
+    {edition === "coastwater" ? <p><a className="vh-back" href="/decision-room/coastwater/present">Rehearse the full presentation <ArrowRight size={15} /></a><small style={{ display: "block", fontSize: 14 }}>No key needed to rehearse. Create a live room to collect table votes.</small></p> : null}
+    <ExplainMore title={`About ${e.title}`}><p>{edition === "coastwater" ? "Six governance decisions at a fictional water utility. Vote as a table, explain the disagreement, consider new information and capture the permission, conditions, owner and escalation trigger. Dan can run every screen with Next and Back." : edition === "agent-0" ? agent0 : "One device per table. Six rounds, from the SOC floor to the boardroom. Vote A–D, say why, lock it — then see where the room landed."}</p><p>{e.description}</p><div className="vh-tags">{e.tags.map((tag) => <span key={tag}>{tag}</span>)}</div></ExplainMore>
     {edition === "agent-0" ? <a className="vh-back vh-review-link" href="/decision-room/agent-0/review">Facilitator review pack <ArrowRight size={15} /></a> : null}
   </section>;
 }

@@ -637,3 +637,6 @@
   .dr-rounds-grid article,.dr-rounds-band{break-inside:avoid}
   .dr-shell.dr-rounds{zoom:.7}
 }
+
+/* Room-specific session planning, persisted through the existing event log. */
+.dr-schedule h2{font-size:20px;margin:0 0 6px}.dr-schedule p{font-size:14px;line-height:1.5;color:#aebfd4;margin:0 0 16px}.dr-schedule-fields{display:flex;flex-wrap:wrap;align-items:flex-end;gap:16px}.dr-schedule-fields label{display:flex;flex-direction:column;gap:8px;font-size:13px;color:#bdd1e6;flex:1;min-width:150px}.dr-schedule-fields input{color-scheme:dark;font:inherit;border:1px solid #78dcff55;background:#000025;color:#eee;padding:12px;border-radius:7px;width:100%;min-height:44px}.dr-schedule-fields button{min-height:44px}.dr-schedule-error{color:#ffb200!important;margin-top:12px!important}.dr-schedule-saved{color:#0ff!important;margin-top:12px!important}.dr-session-plan>.dr-runclock{margin-top:22px}.dr-schedule-window{font-size:14px;white-space:nowrap;color:#78dcff}.dr-schedule-agenda{margin:18px 0}.dr-schedule-agenda summary{cursor:pointer;color:#78dcff;font-size:14px;padding:6px 0}.dr-schedule-agenda ol{list-style:none;padding:0;display:grid;gap:8px}.dr-schedule-agenda li{display:flex;gap:20px;color:#eee;font-size:14px}.dr-schedule-agenda time{min-width:110px;color:#78dcff}.dr-session-plan>.dr-hint{margin-top:14px}

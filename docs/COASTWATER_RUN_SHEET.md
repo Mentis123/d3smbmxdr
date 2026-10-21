@@ -6,6 +6,10 @@ Open `/decision-room/coastwater`. Rehearse the entire presentation without a key
 
 Every table uses one device and joins via the QR code or `/decision-room/join`. Each table selects A–D, records its reasoning and confidence, then locks its call. Include any minority view in the rationale.
 
+The welcome screen shows the room's joining instructions: open **bit.ly/4evinZE**, select **Coastwater**, choose **Join a table**, enter the displayed room code and choose a table. Coastwater home opens on the join form. The QR code offers a direct route into the room.
+
+In **Full room controls**, set **Session date**, **Start time** and **Length (minutes)**, then **Save session plan**. Date and time use **Australia/Sydney**, including daylight saving. Settings belong to the room and remain after a reload or device change. The adjusted agenda preserves the scenario's relative timing and its scheduled finish. A late actual start compresses the remaining agenda. Presenter and table voting countdowns use the same timing. You can also edit the plan from **Workshop controls** in the presenter. Timing remains advisory and never closes a vote automatically.
+
 The presenter is the facilitator control surface. Keep it on the workshop display. **Next** or the right arrow proceeds through two opening screens, five screens for each of six modules, then the closing read-back. Back reviews an earlier screen without undoing votes.
 
 1. Situation: explain what changed.

@@ -23,11 +23,13 @@ import ExplainMore from "./ExplainMore";
 import type { Briefing, Condition, Consequence, Dashboard, FactState, Guidance, Launch, MeterDef, PublicRound, Reveal, RunPlan, RunSegment, Scenario, ScenarioInfo, Tone } from "../../lib/decision-room/types";
 import VersionHub, { EditionIntro, HomeFooter, editions, type Edition } from "./VersionHub";
 import CoastwaterPresenter from "./CoastwaterPresenter";
+import SessionRunClock from "./SessionRunClock";
+import type { SessionSchedule } from "../../lib/decision-room/timing";
 
 /* ------------------------------------------------------------------ types */
 
 type RoundState = "lobby" | "launched" | "open" | "closed" | "published" | "ended";
-type SessionInfo = { id: string; joinCode: string; name: string; status: string; revision: number; activeRound: number; roundCount: number; roundState: RoundState; roundStartedAt: string | null; roundClosedAt: string | null; launchedAt: string | null; durationSeconds: number };
+type SessionInfo = { id: string; joinCode: string; name: string; status: string; revision: number; activeRound: number; roundCount: number; roundState: RoundState; roundStartedAt: string | null; roundClosedAt: string | null; launchedAt: string | null; durationSeconds: number; schedule: SessionSchedule | null };
 type Organisation = { name: string; tagline: string; estate: string; holds: string; reach: string; objective: string };
 type Feed = { kind: string; who: string; text: string };
 type Round = PublicRound;
@@ -195,7 +197,7 @@ function SplitBars({ split, options }: { split: Split; options?: { key: string; 
 
 function Landing({ presetCode, edition }: { presetCode?: string; edition?: Edition }) {
   const [, navigate] = useLocation();
-  const [mode, setMode] = useState<"join" | "facilitate" | "display">(edition === "coastwater" ? "facilitate" : "join");
+  const [mode, setMode] = useState<"join" | "facilitate" | "display">("join");
   const [error, setError] = useState(""); const [busy, setBusy] = useState(false);
   const [joinCode, setJoinCode] = useState(presetCode || ""); const [teamCode, setTeamCode] = useState(""); const [teamName, setTeamName] = useState("");
   const [tables, setTables] = useState<{ teamCode: string; displayName: string; taken: boolean }[] | null>(null);
@@ -458,78 +460,6 @@ function Console({ id }: { id: string }) {
 
 /* ----------------------------------------------------------------- admin */
 
-/* -------------------------------------------------------------- run clock
- * Facilitator-only: where the room is against the 90-minute plan from Richard's
- * deck notes (9:30–11:00 by default, editable for rehearsals). Position comes from
- * the room state, so the clock knows which segment you are in without extra taps.
- */
-type Segment = RunSegment;
-const pad2 = (n: number) => String(n).padStart(2, "0");
-const hhmm = (d: Date) => `${d.getHours() % 12 || 12}:${pad2(d.getMinutes())}`;
-function span(ms: number) {
-  const s = Math.max(0, Math.round(ms / 1000)); const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), r = s % 60;
-  return h ? `${h}:${pad2(m)}:${pad2(r)}` : `${m}:${pad2(r)}`;
-}
-/** The planned window for where the room actually is. The plan is the scenario's own: opening, launch, one segment per round, then the close. */
-function plannedWindow(plan: RunPlan, state: RoundState, round: number): { seg: Segment; from: number; to: number; part: string } {
-  const S = plan.segments; const last = S[S.length - 1];
-  if (state === "lobby") return { seg: S[0], from: S[0].from, to: S[0].to, part: "" };
-  if (state === "launched") return { seg: S[1], from: S[1].from, to: S[1].to, part: "" };
-  if (state === "ended") return { seg: last, from: last.from, to: last.to, part: "" };
-  const seg = S[1 + Math.min(Math.max(round, 1), S.length - 3)];
-  return state === "open" ? { seg, from: seg.from, to: seg.from + plan.decideMinutes, part: "tables deciding" } : { seg, from: seg.from + plan.decideMinutes, to: seg.to, part: state === "closed" ? "option review" : "split and discussion" };
-}
-function RunClock({ plan, state, round, now, launchedAt }: { plan: RunPlan; state: RoundState; round: number; now: number; launchedAt: string | null }) {
-  const [start, setStart] = useState(() => { try { return localStorage.getItem("decision-room-run-start") || "09:30"; } catch { return "09:30"; } });
-  const [editing, setEditing] = useState(false);
-  const [h, m] = start.split(":").map(Number);
-  const t0 = new Date(now); t0.setHours(h || 9, m || 0, 0, 0);
-  const end = t0.getTime() + plan.totalMinutes * 60000;
-  // Once the attack is launched, everything after it is re-fitted between the real launch time and 11:00.
-  const LAUNCH_AT = plan.segments[1].from;
-  const launched = launchedAt ? new Date(launchedAt).getTime() : null;
-  const fit = launched && launched < end ? (end - launched) / ((plan.totalMinutes - LAUNCH_AT) * 60000) : 1;
-  const at = (min: number) => (launched && min >= LAUNCH_AT ? launched + (min - LAUNCH_AT) * fit * 60000 : t0.getTime() + min * 60000);
-  const roundMinutes = Math.round((plan.segments[2].to - plan.segments[2].from) * fit * 10) / 10;
-  const win = plannedWindow(plan, state, round);
-  const elapsedMin = (now - t0.getTime()) / 60000;
-  const before = now < t0.getTime();
-  // Positive = behind plan, negative = ahead.
-  const drift = before ? 0 : now > at(win.to) ? (now - at(win.to)) / 60000 : now < at(win.from) ? -(at(win.from) - now) / 60000 : 0;
-  const lateMin = Math.round(drift);
-  const over = now > end;
-  const tone = before ? "idle" : over || lateMin >= 5 ? "red" : lateMin >= 2 ? "amber" : "green";
-  const inSlot = !before && drift <= 0 ? Math.max(0, at(win.to) - now) : 0;
-  const A = plan.advice; const closing = win.seg.key === "close"; const opening = win.seg.key === "open" || win.seg.key === "launch";
-  const advice = before ? `Starts at ${hhmm(t0)}. Open the room, test the console, breathe.`
-    : over ? `Over by ${span(now - end)}. Thank the room and close now.`
-    : lateMin >= 5 ? `Push: ${lateMin} min behind. ${opening ? A.openingBehind : closing || round >= 5 ? A.closingBehind : A.roundBehind}`
-    : lateMin >= 2 ? `Tighten: ${lateMin} min behind. ${win.seg.key === "open" ? A.openingTighten : A.roundTighten}`
-    : drift < -1.5 ? `Relaxed: ${Math.round(-drift)} min ahead. Let the discussion breathe or take an extra question.`
-    : closing ? (() => { const m = (plan.closeMilestones ?? [{ until: win.to - 7, text: `On schedule. Move to the close by {${win.to - 7}}.` }]).find((x) => now < at(x.until)); return m ? m.text.replace(/\{(\d+)\}/g, (_, n) => hhmm(new Date(at(Number(n))))) : `On the close. ${span(end - now)} to finish on time.`; })()
-    : `On schedule${fit < 0.97 ? ` (re-fitted to finish ${hhmm(new Date(end))}: about ${roundMinutes} min per round, ${Math.max(2, Math.round(plan.decideMinutes * fit * 2) / 2)} to decide)` : ""}. ${span(inSlot)} left for ${win.seg.label.toLowerCase()}${win.part ? ` (${win.part})` : ""}.`;
-  const pct = (t: number) => Math.min(100, Math.max(0, ((t - t0.getTime()) / (end - t0.getTime())) * 100));
-  const nowPct = pct(now);
-  const posPct = pct(at(win.from));
-  void elapsedMin;
-  return <section className={`dr-runclock dr-runclock--${tone}`} aria-label="Run of show">
-    <div className="dr-runclock-main">
-      <span className="dr-runclock-light" aria-hidden="true" />
-      <div><small>{before ? "Starts in" : over ? "Over time" : "Remaining"}</small><strong>{before ? span(t0.getTime() - now) : over ? `+${span(now - end)}` : span(end - now)}</strong></div>
-      <div><small>Now</small><b>{hhmm(new Date(now))}</b></div>
-      <div><small>Where we are</small><b>{win.seg.label}{win.part ? ` · ${win.part}` : ""}</b><em>planned {hhmm(new Date(at(win.from)))}–{hhmm(new Date(at(win.to)))} · {win.seg.slides}</em></div>
-      <p className="dr-runclock-advice">{advice}</p>
-      {editing ? <label className="dr-runclock-edit">Start<input type="time" value={start} onChange={(e) => { setStart(e.target.value); try { localStorage.setItem("decision-room-run-start", e.target.value); } catch { /* ignore */ } }} onBlur={() => setEditing(false)} autoFocus /></label>
-        : <button className="dr-runclock-edit" onClick={() => setEditing(true)} title="Change the start time (for rehearsals)">{hhmm(t0)}–{hhmm(new Date(end))}</button>}
-    </div>
-    <div className="dr-runclock-track" aria-hidden="true">
-      {plan.segments.map((s) => <span key={s.key} className={`seg ${s.key === win.seg.key ? "is-here" : ""}`} style={{ left: `${pct(at(s.from))}%`, width: `${pct(at(s.to)) - pct(at(s.from))}%` }} title={`${s.label} ${hhmm(new Date(at(s.from)))}`}><i>{s.label}</i></span>)}
-      <b className="pos" style={{ left: `${posPct}%` }} title="Where the room is" />
-      {!before ? <b className="now" style={{ left: `${nowPct}%` }} title="Now" /> : null}
-    </div>
-  </section>;
-}
-
 function Admin({ id }: { id: string }) {
   const [key, setKey] = useState(() => { try { return localStorage.getItem("decision-room-admin-key") || ""; } catch { return ""; } });
   const [draftKey, setDraftKey] = useState("");
@@ -552,8 +482,8 @@ function Admin({ id }: { id: string }) {
   const clock = countdown(session.roundStartedAt, session.durationSeconds, now);
   const featured = (data.decisions ?? []).filter((d) => d.isFeatured).length;
   const steps: { label: string; action: string; enabled: boolean; primary?: boolean; icon: ReactNode }[] = [
-    { label: "Launch the attack", action: "launch", enabled: state === "lobby", icon: <Zap /> },
-    { label: state === "lobby" || state === "launched" ? "Start · open triage" : "Started", action: "start", enabled: state === "lobby" || state === "launched", icon: <Play />, primary: state === "launched" },
+    { label: data.scenario.family === "coastwater" ? "Introduce Coastwater" : "Launch the attack", action: "launch", enabled: state === "lobby", icon: <Zap /> },
+    { label: state === "lobby" || state === "launched" ? (data.scenario.family === "coastwater" ? "Open decision 1" : "Start · open triage") : "Started", action: "start", enabled: state === "lobby" || state === "launched", icon: <Play />, primary: state === "launched" },
     state === "closed" ? { label: "Reopen round", action: "unclose", enabled: true, icon: <RotateCcw /> } : { label: "Close round", action: "close", enabled: state === "open", icon: <Square />, primary: state === "open" },
     { label: "Show the split", action: "publish", enabled: state === "open" || state === "closed", icon: <Eye />, primary: state === "closed" },
     { label: session.activeRound >= session.roundCount ? "Final round" : `Next · round ${session.activeRound + 1}`, action: "advance", enabled: session.status === "live" && session.activeRound < session.roundCount, icon: <ArrowRight />, primary: state === "published" && session.activeRound < session.roundCount },
@@ -562,11 +492,11 @@ function Admin({ id }: { id: string }) {
   return <Frame wide className="dr-admin dr-one" kicker={data.scenario.brand.kicker}>
     <section className="dr-admin-head"><div><span className="dr-kicker">FACILITATOR CONTROLS · NOT FOR PROJECTION</span><h1 className="dr-h1-small">Room <span className="dr-join-code">{session.joinCode}</span></h1><p className="dr-when">{round ? `${round.seat} · ${round.title}` : state} · {state === "open" ? `clock ${clock.label}` : state}</p></div><div className="dr-qr"><QRCodeSVG value={joinUrl} size={118} bgColor="#ffffff" fgColor="#000025" /><button onClick={() => navigator.clipboard?.writeText(joinUrl)}><Copy />Copy join link</button></div></section>
 
-    {data.runPlan ? <RunClock plan={data.runPlan} state={state} round={session.activeRound} now={now} launchedAt={session.launchedAt} /> : null}
+    {data.runPlan ? <SessionRunClock plan={data.runPlan} state={state} round={session.activeRound} now={now} launchedAt={session.launchedAt} schedule={session.schedule} onSchedule={async (schedule) => { await request(`${API}/sessions/${id}/actions`, json({ action: "schedule", ...schedule }, headers)); await refresh(); }} /> : null}
 
     <section className="dr-card"><div className="dr-panel-head"><span>Run the room, in order</span><Status tone={stale(lastUpdated, now)} label={stale(lastUpdated, now)} /></div>
       <div className="dr-steps">{steps.map((s, i) => <button key={s.action} className={s.primary ? "dr-primary" : ""} disabled={busy || !s.enabled} onClick={() => act({ action: s.action })}><b>{i + 1}</b>{s.icon}{s.label}</button>)}</div>
-      <div className="dr-run-foot"><ExplainMore title="How to run each round"><p>Flow per round: tables lock → <b>Close round</b> → Richard walks the option slide → <b>Show the split</b> → discuss → <b>Next</b>. The timer is advisory; nothing closes on its own.</p></ExplainMore>
+      <div className="dr-run-foot"><ExplainMore title="How to run each round"><p>{data.scenario.family === "coastwater" ? "Use the Coastwater presenter for the complete Next/Back sequence: situation, decision, discussion, new information and boundary. These controls can also open, close and publish votes." : <>Flow per round: tables lock → <b>Close round</b> → Richard walks the option slide → <b>Show the split</b> → discuss → <b>Next</b>. The timer is advisory; nothing closes on its own.</>}</p></ExplainMore>
       <div className="dr-control-bar"><a className="dr-button" target="_blank" rel="noreferrer" href={consoleUrl}><Monitor />Open console (projector)</a><a className="dr-button" target="_blank" rel="noreferrer" href={`/decision-room/report/${id}`}><FileText />One-page report</a><a className="dr-button" target="_blank" rel="noreferrer" href={`/decision-room/report/${id}/rounds`}><FileText />Round-by-round report</a><button onClick={exportCsv}><Download />Export CSV</button><button onClick={() => confirm("End this room? Table devices can no longer submit.") && act({ action: "end" })} disabled={busy || session.status === "ended"}>End room</button><button className="danger" onClick={() => confirm("Reset this room and remove every response and table login?") && act({ action: "reset" })} disabled={busy}><RotateCcw />Reset</button></div></div>
       <ErrorText message={actionError} />
     </section>

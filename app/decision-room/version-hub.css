@@ -24,4 +24,4 @@
 
 /* Three independent experiences, with room for readable titles. */
 @media(min-width:1150px){.vh-editions{grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}.vh-tile-copy{padding-left:22px;padding-right:22px}.vh-title-row h2{font-size:30px}.vh-tile-top{inset:12px}.vh-tile-top .vh-status{font-size:8px}.vh-version{font-size:8px;padding:6px}.vh-art{aspect-ratio:1.8}.vh-tagline{min-height:46px}.vh-description{flex:1}}
-.vh-tile--coastwater{border-color:#78dcff66}.vh-tile--coastwater .vh-art img{filter:hue-rotate(330deg)}
+.vh-tile--coastwater{border-color:#78dcff66}

@@ -23,7 +23,7 @@ export const editions = {
     number: "03", title: "Coastwater", label: "Board workshop", status: "Ready to run",
     image: "/map-assets/poster.jpg", imageAlt: "A regional water utility landscape, the fictional setting for Coastwater's AI governance workshop",
     line: "The pilot that became policy.",
-    description: "Useful AI spreads across a regional water utility. Six board decisions about permission, evidence and accountability. Present every step from the app.",
+    description: "Six difficult AI decisions at a regional water utility. Make a call, weigh the cost, and hear why others disagree. Run the whole workshop from the app.",
     tags: ["AI governance", "Board and senior leaders", "Six decisions"],
   },
 } as const;

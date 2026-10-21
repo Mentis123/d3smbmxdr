@@ -23,6 +23,7 @@ import { z, ZodError } from "zod";
 import { SCENARIOS, consequenceFor, dashboardFor, factStates, latestOf, publicRound, replay, resolveScenario, roundContent, roundCount, scenarioInfo, scenarioKeyForNewRoom } from "./scenarios";
 import type { Scenario } from "./types";
 import { scheduledVoteSeconds, type SessionSchedule } from "./timing";
+import { coastwaterOperation, coastwaterStep, COASTWATER_LAST_STEP, coastwaterLastStep } from "./presentation";
 
 /* ------------------------------------------------------------ plumbing
  * Ported from the Express version with the handlers untouched: a tiny
@@ -79,6 +80,8 @@ type Session = {
   activeRound: number; resultsVisible: boolean; revision: number; displayTokenHash: string;
   roundStartedAt: string | null; roundClosedAt: string | null; launchedAt: string | null;
   schedule?: SessionSchedule | null;
+  presentationStep?: number | null;
+  audienceTimer?: boolean;
 };
 type Team = { id: string; sessionId: string; teamCode: string; displayName: string; tokenHash: string | null; state: TeamState; lastSeenAt: string | null; pendingHash: string | null; pendingName: string | null; pendingAt: string | null; pendingState: string | null; pendingPolledAt: string | null; pendingReleaseId: string | null; pendingReleaseHash: string | null };
 type Decision = { id: string; sessionId: string; teamId: string; roundNo: number; optionKey: string | null; rationale: string; confidence: number | null; isLocked: boolean; isFeatured: boolean; updatedAt: string };
@@ -174,8 +177,10 @@ async function findSession(identifier: string) {
   const result = rows<any>(await db.execute(sql`SELECT * FROM workshop_sessions WHERE id::text=${identifier} OR join_code=${identifier.toUpperCase()} LIMIT 1`));
   if (!result[0]) return null;
   const session = mapSession(result[0]);
-  const settings = rows<any>(await db.execute(sql`SELECT payload FROM workshop_events WHERE session_id=${session.id}::uuid AND event_type='schedule' ORDER BY created_at DESC LIMIT 1`));
-  session.schedule = settings[0]?.payload ?? null;
+  const settings = rows<any>(await db.execute(sql`SELECT DISTINCT ON (event_type) event_type,payload FROM workshop_events WHERE session_id=${session.id}::uuid AND event_type IN ('schedule','present','audience-timer') ORDER BY event_type,created_at DESC`));
+  session.schedule = settings.find(r => r.event_type === "schedule")?.payload ?? null;
+  session.audienceTimer = settings.find(r => r.event_type === "audience-timer")?.payload?.enabled;
+  session.presentationStep = settings.find(r => r.event_type === "present")?.payload?.step ?? null;
   return session;
 }
 async function getTeams(sessionId: string) {
@@ -328,6 +333,8 @@ function sessionPayload(session: Session, scenario: Scenario) {
     roundStartedAt: session.roundStartedAt, roundClosedAt: session.roundClosedAt, launchedAt: session.launchedAt,
     durationSeconds: scheduledVoteSeconds(scenario.runPlan, session.schedule, session.launchedAt, session.activeRound, round?.durationSeconds ?? 240),
     schedule: session.schedule ?? null,
+    audienceTimer: session.audienceTimer ?? scenario.family !== "coastwater",
+    presentationStep: scenario.family === "coastwater" ? coastwaterStep(session, scenario.key) : null,
   };
 }
 /** The scenario this room was created with. An unknown stored key is refused, never reinterpreted. */
@@ -374,6 +381,7 @@ function consolePayload(session: Session, scenario: Scenario, teams: Team[], dec
     counts: { ...counts, total: teams.length },
     teams: teams.map((t) => ({ id: t.id, displayName: t.displayName, state: t.state, handover: isLive(t) })),
     results: state === "published" && round ? { ...splitFor(decisions, session.activeRound), reveal: round.reveal ?? null } : null,
+    discussion: scenario.family === "coastwater" && (state === "closed" || state === "published") ? splitFor(decisions, session.activeRound) : null,
     stages: scenario.stages,
     ...(scenario.meters ? { initialMeters: start.meters, meterKeys: scenario.meters } : {}),
     ...(scenario.facts ? { initialFacts: factStates(scenario, start.facts) } : {}),
@@ -397,6 +405,8 @@ const joinSchema = z.object({ joinCode: z.string().trim().min(4).max(8), teamCod
 const decisionSchema = z.object({ roundNo: z.number().int().min(1).max(MAX_ROUNDS), optionKey: z.enum(["A", "B", "C", "D"]), rationale: z.string().trim().max(240).default(""), confidence: z.number().int().min(1).max(5).nullable().optional(), lock: z.boolean().default(false) });
 const handoverSchema = z.object({ decision: z.enum(["approve", "decline"]), requestId: z.string().min(8).max(64) });
 const actionSchema = z.discriminatedUnion("action", [
+  z.object({ action: z.literal("audience-timer"), enabled: z.boolean() }),
+  z.object({ action: z.literal("present"), step: z.number().int().min(0).max(COASTWATER_LAST_STEP), expectedStep: z.number().int().min(0).max(COASTWATER_LAST_STEP) }),
   z.object({ action: z.literal("schedule"), startsAt: z.string().datetime({ offset: true }), durationMinutes: z.number().int().min(15).max(480), timeZone: z.literal("Australia/Sydney") }),
   z.object({ action: z.literal("launch") }), z.object({ action: z.literal("start") }), z.object({ action: z.literal("close") }), z.object({ action: z.literal("unclose") }),
   z.object({ action: z.literal("publish") }), z.object({ action: z.literal("advance") }), z.object({ action: z.literal("end") }), z.object({ action: z.literal("reset") }),
@@ -580,7 +590,7 @@ function registerDecisionRoomRoutes(app: Express) {
     const session = await findSession(req.params.identifier);
     if (!session) { res.status(404).json({ message: "Room not found" }); return; }
     const displayToken = String(req.query.displayToken ?? "");
-    if (!displayToken || !matchesHash(displayToken, session.displayTokenHash)) { res.status(401).json({ message: "Display access required" }); return; }
+    if ((!displayToken || !matchesHash(displayToken, session.displayTokenHash)) && !ensureAdmin(req, res)) return;
     const scenario = scenarioOf(session, res); if (!scenario) return;
     res.json(consolePayload(session, scenario, await getTeams(session.id), await getDecisions(session.id)));
   } catch (e) { fail(e, res, next); } });
@@ -675,12 +685,23 @@ function registerDecisionRoomRoutes(app: Express) {
     const teams = await getTeams(session.id);
     const state = roundState(session);
 
-    if (input.action === "schedule") {
+    if (input.action === "present") {
+      if (scenario.family !== "coastwater") { res.status(400).json({ message: "Presentation controls belong to Coastwater rooms" }); return; }
+      const current = coastwaterStep(session, scenario.key);
+      if (input.step > coastwaterLastStep(scenario.key) || input.expectedStep !== current || Math.abs(input.step - current) !== 1) { res.status(409).json({ message: "The presentation moved on another screen. Refresh and try again." }); return; }
+    }
+    const operation = input.action === "present" ? coastwaterOperation(session, input.step, scenario.key) : input.action;
+
+    if (input.action === "audience-timer") {
+      if (scenario.family !== "coastwater") { res.status(400).json({ message: "This setting belongs to Coastwater" }); return; }
+      session.audienceTimer = input.enabled;
+    } else if (input.action === "schedule") {
       session.schedule = { startsAt: input.startsAt, durationMinutes: input.durationMinutes, timeZone: input.timeZone };
     } else if (input.action === "feature") {
       const decisions = await getDecisions(session.id);
       const target = decisions.find((d) => d.id === input.decisionId);
       if (!target || target.roundNo !== session.activeRound) { res.status(404).json({ message: "Response not found in this round" }); return; }
+      if (scenario.family === "coastwater" && input.featured && !target.isLocked) { res.status(409).json({ message: "Lock this response before selecting it for projection" }); return; }
       const featured = decisions.filter((d) => d.roundNo === session.activeRound && d.isFeatured && d.id !== target.id).length;
       if (input.featured && featured >= MAX_FEATURED) { res.status(409).json({ message: `Deselect one first: at most ${MAX_FEATURED} rationales go on the screen` }); return; }
       if (db) await db.execute(sql`UPDATE workshop_decisions SET is_featured=${input.featured} WHERE id=${input.decisionId}::uuid AND session_id=${session.id}::uuid`);
@@ -699,7 +720,7 @@ function registerDecisionRoomRoutes(app: Express) {
     } else {
       let { status, activeRound: round, resultsVisible: visible, roundStartedAt: started, roundClosedAt: closed, launchedAt: launched } = session;
       const now = new Date().toISOString();
-      switch (input.action) {
+      switch (operation) {
         case "launch": if (status !== "lobby") { res.status(409).json({ message: "The room has already launched" }); return; } status = "launched"; launched = now; break;
         case "start": if (status === "live" || status === "ended") { res.status(409).json({ message: "The room is already running" }); return; } status = "live"; started = now; closed = null; visible = false; if (!launched) launched = now; break;
         case "close": if (state !== "open") { res.status(409).json({ message: "No open round to close" }); return; } closed = now; break;
@@ -715,12 +736,19 @@ function registerDecisionRoomRoutes(app: Express) {
       }
       if (db) {
         await db.execute(sql`UPDATE workshop_sessions SET status=${status},active_round=${round},results_visible=${visible},round_started_at=${started ? new Date(started) : null},round_closed_at=${closed ? new Date(closed) : null},launched_at=${launched ? new Date(launched) : null},ended_at=${status === "ended" ? new Date() : null} WHERE id=${session.id}::uuid`);
-        if (input.action === "advance") await db.execute(sql`UPDATE workshop_teams SET state='reading' WHERE session_id=${session.id}::uuid AND token_hash IS NOT NULL`);
-        if (input.action === "reset") { await db.execute(sql`DELETE FROM workshop_decisions WHERE session_id=${session.id}::uuid`); await db.execute(sql`UPDATE workshop_teams SET state='not_joined',token_hash=NULL,last_seen_at=NULL,pending_token_hash=NULL,pending_name=NULL,pending_at=NULL,pending_state=NULL,pending_polled_at=NULL,pending_release_id=NULL,pending_release_hash=NULL WHERE session_id=${session.id}::uuid`); }
+        if (operation === "advance") await db.execute(sql`UPDATE workshop_teams SET state='reading' WHERE session_id=${session.id}::uuid AND token_hash IS NOT NULL`);
+        if (operation === "reset") { await db.execute(sql`DELETE FROM workshop_decisions WHERE session_id=${session.id}::uuid`); await db.execute(sql`UPDATE workshop_teams SET state='not_joined',token_hash=NULL,last_seen_at=NULL,pending_token_hash=NULL,pending_name=NULL,pending_at=NULL,pending_state=NULL,pending_polled_at=NULL,pending_release_id=NULL,pending_release_hash=NULL WHERE session_id=${session.id}::uuid`); }
       } else {
         Object.assign(session, { status, activeRound: round, resultsVisible: visible, roundStartedAt: started, roundClosedAt: closed, launchedAt: launched });
-        if (input.action === "advance") for (const t of teams) if (t.tokenHash) t.state = "reading";
-        if (input.action === "reset") { for (const t of teams) Object.assign(t, { state: "not_joined", tokenHash: null, lastSeenAt: null, ...CLEAR_PENDING }); for (const [id, d] of Array.from(memory.decisions.entries())) if (d.sessionId === session.id) memory.decisions.delete(id); }
+        if (operation === "advance") for (const t of teams) if (t.tokenHash) t.state = "reading";
+        if (operation === "reset") { for (const t of teams) Object.assign(t, { state: "not_joined", tokenHash: null, lastSeenAt: null, ...CLEAR_PENDING }); for (const [id, d] of Array.from(memory.decisions.entries())) if (d.sessionId === session.id) memory.decisions.delete(id); }
+      }
+      if (scenario.family === "coastwater") {
+        const updated = { ...session, status, activeRound: round, resultsVisible: visible, roundClosedAt: closed, presentationStep: null };
+        const nextStep = input.action === "present" ? input.step : operation === "reset" ? 0 : coastwaterStep(updated, scenario.key);
+        session.presentationStep = nextStep;
+        if (input.action !== "present") await event(session.id, "present", { step: nextStep });
+        else if (operation !== "noop") await event(session.id, operation, { source: "presenter", step: nextStep });
       }
     }
     await event(session.id, input.action, input);

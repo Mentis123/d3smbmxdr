@@ -23,13 +23,14 @@ import ExplainMore from "./ExplainMore";
 import type { Briefing, Condition, Consequence, Dashboard, FactState, Guidance, Launch, MeterDef, PublicRound, Reveal, RunPlan, RunSegment, Scenario, ScenarioInfo, Tone } from "../../lib/decision-room/types";
 import VersionHub, { EditionIntro, HomeFooter, editions, type Edition } from "./VersionHub";
 import CoastwaterPresenter from "./CoastwaterPresenter";
+import AudienceTimerControl from "./AudienceTimerControl";
 import SessionRunClock from "./SessionRunClock";
 import type { SessionSchedule } from "../../lib/decision-room/timing";
 
 /* ------------------------------------------------------------------ types */
 
 type RoundState = "lobby" | "launched" | "open" | "closed" | "published" | "ended";
-type SessionInfo = { id: string; joinCode: string; name: string; status: string; revision: number; activeRound: number; roundCount: number; roundState: RoundState; roundStartedAt: string | null; roundClosedAt: string | null; launchedAt: string | null; durationSeconds: number; schedule: SessionSchedule | null };
+type SessionInfo = { id: string; joinCode: string; name: string; status: string; revision: number; activeRound: number; roundCount: number; roundState: RoundState; roundStartedAt: string | null; roundClosedAt: string | null; launchedAt: string | null; durationSeconds: number; schedule: SessionSchedule | null; audienceTimer: boolean };
 type Organisation = { name: string; tagline: string; estate: string; holds: string; reach: string; objective: string };
 type Feed = { kind: string; who: string; text: string };
 type Round = PublicRound;
@@ -255,10 +256,10 @@ function Landing({ presetCode, edition }: { presetCode?: string; edition?: Editi
     try {
       const data = await request<{ sessionId: string; joinCode: string; displayToken: string }>(`${API}/sessions`, json({ tableCount, ...(edition ? { name: editions[edition].title, variant: edition === "coastwater" ? "coastwater" : edition === "agent-0" ? "agent0" : "riverbend" } : {}) }, { "x-admin-key": adminKey }));
       try { localStorage.setItem("decision-room-admin-key", adminKey); localStorage.setItem(`decision-room-display:${data.sessionId}`, data.displayToken); } catch { /* ignore */ }
-      navigate(edition === "coastwater" ? `/decision-room/coastwater/present?room=${data.sessionId}` : `/decision-room/admin/${data.sessionId}`);
+      navigate(edition === "coastwater" ? `/decision-room/coastwater/control?room=${data.sessionId}` : `/decision-room/admin/${data.sessionId}`);
     } catch (e) { setError((e as Error).message); } finally { setBusy(false); }
   }
-  function openDisplay() { try { localStorage.setItem(`decision-room-display:${sessionId}`, displayToken); } catch { /* ignore */ } navigate(`/decision-room/console/${sessionId}?displayToken=${encodeURIComponent(displayToken)}`); }
+  function openDisplay() { try { localStorage.setItem(`decision-room-display:${sessionId}`, displayToken); } catch { /* ignore */ } navigate(edition === "coastwater" ? `/decision-room/coastwater/present?room=${sessionId}&display=1&displayToken=${encodeURIComponent(displayToken)}` : `/decision-room/console/${sessionId}?displayToken=${encodeURIComponent(displayToken)}`); }
 
   return <Frame className={`dr-landing dr-one${edition ? " dr-edition-landing" : ""}`}>
     <div className="dr-landing-grid">
@@ -355,6 +356,7 @@ function Participant({ code }: { code: string }) {
     : state === "ended" ? <section className="dr-card dr-wait"><h2>{brand.ended.title}</h2><p>{brand.ended.body}</p></section>
     : null;
   const actCard = !round || !inRound ? null
+    : state === "published" && results && data.scenario.family === "coastwater" && data.scenario.revision === "2" ? <section className="dr-card dr-reveal"><h2>Where did we differ?</h2><SplitBars split={results} options={round.options} /><p>What downside are you accepting by choosing this?</p><p>What evidence or condition would make you change your decision?</p><p className="dr-hint">Your call: {decision?.optionKey || "No locked response"}. Discuss the other tables’ reasoning with your facilitator.</p></section>
     : state === "published" && results ? <section className="dr-card dr-reveal" key={`reveal-${round.roundNo}`}>
         <div className="dr-panel-head"><span>Where the room landed</span><span className="dr-chain-note">{results.locked} tables locked</span></div>
         <SplitBars split={results} options={round.options} />
@@ -362,8 +364,8 @@ function Participant({ code }: { code: string }) {
         {results.consequence ? <div className="dr-conseq"><span className="tag">Your call · {decision?.optionKey}</span><strong>{results.consequence.you}</strong><p>{results.consequence.body}</p><div className="dr-changes">{results.consequence.changes.map((ch) => <span className={`chg chg--${ch.d}`} key={ch.t}>{ch.t}</span>)}</div></div> : <p className="dr-hint">Your table did not lock a call this round, so there is no consequence to show.</p>}
         {results.reveal ? <RevealBlock reveal={results.reveal} /> : null}
       </section>
-    : state === "closed" ? <section className="dr-card dr-wait"><Square className="dr-wait-icon" /><h2>Round closed.</h2><p>{data.scenario.family === "coastwater" ? "Discuss the different views with your facilitator. New information follows on the screen." : "Richard is walking the options on the screen."} Your call{locked ? ` was ${decision?.optionKey}` : " was not locked"}.</p></section>
-    : locked ? <section className="dr-card dr-locked-card"><h2><LockKeyhole /> Locked: {decision?.optionKey}</h2>{decision?.rationale ? <p>“{decision.rationale}”</p> : null}<p className="dr-hint">Confidence {decision?.confidence} of 5. Keep talking — the reveal will not wait for perfect certainty. Ask Adam if this must change.</p></section>
+    : state === "closed" ? <section className="dr-card dr-wait"><Square className="dr-wait-icon" /><h2>Round closed.</h2><p>{data.scenario.family === "coastwater" ? "Discuss the different views with your facilitator." : "Richard is walking the options on the screen."} Your call{locked ? ` was ${decision?.optionKey}` : " was not locked"}.</p></section>
+    : locked ? <section className="dr-card dr-locked-card"><h2><LockKeyhole /> Locked: {decision?.optionKey}</h2>{decision?.rationale ? <p>“{decision.rationale}”</p> : null}<p className="dr-hint">Confidence {decision?.confidence} of 5. Keep talking. Be ready to explain the downside you accept. Ask your facilitator if this must change.</p></section>
     : <section className="dr-card dr-form dr-vote">
         <div className="dr-options">{round.options.map((o) => <button key={o.key} className={optionKey === o.key ? "selected" : ""} aria-pressed={optionKey === o.key} disabled={saving} onClick={() => { setOptionKey(o.key); setDirty(true); }}><b>{o.key}</b><span>{o.label}{o.cost ? <small className="dr-opt-cost">{o.cost}</small> : null}</span></button>)}</div>
         <label>Because… (one sentence)<textarea value={rationale} maxLength={240} disabled={saving} onChange={(e) => { setRationale(e.target.value); setDirty(true); }} placeholder="The reason we would defend out loud." /><span className="dr-counter">{rationale.length}/240</span></label>
@@ -378,7 +380,7 @@ function Participant({ code }: { code: string }) {
   return <Frame className="dr-table dr-one" kicker={brand.kicker}>
     <div className="dr-session-head">
       <div><span className="dr-kicker">{data.team.displayName.toUpperCase()}{round ? ` · ${round.seat.toUpperCase()}` : ""}</span><h1 className="dr-h1-small">{round ? round.title : data.organisation.name}</h1>{round ? <p className="dr-when">{round.when}</p> : <p className="dr-when">{data.organisation.tagline}</p>}</div>
-      <div className="dr-head-right">{state === "open" ? <span className={`dr-mini-clock ${clock.over ? "over" : clock.low ? "low" : ""}`}>{clock.label}</span> : null}<Status tone={connection} label={connection} /></div>
+      <div className="dr-head-right">{state === "open" && session.audienceTimer !== false ? <span className={`dr-mini-clock ${clock.over ? "over" : clock.low ? "low" : ""}`}>{clock.label}</span> : null}<Status tone={connection} label={connection} /></div>
     </div>
 
     {connection === "offline" ? <div className="dr-banner dr-banner--warn">No connection. Your last saved response is safe — use the printed lock card and hand it to Adam. The exercise continues.</div> : null}
@@ -422,6 +424,7 @@ function Console({ id }: { id: string }) {
   const joinUrl = data ? `${location.origin}/decision-room/join/${data.session.joinCode}` : "";
   const now = useNow();
   if (!data) return <Frame wide><section className="dr-card"><h2>Opening presenter console…</h2><ErrorText message={error} /><p className="dr-hint">If this stays here, run the round from the printed pack. The exercise does not depend on this screen.</p></section></Frame>;
+  if (data.scenario.family === "coastwater") return <CoastwaterPresenter room={id} displayOnly displayToken={displayToken} />;
   const { session, round, counts, results } = data;
   const brand = data.scenario.brand;
   const state = session.roundState;
@@ -478,7 +481,7 @@ function Admin({ id }: { id: string }) {
   const { session, counts, round } = data;
   const state = session.roundState;
   const joinUrl = `${location.origin}/decision-room/join/${session.joinCode}`;
-  const consoleUrl = data.scenario.family === "coastwater" ? `/decision-room/coastwater/present?room=${id}` : `/decision-room/console/${id}?displayToken=${encodeURIComponent(displayToken)}`;
+  const consoleUrl = data.scenario.family === "coastwater" ? `/decision-room/coastwater/present?room=${id}&display=1&displayToken=${encodeURIComponent(displayToken)}` : `/decision-room/console/${id}?displayToken=${encodeURIComponent(displayToken)}`;
   const clock = countdown(session.roundStartedAt, session.durationSeconds, now);
   const featured = (data.decisions ?? []).filter((d) => d.isFeatured).length;
   const steps: { label: string; action: string; enabled: boolean; primary?: boolean; icon: ReactNode }[] = [
@@ -492,21 +495,23 @@ function Admin({ id }: { id: string }) {
   return <Frame wide className="dr-admin dr-one" kicker={data.scenario.brand.kicker}>
     <section className="dr-admin-head"><div><span className="dr-kicker">FACILITATOR CONTROLS · NOT FOR PROJECTION</span><h1 className="dr-h1-small">Room <span className="dr-join-code">{session.joinCode}</span></h1><p className="dr-when">{round ? `${round.seat} · ${round.title}` : state} · {state === "open" ? `clock ${clock.label}` : state}</p></div><div className="dr-qr"><QRCodeSVG value={joinUrl} size={118} bgColor="#ffffff" fgColor="#000025" /><button onClick={() => navigator.clipboard?.writeText(joinUrl)}><Copy />Copy join link</button></div></section>
 
+      {data.scenario.family === "coastwater" ? <div className="dr-coastwater-console-link"><a className="dr-button dr-primary" href={`/decision-room/coastwater/control?room=${id}`} target="_blank" rel="noreferrer"><Monitor />Open facilitator console · tables, comments and Next/Back</a><p className="dr-hint">Keep the console on your private screen. Open its audience display on the projector.</p></div> : null}
+    {data.scenario.family === "coastwater" ? <AudienceTimerControl enabled={session.audienceTimer} onChange={async enabled => { await request(`${API}/sessions/${id}/actions`, json({ action: "audience-timer", enabled }, headers)); await refresh(); }} /> : null}
     {data.runPlan ? <SessionRunClock plan={data.runPlan} state={state} round={session.activeRound} now={now} launchedAt={session.launchedAt} schedule={session.schedule} onSchedule={async (schedule) => { await request(`${API}/sessions/${id}/actions`, json({ action: "schedule", ...schedule }, headers)); await refresh(); }} /> : null}
 
     <section className="dr-card"><div className="dr-panel-head"><span>Run the room, in order</span><Status tone={stale(lastUpdated, now)} label={stale(lastUpdated, now)} /></div>
       <div className="dr-steps">{steps.map((s, i) => <button key={s.action} className={s.primary ? "dr-primary" : ""} disabled={busy || !s.enabled} onClick={() => act({ action: s.action })}><b>{i + 1}</b>{s.icon}{s.label}</button>)}</div>
-      <div className="dr-run-foot"><ExplainMore title="How to run each round"><p>{data.scenario.family === "coastwater" ? "Use the Coastwater presenter for the complete Next/Back sequence: situation, decision, discussion, new information and boundary. These controls can also open, close and publish votes." : <>Flow per round: tables lock → <b>Close round</b> → Richard walks the option slide → <b>Show the split</b> → discuss → <b>Next</b>. The timer is advisory; nothing closes on its own.</>}</p></ExplainMore>
-      <div className="dr-control-bar"><a className="dr-button" target="_blank" rel="noreferrer" href={consoleUrl}><Monitor />Open console (projector)</a><a className="dr-button" target="_blank" rel="noreferrer" href={`/decision-room/report/${id}`}><FileText />One-page report</a><a className="dr-button" target="_blank" rel="noreferrer" href={`/decision-room/report/${id}/rounds`}><FileText />Round-by-round report</a><button onClick={exportCsv}><Download />Export CSV</button><button onClick={() => confirm("End this room? Table devices can no longer submit.") && act({ action: "end" })} disabled={busy || session.status === "ended"}>End room</button><button className="danger" onClick={() => confirm("Reset this room and remove every response and table login?") && act({ action: "reset" })} disabled={busy}><RotateCcw />Reset</button></div></div>
+      <div className="dr-run-foot"><ExplainMore title="How to run each round"><p>{data.scenario.family === "coastwater" ? "Use the facilitator console for Next/Back, live table responses and selected comments. New rooms use a decision screen followed by discussion." : <>Flow per round: tables lock → <b>Close round</b> → Richard walks the option slide → <b>Show the split</b> → discuss → <b>Next</b>. The timer is advisory; nothing closes on its own.</>}</p></ExplainMore>
+      <div className="dr-control-bar"><a className="dr-button" target="_blank" rel="noreferrer" href={consoleUrl}><Monitor />{data.scenario.family === "coastwater" ? "Open audience display" : "Open console (projector)"}</a><a className="dr-button" target="_blank" rel="noreferrer" href={`/decision-room/report/${id}`}><FileText />One-page report</a><a className="dr-button" target="_blank" rel="noreferrer" href={`/decision-room/report/${id}/rounds`}><FileText />Round-by-round report</a><button onClick={exportCsv}><Download />Export CSV</button><button onClick={() => confirm("End this room? Table devices can no longer submit.") && act({ action: "end" })} disabled={busy || session.status === "ended"}>End room</button><button className="danger" onClick={() => confirm("Reset this room and remove every response and table login?") && act({ action: "reset" })} disabled={busy}><RotateCcw />Reset</button></div></div>
       <ErrorText message={actionError} />
     </section>
 
-    <section className="dr-metrics"><div className="dr-metric"><small>Not joined</small><strong>{counts.notJoined}</strong></div><div className="dr-metric"><small>Drafting</small><strong>{counts.joined}</strong></div><div className="dr-metric accent"><small>Locked</small><strong>{counts.locked}</strong></div><div className="dr-metric"><small>On screen</small><strong>{featured}<em>/2</em></strong></div></section>
+    <section className="dr-metrics"><div className="dr-metric"><small>Not joined</small><strong>{counts.notJoined}</strong></div><div className="dr-metric"><small>Drafting</small><strong>{counts.joined}</strong></div><div className="dr-metric accent"><small>Locked</small><strong>{counts.locked}</strong></div><div className="dr-metric"><small>Selected for projection</small><strong>{featured}<em>/2</em></strong></div></section>
 
     <section className={`dr-admin-grid${data.guidance ? " has-guidance" : ""}`}>
       <div className="dr-card"><h2>Tables</h2>{data.teams.map((t) => <div className="dr-admin-row" key={t.id}><span><strong>{t.displayName}</strong><small className={t.handover ? "dr-flag" : ""}>{t.handover ? "handover requested" : TEAM_LABEL[t.state] ?? t.state}</small></span>{t.handover ? <button className="dr-primary" onClick={() => confirm(`Hand ${t.displayName} to the device that is asking? The current device is signed out.`) && act({ action: "handover", teamId: t.id })} disabled={busy}>Approve handover</button> : null}{t.state === "locked" && state !== "published" ? <button onClick={() => confirm(`Reopen ${t.displayName}? Their lock is cleared.`) && act({ action: "reopen", teamId: t.id })} disabled={busy}>Reopen</button> : null}</div>)}</div>
       {data.guidance ? <GuidanceCard g={data.guidance} /> : null}
-      <div className="dr-card"><h2>This round’s responses</h2><p className="dr-hint">Private to you until you show the split. Pick up to two rationales for the screen.</p>{(data.decisions ?? []).length === 0 ? <p>No responses yet.</p> : (data.decisions ?? []).map((d) => <div className="dr-response" key={d.id}><strong><b className="dr-key">{d.optionKey ?? "–"}</b> {d.table} · {d.isLocked ? "locked" : "draft"} · confidence {d.confidence ?? "–"}</strong><p>{d.rationale || <em>no rationale</em>}</p>{d.rationale ? <button onClick={() => act({ action: "feature", decisionId: d.id, featured: !d.isFeatured })} disabled={busy || (!d.isFeatured && featured >= 2)}>{d.isFeatured ? "Remove from screen" : "Put on screen"}</button> : null}</div>)}</div>
+      <div className="dr-card"><h2>This round’s responses</h2><p className="dr-hint">Select up to two locked rationales for projection. Unselected comments stay private.</p>{(data.decisions ?? []).length === 0 ? <p>No responses yet.</p> : (data.decisions ?? []).map((d) => <div className="dr-response" key={d.id}><strong><b className="dr-key">{d.optionKey ?? "–"}</b> {d.table} · {d.isLocked ? "locked" : "draft"} · confidence {d.confidence ?? "–"}</strong><p>{d.rationale || <em>no rationale</em>}</p>{d.rationale ? <button onClick={() => act({ action: "feature", decisionId: d.id, featured: !d.isFeatured })} disabled={busy || (!d.isFeatured && (featured >= 2 || (data.scenario.family === "coastwater" && !d.isLocked)))}>{d.isFeatured ? "Remove from screen" : "Put on screen"}</button> : null}</div>)}</div>
     </section>
     <ErrorText message={error} />
   </Frame>;
@@ -791,7 +796,7 @@ export default function DecisionRoom() {
   const search = useSearchParams();
   const parts = path.split("/").filter(Boolean);
   if (parts[1] === "agent-0" && parts[2] === "review") return <ReviewPack family="ironvale" />;
-  if (parts[1] === "coastwater" && parts[2] === "present") return <CoastwaterPresenter key={search.get("room") || "rehearsal"} room={search.get("room") || ""} />;
+  if (parts[1] === "coastwater" && (parts[2] === "present" || parts[2] === "control")) return <CoastwaterPresenter key={`${parts[2]}:${search.get("room") || "rehearsal"}:${search.get("display") || ""}`} room={search.get("room") || ""} operator={parts[2] === "control"} displayOnly={search.get("display") === "1"} displayToken={search.get("displayToken") || ""} />;
   if (parts[1] === "ciso-basecamp" || parts[1] === "agent-0" || parts[1] === "coastwater") return <Landing key={parts[1]} edition={parts[1]} />;
   if (parts[1] === "join") return <Landing presetCode={parts[2]} />;
   if (parts[1] === "session" && parts[2]) return <Participant code={parts[2].toUpperCase()} />;

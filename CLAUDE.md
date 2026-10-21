@@ -98,4 +98,6 @@ When you learn something that would have saved time or prevented a mistake on th
 
 ## Coastwater presenter
 
-`/decision-room/coastwater/present` is the facilitator presentation. Optional `?room=<session id>` connects its Next button to the existing live room actions. Position and boundary notes are browser-local; votes remain server-side. Keep header and footer visible at 720p and let only the central stage scroll. Content lives in `lib/decision-room/coastwater-content.ts` and feeds both the presenter and the revision-pinned scenario.
+`/decision-room/coastwater/control?room=...` is the private facilitator console, linked prominently from full admin and opened after room creation. It monitors saved drafts, locks and at most two curated locked comments. `/decision-room/coastwater/present?room=...&display=1&displayToken=...` is the read-only audience display. Presentation position is room-persisted in the existing event log; optional appetite notes remain browser-local and sync between tabs. Keep header/footer visible at 720p, scrolling only the central stage.
+
+Learned from the 21 Oct Adam/Dan demo: new `coastwater@2` rooms use 15 screens (welcome, instructions, six decision/discussion pairs, close), visible option costs and no compulsory reveal/boundary screens. Keep revision-1 content and its five-phase presenter for existing rooms. Audience timers default off and are toggled in private controls; hidden timing never auto-closes voting. Content changes must add a pinned revision so old votes and reports retain their meaning.

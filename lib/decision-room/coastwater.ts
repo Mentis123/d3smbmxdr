@@ -2,7 +2,7 @@ import { COASTWATER_MODULES, COASTWATER_STORY } from "./coastwater-content";
 import type { OptionKey, Scenario } from "./types";
 
 export const COASTWATER: Scenario = {
-  key: "coastwater@1", family: "coastwater", revision: "1", status: "live",
+  key: "coastwater@2", family: "coastwater", revision: "2", status: "live",
   brand: {
     kicker: "THE PILOT THAT BECAME POLICY · COASTWATER", short: "Coastwater",
     reportTitle: "Coastwater · the board's decisions", pathTitle: "The governance questions",
@@ -20,11 +20,11 @@ export const COASTWATER: Scenario = {
     terminal: "Coastwater · board agenda", lines: [{ t: "Today", text: COASTWATER_STORY, tone: "plain" }], steps: [{ note: "The board sets risk appetite. Management proposes uses and runs controls.", path: [] }] },
   stages: [],
   rounds: COASTWATER_MODULES.map((m, i) => ({ roundNo: i + 1, id: m.id, seat: "Board and senior leaders", when: `Decision ${i + 1} of 6`, title: m.title, prompt: m.question,
-    situation: [m.situation], feed: [], path: [], durationSeconds: 240,
+    situation: [m.situation], feed: [], path: [], durationSeconds: 150,
     options: m.options.map((label, j) => ({ key: "ABCD"[j] as OptionKey, label, cost: m.tradeoffs[j], consequence: { you: `Your table chose ${"ABCD"[j]}: ${label}.`, body: `${m.tradeoffs[j]} ${m.boundary}`, changes: [] } })),
-    reveal: { boundary: m.reveal, lesson: m.reconsider, questions: [...m.discuss] },
+    reveal: { boundary: "Compare the downsides each table accepts.", lesson: "What would change your decision?", questions: [...m.discuss] },
   })),
-  runPlan: { totalMinutes: 60, decideMinutes: 4,
-    segments: [{ key: "open", label: "Meet Coastwater and agree the format", from: 0, to: 5, slides: "Opening screens" }, { key: "launch", label: "The board's task", from: 5, to: 6, slides: "How to take part" }, ...COASTWATER_MODULES.map((m, i) => ({ key: `r${i + 1}`, label: m.title, from: 6 + i * 8, to: 14 + i * 8, slides: "Situation · decision · discussion · reveal · boundary" })), { key: "close", label: "Read back the appetite and next steps", from: 54, to: 60, slides: "Closing screens" }],
-    advice: { openingBehind: "Introduce the setting briefly, then begin.", closingBehind: "Capture the conditions and owners before closing.", roundBehind: "Hear two different views and capture the boundary.", openingTighten: "Explain one response per table and begin.", roundTighten: "Use the main discussion question, then reveal the new information." } },
+  runPlan: { totalMinutes: 40, decideMinutes: 2.5,
+    segments: [{ key: "open", label: "Meet Coastwater and agree the format", from: 0, to: 3, slides: "Opening screens" }, { key: "launch", label: "The board's task", from: 3, to: 5, slides: "How to take part" }, ...COASTWATER_MODULES.map((m, i) => ({ key: `r${i + 1}`, label: m.title, from: 5 + i * 5, to: 10 + i * 5, slides: "Situation and decision · room discussion" })), { key: "close", label: "Read back the appetite and next steps", from: 35, to: 40, slides: "Closing screens" }],
+    advice: { openingBehind: "Introduce the setting briefly, then begin.", closingBehind: "Capture the conditions and owners before closing.", roundBehind: "Hear two different views and capture the boundary.", openingTighten: "Explain one response per table and begin.", roundTighten: "Ask which downside each table accepts and what would change its call." } },
 };

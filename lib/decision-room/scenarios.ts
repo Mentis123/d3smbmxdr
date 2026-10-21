@@ -15,11 +15,12 @@
 
 import { RIVERBEND } from "./content";
 import { IRONVALE } from "./ironvale";
+import { COASTWATER_V1 } from "./coastwater-v1";
 import { COASTWATER } from "./coastwater";
 import { AGENT0_PRODUCTION_RELEASE } from "./release";
 import type { Condition, Consequence, Dashboard, FactState, PublicRound, RoundContent, Scenario, ScenarioInfo, StageStatus } from "./types";
 
-export const SCENARIOS: Record<string, Scenario> = { [RIVERBEND.key]: RIVERBEND, [IRONVALE.key]: IRONVALE, [COASTWATER.key]: COASTWATER };
+export const SCENARIOS: Record<string, Scenario> = { [RIVERBEND.key]: RIVERBEND, [IRONVALE.key]: IRONVALE, [COASTWATER_V1.key]: COASTWATER_V1, [COASTWATER.key]: COASTWATER };
 /** What a room created before scenario pinning ran. */
 export const LEGACY_SCENARIO_KEY = RIVERBEND.key;
 

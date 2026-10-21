@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "sourceRepository": "Mentis123/adamrappaport",
-  "sourceCommit": "b85e23d8dffcbb6354f91a639adebb31904d08e7",
+  "sourceCommit": "b5090972bcc3857298f05004d3a5850574819a46",
   "experience": "ai-lab",
   "runtimeDependency": "Self-hosted static files; no personal-site requests",
   "files": {
@@ -14,7 +14,7 @@
     "public/map-assets/datacenter-scene.js": "9b70e09961d8e933ebfa09afc3492691bd69c6741c3400d419140be6723623d8",
     "public/map-assets/electrical.js": "cc49e083143cab12430332dad6ef3a182d48c4654e227912b22aca587d3ae7a3",
     "public/map-assets/exhibit-workflows.js": "e1994963f256f2a0184ab00307d57e483f75f18fd3bf7764caa8f908d80643e9",
-    "public/map-assets/exhibits.js": "648bd7dfcc27328633ec91aaac4c5a1aaf4a91b77b7a64005636e052ad270704",
+    "public/map-assets/exhibits.js": "7cf826d8881d83c4f6df52385203bb5a1e68d4e7e409756f9c4ce81a68a0ca5c",
     "public/map-assets/expansion.js": "aca30063e9af4c6c23d7c9b419bae582fe7d2288be0c47a8a5feacde98294de3",
     "public/map-assets/flow-effects.js": "5ebb5918ca79f7779defc313126337193514298b9e16d5708bfaa50bc929de6e",
     "public/map-assets/flythrough.js": "f4ed55a4aa5d2a0c849979db1f17416e71c4937715ccc1be76263dd2308993e4",
@@ -61,7 +61,6 @@
     "public/map-assets/textures/pine-twig-color.jpg": "e649f0f9bc74d1af5f1a45eaf2fe7a29adaaddfab251f746b983da301e4b80e1",
     "public/map-assets/textures/rock-face-color.jpg": "cce4b50517161264bdef196f5e247e328ca3739083cd6044ad3cc54d88cb82e2",
     "public/map-assets/textures/rock-face-normal.jpg": "e2682e1286c8b6aca7e01ba7b8fe1726cb6606042b9ee70d097aa67470d410ef",
-    "public/map-assets/vendor/LICENSE": "bfe119ea4fd413f5f7ca3fcd63adb0c4a073ed39daa2fe7d3e6b769e21272601",
     "public/map-assets/vendor/addons/loaders/GLTFLoader.js": "67ac5551fdafa6e349bd80c8f8e5e39c136d6b2fb1ad647db9abb21dc86f9e4a",
     "public/map-assets/vendor/addons/objects/Reflector.js": "0908d87a7251268dd6d12310b9633f08fd3be9c6faf2e2a4076fce0e87bdd26d",
     "public/map-assets/vendor/addons/postprocessing/EffectComposer.js": "4b8c855f28eed2570bed898adc0ab89c585a8a281ecb6d905c09d00697f9f50a",
@@ -73,6 +72,7 @@
     "public/map-assets/vendor/addons/shaders/CopyShader.js": "a33057d5ac91c43304c186ac0e8816e62bb2ed471d3a00ff3018dfd5c0389718",
     "public/map-assets/vendor/addons/shaders/LuminosityHighPassShader.js": "5044f780b6e6cf863947f64c36fe1587132f7fbe395ada863cd1e5f0388dcf1e",
     "public/map-assets/vendor/addons/utils/BufferGeometryUtils.js": "fda7e946b8e0b5ab39b779206589e7a1079a22eb24efb89d7223e03fdfb1f751",
+    "public/map-assets/vendor/LICENSE": "bfe119ea4fd413f5f7ca3fcd63adb0c4a073ed39daa2fe7d3e6b769e21272601",
     "public/map-assets/vendor/three.core.min.js": "61ba0df005b05991361d040d8ff670e1aadfd0ce7aeebd1fdb0725957a8957de",
     "public/map-assets/vendor/three.module.min.js": "e2b5ee6bccd38fd6d8a2428546b83c5f2426d84b152ef82be8055556e3b40eb6",
     "public/map-assets/viewer.css": "02715c95a3f3eceac60e342eafa4f032ed3359aa21fdc8634a5290d603d3aec6",

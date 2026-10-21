@@ -114,8 +114,8 @@ const TEAM_LABEL: Record<string, string> = { not_joined: "not joined", reading: 
 function MicrosoftMark() {
   return <div className="dr-partner" aria-label="Microsoft"><svg viewBox="0 0 23 23" width="20" height="20" aria-hidden="true"><rect x="1" y="1" width="10" height="10" fill="#f25022" /><rect x="12" y="1" width="10" height="10" fill="#7fba00" /><rect x="1" y="12" width="10" height="10" fill="#00a4ef" /><rect x="12" y="12" width="10" height="10" fill="#ffb900" /></svg><span>Microsoft</span></div>;
 }
-function Frame({ children, wide = false, className = "", kicker }: { children: ReactNode; wide?: boolean; className?: string; kicker?: string }) {
-  return <main className={`dr-shell ${wide ? "dr-wide" : ""} ${className}`.trim()}><header className="dr-brand"><div className="dr-mark" aria-label="Data#3">Data<sup>#</sup>3</div><div><strong>DECISION ROOM</strong><small>{kicker || "LIVE TABLETOP"}</small></div><MicrosoftMark /></header>{children}<footer>Observe · govern · secure · no scores, no ranking</footer></main>;
+function Frame({ children, wide = false, className = "", kicker, showMicrosoft = false }: { children: ReactNode; wide?: boolean; className?: string; kicker?: string; showMicrosoft?: boolean }) {
+  return <main className={`dr-shell ${wide ? "dr-wide" : ""} ${className}`.trim()}><header className="dr-brand"><div className="dr-mark" aria-label="Data#3">Data<sup>#</sup>3</div><div><strong>DECISION ROOM</strong><small>{kicker || "LIVE TABLETOP"}</small></div>{showMicrosoft ? <MicrosoftMark /> : null}</header>{children}<footer>Observe · govern · secure · no scores, no ranking</footer></main>;
 }
 function ErrorText({ message }: { message: string }) { return message ? <p className="dr-error"><AlertTriangle size={18} />{message}</p> : null; }
 function Status({ tone, label }: { tone: string; label: string }) { return <span className={`dr-live dr-live--${tone}`}><i />{label}</span>; }
@@ -261,7 +261,7 @@ function Landing({ presetCode, edition }: { presetCode?: string; edition?: Editi
   }
   function openDisplay() { try { localStorage.setItem(`decision-room-display:${sessionId}`, displayToken); } catch { /* ignore */ } navigate(edition === "coastwater" ? `/decision-room/coastwater/present?room=${sessionId}&display=1&displayToken=${encodeURIComponent(displayToken)}` : `/decision-room/console/${sessionId}?displayToken=${encodeURIComponent(displayToken)}`); }
 
-  return <Frame className={`dr-landing dr-one${edition ? " dr-edition-landing" : ""}`}>
+  return <Frame showMicrosoft={Boolean(edition) && edition !== "coastwater"} className={`dr-landing dr-one${edition ? " dr-edition-landing" : ""}`}>
     <div className="dr-landing-grid">
       {edition ? <EditionIntro edition={edition} /> : <section className="dr-hero"><a className="vh-back" href="/decision-room">← All experiences</a><span className="dr-kicker">JOIN A LIVE TABLETOP</span><h1>Make the room’s decisions visible.</h1><p>One device per table — a laptop or a phone. Enter your room code to join the experience your facilitator has opened.</p></section>}
       <div className="dr-landing-side">
@@ -377,7 +377,7 @@ function Participant({ code }: { code: string }) {
           : <div className="dr-actions"><button disabled={saving || !optionKey} onClick={() => save(false)}>{saving ? "Saving…" : "Save draft"}</button><button className="dr-primary" disabled={!canLock || saving} onClick={() => setConfirming(true)}>Lock response <LockKeyhole /></button></div>}
       </section>;
 
-  return <Frame className="dr-table dr-one" kicker={brand.kicker}>
+  return <Frame className="dr-table dr-one" kicker={brand.kicker} showMicrosoft={data.scenario.family !== "coastwater"}>
     <div className="dr-session-head">
       <div><span className="dr-kicker">{data.team.displayName.toUpperCase()}{round ? ` · ${round.seat.toUpperCase()}` : ""}</span><h1 className="dr-h1-small">{round ? round.title : data.organisation.name}</h1>{round ? <p className="dr-when">{round.when}</p> : <p className="dr-when">{data.organisation.tagline}</p>}</div>
       <div className="dr-head-right">{state === "open" && session.audienceTimer !== false ? <span className={`dr-mini-clock ${clock.over ? "over" : clock.low ? "low" : ""}`}>{clock.label}</span> : null}<Status tone={connection} label={connection} /></div>
@@ -431,7 +431,7 @@ function Console({ id }: { id: string }) {
   const clock = countdown(session.roundStartedAt, session.durationSeconds, now);
   const connection = stale(lastUpdated, now);
 
-  return <Frame wide kicker={brand.kicker}>
+  return <Frame wide kicker={brand.kicker} showMicrosoft>
     <section className="dr-console-head">
       <div><span className="dr-kicker">{data.organisation.name.toUpperCase()}{round ? ` · ${round.seat.toUpperCase()} · ${round.when.toUpperCase()}` : ""}</span><h1>{state === "lobby" ? brand.consoleLobby : state === "launched" ? brand.consoleLaunched : round ? round.title : "Decision Room"}</h1></div>
       {state === "open" ? <div className={`dr-clock ${clock.over ? "over" : clock.low ? "low" : ""}`}><small>TABLE CLOCK</small><strong>{clock.label}</strong></div> : <div className="dr-clock muted"><small>ROUND</small><strong>{state === "lobby" || state === "launched" ? "—" : `${session.activeRound} / ${session.roundCount}`}</strong><em>{state === "closed" ? "closed" : state === "published" ? "the split" : state === "ended" ? "ended" : state}</em></div>}
@@ -492,7 +492,7 @@ function Admin({ id }: { id: string }) {
     { label: session.activeRound >= session.roundCount ? "Final round" : `Next · round ${session.activeRound + 1}`, action: "advance", enabled: session.status === "live" && session.activeRound < session.roundCount, icon: <ArrowRight />, primary: state === "published" && session.activeRound < session.roundCount },
   ];
 
-  return <Frame wide className="dr-admin dr-one" kicker={data.scenario.brand.kicker}>
+  return <Frame wide className="dr-admin dr-one" kicker={data.scenario.brand.kicker} showMicrosoft={data.scenario.family !== "coastwater"}>
     <section className="dr-admin-head"><div><span className="dr-kicker">FACILITATOR CONTROLS · NOT FOR PROJECTION</span><h1 className="dr-h1-small">Room <span className="dr-join-code">{session.joinCode}</span></h1><p className="dr-when">{round ? `${round.seat} · ${round.title}` : state} · {state === "open" ? `clock ${clock.label}` : state}</p></div><div className="dr-qr"><QRCodeSVG value={joinUrl} size={118} bgColor="#ffffff" fgColor="#000025" /><button onClick={() => navigator.clipboard?.writeText(joinUrl)}><Copy />Copy join link</button></div></section>
 
       {data.scenario.family === "coastwater" ? <div className="dr-coastwater-console-link"><a className="dr-button dr-primary" href={`/decision-room/coastwater/control?room=${id}`} target="_blank" rel="noreferrer"><Monitor />Open facilitator console · tables, comments and Next/Back</a><p className="dr-hint">Keep the console on your private screen. Open its audience display on the projector.</p></div> : null}
@@ -553,7 +553,7 @@ function Report({ id }: { id: string }) {
   const factCols = data.tables.find((t) => t.facts?.length)?.facts ?? [];
   const useFacts = factCols.length > 0;
   const date = new Date(data.room.launchedAt ?? data.generatedAt);
-  return <Frame wide className="dr-report" kicker={brand.kicker}>
+  return <Frame wide className="dr-report" kicker={brand.kicker} showMicrosoft={data.scenario.family !== "coastwater"}>
     <section className="dr-report-head">
       <div><span className="dr-kicker">AFTER-ACTION REPORT · ROOM {data.room.joinCode} · {date.toLocaleDateString("en-AU", { day: "numeric", month: "long", year: "numeric" })}</span><h1>{brand.reportTitle}</h1><p>{data.tables.length} tables · {played.length} of {data.rounds.length} rounds decided · {conditional ? "facilitator guidance is conditional, not an answer key; tables are shown as journeys, never ranked." : "Richard’s best move is from the deck; tables are shown as journeys, never ranked."} <a className="dr-report-switch" href={`/decision-room/report/${id}/rounds`}>Round by round, with every table’s reasons →</a></p></div>
       <button className="dr-report-print" onClick={() => window.print()}><Printer />Print or save PDF</button>
@@ -690,7 +690,7 @@ function RoundsReport({ id }: { id: string }) {
     setDeckError(""); setBuilding(true);
     try { await downloadRoundsDeck(model); } catch (e) { setDeckError(`PowerPoint failed: ${(e as Error).message}`); } finally { setBuilding(false); }
   }
-  return <Frame wide className="dr-report dr-rounds" kicker={data.scenario.brand.kicker}>
+  return <Frame wide className="dr-report dr-rounds" kicker={data.scenario.brand.kicker} showMicrosoft={data.scenario.family !== "coastwater"}>
     <section className="dr-report-head">
       <div><span className="dr-kicker">ROUND-BY-ROUND REPORT · ROOM {model.roomCode} · {model.dateLabel.toUpperCase()}</span><h1>Round by round: the question, and how each table answered</h1>
         <p>{model.tables.length} tables · {model.footnote} <a className="dr-report-switch" href={`/decision-room/report/${id}`}>One-page summary →</a></p></div>
@@ -755,7 +755,7 @@ function ReviewPack({ family }: { family: string }) {
   if (!key || (!data && /facilitator access/i.test(error))) return <Frame><section className="dr-card dr-form"><a className="vh-back" href="/decision-room/agent-0">← Agent 0</a><h2>Agent 0 review pack</h2><p className="dr-hint">Facilitator key required. This page holds the preferences and every consequence, so it is never shown to tables.</p><label>Facilitator key<input type="password" value={draftKey} onChange={(e) => setDraftKey(e.target.value)} autoComplete="off" /></label><button className="dr-primary" disabled={!draftKey.trim()} onClick={() => { try { localStorage.setItem("decision-room-admin-key", draftKey.trim()); } catch { /* ignore */ } setKey(draftKey.trim()); }}>Open review pack</button><ErrorText message={error} /></section></Frame>;
   if (!data) return <Frame wide><section className="dr-card"><h2>Opening the review pack…</h2><ErrorText message={error} /></section></Frame>;
   const { scenario: s, info } = data;
-  return <Frame wide className="dr-review" kicker={s.brand.kicker}>
+  return <Frame wide className="dr-review" kicker={s.brand.kicker} showMicrosoft={s.family !== "coastwater"}>
     <section className="dr-review-head">
       <div><span className="dr-kicker">FACILITATOR REVIEW PACK · NOT FOR PROJECTION · {info.key}</span><h1>{s.organisation.name}: the six decisions</h1>
         <p>{s.organisation.tagline}</p>

@@ -21,7 +21,7 @@ export const editions = {
   },
   coastwater: {
     number: "03", title: "Coastwater", label: "Board workshop", status: "Ready to run",
-    image: "/decision-room-art/coastwater.webp", imageAlt: "Coastwater board table beneath a glowing water-drop, connected to a coastal community, reservoir and water treatment plant",
+    image: "/decision-room-art/coastwater-ocean.webp", imageAlt: "Breaking blue ocean waves along sandstone headlands, with a coastal community and water utility at dusk",
     line: "The pilot that became policy.",
     description: "Six difficult AI decisions at a regional water utility. Make a call, weigh the cost, and hear why others disagree. Run the whole workshop from the app.",
     tags: ["AI governance", "Board and senior leaders", "Six decisions"],

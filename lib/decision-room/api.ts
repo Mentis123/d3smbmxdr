@@ -22,6 +22,7 @@ import { neon, type NeonQueryFunction } from "@neondatabase/serverless";
 import { z, ZodError } from "zod";
 import { SCENARIOS, consequenceFor, dashboardFor, factStates, latestOf, publicRound, replay, resolveScenario, roundContent, roundCount, scenarioInfo, scenarioKeyForNewRoom } from "./scenarios";
 import type { Scenario } from "./types";
+import { scheduledVoteSeconds, type SessionSchedule } from "./timing";
 
 /* ------------------------------------------------------------ plumbing
  * Ported from the Express version with the handlers untouched: a tiny
@@ -77,6 +78,7 @@ type Session = {
   id: string; joinCode: string; name: string; variant: string; scenario: string | null; status: string;
   activeRound: number; resultsVisible: boolean; revision: number; displayTokenHash: string;
   roundStartedAt: string | null; roundClosedAt: string | null; launchedAt: string | null;
+  schedule?: SessionSchedule | null;
 };
 type Team = { id: string; sessionId: string; teamCode: string; displayName: string; tokenHash: string | null; state: TeamState; lastSeenAt: string | null; pendingHash: string | null; pendingName: string | null; pendingAt: string | null; pendingState: string | null; pendingPolledAt: string | null; pendingReleaseId: string | null; pendingReleaseHash: string | null };
 type Decision = { id: string; sessionId: string; teamId: string; roundNo: number; optionKey: string | null; rationale: string; confidence: number | null; isLocked: boolean; isFeatured: boolean; updatedAt: string };
@@ -170,7 +172,11 @@ async function findSession(identifier: string) {
   if (!db) return Array.from(memory.sessions.values()).find((s) => s.id === identifier || s.joinCode === identifier.toUpperCase()) ?? null;
   await ensureTables();
   const result = rows<any>(await db.execute(sql`SELECT * FROM workshop_sessions WHERE id::text=${identifier} OR join_code=${identifier.toUpperCase()} LIMIT 1`));
-  return result[0] ? mapSession(result[0]) : null;
+  if (!result[0]) return null;
+  const session = mapSession(result[0]);
+  const settings = rows<any>(await db.execute(sql`SELECT payload FROM workshop_events WHERE session_id=${session.id}::uuid AND event_type='schedule' ORDER BY created_at DESC LIMIT 1`));
+  session.schedule = settings[0]?.payload ?? null;
+  return session;
 }
 async function getTeams(sessionId: string) {
   if (!db) return Array.from(memory.teams.values()).filter((t) => t.sessionId === sessionId);
@@ -320,7 +326,8 @@ function sessionPayload(session: Session, scenario: Scenario) {
     id: session.id, joinCode: session.joinCode, name: session.name, status: session.status, revision: session.revision,
     activeRound: session.activeRound, roundCount: roundCount(scenario), roundState: roundState(session),
     roundStartedAt: session.roundStartedAt, roundClosedAt: session.roundClosedAt, launchedAt: session.launchedAt,
-    durationSeconds: round?.durationSeconds ?? 240,
+    durationSeconds: scheduledVoteSeconds(scenario.runPlan, session.schedule, session.launchedAt, session.activeRound, round?.durationSeconds ?? 240),
+    schedule: session.schedule ?? null,
   };
 }
 /** The scenario this room was created with. An unknown stored key is refused, never reinterpreted. */
@@ -390,6 +397,7 @@ const joinSchema = z.object({ joinCode: z.string().trim().min(4).max(8), teamCod
 const decisionSchema = z.object({ roundNo: z.number().int().min(1).max(MAX_ROUNDS), optionKey: z.enum(["A", "B", "C", "D"]), rationale: z.string().trim().max(240).default(""), confidence: z.number().int().min(1).max(5).nullable().optional(), lock: z.boolean().default(false) });
 const handoverSchema = z.object({ decision: z.enum(["approve", "decline"]), requestId: z.string().min(8).max(64) });
 const actionSchema = z.discriminatedUnion("action", [
+  z.object({ action: z.literal("schedule"), startsAt: z.string().datetime({ offset: true }), durationMinutes: z.number().int().min(15).max(480), timeZone: z.literal("Australia/Sydney") }),
   z.object({ action: z.literal("launch") }), z.object({ action: z.literal("start") }), z.object({ action: z.literal("close") }), z.object({ action: z.literal("unclose") }),
   z.object({ action: z.literal("publish") }), z.object({ action: z.literal("advance") }), z.object({ action: z.literal("end") }), z.object({ action: z.literal("reset") }),
   z.object({ action: z.literal("reopen"), teamId: z.string().uuid() }), z.object({ action: z.literal("handover"), teamId: z.string().uuid() }), z.object({ action: z.literal("feature"), decisionId: z.string().uuid(), featured: z.boolean() }),
@@ -667,7 +675,9 @@ function registerDecisionRoomRoutes(app: Express) {
     const teams = await getTeams(session.id);
     const state = roundState(session);
 
-    if (input.action === "feature") {
+    if (input.action === "schedule") {
+      session.schedule = { startsAt: input.startsAt, durationMinutes: input.durationMinutes, timeZone: input.timeZone };
+    } else if (input.action === "feature") {
       const decisions = await getDecisions(session.id);
       const target = decisions.find((d) => d.id === input.decisionId);
       if (!target || target.roundNo !== session.activeRound) { res.status(404).json({ message: "Response not found in this round" }); return; }

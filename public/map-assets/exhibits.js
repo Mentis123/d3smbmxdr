@@ -1,6 +1,8 @@
 import * as THREE from 'three';
 import {buildWorkflow} from './exhibit-workflows.js';
 
+const PHASE_SECONDS=6,CYCLE_SECONDS=PHASE_SECONDS*3;
+
 // Isolated, deterministic museum exhibits. Shares the world's WebGL renderer, never its resources.
 export function createExhibit(id, host, notify) {
   if(!['mining.conveyor-vision','energy.intake-vision','energy.drawing-search','energy.alarm-investigation','mining.procedure-control','mining.historian-gap'].includes(id))throw Error('Unsupported exhibit');
@@ -102,7 +104,7 @@ export function createExhibit(id, host, notify) {
   }
   function framing(){const bounds={minX:Infinity,maxX:-Infinity,minY:Infinity,maxY:-Infinity};for(const p of framePoints){const v=p.clone().add(frameCenter).project(camera);bounds.minX=Math.min(bounds.minX,v.x);bounds.maxX=Math.max(bounds.maxX,v.x);bounds.minY=Math.min(bounds.minY,v.y);bounds.maxY=Math.max(bounds.maxY,v.y);}return bounds;}
 
-  function update(dt){if(playing)time+=dt;const t=time%24,amount=THREE.MathUtils.smoothstep(t,8,16),phase=t<8?0:t<16?1:2;
+  function update(dt){if(playing)time+=dt;const t=time%CYCLE_SECONDS,amount=THREE.MathUtils.smoothstep(t,PHASE_SECONDS,PHASE_SECONDS*2),phase=Math.floor(t/PHASE_SECONDS);
     moving.forEach(o=>{o.position.set(-2.6+((o.userData.offset+time*.13)%1)*5.2,1.18,o.userData.lane);o.rotation.z=time*1.2+o.userData.offset;});
     pile.forEach((o,i)=>{const s=Math.max(.001,THREE.MathUtils.clamp(amount*pile.length-i,0,1));o.scale.setScalar(s);});
     if(outline){outline.visible=phase===2;outline.material.emissiveIntensity=.45+Math.sin(time*3)*.15;}
@@ -116,9 +118,9 @@ export function createExhibit(id, host, notify) {
   function move(e){if(!points.has(e.pointerId))return;stop(e);const old=points.get(e.pointerId);points.set(e.pointerId,{x:e.clientX,y:e.clientY});if(points.size===2){const [a,b]=[...points.values()],d=Math.hypot(a.x-b.x,a.y-b.y);if(gesture)distance=THREE.MathUtils.clamp(distance*gesture/d,6.5,16);gesture=d;}else{angle-=(e.clientX-old.x)*.007;elevation=THREE.MathUtils.clamp(elevation+(e.clientY-old.y)*.005,.08,1.2);}pose();}
   function up(e){if(!points.has(e.pointerId))return;stop(e);points.delete(e.pointerId);gesture=null;if(host.hasPointerCapture(e.pointerId))host.releasePointerCapture(e.pointerId);}
   function wheel(e){stop(e);e.preventDefault();distance=THREE.MathUtils.clamp(distance*Math.exp(e.deltaY*.001),6.5,16);pose();}
-  function keydown(e){if(e.key==='Escape'){stop(e);e.preventDefault();notify({close:true});return;}if(e.target!==host)return;if(e.code==='KeyF'||e.key==='Home'){stop(e);e.preventDefault();if(e.key==='Home'){angle=.55;elevation=.42;distance=10.8;pose();}return;}if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','+','-',' '].includes(e.key)){stop(e);e.preventDefault();if(e.key==='ArrowLeft')angle-=.15;if(e.key==='ArrowRight')angle+=.15;if(e.key==='ArrowUp')elevation=Math.min(1.2,elevation+.1);if(e.key==='ArrowDown')elevation=Math.max(.08,elevation-.1);if(e.key==='+')distance=Math.max(6.5,distance/1.1);if(e.key==='-')distance=Math.min(16,distance*1.1);if(e.key===' ')playing=!playing;pose();notify({phase:lastPhase,playing,time:time%24});}}
+  function keydown(e){if(e.key==='Escape'){stop(e);e.preventDefault();notify({close:true});return;}if(e.target!==host)return;if(e.code==='KeyF'||e.key==='Home'){stop(e);e.preventDefault();if(e.key==='Home'){angle=.55;elevation=.42;distance=10.8;pose();}return;}if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','+','-',' '].includes(e.key)){stop(e);e.preventDefault();if(e.key==='ArrowLeft')angle-=.15;if(e.key==='ArrowRight')angle+=.15;if(e.key==='ArrowUp')elevation=Math.min(1.2,elevation+.1);if(e.key==='ArrowDown')elevation=Math.max(.08,elevation-.1);if(e.key==='+')distance=Math.max(6.5,distance/1.1);if(e.key==='-')distance=Math.min(16,distance*1.1);if(e.key===' ')playing=!playing;pose();notify({phase:lastPhase,playing,time:time%CYCLE_SECONDS});}}
   const listeners=[['pointerdown',down],['pointermove',move],['pointerup',up],['pointercancel',up],['wheel',wheel]];
   listeners.forEach(([n,f])=>host.addEventListener(n,f,{capture:true,passive:false}));document.addEventListener('keydown',keydown,true);
   update(0);
-  return{scene,camera,update,command(action){if(action==='pause')playing=!playing;if(action==='next'){time=lastPhase===0?8:lastPhase===1?16:0;playing=false;update(0);}if(action==='replay'){time=0;playing=true;}if(action==='reset'){angle=.55;elevation=.42;distance=10.8;}notify({phase:lastPhase,playing,time:time%24});},setTime(t){time=t;playing=false;update(0);},metrics:()=>({id,time:time%24,playing,phase:lastPhase,angle,elevation,distance,fittedDistance,framing:framing(),workflow:workflow?.metrics()}),dispose(){listeners.forEach(([n,f])=>host.removeEventListener(n,f,true));document.removeEventListener('keydown',keydown,true);points.clear();geometries.forEach(g=>g.dispose());materials.forEach(m=>m.dispose());textures.forEach(t=>t.dispose());key.shadow.map?.dispose();}};
+  return{scene,camera,update,command(action){if(action==='pause')playing=!playing;if(action==='next'){time=((lastPhase+1)%3)*PHASE_SECONDS;playing=false;update(0);}if(action==='replay'){time=0;playing=true;}if(action==='reset'){angle=.55;elevation=.42;distance=10.8;}notify({phase:lastPhase,playing,time:time%CYCLE_SECONDS});},setTime(t){time=t;playing=false;update(0);},metrics:()=>({id,time:time%CYCLE_SECONDS,playing,phase:lastPhase,angle,elevation,distance,fittedDistance,framing:framing(),workflow:workflow?.metrics()}),dispose(){listeners.forEach(([n,f])=>host.removeEventListener(n,f,true));document.removeEventListener('keydown',keydown,true);points.clear();geometries.forEach(g=>g.dispose());materials.forEach(m=>m.dispose());textures.forEach(t=>t.dispose());key.shadow.map?.dispose();}};
 }

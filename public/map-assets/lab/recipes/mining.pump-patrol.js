@@ -28,4 +28,6 @@ export default {
       say:'The fitter gets "new wet area by P-12" with today\'s picture and the stored one. They walk out, find where it comes from and decide what to do. The robot found the change; the fitter finds the cause.'},
   ],
   variation:{id:'washdown',label:'Recent wash-down',caption:'View unclear · another look needed',captions:{review:'A fitter checks whether the wet area is new'},overlay:{anchor:'wet',label:'View unclear',state:'unclear'}},
+  // Narration (owner's ElevenLabs file, 23 Oct 2026). Delays land each line on its on-screen event; with the variation on, its clip plays at the AI view and the review stays silent.
+  narration:{base:'/map-assets/lab/audio/mining.pump-patrol/',lines:{scene:'scene.mp3',change:'change.mp3',aiView:'aiView.mp3',review:'review.mp3'},variation:{aiView:'variation.mp3',review:null},delay:{change:0.8,review:1.0}},
 };

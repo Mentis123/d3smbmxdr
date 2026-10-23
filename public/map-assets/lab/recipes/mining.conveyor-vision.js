@@ -27,4 +27,6 @@ export default {
       say:'The finding reaches the operator as "build-up at transfer 3". They walk out and look before deciding to clean the chute. AI noticed early; the operator decides what happens next.'},
   ],
   variation:{id:'dust',label:'Dust',caption:'Camera view unclear · check in person',overlay:{anchor:'buildup',label:'View unclear',state:'unclear'}},
+  // Narration (owner's ElevenLabs file, 23 Oct 2026). Delays land each line on its on-screen event; with the variation on, its clip plays at the AI view and the review stays silent.
+  narration:{base:'/map-assets/lab/audio/mining.conveyor-vision/',lines:{scene:'scene.mp3',change:'change.mp3',aiView:'aiView.mp3',review:'review.mp3'},variation:{aiView:'variation.mp3',review:null},delay:{change:1.2}},
 };

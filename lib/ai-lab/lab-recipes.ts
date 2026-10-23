@@ -1,5 +1,5 @@
 "use client";
-import {useEffect,useState} from 'react';
+import {useCallback,useEffect,useRef,useState} from 'react';
 
 /** Typed view over the synced renderer registry (/map-assets/lab/recipes/index.js). One source for the words. */
 export type ChapterId='scene'|'change'|'aiView'|'review';
@@ -10,6 +10,7 @@ export type LabRecipe={
  provenance:{label:string;url:string;kind:'verified'|'vendor'|'pattern'}[];
  duration:number;chapters:LabChapter[];
  variation?:{id:string;label:string;caption:string;captions?:Partial<Record<ChapterId,string>>};stub?:boolean;
+ narration?:{base:string;lines:Partial<Record<ChapterId,string>>;variation?:Partial<Record<ChapterId,string|null>>};
 };
 export type LabRegistry={RECIPES:Record<string,LabRecipe>;FEATURED:Record<string,LabRecipe[]>;LEGACY_IDS:readonly string[]};
 export type RecipeState={chapter:number;chapterId:ChapterId;time:number;duration:number;playing:boolean;variation:string|null;hold:boolean;sensor:boolean;sensorLabel:string|null;ended:boolean};
@@ -37,4 +38,40 @@ export function useLabRegistry(){
  const [registry,setRegistry]=useState<LabRegistry|null>(null),[failed,setFailed]=useState(false);
  useEffect(()=>{let live=true;loadLabRegistry().then(r=>{if(live)setRegistry(r);}).catch(()=>{if(live)setFailed(true);});return()=>{live=false;};},[]);
  return {registry,failed};
+}
+
+/** The narration clip for a chapter: the variation's own clip (or deliberate silence, null) overrides the normal line. */
+export function narrationClip(recipe:LabRecipe,chapterId:ChapterId,variationOn:boolean){
+ const n=recipe.narration;if(!n)return null;
+ const file=variationOn&&n.variation&&chapterId in n.variation?n.variation[chapterId]:n.lines[chapterId];
+ return file?n.base+file:null;
+}
+
+const MUTE_KEY='ailab.narration.muted';
+
+/**
+ * Plays a recipe's narration in step with the renderer's chapter state. Sound is ON by default (owner decision,
+ * 23 Oct 2026): opening an exhibit is a click, so the browser allows it. A mute is remembered per browser. If the
+ * browser still refuses, `blocked` is set and the page offers "Tap for sound"; captions carry the same words.
+ */
+export function useNarration(recipe:LabRecipe|null,state:RecipeState|null){
+ const audio=useRef<HTMLAudioElement|null>(null),last=useRef({key:'',time:0});
+ const [muted,setMuted]=useState(false),[blocked,setBlocked]=useState(false);
+ useEffect(()=>{try{setMuted(localStorage.getItem(MUTE_KEY)==='1');}catch{/* Storage may be unavailable; sound stays on. */}},[]);
+ const clip=recipe&&state?narrationClip(recipe,state.chapterId,!!state.variation):null;
+ const start=useCallback(()=>{const a=audio.current;if(!a)return;a.play().then(()=>setBlocked(false)).catch(()=>setBlocked(true));},[]);
+ useEffect(()=>{
+  if(!recipe?.narration||!state){audio.current?.pause();last.current={key:'',time:0};return;}
+  audio.current??=new Audio();const a=audio.current;
+  const key=`${recipe.id}|${state.chapterId}|${state.variation??''}`;
+  // A new chapter, a variation switch, or the same chapter restarted (time jumped back) starts the clip again.
+  const restart=key!==last.current.key||state.time<last.current.time-.5;
+  last.current={key,time:state.time};
+  if(restart){a.pause();if(!clip){a.removeAttribute('src');return;}a.src=clip;a.currentTime=0;}
+  if(!clip)return;
+  if(state.playing&&!muted){if(restart||(a.paused&&!a.ended))start();}else a.pause();
+ },[recipe,state,clip,muted,start]);
+ useEffect(()=>()=>{audio.current?.pause();audio.current=null;},[]);
+ const toggleMute=useCallback(()=>{setMuted(m=>{const next=!m;try{localStorage.setItem(MUTE_KEY,next?'1':'0');}catch{/* Not persisted. */}if(next)audio.current?.pause();return next;});},[]);
+ return {available:!!recipe?.narration,muted,blocked,toggleMute,tapForSound:start};
 }

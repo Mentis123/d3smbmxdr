@@ -121,6 +121,16 @@ export default function LabExplorer({industry}:{industry:LabIndustry}){
  const caption=recipe?chapterCaption(recipe,chapterIndex,variationOn):undefined;
  const narration=useNarration(recipe&&id===recipe.id?recipe:null,id&&recipe?rs:null);
  rewindNarration.current=narration.rewind;
+ // Unlock narration audio on the visitor's first tap, in this page or inside the world iframe (same origin), so that
+ // Safari lets the clip play when the exhibit opens a moment later. Chrome does not need this; WebKit does.
+ const unlockNarration=narration.unlock;
+ useEffect(()=>{
+  const opts={capture:true,passive:true} as const,docs:Document[]=[document];
+  const attach=()=>{try{const d=frame.current?.contentDocument;if(d&&!docs.includes(d)){docs.push(d);d.addEventListener('pointerdown',unlockNarration,opts);d.addEventListener('keydown',unlockNarration,opts);}}catch{/* Cross-origin: never expected here. */}};
+  document.addEventListener('pointerdown',unlockNarration,opts);document.addEventListener('keydown',unlockNarration,opts);
+  attach();const f=frame.current;f?.addEventListener('load',attach);
+  return()=>{f?.removeEventListener('load',attach);docs.forEach(d=>{try{d.removeEventListener('pointerdown',unlockNarration,opts);d.removeEventListener('keydown',unlockNarration,opts);}catch{/* Frame gone. */}});};
+ },[unlockNarration,ready]);
  return <main className="al-container al-explorer al-exhibits" data-industry={industry}>
   <div><LabHeader/><div className="al-world-heading"><div><a className="al-back" href="/ai-lab">← Choose an industry</a><h1>{world.name}</h1><p className="ex-intro">Look around. Select a marker to watch AI help a person.</p></div></div></div>
   <section className="ex-world" aria-label="Explore the industry world">

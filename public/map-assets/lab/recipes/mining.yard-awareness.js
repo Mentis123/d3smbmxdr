@@ -29,4 +29,6 @@ export default {
   variation:{id:'occlusion',label:'Worker hidden',caption:'Limited visibility · treat as unknown',
     captions:{review:'Worker hidden, so the operator holds until the corner clears'},
     overlay:{anchor:'pair',label:'Limited visibility',state:'unclear'}},
+  // Narration (owner's ElevenLabs file, 23 Oct 2026). Delays land lines on the blocked corner (5.4 s) and the hold (17.4 s). The variation line describes the review (operator holds), so it plays there and the AI view stays silent.
+  narration:{base:'/map-assets/lab/audio/mining.yard-awareness/',lines:{scene:'scene.mp3',change:'change.mp3',aiView:'aiView.mp3',review:'review.mp3'},variation:{aiView:null,review:'variation.mp3'},delay:{change:1.4,review:1.2}},
 };

@@ -1,3 +1,4 @@
-import WorldExplorer from '../_worlds/WorldExplorer';
+import LabExplorer from '../ai-lab/LabExplorer';
 
-export default function Page() { return <WorldExplorer world="datacenter" brand={{title: 'AI-ready datacenter', small: 'YOUR JOURNEY TO AI-READY INFRASTRUCTURE'}}/>; }
+// The AI-ready datacenter in the AI Lab exhibit format: the world's three lab markers open the too hungry / too hot / too heavy exhibits.
+export default function Page() { return <LabExplorer industry="datacenter"/>; }

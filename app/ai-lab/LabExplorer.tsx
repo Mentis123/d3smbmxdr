@@ -4,7 +4,7 @@ import {LabHeader,LabFooter} from './LabChrome';
 import {LABS,LAB_WORLDS,type LabIndustry} from '../../lib/ai-lab/content';
 import ExhibitEvidence from './ExhibitEvidence';
 import {EXHIBITS} from '../../lib/ai-lab/exhibits';
-import {CHAPTER_NAMES,chapterCaption,useLabRegistry,type LabRegistry,type RecipeState,useNarration} from '../../lib/ai-lab/lab-recipes';
+import {chapterCaption,chapterName,useLabRegistry,type LabRegistry,type RecipeState,useNarration} from '../../lib/ai-lab/lab-recipes';
 
 type TabletopWindow=Window&{__tabletop?:{exhibit?:{prepare:()=>void}}};
 const KIND_LABEL={verified:'Verified',vendor:'Vendor',pattern:'Pattern'} as const;
@@ -132,11 +132,11 @@ export default function LabExplorer({industry}:{industry:LabIndustry}){
   return()=>{f?.removeEventListener('load',attach);docs.forEach(d=>{try{d.removeEventListener('pointerdown',unlockNarration,opts);d.removeEventListener('keydown',unlockNarration,opts);}catch{/* Frame gone. */}});};
  },[unlockNarration,ready]);
  return <main className="al-container al-explorer al-exhibits" data-industry={industry}>
-  <div><LabHeader/><div className="al-world-heading"><div><a className="al-back" href="/ai-lab">← Choose an industry</a><h1>{world.name}</h1><p className="ex-intro">Look around. Select a marker to watch AI help a person.</p></div></div></div>
+  <div><LabHeader/><div className="al-world-heading"><div><a className="al-back" href={world.back?.href??'/ai-lab'}>{world.back?.label??'← Choose an industry'}</a><h1>{world.name}</h1><p className="ex-intro">{world.intro??'Look around. Select a marker to watch AI help a person.'}</p></div></div></div>
   <section className="ex-world" aria-label="Explore the industry world">
    <img src={LABS[industry].poster} alt="Overview of the fictional industry world"/>
    <dialog ref={dialog} className="ex-dialog" data-exhibit={!!id} data-recipe={!!recipe} data-scene-fullscreen={fullscreen} role={id||fullscreen?'dialog':'region'} aria-label={id?undefined:'Interactive industry world'} aria-labelledby={id?'ex-title':undefined} onCancel={e=>{e.preventDefault();if(full.current)exitFullscreen();else if(id&&performance.now()>ignoreCloseUntil.current)close();}} onClick={e=>{if(full.current)return;if(id&&e.target===dialog.current)close();}}>
-    {title&&<header className="ex-header"><div><span className="al-eyebrow">AI IN {world.eyebrow}</span><h2 id="ex-title">{title}</h2></div><button ref={closeButton} onClick={close} aria-label="Close exhibit">Close ×</button></header>}
+    {title&&<header className="ex-header"><div><span className="al-eyebrow">{world.offHub?world.eyebrow:`AI IN ${world.eyebrow}`}</span><h2 id="ex-title">{title}</h2></div><button ref={closeButton} onClick={close} aria-label="Close exhibit">Close ×</button></header>}
     <div className="ex-body"><div className="ex-visual"><div ref={stage} className="ex-stage" aria-label={id?'Interactive close-up model':'Interactive world'}>
      <div className="ex-viewer-layer" style={id&&!showModel?{display:'none'}:undefined}>
       <iframe ref={frame} title={`${world.frame} interactive world and close-up exhibit`} src={`/lab-worlds/${industry}.html?embed=1&experience=lab&controls=compact&exhibits=1`} allow="fullscreen; pointer-lock"/>
@@ -146,10 +146,10 @@ export default function LabExplorer({industry}:{industry:LabIndustry}){
      {legacy&&!showModel&&<div className="ex-flow-illustration"><span className="al-eyebrow">WORKFLOW OVERVIEW</span>{legacy.flow.map((label,i)=><div key={label}><span>{i===0?'◎':i===1?'▤':'◉'}</span><strong>{label}</strong>{i<2&&<i>↓</i>}</div>)}</div>}
      {legacy&&showModel&&<><p className="ex-phase" aria-live="polite"><span>{phase+1} / 3</span>{phaseLabel}</p><ExhibitEvidence id={id!} phase={phase}/><div className="ex-controls" aria-label="Animation playback"><button onClick={()=>command('pause')}>{playing?'Pause':'Play'}</button><button onClick={()=>command('next')} aria-label="Next animation step">Next →</button><button onClick={()=>command('replay')}>Replay</button><button onClick={()=>command('reset')}>Reset view</button></div></>}
      {recipe&&showModel&&loaded&&rs&&chapter&&<>
-      <p className="ex-phase ex-caption" aria-live="polite" data-chapter={chapter.id} data-variation={variationOn&&chapterIndex>=2}><span>{chapterIndex+1} / 4 · {CHAPTER_NAMES[chapter.id]}</span>{caption}</p>
+      <p className="ex-phase ex-caption" aria-live="polite" data-chapter={chapter.id} data-variation={variationOn&&chapterIndex>=2}><span>{chapterIndex+1} / 4 · {chapterName(chapter)}</span>{caption}</p>
       <div className="ex-controls ex-chapterbar" aria-label="Exhibit playback">
       {rs?.sensor&&<div className="ex-sensor-tag" role="status"><span>Camera view{rs.sensorLabel?<small> · {rs.sensorLabel}</small>:null}</span><button onClick={()=>command('sensor',{value:false})}>Back to scene</button></div>}
-       <div className="ex-stops" role="group" aria-label="Chapters">{recipe.chapters.map((c,i)=><button key={c.id} data-chapter-stop={c.id} aria-current={i===chapterIndex?'step':undefined} onClick={()=>command('chapter',{index:i})}><b>{i+1}</b>{CHAPTER_NAMES[c.id]}</button>)}</div>
+       <div className="ex-stops" role="group" aria-label="Chapters">{recipe.chapters.map((c,i)=><button key={c.id} data-chapter-stop={c.id} aria-current={i===chapterIndex?'step':undefined} onClick={()=>command('chapter',{index:i})}><b>{i+1}</b>{chapterName(c)}</button>)}</div>
        <div className="ex-actions">
         <button data-action="play" onClick={()=>command(rs?.playing?'pause':'play')}>{rs?.playing?'Pause':rs?.ended?'Play again':'Play'}</button>
         <button data-action="replay" onClick={()=>command('replay')}>Replay</button>
@@ -164,7 +164,7 @@ export default function LabExplorer({industry}:{industry:LabIndustry}){
     {legacy&&<aside className="ex-copy"><div className="ex-benefit"><strong>{legacy.benefit}</strong></div><h3 className="ex-context-title">How AI helps</h3><p className="ex-explanation">{legacy.copy}</p><div className="ex-compute"><span>Where it runs</span><p>{legacy.flow.join(' → ')}</p></div><p className="ex-disclosure">Illustrative demonstration · simulated inputs</p></aside>}
     {recipe&&<aside className="ex-copy ex-recipe-copy">
      <div className="ex-benefit"><strong>{recipe.benefit}</strong></div>
-     <section className="ex-say" aria-live="polite"><h3 className="ex-context-title">Say this{chapter?` · ${CHAPTER_NAMES[chapter.id]}`:''}</h3><p className="ex-explanation">{chapter?.say??recipe.chapters[0].say}</p></section>
+     <section className="ex-say" aria-live="polite"><h3 className="ex-context-title">Say this{chapter?` · ${chapterName(chapter)}`:''}</h3><p className="ex-explanation">{chapter?.say??recipe.chapters[0].say}</p></section>
      <section className="ex-compute"><span>Where this runs</span><ol className="ex-runs">{recipe.whereItRuns.map((s,i)=><li key={s}><b>{i+1}</b>{s}</li>)}</ol></section>
      <section className="ex-limits"><span>Limits</span><p>{recipe.limits}</p></section>
      <details className="ex-more"><summary>Explain more</summary><ul>{recipe.provenance.map(p=><li key={p.url+p.label}><span className="ex-kind" data-kind={p.kind}>{KIND_LABEL[p.kind]??p.kind}</span><a href={p.url} target="_blank" rel="noopener noreferrer">{p.label}</a></li>)}</ul><p className="ex-disclosure">Fictional site · illustrative AI workflow · simulated inputs</p></details>

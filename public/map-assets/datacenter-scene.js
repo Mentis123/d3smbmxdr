@@ -316,7 +316,9 @@ export function createDatacenterScene() {
   // Journey state: the card in focus ('opener' and 'outcomes' are the first and last steps) and when it began.
   // Embedded in a host page with a side panel, floating tags show only for the card in focus.
   let focus = null, storyStart = 0;
-  const EMBED = new URLSearchParams(location.search).get('embed') === '1';
+  // In the AI Lab (experience=lab) the three lab markers carry the places, so the floating tags wait for a focus as in an embed.
+  const query = new URLSearchParams(location.search);
+  const EMBED = query.get('embed') === '1' || query.get('experience') === 'lab';
   const placards = {};
   const place = (zone, ...sprites) => { for (const sprite of sprites) zoneTags.push({zone, sprite}); };
 

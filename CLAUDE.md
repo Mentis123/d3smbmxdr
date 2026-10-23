@@ -60,7 +60,7 @@ After any shared-module change, compare paused, fixed-time frames of `/lab-world
   - optionally `STATUSES`, `INTRO` (with a quote), `OUTCOMES` and `TAGLINE`.
 
   Add a field to the data module and the component, not a new page. Learned 19 Oct 2026: the datacenter pro pass reused the NEXTDC panel by lifting it into this component.
-- `/datacenter` is an app route now, not a rewrite to `/lab-worlds/datacenter.html`; the bare wrapper still works on its own.
+- `/datacenter` is an app route now, not a rewrite to `/lab-worlds/datacenter.html`; the bare wrapper still works on its own. Since 23 Oct 2026 it renders `LabExplorer industry="datacenter"` (AI Lab exhibit format: three lab markers, too hungry / hot / heavy), not `WorldExplorer`. `datacenter` is in `LAB_WORLDS` with `offHub: true`, so the `/ai-lab` hub tiles and counts (`HUB_WORLDS`) stay energy, mining and retail. With `experience=lab` the renderer hides the world's own pins and floating tags. Recipe chapters may carry a `label` (shown via `chapterName()` instead of Scene/Change/AI view/Review).
 
 - **One source for the words.** `/nextdc` imports `/map-assets/nextdc-data.js` at runtime with `import(/* webpackIgnore: true */ url)` and a variable URL, so the panel and the world read the same synced file.
 - **`app/globals.css` styles every `header` and `footer`** (white background, padding). Scoped page CSS must reset them, as `lab.css` and `nextdc.css` do. Learned when `/nextdc` shipped a white header bar in its first build.

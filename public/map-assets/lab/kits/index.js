@@ -8,9 +8,13 @@ import {buildKit as miningYard} from './mining.yard-awareness.js';
 import {buildKit as retailProduce} from './retail.produce-recognition.js';
 import {buildKit as retailDeli} from './retail.deli-service.js';
 import {buildKit as retailAvailability} from './retail.produce-availability.js';
+import {buildKit as dcHungry} from './datacenter.too-hungry.js';
+import {buildKit as dcHot} from './datacenter.too-hot.js';
+import {buildKit as dcHeavy} from './datacenter.too-heavy.js';
 
 export const KITS=Object.freeze({
   'energy.intake-vision':energyIntake,'energy.thermal-patrol':energyThermal,'energy.corridor-inspection':energyCorridor,
   'mining.conveyor-vision':miningConveyor,'mining.pump-patrol':miningPump,'mining.yard-awareness':miningYard,
   'retail.produce-recognition':retailProduce,'retail.deli-service':retailDeli,'retail.produce-availability':retailAvailability,
+  'datacenter.too-hungry':dcHungry,'datacenter.too-hot':dcHot,'datacenter.too-heavy':dcHeavy,
 });

@@ -3,7 +3,7 @@ import {useCallback,useEffect,useRef,useState} from 'react';
 
 /** Typed view over the synced renderer registry (/map-assets/lab/recipes/index.js). One source for the words. */
 export type ChapterId='scene'|'change'|'aiView'|'review';
-export type LabChapter={id:ChapterId;at:number;caption:string;say:string;sensor?:string;overlay?:{anchor:string;label:string;state:string}};
+export type LabChapter={id:ChapterId;at:number;caption:string;say:string;label?:string;sensor?:string;overlay?:{anchor:string;label:string;state:string}};
 export type LabRecipe={
  id:string;world:string;featured:boolean;order:number;locationId:string;label:string;
  title:string;benefit:string;limits:string;whereItRuns:[string,string,string];
@@ -24,6 +24,8 @@ export function chapterCaption(recipe:LabRecipe,index:number,variationOn:boolean
 }
 
 export const CHAPTER_NAMES:Record<ChapterId,string>={scene:'Scene',change:'Change',aiView:'AI view',review:'Review'};
+/** A recipe may name its chapters (e.g. 'The assumption'); otherwise the four generic names apply. */
+export const chapterName=(chapter:LabChapter)=>chapter.label??CHAPTER_NAMES[chapter.id];
 const REGISTRY_URL='/map-assets/lab/recipes/index.js';
 let cached:Promise<LabRegistry>|null=null;
 

@@ -1,4 +1,4 @@
-export type LabIndustry = 'energy' | 'mining' | 'retail';
+export type LabIndustry = 'energy' | 'mining' | 'retail' | 'datacenter';
 
 export type LabConditions = {
   lighting: 'day' | 'low';
@@ -19,7 +19,7 @@ export type LabDefinition = {
   title: string;
   subtitle: string;
   locationId: string;
-  view: 'intake' | 'conveyor' | 'workshop' | 'control' | 'tank-detail' | 'tanks' | 'scales';
+  view: 'intake' | 'conveyor' | 'workshop' | 'control' | 'tank-detail' | 'tanks' | 'scales' | 'hero';
   poster: '/map-assets/poster.jpg' | '/map-assets/mining-poster.jpg' | '/map-assets/retail-poster.jpg';
   observation: string;
   interpretation: string;
@@ -74,6 +74,21 @@ export const LABS: Record<LabIndustry, LabDefinition> = {
     benefit: 'A local visual suggestion could save searching through produce menus.',
     limitation: 'Bags, mixed items and glare can make the camera unsure, so a person always confirms.',
   },
+  // Reached from /datacenter, not the hub. No datacenter poster exists yet, so the loading backdrop reuses the energy one.
+  datacenter: {
+    title: 'AI-ready datacenter',
+    subtitle: 'An illustrative datacenter: power, cooling and structure before the GPUs arrive',
+    locationId: 'datacenter.hungry',
+    view: 'hero',
+    poster: '/map-assets/poster.jpg',
+    observation: 'Three platforms show why a traditional hall is not ready for a modern AI rack: power density, cooling and floor loading.',
+    interpretation: 'Each exhibit compares the assumption with the reality check; the figures are the infographic ranges, not a site assessment.',
+    compute: 'Illustrative scenes only. No facility data is read or modelled.',
+    response: 'An engineer assesses the real site: power per rack, cooling strategy and structural capacity.',
+    verification: 'A site assessment, not this illustration, confirms whether a facility can host AI racks.',
+    benefit: 'See the three reality checks behind an AI-ready datacenter.',
+    limitation: 'Ranges are typical industry figures; every facility differs.',
+  },
 };
 
 /** Deterministic demonstration state, separate from any verified physical condition. */
@@ -103,7 +118,7 @@ export function deriveLabState(_industry: LabIndustry, conditions: LabConditions
 }
 
 /** Display copy per Lab world. Add a world here (and to LabIndustry) and the hub tiles and explorer headings follow. */
-export const LAB_WORLDS: Record<LabIndustry, { name: string; eyebrow: string; frame: string; alt: string; tile: string; tags: string[] }> = {
+export const LAB_WORLDS: Record<LabIndustry, { name: string; eyebrow: string; frame: string; alt: string; tile: string; tags: string[]; offHub?: boolean; intro?: string; back?: { href: string; label: string } }> = {
   energy: {
     name: 'Water and energy',
     eyebrow: 'WATER AND ENERGY',
@@ -128,4 +143,19 @@ export const LAB_WORLDS: Record<LabIndustry, { name: string; eyebrow: string; fr
     tile: 'Recognise produce, help a waiting customer, keep displays stocked.',
     tags: ['3D exploration', 'Store cameras', 'A person decides'],
   },
+  // Served at /datacenter (and /ai-lab/datacenter); offHub keeps it off the /ai-lab tiles and counts.
+  datacenter: {
+    name: 'AI-ready datacenter',
+    eyebrow: 'AI-READY INFRASTRUCTURE',
+    frame: 'Datacenter',
+    alt: '3D datacenter miniature: power, cooling and structure platforms',
+    tile: 'Too hungry, too hot, too heavy: the reality checks before the GPUs arrive.',
+    tags: ['3D exploration', 'Power, cooling + structure', 'An engineer decides'],
+    offHub: true,
+    intro: 'Too hungry, too hot, too heavy: select a marker to see the reality check behind each.',
+    back: { href: '/links', label: '← All resources' },
+  },
 };
+
+/** The worlds shown as tiles on the /ai-lab hub. */
+export const HUB_WORLDS = (Object.keys(LAB_WORLDS) as LabIndustry[]).filter(id => !LAB_WORLDS[id].offHub);

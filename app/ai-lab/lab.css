@@ -152,7 +152,9 @@
 .ex-chapterbar{left:8px!important;right:8px!important;bottom:8px!important;max-width:none;flex-direction:column;gap:4px;padding:4px}
 .ex-chapterbar>div{width:100%}
 .ex-chapterbar button{flex:1 1 0;min-width:0;min-height:40px!important;padding:5px 4px!important;font-size:12px!important;gap:4px}
-.ex-stops button b{width:16px;height:16px;font-size:10px}
+.ex-stops button b{width:16px;height:16px;font-size:10px;flex-shrink:0}
+/* Recipe chapter labels (e.g. 'The assumption') are longer than Scene/Change: let them wrap rather than clip. */
+.ex-stops button{white-space:normal;line-height:1.15;text-align:left}
 .ex-sensor-tag{left:auto;right:8px;font-size:12px}
 }
 .ex-sensor-tag small{font-size:inherit;color:#9fc4d8;text-transform:none}

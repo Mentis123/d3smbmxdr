@@ -9,9 +9,12 @@ import miningYard from './mining.yard-awareness.js';
 import retailProduce from './retail.produce-recognition.js';
 import retailDeli from './retail.deli-service.js';
 import retailAvailability from './retail.produce-availability.js';
+import dcHungry from './datacenter.too-hungry.js';
+import dcHot from './datacenter.too-hot.js';
+import dcHeavy from './datacenter.too-heavy.js';
 
-const ALL=[energyIntake,energyThermal,energyCorridor,miningConveyor,miningPump,miningYard,retailProduce,retailDeli,retailAvailability];
+const ALL=[energyIntake,energyThermal,energyCorridor,miningConveyor,miningPump,miningYard,retailProduce,retailDeli,retailAvailability,dcHungry,dcHot,dcHeavy];
 export const RECIPES=Object.freeze(Object.fromEntries(ALL.map(r=>[r.id,r])));
-export const FEATURED=Object.freeze(Object.fromEntries(['energy','mining','retail'].map(w=>[w,ALL.filter(r=>r.world===w&&r.featured).sort((a,b)=>a.order-b.order)])));
+export const FEATURED=Object.freeze(Object.fromEntries(['energy','mining','retail','datacenter'].map(w=>[w,ALL.filter(r=>r.world===w&&r.featured).sort((a,b)=>a.order-b.order)])));
 // Retired from the featured three and the world markers; still openable by id on the old three-phase path.
 export const LEGACY_IDS=Object.freeze(['energy.drawing-search','energy.alarm-investigation','mining.procedure-control','mining.historian-gap']);

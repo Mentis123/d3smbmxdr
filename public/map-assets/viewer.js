@@ -16,8 +16,10 @@ const worldKind=document.body.dataset.world||'energy';
 const isMining=worldKind==='mining';
 // Worlds beyond energy and mining load their own module by these generic exports: createWorld, WORLD_SEED, WORLD_VIEWS.
 const EXTRA_WORLDS={datacenter:'./datacenter-scene.js',nextdc:'./nextdc-scene.js',retail:'./retail-scene.js'};
-// AI Lab worlds (markers, exhibits, location pins): energy, mining and retail. Retail loads as an extra world but has no hotspots of its own.
-const labWorld=isMining?'mining':worldKind==='retail'?'retail':'energy';
+// AI Lab worlds (markers, exhibits): energy, mining, retail and datacenter. Retail and datacenter load as extra worlds;
+// location pins stay energy/mining/retail. In lab mode the datacenter's own hotspots give way to the three lab markers.
+const labWorld=isMining?'mining':worldKind==='retail'||worldKind==='datacenter'?worldKind:'energy';
+const labExperience=params.get('experience')==='lab';
 const extra=Object.hasOwn(EXTRA_WORLDS,worldKind)?await import(EXTRA_WORLDS[worldKind]):null;
 const createScene=isMining?(await import('./mining-scene.js')).createMiningScene:extra?extra.createWorld:createEnergyScene;
 const SEED=isMining?181026:extra?extra.WORLD_SEED:ENERGY_SEED;
@@ -303,11 +305,11 @@ let resizeObserver;
 try{
   renderer=new THREE.WebGLRenderer({alpha:true,antialias:true,preserveDrawingBuffer:capture,powerPreference:'high-performance'});renderer.setClearColor(0x000000,0);renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1;renderer.shadowMap.enabled=quality==='high';renderer.shadowMap.type=THREE.PCFSoftShadowMap;host.appendChild(renderer.domElement);pipeline=createPipeline(renderer);
   camera=new THREE.PerspectiveCamera(42,1,.1,160);world=createScene();await world.ready;
-  if(extra&&world.hotspots){
+  if(extra&&world.hotspots&&!(labExperience&&labWorld==='datacenter')){
     // Pins for extra worlds: same marker layer and camera glide as the lab, driven by world.hotspots.
     const {createHotspotLayer}=await import('./hotspot-layer.js');
     labLayer=createHotspotLayer(world,world.hotspots,host,selectWorldHotspot);
-  }else if(params.get('experience')==='lab'){
+  }else if(labExperience){
     const {createLabLayer}=await import('./lab-layer.js');
     labLayer=createLabLayer(world,labWorld,host,recipe=>{
       if(!exhibitMode){labLayer.apply({recipeId:recipe.id});if(recipe.view)setView(recipe.view);}

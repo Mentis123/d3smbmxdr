@@ -6,4 +6,5 @@ export const LAB_LOCATIONS={
   energy:FEATURED.energy.map(marker),
   mining:FEATURED.mining.map(marker),
   retail:FEATURED.retail.map(marker),
+  datacenter:FEATURED.datacenter.map(marker),
 };

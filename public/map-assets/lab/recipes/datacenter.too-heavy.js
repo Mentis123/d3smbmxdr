@@ -25,4 +25,6 @@ export default {
       overlay:{anchor:'slab',label:'Validated on slab',state:'neutral'},
       say:'AI ready means structural validation: floors, weight, cabling and more. Here the rack goes back down onto a slab on grade, power and pipes run overhead, and a structural engineer signs it off. In our view, many raised floors were never built for this load. Not every datacenter can physically support modern AI racks.'},
   ],
+  // Narration (owner's ElevenLabs file, 23 Oct 2026). Delays land each line on its on-screen event. No variation.
+  narration:{base:'/map-assets/lab/audio/datacenter.too-heavy/',lines:{scene:'scene.mp3',change:'change.mp3',aiView:'aiView.mp3',review:'review.mp3'},delay:{change:1.5,review:0.6}},
 };

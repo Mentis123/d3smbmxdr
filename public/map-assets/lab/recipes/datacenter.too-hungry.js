@@ -26,4 +26,6 @@ export default {
       camera:{angle:.85,elevation:.3,distance:9.2,target:[1.1,2.0,-.3],portrait:{angle:.8,elevation:.3,distance:13,target:[1.45,2.1,-.2]}},
       say:'AI-ready means high-density power: 100 to 250 kW or more per rack, from a new high-capacity feed and an overhead busway instead of another thin whip. Planned before the hardware lands, it lowers deployment risk: no expensive redesigns, delays or cost overruns. AI doesn’t need more racks. It needs more power per rack.'},
   ],
+  // Narration (owner's ElevenLabs file, 23 Oct 2026). Delays land each line on its on-screen event. No variation.
+  narration:{base:'/map-assets/lab/audio/datacenter.too-hungry/',lines:{scene:'scene.mp3',change:'change.mp3',aiView:'aiView.mp3',review:'review.mp3'},delay:{change:1.1,aiView:1.6,review:1.2}},
 };

@@ -31,4 +31,6 @@ export default {
       say:'The finding reaches the vegetation crew as "check span 2 first". They drive out, look up at the limb and measure on the ground before deciding what to cut. The drone flies home. AI pointed; people decide.'},
   ],
   variation:{id:'glare',label:'Low sun',caption:'View unclear · another pass needed',overlay:{anchor:'canopy',label:'View unclear',state:'unclear'}},
+  // Narration (owner's ElevenLabs file, 23 Oct 2026). With the variation on, its clip plays at the AI view and the review stays silent.
+  narration:{base:'/map-assets/lab/audio/energy.corridor-inspection/',lines:{scene:'scene.mp3',change:'change.mp3',aiView:'aiView.mp3',review:'review.mp3'},variation:{aiView:'variation.mp3',review:null}},
 };

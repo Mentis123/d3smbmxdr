@@ -15,7 +15,9 @@ const params=new URLSearchParams(location.search), capture=params.get('capture')
 const worldKind=document.body.dataset.world||'energy';
 const isMining=worldKind==='mining';
 // Worlds beyond energy and mining load their own module by these generic exports: createWorld, WORLD_SEED, WORLD_VIEWS.
-const EXTRA_WORLDS={datacenter:'./datacenter-scene.js',nextdc:'./nextdc-scene.js'};
+const EXTRA_WORLDS={datacenter:'./datacenter-scene.js',nextdc:'./nextdc-scene.js',retail:'./retail-scene.js'};
+// AI Lab worlds (markers, exhibits, location pins): energy, mining and retail. Retail loads as an extra world but has no hotspots of its own.
+const labWorld=isMining?'mining':worldKind==='retail'?'retail':'energy';
 const extra=Object.hasOwn(EXTRA_WORLDS,worldKind)?await import(EXTRA_WORLDS[worldKind]):null;
 const createScene=isMining?(await import('./mining-scene.js')).createMiningScene:extra?extra.createWorld:createEnergyScene;
 const SEED=isMining?181026:extra?extra.WORLD_SEED:ENERGY_SEED;
@@ -90,7 +92,7 @@ async function handleExhibit(data){
   if(data.type==='exhibit:command'){if(['play','pause','replay','reset','next','back','chapter','variation','hold','sensor','captions'].includes(data.action))exhibit?.command(data.action,{index:data.index,value:data.value});return;}
   if(data.type!=='exhibit:open')return;
   // Allow-list: this world's recipes plus its retired (legacy) ids.
-  const lab=isMining?'mining':'energy',{RECIPES,LEGACY_IDS}=labRegistry||(labRegistry=await import('./lab/recipes/index.js'));
+  const lab=labWorld,{RECIPES,LEGACY_IDS}=labRegistry||(labRegistry=await import('./lab/recipes/index.js'));
   if(!(Object.hasOwn(RECIPES,data.id)&&RECIPES[data.id].world===lab)&&!(LEGACY_IDS.includes(data.id)&&data.id.startsWith(lab+'.')))return;
   const request=exhibitRequest=data.requestId;
   try{
@@ -307,7 +309,7 @@ try{
     labLayer=createHotspotLayer(world,world.hotspots,host,selectWorldHotspot);
   }else if(params.get('experience')==='lab'){
     const {createLabLayer}=await import('./lab-layer.js');
-    labLayer=createLabLayer(world,isMining?'mining':'energy',host,recipe=>{
+    labLayer=createLabLayer(world,labWorld,host,recipe=>{
       if(!exhibitMode){labLayer.apply({recipeId:recipe.id});if(recipe.view)setView(recipe.view);}
       if(window.parent!==window)window.parent.postMessage({type:'lab:hotspot',locationId:recipe.locationId,recipeId:recipe.id},location.origin);
     });
@@ -350,13 +352,13 @@ try{
   window.addEventListener('keydown',e=>{if(shot&&e.code==='Escape'){e.preventDefault();stopShot('escaped');}},true);
   window.__tabletop={ready:false,birb:{metrics:()=>birbFlight?.metrics()||null},flythrough,exhibit:{prepare:prepareExhibit,metrics:()=>exhibit?.metrics()||null,setTime:t=>{exhibit?.setTime(t);render();},chapter:n=>{exhibit?.chapter?.(n);render();},command:(action,data)=>{exhibit?.command(action,data);render();}},setLabState:s=>labLayer?.apply(s),setState(s={}){if(s.view)setView(s.view);if(s.timeSeconds!==undefined)elapsed=s.timeSeconds;if(s.paused!==undefined)paused=s.paused;if(s.yaw!==undefined)yaw=targetYaw=s.yaw;if(s.zoom!==undefined)zoom=targetZoom=clampZoom(s.zoom,host.clientWidth,host.clientHeight);if(s.quality){quality=s.quality;qSelect.value=quality;onQuality();}pauseButton();render();return metrics();},metrics,auditHydro:()=>world.hydroDiagnostics?.(),auditInfrastructure:()=>isMining?world.audit():auditInfrastructure(world),auditGeometry:()=>auditGeometry(world.root),auditLandmarks:()=>isMining?world.audit():auditLandmarks(world),clearFrameTimes(){frameTimes=[];},reset(){navigation.reset();yaw=targetYaw;zoom=targetZoom;tilt=targetTilt;render();},dispose};
   renderer.compile(world.scene,camera);setView(params.get('view')||'hero');
-  // Location pins belong to the energy and mining maps; extra worlds (datacenter, nextdc) use their own hotspots.
-  if(!extra){pinsLayer=createPinsLayer(world,isMining?'mining':'energy',host,{onSelect:p=>{glideTo(p.view);if(window.parent!==window)window.parent.postMessage({type:'worlds:location',view:p.view,id:p.id},location.origin);}});
+  // Location pins belong to the energy, mining and retail maps; extra worlds (datacenter, nextdc) use their own hotspots.
+  if(!extra||labWorld==='retail'){pinsLayer=createPinsLayer(world,labWorld,host,{onSelect:p=>{glideTo(p.view);if(window.parent!==window)window.parent.postMessage({type:'worlds:location',view:p.view,id:p.id},location.origin);}});
   {const q=params.get('pins');let saved=null;try{saved=localStorage.getItem('tabletop-pins');}catch{}
    setPins(q==='1'?true:q==='0'?false:(capture||labLayer)?false:saved!=='0',{persist:q==='0'||q==='1'});}
   window.__tabletop.pins={set:on=>setPins(on),toggle:()=>setPins(!pinsOn),diagnostics:()=>pinsLayer.diagnostics(),select:id=>pinsLayer.select(id)};
-  if(window.parent!==window)window.parent.postMessage({type:'worlds:ready',world:isMining?'mining':'energy',pins:pinsOn},location.origin);}
-  loading.hidden=true;window.__tabletop.ready=true;if(extra&&window.parent!==window)window.parent.postMessage({type:'world:ready',world:worldKind},location.origin);if(labLayer&&window.parent!==window)window.parent.postMessage({type:'lab:ready',industry:isMining?'mining':'energy'},location.origin);raf=requestAnimationFrame(animate);
+  if(window.parent!==window)window.parent.postMessage({type:'worlds:ready',world:labWorld,pins:pinsOn},location.origin);}
+  loading.hidden=true;window.__tabletop.ready=true;if(extra&&window.parent!==window)window.parent.postMessage({type:'world:ready',world:worldKind},location.origin);if(labLayer&&window.parent!==window)window.parent.postMessage({type:'lab:ready',industry:labWorld},location.origin);raf=requestAnimationFrame(animate);
   if(params.get('studio')==='1')setupStudio();
   else if(params.get('shot')){try{playShot(params.get('shot'),{loop:params.get('loop')==='1',record:params.get('record')==='1'});}catch(e){console.error(e);}}
 }catch(e){navigation?.dispose();loading.hidden=true;error.hidden=false;document.querySelector('#error-message').textContent='WebGL is unavailable or a scene asset could not load. Check your connection and browser hardware acceleration, then try again.';world?.dispose();pipeline?.dispose();renderer?.dispose();renderer?.forceContextLoss();console.error(e);document.addEventListener('click',click);}

@@ -3,7 +3,10 @@
 // two-bone IK. Robots and drones live in lab/rigs/.
 export function createActors(k){
   const {THREE,root,mat}=k;
-  const THIGH=.44,SHIN=.44,HIP=.9,ANKLE=.075,CYCLE=.92,STANCE=.62,LIFT=.11;
+  const THIGH=.44,SHIN=.44,ANKLE=.075,CYCLE=.92,STANCE=.62,LIFT=.11;
+  // Pelvis height from leg reach: nearly straight standing (reach .993), a little less at full stride, and low enough
+  // that a foot at the end of the stride still reaches the ground. HIP is the standing height.
+  const hipFor=w=>{const R=(THIGH+SHIN)*(.993-.02*w),half=CYCLE*STANCE/2*w;return Math.sqrt(R*R-half*half)+ANKLE+.02;},HIP=hipFor(0);
 
   function person({vest=0xff7a1a,shirt=0x2b4b6b,pants=0x1f2a36,helmet=0xf4f4f0,skin=0xd6a27e,scale=1,name='person'}={}){
     const group=new THREE.Group();group.name=name;group.scale.setScalar(scale);root.add(group);
@@ -43,17 +46,18 @@ export function createActors(k){
       leg.hip.rotation.x=-(phi+alpha);leg.knee.rotation.x=Math.PI-beta;leg.ankle.rotation.x=-(leg.hip.rotation.x+leg.knee.rotation.x);
     }
     // distance: metres walked along the path; weight: 0 standing .. 1 full stride; look: head pitch (+ = down);
-    // lean: torso pitch (+ = forward); point: 0..1 raises the right arm to point forward and down.
-    function pose({distance=0,weight=1,look=0,turn=0,lean=0,point=0}={}){
+    // lean: torso pitch (+ = forward); point: 0..1 raises the right arm to point forward and down; pointPitch: how far
+    // the pointing arm lifts (radians, .9 = forward and down, about 2.4 = up at something overhead).
+    function pose({distance=0,weight=1,look=0,turn=0,lean=0,point=0,pointPitch=.9}={}){
       const w=Math.max(0,Math.min(1,weight)),stride=CYCLE*STANCE,half=stride/2;
-      const hipY=HIP-.014*w*Math.abs(Math.sin(distance/CYCLE*Math.PI*2));pelvis.position.y=hipY;
+      const hipY=hipFor(w)-.014*w*Math.abs(Math.sin(distance/CYCLE*Math.PI*2));pelvis.position.y=hipY;
       for(const leg of legs){
         const p=((distance/CYCLE+(leg.side>0?.5:0))%1+1)%1;let fz,lift=0;
         if(p<STANCE){fz=half-(p/STANCE)*stride;}else{const u=(p-STANCE)/(1-STANCE);fz=-half+(u*u*(3-2*u))*stride;lift=Math.sin(u*Math.PI)*LIFT;}
         solve(leg,fz*w,(ANKLE+lift*w)-(hipY-.02));
       }
       for(const arm of arms){const p=distance/CYCLE*Math.PI*2+(arm.side>0?0:Math.PI),pt=arm.side<0?Math.max(0,Math.min(1,point)):0;
-        arm.shoulder.rotation.x=Math.sin(p)*.42*w*(1-pt)-.9*pt;arm.elbow.rotation.x=(-.18-.2*w*Math.max(0,Math.sin(p)))*(1-pt)-.05*pt;arm.shoulder.rotation.z=arm.side*(.06+.1*pt);}
+        arm.shoulder.rotation.x=Math.sin(p)*.42*w*(1-pt)-pointPitch*pt;arm.elbow.rotation.x=(-.18-.2*w*Math.max(0,Math.sin(p)))*(1-pt)-.05*pt;arm.shoulder.rotation.z=arm.side*(.06+.1*pt);}
       torso.rotation.x=lean;head.rotation.x=look;neck.rotation.y=turn;
     }
     pose();

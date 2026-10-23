@@ -4,7 +4,7 @@ import {LabHeader,LabFooter} from './LabChrome';
 import {LABS,LAB_WORLDS,type LabIndustry} from '../../lib/ai-lab/content';
 import ExhibitEvidence from './ExhibitEvidence';
 import {EXHIBITS} from '../../lib/ai-lab/exhibits';
-import {CHAPTER_NAMES,useLabRegistry,type LabRegistry,type RecipeState} from '../../lib/ai-lab/lab-recipes';
+import {CHAPTER_NAMES,chapterCaption,useLabRegistry,type LabRegistry,type RecipeState} from '../../lib/ai-lab/lab-recipes';
 
 type TabletopWindow=Window&{__tabletop?:{exhibit?:{prepare:()=>void}}};
 const KIND_LABEL={verified:'Verified',vendor:'Vendor',pattern:'Pattern'} as const;
@@ -117,7 +117,7 @@ export default function LabExplorer({industry}:{industry:LabIndustry}){
  const phaseLabel=legacy?.phases?.[phase]??'';
  const chapterIndex=rs?.chapter??0,chapter=recipe?.chapters[chapterIndex];
  const variationOn=!!recipe?.variation&&!!rs?.variation;
- const caption=variationOn&&chapterIndex>=2?recipe!.variation!.caption:chapter?.caption;
+ const caption=recipe?chapterCaption(recipe,chapterIndex,variationOn):undefined;
  return <main className="al-container al-explorer al-exhibits" data-industry={industry}>
   <div><LabHeader/><div className="al-world-heading"><div><a className="al-back" href="/ai-lab">← Choose an industry</a><h1>{world.name}</h1><p className="ex-intro">Look around. Select a marker to watch AI help a person.</p></div></div></div>
   <section className="ex-world" aria-label="Explore the industry world">

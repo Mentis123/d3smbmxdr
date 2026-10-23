@@ -9,10 +9,18 @@ export type LabRecipe={
  title:string;benefit:string;limits:string;whereItRuns:[string,string,string];
  provenance:{label:string;url:string;kind:'verified'|'vendor'|'pattern'}[];
  duration:number;chapters:LabChapter[];
- variation?:{id:string;label:string;caption:string};stub?:boolean;
+ variation?:{id:string;label:string;caption:string;captions?:Partial<Record<ChapterId,string>>};stub?:boolean;
 };
 export type LabRegistry={RECIPES:Record<string,LabRecipe>;FEATURED:Record<string,LabRecipe[]>;LEGACY_IDS:readonly string[]};
 export type RecipeState={chapter:number;chapterId:ChapterId;time:number;duration:number;playing:boolean;variation:string|null;hold:boolean;sensor:boolean;sensorLabel:string|null;ended:boolean};
+
+/** The caption the renderer would show: from the AI view on, the variation's caption (or its per-chapter override) replaces the chapter's. */
+export function chapterCaption(recipe:LabRecipe,index:number,variationOn:boolean){
+ const chapter=recipe.chapters[index],v=variationOn?recipe.variation:undefined,ai=recipe.chapters.findIndex(c=>c.id==='aiView');
+ if(!chapter)return undefined;
+ if(!v||ai<0||index<ai)return chapter.caption;
+ return v.captions?.[chapter.id]??v.caption??chapter.caption;
+}
 
 export const CHAPTER_NAMES:Record<ChapterId,string>={scene:'Scene',change:'Change',aiView:'AI view',review:'Review'};
 const REGISTRY_URL='/map-assets/lab/recipes/index.js';

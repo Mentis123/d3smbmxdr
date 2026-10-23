@@ -1,75 +1,31 @@
-// STUB recipe: real title, benefit, limits and provenance from AI-LAB-MASTER-PLAN.md; chapters are placeholders
-// until the exhibit is built. Pure data, no imports.
+// M2. Pure data: read by the renderer and (via sync) by the Data#3 host.
 export default {
-  "id": "mining.pump-patrol",
-  "world": "mining",
-  "featured": true,
-  "order": 2,
-  "locationId": "mining.processing.plant",
-  "label": "Pump patrol",
-  "view": "plant",
-  "anchor": [
-    6.9,
-    3.0,
-    -0.2
+  id:'mining.pump-patrol',world:'mining',featured:true,order:2,
+  locationId:'mining.processing.plant',label:'Pump patrol',view:'plant',anchor:[6.95,2.35,-.05],
+  title:'A robot finds a new wet area by a pump',
+  benefit:'Fitters hear about a new wet patch by a pump between rounds, while it is still small.',
+  limits:'The robot compares today\'s picture with a stored one from the same spot; it cannot tell what the liquid is or where it comes from, and a wash-down or spill also looks wet, so a fitter checks the pump.',
+  whereItRuns:['Robot camera','Site GPU','Fitter'],
+  provenance:[
+    {label:'Vendor case: a legged robot inspects machinery, drainage and pipes on rounds at Vale (ANYbotics)',url:'https://www.anybotics.com/news/anymal-helps-vale-to-prioritize-people-in-mining/',kind:'vendor'},
+    {label:'Verified pattern: Woodside\'s inspection robot looks for leaks and hot spots on routine rounds (Control Global)',url:'https://controlglobal.com/control/industrial-computers/article/55267857/safety-on-four-legs-at-lng-plant',kind:'verified'},
+    {label:'Pattern: promptable segmentation for the changed-area mask (Meta SAM 2)',url:'https://ai.meta.com/research/sam2/',kind:'pattern'},
   ],
-  "title": "A robot finds a new wet area by a pump",
-  "benefit": "Fitters hear about a new wet patch by a pump between rounds, before it becomes a failure.",
-  "limits": "The robot compares today with a stored baseline; a wash-down or spill also looks wet, so a fitter checks the pump.",
-  "whereItRuns": [
-    "Robot camera",
-    "Site GPU",
-    "Fitter"
+  duration:26,
+  chapters:[
+    {id:'scene',at:0,caption:'A robot walks its round past the plant pumps',
+      camera:{angle:.55,elevation:.42,distance:7.6,target:[.26,-.15,.35],ease:.001,portrait:{angle:.35,elevation:.66,distance:7.2,target:[-.7,.3,-.3]}},
+      say:'This is a pump bay in the processing plant. A four-legged robot walks the same round every shift and stops at each pump. At P-11 everything looks as it did last time. Nothing needs doing.'},
+    {id:'change',at:4,caption:'Water drips from pump P-12 and spreads across the floor',
+      camera:{angle:.55,elevation:.6,distance:3.1,target:[1.25,.25,-.1],portrait:{angle:.45,elevation:.66,distance:3.7,target:[1.12,.25,-.05]}},
+      say:'At P-12 water is dripping from the pump casing and a wet patch is spreading towards the drain. It is small, the pump still runs, and nobody is in the bay to see it.'},
+    {id:'aiView',at:10,caption:'The robot camera marks a new wet area by P-12',sensor:'robot-cam',
+      overlay:{anchor:'wet',label:'New wet area',state:'review'},
+      say:'The robot stops where it always stops and takes the same picture. On the site GPU that picture is compared with the stored one from earlier rounds; the area that changed is outlined and tied to P-12. It flags a change, not a cause. The robot\'s own computer only walks.'},
+    {id:'review',at:16.5,caption:'A fitter checks pump P-12 for the source',
+      camera:{angle:.3,elevation:.5,distance:5.6,target:[1.35,.5,-.1],portrait:{angle:.1,elevation:.58,distance:8.2,target:[1.5,.6,-.25]}},
+      overlay:{anchor:'wet',label:'Inspect P-12',state:'review'},
+      say:'The fitter gets "new wet area by P-12" with today\'s picture and the stored one. They walk out, find where it comes from and decide what to do. The robot found the change; the fitter finds the cause.'},
   ],
-  "provenance": [
-    {
-      "label": "Vendor case: legged robot inspection rounds at Vale (ANYbotics)",
-      "url": "https://www.anybotics.com/news/anymal-helps-vale-to-prioritize-people-in-mining/",
-      "kind": "vendor"
-    }
-  ],
-  "duration": 26,
-  "chapters": [
-    {
-      "id": "scene",
-      "at": 0,
-      "caption": "Pumps in the plant run through the night shift",
-      "say": "The plant pump bay runs around the clock. A robot walks the same round every few hours."
-    },
-    {
-      "id": "change",
-      "at": 4,
-      "caption": "The robot stops at pump P-12 on its round",
-      "say": "At pump P-12 the robot stops and looks from the same spot as last time."
-    },
-    {
-      "id": "aiView",
-      "at": 10,
-      "caption": "The robot camera sees a new wet area",
-      "say": "The site GPU compares this view with the stored baseline and marks a wet area that was not there before.",
-      "sensor": "site-cam",
-      "overlay": {
-        "anchor": "subject",
-        "label": "For review",
-        "state": "review"
-      }
-    },
-    {
-      "id": "review",
-      "at": 16,
-      "caption": "A fitter inspects pump P-12",
-      "say": "A fitter inspects P-12 and decides what to do. The robot found the change; the fitter finds the cause."
-    }
-  ],
-  "variation": {
-    "id": "reflection",
-    "label": "Reflection",
-    "caption": "View unclear · another look needed",
-    "overlay": {
-      "anchor": "subject",
-      "label": "View unclear",
-      "state": "unclear"
-    }
-  },
-  "stub": true
+  variation:{id:'washdown',label:'Recent wash-down',caption:'View unclear · another look needed',captions:{review:'A fitter checks whether the wet area is new'},overlay:{anchor:'wet',label:'View unclear',state:'unclear'}},
 };

@@ -58,6 +58,8 @@ export function runRecipe(recipe,stage,host,notify){
     const c=chapters[i];let ov=c.overlay;if(!ov)return null;
     const unclear=tl.variation&&recipe.variation&&i>=chapters.findIndex(x=>x.id==='aiView');
     if(unclear)ov={anchor:recipe.variation.overlay?.anchor||ov.anchor,label:recipe.variation.overlay?.label||'View unclear',state:'unclear'};
+    // A chapter overlay may clear (or settle to a neutral label) at a set time: overlay.until + optional overlay.after.
+    if(!unclear&&ov.until!=null&&t>=ov.until){const after=ov.after;if(!after)return null;return{anchor:anchors[after.anchor||ov.anchor],label:after.label,state:after.state||'neutral',sweep:null};}
     const first=chapters.findIndex(x=>x.overlay)===i,since=t-c.at;
     if(first&&since<OVERLAY_DELAY)return null;
     const s=first?since-OVERLAY_DELAY:SWEEP_SECONDS;let state=ov.state;
@@ -66,7 +68,8 @@ export function runRecipe(recipe,stage,host,notify){
     return{anchor:anchors[ov.anchor],label:ov.label,state,sweep:first&&s<SWEEP_SECONDS?s/SWEEP_SECONDS:null};
   }
   const aiIndex=chapters.findIndex(x=>x.id==='aiView');
-  const captionFor=i=>tl.variation&&recipe.variation?.caption&&aiIndex>=0&&i>=aiIndex?recipe.variation.caption:chapters[i].caption;
+  // From the AI view on, the variation's caption replaces the chapter's; variation.captions[chapterId] overrides it per chapter.
+  const captionFor=i=>{const v=tl.variation&&recipe.variation;if(!v||aiIndex<0||i<aiIndex)return chapters[i].caption;return v.captions?.[chapters[i].id]??v.caption??chapters[i].caption;};
   function subjectAnchor(i){const id=chapters[i].overlay?.anchor||chapters.find(c=>c.id==='aiView')?.overlay?.anchor||Object.keys(anchors)[0];return anchors[id];}
   function state(){const i=tl.index;return{id:recipe.id,chapter:i,chapterId:idOf(i),time:tl.time,duration:recipe.duration,playing:tl.playing,variation:tl.variation,hold:tl.hold,sensor:activeCamera!==orbit,sensorLabel:activeCamera!==orbit?(sensors[chapters[i].sensor]?.label||'site camera'):null,ended:tl.ended};}
 

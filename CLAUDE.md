@@ -36,10 +36,10 @@ Use this when a page renders in the browser (WebGL, canvas, JS-driven UI) and a 
 
 The energy, mining and datacenter worlds are **owned by `Mentis123/adamrappaport`**. This repo only serves synced copies:
 
-- `public/map-assets/*` and `public/lab-worlds/{energy,mining,datacenter}.html` are copies. **Never edit them here.** Change the canonical repo and re-sync.
+- `public/map-assets/*` and `public/lab-worlds/{energy,mining,retail,datacenter,nextdc}.html` are copies. **Never edit them here.** Change the canonical repo and re-sync.
 - `public/lab-worlds/version.json` pins the canonical commit and every file hash. A sync is only valid when `--check` passes.
 - Canonical map and rules: `adamrappaport/docs/SHARED-WORLDS.md` (modules, world/view/hotspot/wrapper contracts, how to add a world, the headless checklist).
-- Routes: `/datacenter` rewrites to `/lab-worlds/datacenter.html`, the shared viewer with `body[data-world="datacenter"]`. `/ai-lab` links to the energy and mining copies.
+- Routes: `/datacenter` rewrites to `/lab-worlds/datacenter.html`, the shared viewer with `body[data-world="datacenter"]`. `/ai-lab` links to the energy, mining and retail copies.
 - Re-sync from a checkout of the canonical repo: `node scripts/sync-lab-worlds.mjs /home/user/d3smbmxdr`, then the same command with `--check`. Commit the synced output here with the route or page change.
 
 Learned 19 Oct 2026: the old `/datacenter` page had its own controls and boxes and looked basic. Don't add a page that builds its own toolbar, viewer or scene. Add a world to the shared viewer instead.
@@ -71,6 +71,7 @@ After any shared-module change, compare paused, fixed-time frames of `/lab-world
 - Views may carry `portraitZoom` (applied by the shared viewer on tall, narrow frames). The datacenter and NEXTDC views use it so phones see the world closer; desktop framing is unchanged.
 
 - **AI Lab recipe exhibits** (`app/ai-lab/LabExplorer.tsx`, `lib/ai-lab/lab-recipes.ts`): titles, captions, say-this notes, where-it-runs, limits, provenance and the featured three per world all come from the synced `/map-assets/lab/recipes/index.js` (`RECIPES`, `FEATURED`, `LEGACY_IDS`), imported at runtime like `nextdc-data.js`. Add or change an exhibit in adamrappaport and re-sync; do not copy its words into this repo. The retired four (`LEGACY_IDS`) keep the old three-phase UI from `lib/ai-lab/exhibits.ts`. On phones the caption sits above and the chapter bar below the canvas (overlays only in full screen) so the renderer frames the subject in the whole canvas: learned 23 Oct 2026, when overlaid controls hid the lower half of the AI-view box at 390 px. The renderer draws its own caption placard unless told otherwise, so `LabExplorer` sends `exhibit:command {action:'captions', value:false}` on `exhibit:ready` for recipe exhibits; drop that and the caption appears twice.
+- **Adding an AI Lab world** (learned 23 Oct 2026, retail): add it to `LabIndustry`, `LABS` (poster under `/map-assets/`, synced from adamrappaport) and `LAB_WORLDS` in `lib/ai-lab/content.ts`; the hub tiles, counts, `[industry]` params and explorer headings all follow from those. The renderer side needs the world in `lab-locations.js` or `createLabLayer` returns no markers. Variation captions use `chapterCaption()` in `lib/ai-lab/lab-recipes.ts`, the same rule as the renderer (`variation.captions[chapterId]` overrides `variation.caption` from the AI view on).
 - **Killing the Next server:** match only the split pattern (`"next-""server"`). Matching `next start -p 3107` also hits the shell that launched it and kills your own command (23 Oct 2026).
 
 Learned 19 Oct 2026 (`/nextdc`): checking the kit first meant the world, pins, controls and host pattern were all reuse. The new code was the scene, its data module, four generic viewer hooks and the panel.

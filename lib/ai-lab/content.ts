@@ -1,4 +1,4 @@
-export type LabIndustry = 'energy' | 'mining';
+export type LabIndustry = 'energy' | 'mining' | 'retail';
 
 export type LabConditions = {
   lighting: 'day' | 'low';
@@ -19,8 +19,8 @@ export type LabDefinition = {
   title: string;
   subtitle: string;
   locationId: string;
-  view: 'intake' | 'conveyor' | 'workshop' | 'control' | 'tank-detail' | 'tanks';
-  poster: '/map-assets/poster.jpg' | '/map-assets/mining-poster.jpg';
+  view: 'intake' | 'conveyor' | 'workshop' | 'control' | 'tank-detail' | 'tanks' | 'scales';
+  poster: '/map-assets/poster.jpg' | '/map-assets/mining-poster.jpg' | '/map-assets/retail-poster.jpg';
   observation: string;
   interpretation: string;
   compute: string;
@@ -59,6 +59,20 @@ export const LABS: Record<LabIndustry, LabDefinition> = {
     verification: 'The operator checks the equipment and transfer area, records the observed condition and confirms any action through approved site processes.',
     benefit: 'A local visual prompt could help an operator find a transfer area that merits inspection.',
     limitation: 'Dust, lighting, material variation and blocked views can obscure the belt, so uncertain visibility requires manual review.',
+  },
+  retail: {
+    title: 'Produce at the self-serve scale',
+    subtitle: 'A camera view of a fictional neighbourhood supermarket',
+    locationId: 'retail.produce.scales',
+    view: 'scales',
+    poster: '/map-assets/retail-poster.jpg',
+    observation: 'A small camera above the self-serve scale provides images of the produce on the plate.',
+    interpretation: 'In this scripted example, the produce is offered as a suggestion on the screen; the shopper confirms or picks another item.',
+    compute: 'A store GPU could analyse images locally. This demonstration uses fixed scripted outputs and does not run inference.',
+    response: 'The shopper confirms the suggestion; store colleagues act on any staff prompt under store procedures.',
+    verification: 'The scale supplies the weight and the product list supplies the price; the camera only suggests what the produce is.',
+    benefit: 'A local visual suggestion could save searching through produce menus.',
+    limitation: 'Bags, mixed items and glare can make the camera unsure, so a person always confirms.',
   },
 };
 
@@ -105,5 +119,13 @@ export const LAB_WORLDS: Record<LabIndustry, { name: string; eyebrow: string; fr
     alt: '3D open-pit mining miniature with haulage and processing plant',
     tile: 'Catch a growing build-up at a conveyor chute, a robot find a new wet area by a pump and see around the loading-bay corner.',
     tags: ['3D exploration', 'Camera + robot', 'A person decides'],
+  },
+  retail: {
+    name: 'Retail and supermarkets',
+    eyebrow: 'RETAIL',
+    frame: 'Retail',
+    alt: '3D roof-off supermarket miniature with produce, deli and checkouts',
+    tile: 'Recognise produce, help a waiting customer, keep displays stocked.',
+    tags: ['3D exploration', 'Store cameras', 'A person decides'],
   },
 };

@@ -3,7 +3,10 @@ import {LAB_LOCATIONS} from './lab-locations.js';
 
 // Experience-only, fictional observation geometry. No detector or control API.
 export function createLabLayer(world, industry, host, onSelect) {
-  const mining=industry==='mining', recipes=LAB_LOCATIONS[industry];
+  const mining=industry==='mining', recipes=LAB_LOCATIONS[industry]||[];
+  if(!recipes.length)return{apply(){return{};},update(){},diagnostics(){return{};},dispose(){}};
+  // The illustrated debris, cover and ring anchor belong to the energy intake and mining conveyor; other worlds get the ring only.
+  const illustrated=industry==='energy'||mining;
   let active=recipes[0];
   const anchor=new THREE.Vector3(...(mining?[4.82,3.42,-3.12]:[-4.4,1.8,-1.02]));
   const group=new THREE.Group();group.name='ai-lab-observation';world.root.add(group);
@@ -22,7 +25,7 @@ export function createLabLayer(world, industry, host, onSelect) {
   const markers=recipes.map(recipe=>{
     const marker=document.createElement('button');marker.className='lab-hotspot';marker.type='button';marker.textContent='◉ '+recipe.label;marker.dataset.recipe=recipe.id;marker.setAttribute('aria-label','Open '+recipe.label+' demonstration');
     marker.style.cssText='position:absolute;z-index:4;left:0;top:0;transform:translate(-50%,-100%);border:1px solid #78dcff;background:#000025ed;color:#fff;border-radius:20px;padding:9px 13px;min-height:44px;font:600 12px Arial,sans-serif;white-space:nowrap;box-shadow:0 0 24px #00aeff35';
-    marker.addEventListener('pointerdown',e=>e.stopPropagation());marker.addEventListener('click',()=>onSelect(recipe));host.appendChild(marker);const width=Math.max(130,recipe.label.length*7+38);marker.style.width=width+'px';return{recipe,marker,width};
+    marker.addEventListener('pointerdown',e=>e.stopPropagation());marker.addEventListener('click',()=>onSelect(recipe));host.appendChild(marker);const width=Math.max(host.clientWidth<480?96:130,recipe.label.length*7+38);marker.style.width=width+'px';return{recipe,marker,width};
   });
   const keyIntensity=world.key.intensity;
   let state={lighting:'day',occlusion:false,connected:true,condition:true};
@@ -31,8 +34,8 @@ export function createLabLayer(world, industry, host, onSelect) {
     if(recipes.some(r=>r.id===input.recipeId))active=recipes.find(r=>r.id===input.recipeId);
     state={recipeId:active.id,drawingScan:['clear','poor','missing'].includes(input.drawingScan)?input.drawingScan:'clear',drawingRotated:input.drawingRotated===true,alarmCase:['baseline','maintenance','sensor','stale'].includes(input.alarmCase)?input.alarmCase:'baseline',historianCase:['normal','sensor','network','shutdown'].includes(input.historianCase)?input.historianCase:'normal',procedureMode:['approved','draft','conflict','offline','removed'].includes(input.procedureMode)?input.procedureMode:'approved',lighting:input.lighting==='low'?'low':'day',occlusion:input.occlusion===true,connected:input.connected!==false,condition:input.condition!==false};
     const vision=active.kind==='vision';
-    issue.visible=vision&&state.condition;cover.visible=vision&&state.occlusion;world.key.intensity=keyIntensity*(vision&&state.lighting==='low'?.28:1);
-    ring.position.fromArray(active.anchor);ring.position.y+=.1;
+    issue.visible=illustrated&&vision&&state.condition;cover.visible=illustrated&&vision&&state.occlusion;world.key.intensity=keyIntensity*(vision&&state.lighting==='low'?.28:1);
+    ring.position.fromArray(active.anchor);ring.position.y=illustrated?active.anchor[1]+.1:(world.height?.()??0)+.03;
     world.setIllustratedConveyorRunning?.(active.kind!=='historian'||state.historianCase!=='shutdown');
     for(const {recipe,marker}of markers)marker.setAttribute('aria-pressed',String(recipe.id===active.id));
     ring.material.color.set((active.kind==='alarm'&&['sensor','stale'].includes(state.alarmCase))||(active.kind==='drawing'&&(state.drawingScan!=='clear'||!state.connected))||state.occlusion||state.lighting==='low'?0xffc875:state.condition?0x00aeff:0x78dcff);

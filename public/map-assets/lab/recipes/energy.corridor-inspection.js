@@ -1,85 +1,34 @@
-// STUB recipe: real title, benefit, limits and provenance from AI-LAB-MASTER-PLAN.md; chapters are placeholders
-// until the exhibit is built. Pure data, no imports.
+// E3. Pure data: read by the renderer and (via sync) by the Data#3 host.
 export default {
-  "id": "energy.corridor-inspection",
-  "world": "energy",
-  "featured": true,
-  "order": 3,
-  "locationId": "energy.grid.network",
-  "label": "Line patrol",
-  "view": "grid",
-  "anchor": [
-    6.65,
-    4.3,
-    -2.75
+  id:'energy.corridor-inspection',world:'energy',featured:true,order:3,
+  locationId:'energy.grid.network',label:'Line patrol',view:'grid',anchor:[5.68,3.9,-2.95],
+  title:'A drone finds a stretch of line to inspect',
+  benefit:'The vegetation crew goes first to the span that needs them.',
+  limits:'A camera view cannot measure clearance. It points a crew to a span; the crew measures on the ground and decides what to cut. Low sun, haze and dense canopy can hide the conductor, so an unclear view means another pass, never an all-clear.',
+  whereItRuns:['Drone camera','Site GPU','Vegetation crew'],
+  provenance:[
+    {label:'Verified programme: Ausgrid drone survey of its network',url:'https://www.ausgrid.com.au/About-Us/News/Drone-survey',kind:'verified'},
+    {label:'Verified research: onboard power-line detection on a drone (Landsnet, HICSS-55)',url:'https://aisel.aisnet.org/hicss-55/st/smart_app_development/3',kind:'verified'},
+    {label:'Operator programme: FPL drone inspections, including vegetation assessment',url:'https://www.fpl.com/value/smart-technology/drones.html',kind:'verified'},
+    {label:'Operator programme: National Grid autonomous drone inspections',url:'https://www.nationalgrid.com/powering-future-national-grid-rolls-out-centralised-autonomous-drone-inspections-across-its-network',kind:'verified'},
+    {label:'Vendor: vegetation screening from inspection imagery (Optelos)',url:'https://optelos.com/power-utilities/utility-vegetation-management/',kind:'vendor'},
+    {label:'Pattern: promptable image segmentation for the mask (Meta SAM 2)',url:'https://ai.meta.com/research/sam2/',kind:'pattern'},
   ],
-  "title": "A drone finds a stretch of line to inspect",
-  "benefit": "The vegetation crew goes first to the span that needs them.",
-  "limits": "A camera view cannot measure clearance; it points a crew to a span, and the crew measures on the ground.",
-  "whereItRuns": [
-    "Drone camera",
-    "Site GPU",
-    "Vegetation crew"
+  duration:27,
+  chapters:[
+    {id:'scene',at:0,caption:'Power lines cross the bush from the depot toward town',
+      camera:{angle:.55,elevation:.42,distance:9.6,target:[0,.9,.35],portrait:{angle:.5,elevation:.44,distance:11.2,target:[-.55,1.35,.45]}},
+      say:'This is a power-line corridor: three towers, three conductors each, trees on both sides. The drone lifts off from the pad beside the depot hut. Nothing is wrong yet.'},
+    {id:'change',at:4,caption:'The drone surveys the line and pauses at span 2',
+      camera:{angle:.42,elevation:.07,distance:4.6,target:[1.2,2.15,.3],portrait:{angle:.36,elevation:.07,distance:5.8,target:[1.25,2.2,.3]}},
+      say:'The drone flies beside the line with its camera on the conductors; its own onboard model keeps it on the line. At span 2 it holds position: one tree has a limb reaching up to the height of the near conductor. The growth was already there; the survey found it. It sends a short burst of frames back to the depot hut, not a live stream.'},
+    {id:'aiView',at:10,caption:'The drone camera sees branches reaching toward the line',sensor:'drone-cam',
+      overlay:{anchor:'canopy',label:'Vegetation near line',state:'review'},
+      say:'This is the drone camera. The site GPU in the depot hut works on the frames it was sent, outlines the vegetation near the conductor and pins it to span 2. It is a screening flag from a picture, not a clearance measurement.'},
+    {id:'review',at:16.5,caption:'A vegetation crew checks span 2 first',
+      camera:{angle:.3,elevation:.3,distance:6.5,target:[1.4,1.4,.7],portrait:{angle:.3,elevation:.32,distance:7.5,target:[1.5,1.4,.9]}},
+      overlay:{anchor:'canopy',label:'Check span 2',state:'review'},
+      say:'The finding reaches the vegetation crew as "check span 2 first". They drive out, look up at the limb and measure on the ground before deciding what to cut. The drone flies home. AI pointed; people decide.'},
   ],
-  "provenance": [
-    {
-      "label": "Verified programme: Ausgrid drone survey of its network",
-      "url": "https://www.ausgrid.com.au/About-Us/News/Drone-survey",
-      "kind": "verified"
-    },
-    {
-      "label": "Verified research: onboard line detection on a drone (Landsnet, HICSS-55)",
-      "url": "https://aisel.aisnet.org/hicss-55/st/smart_app_development/3",
-      "kind": "verified"
-    },
-    {
-      "label": "Operator programme: National Grid autonomous drone inspections",
-      "url": "https://www.nationalgrid.com/powering-future-national-grid-rolls-out-centralised-autonomous-drone-inspections-across-its-network",
-      "kind": "verified"
-    }
-  ],
-  "duration": 26,
-  "chapters": [
-    {
-      "id": "scene",
-      "at": 0,
-      "caption": "Power lines run from the yard toward the town",
-      "say": "Lines carry power from the substation to the town across bush and paddocks."
-    },
-    {
-      "id": "change",
-      "at": 4,
-      "caption": "The drone follows the line and pauses at span 4",
-      "say": "A drone flies the corridor; its onboard model keeps the camera on the conductors."
-    },
-    {
-      "id": "aiView",
-      "at": 10,
-      "caption": "The drone camera sees branches close to the line",
-      "say": "Imagery goes to the site GPU, which marks vegetation near the line at span 4.",
-      "sensor": "site-cam",
-      "overlay": {
-        "anchor": "subject",
-        "label": "For review",
-        "state": "review"
-      }
-    },
-    {
-      "id": "review",
-      "at": 16,
-      "caption": "A vegetation crew checks span 4 first",
-      "say": "The crew checks span 4 first and measures clearance on the ground. The drone pointed; people decide."
-    }
-  ],
-  "variation": {
-    "id": "low-sun",
-    "label": "Low sun",
-    "caption": "View unclear · another look needed",
-    "overlay": {
-      "anchor": "subject",
-      "label": "View unclear",
-      "state": "unclear"
-    }
-  },
-  "stub": true
+  variation:{id:'glare',label:'Low sun',caption:'View unclear · another pass needed',overlay:{anchor:'canopy',label:'View unclear',state:'unclear'}},
 };

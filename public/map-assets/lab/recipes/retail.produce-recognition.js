@@ -1,75 +1,30 @@
-// STUB recipe: real title, benefit, limits and provenance from AI-LAB-MASTER-PLAN.md; chapters are placeholders
-// until the exhibit is built. Pure data, no imports.
+// R1. Pure data: read by the renderer and (via sync) by the Data#3 host.
 export default {
-  "id": "retail.produce-recognition",
-  "world": "retail",
-  "featured": true,
-  "order": 1,
-  "locationId": "retail.produce.scales",
-  "label": "Produce scale",
-  "view": null,
-  "anchor": [
-    0,
-    1,
-    0
+  id:'retail.produce-recognition',world:'retail',featured:true,order:1,
+  locationId:'retail.produce.scales',label:'Produce scales',view:'scales',anchor:[-5.0,1.1,3.3],
+  title:'Recognise your produce',
+  benefit:'Less searching through produce menus at the self-serve scale.',
+  limits:'The camera suggests what the produce is; it does not weigh it or tell every variety apart. Bags, mixed items and glare make it unsure, so the shopper always confirms.',
+  whereItRuns:['Scale camera','Store GPU','Shopper'],
+  provenance:[
+    {label:'Verified: produce recognition on in-store GPUs, the Coles case (Microsoft Source, 27 March 2024)',url:'https://news.microsoft.com/source/asia/features/coles-deepens-its-relationship-with-shoppers-using-ai-to-understand-the-customer-experience-and-improve-efficiency-in-store/',kind:'verified'},
+    {label:'Pattern: promptable image segmentation for the outline (Meta SAM 2)',url:'https://ai.meta.com/research/sam2/',kind:'pattern'},
   ],
-  "title": "Recognise your produce",
-  "benefit": "Less searching through produce menus at the self-checkout.",
-  "limits": "The camera suggests; the customer confirms, and the scale supplies the weight.",
-  "whereItRuns": [
-    "Scale camera",
-    "Store GPU",
-    "Customer"
+  duration:24,
+  chapters:[
+    {id:'scene',at:0,caption:'A shopper brings fruit to the self-serve scale',
+      camera:{angle:.55,elevation:.42,distance:8.8,target:[.37,.2,.23],portrait:{angle:.5,elevation:.5,distance:9.8,target:[-.3,.75,.15]}},
+      say:'This is a self-serve produce scale in a fictional store. There is a small camera on the arm above the plate and a screen beside it. The shopper has bananas in the basket.'},
+    {id:'change',at:4,caption:'The shopper puts a bunch of bananas on the scale',
+      camera:{angle:1.3,elevation:.66,distance:2.35,target:[.12,1.1,.12],portrait:{angle:1.2,elevation:.68,distance:2.95,target:[.1,1.15,.18]}},
+      say:'The bunch goes on the plate and the scale settles. Normally the shopper would now scroll through a produce menu to find bananas. Watch the camera above the plate.'},
+    {id:'aiView',at:10,caption:'The camera above the scale suggests bananas',sensor:'scale-cam',
+      overlay:{anchor:'produce',label:'Bananas · confirm?',state:'noticed'},
+      say:'This is what the camera sees. The store GPU outlines the produce on the plate and offers bananas as the first choice on the screen. It is a suggestion, not a sale.'},
+    {id:'review',at:16,caption:'The shopper confirms; the scale supplies the weight',
+      camera:{angle:-.14,elevation:.34,distance:4.0,target:[.8,1.1,-.5],ease:1.4,portrait:{angle:-.1,elevation:.4,distance:6.4,target:[.85,1.05,-.45]}},
+      overlay:{anchor:'screen',label:'Shopper confirms',state:'noticed'},
+      say:'The shopper taps the banana tile to confirm. Beside it the screen shows the scale\'s own reading: the weight comes from the scale and the price from the product list; the camera only named the produce. The pictures are processed on the store GPU in the back.'},
   ],
-  "provenance": [
-    {
-      "label": "Verified: Coles produce recognition on in-store GPUs (Microsoft case study)",
-      "url": "https://news.microsoft.com/source/asia/features/coles-deepens-its-relationship-with-shoppers-using-ai-to-understand-the-customer-experience-and-improve-efficiency-in-store/",
-      "kind": "verified"
-    }
-  ],
-  "duration": 26,
-  "chapters": [
-    {
-      "id": "scene",
-      "at": 0,
-      "caption": "A customer brings fruit to the self-checkout",
-      "say": "A self-checkout with a produce scale and a small camera above it."
-    },
-    {
-      "id": "change",
-      "at": 4,
-      "caption": "Bananas go on the scale",
-      "say": "The customer puts loose bananas on the scale."
-    },
-    {
-      "id": "aiView",
-      "at": 10,
-      "caption": "The scale camera recognises bananas",
-      "say": "The in-store server recognises bananas and offers them first.",
-      "sensor": "site-cam",
-      "overlay": {
-        "anchor": "subject",
-        "label": "For review",
-        "state": "review"
-      }
-    },
-    {
-      "id": "review",
-      "at": 16,
-      "caption": "The customer confirms; the scale gives the weight",
-      "say": "The customer confirms. The weight is the scale's, not the camera's."
-    }
-  ],
-  "variation": {
-    "id": "bagged",
-    "label": "Bagged bunch",
-    "caption": "Not sure · customer picks from a short list",
-    "overlay": {
-      "anchor": "subject",
-      "label": "View unclear",
-      "state": "unclear"
-    }
-  },
-  "stub": true
+  variation:{id:'bagged',label:'Bagged and mixed',caption:'Not sure · the shopper picks from a short list',overlay:{anchor:'produce',label:'Not sure · pick one',state:'unclear'}},
 };

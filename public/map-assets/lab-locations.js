@@ -5,4 +5,5 @@ const marker=r=>({id:r.id,locationId:r.locationId,label:r.label,view:r.view,anch
 export const LAB_LOCATIONS={
   energy:FEATURED.energy.map(marker),
   mining:FEATURED.mining.map(marker),
+  retail:FEATURED.retail.map(marker),
 };

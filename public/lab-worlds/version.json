@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "sourceRepository": "Mentis123/adamrappaport",
-  "sourceCommit": "dd598dcae67357fb97c39ce9c2e004368530a3bd",
+  "sourceCommit": "87bc4e028006ac7b159aa753504b8c07a88856e9",
   "experience": "ai-lab",
   "runtimeDependency": "Self-hosted static files; no personal-site requests",
   "files": {
@@ -35,6 +35,10 @@
     "public/map-assets/lab/audio/datacenter.too-heavy/change.mp3": "96b36bb16ae0658a251a2354b7159f086e5df9978622d736d3a47ade72ed0c88",
     "public/map-assets/lab/audio/datacenter.too-heavy/review.mp3": "190ebdc8f6e792fee4e78df6d486e2a39048606b437ad10f370522e118ae8ad9",
     "public/map-assets/lab/audio/datacenter.too-heavy/scene.mp3": "429d8f439badea7a9050adc92a0278bacd0d73dbf094b105e417add60006d2ca",
+    "public/map-assets/lab/audio/datacenter.too-hot/aiView.mp3": "4083826faad8b748a7694e7434839e4450e053c7c409d50722894123caa9fa3f",
+    "public/map-assets/lab/audio/datacenter.too-hot/change.mp3": "d0566d40bb1aad2d7454934282eb4b8253e48f3ccdd06aa6821619ff4e114b1c",
+    "public/map-assets/lab/audio/datacenter.too-hot/review.mp3": "acd36e32ee22315169c2ad72e1588de8d9160fab4908f14b9b098e523bce8e93",
+    "public/map-assets/lab/audio/datacenter.too-hot/scene.mp3": "2d06ec366701456026e40a8e9546862d9bb55d5d2c1573951aa93a34eba8491d",
     "public/map-assets/lab/audio/datacenter.too-hungry/aiView.mp3": "1dafd417b64713443e09b6f6634fb9bc00d40ee075fd9cbb14f1d7aa8b2e1374",
     "public/map-assets/lab/audio/datacenter.too-hungry/change.mp3": "317c9f13f4827de23954feb861aaee62cb630bedca782660882d011792e430db",
     "public/map-assets/lab/audio/datacenter.too-hungry/review.mp3": "21f43000b7a8414e84dd9efd30030db2cf08d7d83f573a607f1855494586452e",
@@ -105,7 +109,7 @@
     "public/map-assets/lab/kits/retail.produce-availability.js": "4b1c643e70d1cf59c93f61e055335225a8f1c966eac544ce604fd244e8d3c4df",
     "public/map-assets/lab/kits/retail.produce-recognition.js": "5a3cef96c7d3dd8924a7a15af063d651bbad29f2bb87b1b726d8b97f65e9cd9c",
     "public/map-assets/lab/recipes/datacenter.too-heavy.js": "749eebc62d94f39a479cc1ec5deda02384a5ee96ef35e50e9fbc8b067c697733",
-    "public/map-assets/lab/recipes/datacenter.too-hot.js": "2edae374e2702bc99d1191d34f9640c37f1b7019fc21a5bc2c20f9a726da6ea8",
+    "public/map-assets/lab/recipes/datacenter.too-hot.js": "5c87102f7e3ea0af3967984da0c536584483fa2fc83d1c4f03bdad7c054e7c5a",
     "public/map-assets/lab/recipes/datacenter.too-hungry.js": "18ae94e620f495f07fbf52bb5530dddd7e227605351c15df67bc70f02c9d5ad3",
     "public/map-assets/lab/recipes/energy.corridor-inspection.js": "596aabd2911c865217d18d0da742e081541cf33335f83043dce6540f93d244b1",
     "public/map-assets/lab/recipes/energy.intake-vision.js": "c5b8b74ceb33b69d1a8c39a811a9b97420c0133562ddd638c98978b7749f14a1",

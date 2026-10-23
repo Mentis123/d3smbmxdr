@@ -26,4 +26,6 @@ export default {
       overlay:{anchor:'aiRack',label:'Fitting liquid cooling',state:'neutral',until:20.4,after:{label:'Liquid cooled'}},
       say:'A coolant distribution unit and a liquid loop now carry heat straight from the rack: liquid cooled means high capacity, and the air coolers settle back down. A facilities engineer checks it. If your cooling strategy ends at air, your AI journey may end there too.'},
   ],
+  // Narration (owner's ElevenLabs file, 23 Oct 2026). Delays land each line on its on-screen event. No variation.
+  narration:{base:'/map-assets/lab/audio/datacenter.too-hot/',lines:{scene:'scene.mp3',change:'change.mp3',aiView:'aiView.mp3',review:'review.mp3'},delay:{change:1.7,aiView:0.5,review:1.7}},
 };

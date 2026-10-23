@@ -87,7 +87,7 @@ async function handleExhibit(data){
     if(saved?.mode==='fly'){camera.position.copy(saved.position);camera.quaternion.copy(saved.quaternion);camera.updateMatrixWorld();navigation?.enterFly({capture:false});}
     reply('exhibit:closed');return;
   }
-  if(data.type==='exhibit:command'){if(['play','pause','replay','reset','next','back','chapter','variation','hold','sensor'].includes(data.action))exhibit?.command(data.action,{index:data.index,value:data.value});return;}
+  if(data.type==='exhibit:command'){if(['play','pause','replay','reset','next','back','chapter','variation','hold','sensor','captions'].includes(data.action))exhibit?.command(data.action,{index:data.index,value:data.value});return;}
   if(data.type!=='exhibit:open')return;
   // Allow-list: this world's recipes plus its retired (legacy) ids.
   const lab=isMining?'mining':'energy',{RECIPES,LEGACY_IDS}=labRegistry||(labRegistry=await import('./lab/recipes/index.js'));

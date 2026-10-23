@@ -34,7 +34,22 @@ export function createOverlay(host){
   const box=document.createElement('div');box.style.cssText='position:absolute;display:none;border:2px solid;border-radius:3px;box-sizing:border-box';
   const sweep=document.createElement('div');sweep.style.cssText='position:absolute;left:-2px;right:-2px;height:3px;display:none';box.appendChild(sweep);
   const label=document.createElement('div');label.style.cssText='position:absolute;display:none;white-space:nowrap;padding:5px 8px;border-radius:3px;color:#081018;font-size:12px;letter-spacing:.01em';
-  layer.append(frame,box,label);host.appendChild(layer);
+  // Caption placard: the chapter's one sentence, pinned under the subject, for when no host draws captions
+  // (standalone page, phones, a hidden side panel). The host turns it off with the 'captions' command.
+  const placard=document.createElement('div');placard.style.cssText='position:absolute;display:none;box-sizing:border-box;padding:7px 11px 8px;border-radius:4px;background:#0a131bea;color:#f2f8fb;border-left:3px solid #d9f4ff;font:600 14px/1.3 Arial,Helvetica,sans-serif;letter-spacing:.005em;box-shadow:0 4px 18px #0008;transition:opacity .35s';
+  layer.append(frame,box,label,placard);host.appendChild(layer);
+  function place(spec,w,h,boxRect,labelRect){
+    const c=spec.caption;if(!c?.text){placard.style.display='none';return;}
+    if(placard.textContent!==c.text)placard.textContent=c.text;
+    placard.style.display='block';placard.style.maxWidth=Math.min(360,w-24)+'px';placard.style.fontSize=w<480?'13px':'14px';
+    placard.style.borderLeftColor=OVERLAY_COLOURS[spec.rect&&spec.label?spec.state:'neutral']||OVERLAY_COLOURS.neutral;
+    const pw=placard.offsetWidth,ph=placard.offsetHeight,r=boxRect||c.rect;
+    // In the camera view: under the outlined subject when it fits, else above it (clear of the box label).
+    // In the scene: a lower-third placard, so it never covers the subject or the person.
+    let cx=r&&c.pinned?(r.left+r.right)/2:w/2,y=h-ph-14;
+    if(r&&c.pinned){const top=labelRect?Math.min(labelRect.top,r.top):r.top,bottom=labelRect?Math.max(labelRect.bottom,r.bottom):r.bottom;if(bottom+12+ph<=h-12)y=bottom+12;else if(top-12-ph>=12)y=top-12-ph;}
+    const x=Math.min(Math.max(12,cx-pw/2),w-pw-12);placard.style.left=x+'px';placard.style.top=Math.max(12,y)+'px';
+  }
   let last={};
   // spec: {rect:{left,right,top,bottom}|null, label, state, sweep:0..1|null, camera:{active,label}}
   function update(spec){
@@ -42,18 +57,19 @@ export function createOverlay(host){
     frame.style.display=spec.camera?.active?'block':'none';
     if(spec.camera?.active&&tagText.textContent!==spec.camera.label)tagText.textContent=spec.camera.label;
     const r=spec.rect;
-    if(!r||!spec.label){box.style.display=label.style.display='none';last={};return;}
+    if(!r||!spec.label){box.style.display=label.style.display='none';last={};place(spec,w,h,null,null);return;}
     const pad=8,left=Math.max(4,r.left-pad),top=Math.max(4,r.top-pad),right=Math.min(w-4,r.right+pad),bottom=Math.min(h-4,r.bottom+pad);
-    if(right-left<6||bottom-top<6){box.style.display=label.style.display='none';return;}
+    if(right-left<6||bottom-top<6){box.style.display=label.style.display='none';place(spec,w,h,null,null);return;}
     const colour=OVERLAY_COLOURS[spec.state]||OVERLAY_COLOURS.neutral;
-    Object.assign(box.style,{display:'block',left:left+'px',top:top+'px',width:(right-left)+'px',height:(bottom-top)+'px',borderColor:colour,boxShadow:`0 0 0 1px #0008, 0 0 18px ${colour}66, inset 0 0 0 1px #0006`,background:spec.state==='unclear'?'#a4aeb614':'transparent'});
+    Object.assign(box.style,{display:'block',left:left+'px',top:top+'px',width:(right-left)+'px',height:(bottom-top)+'px',borderColor:colour,borderStyle:spec.state==='unclear'?'dashed':'solid',boxShadow:`0 0 0 1px #0008, 0 0 18px ${colour}66, inset 0 0 0 1px #0006`,background:spec.state==='unclear'?'#a4aeb614':'transparent'});
     if(spec.sweep!=null&&spec.sweep>=0&&spec.sweep<=1){Object.assign(sweep.style,{display:'block',top:(spec.sweep*100)+'%',background:`linear-gradient(${colour},${colour})`,boxShadow:`0 0 14px 4px ${colour}aa`});}else sweep.style.display='none';
     if(label.textContent!==spec.label)label.textContent=spec.label;
     label.style.display='block';label.style.background=colour;
     const lw=label.offsetWidth||spec.label.length*7+16,lh=label.offsetHeight||24;
     const lx=Math.min(Math.max(4,left),w-lw-4),ly=top-lh-4>=4?top-lh-4:Math.min(h-lh-4,bottom+4);
     label.style.left=lx+'px';label.style.top=ly+'px';
+    place(spec,w,h,{left,top,right,bottom},{top:ly,bottom:ly+lh});
     last={left,top,right,bottom,state:spec.state,label:spec.label};
   }
-  return{update,get state(){return last;},dispose(){layer.remove();}};
+  return{update,get state(){return last;},get caption(){return placard.style.display==='none'?null:placard.textContent;},dispose(){layer.remove();}};
 }

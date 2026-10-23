@@ -80,7 +80,10 @@ export function buildKit(k){
   }
   const matGeo=track(new THREE.IcosahedronGeometry(1,2)),mp=matGeo.attributes.position;
   for(let i=0;i<mp.count;i++){const v=new THREE.Vector3().fromBufferAttribute(mp,i);v.multiplyScalar(1+.3*Math.sin(v.x*7.3+v.z*3)+.22*Math.sin(v.z*11.1+v.x*2)+.15*Math.cos(v.y*9+v.x*5));mp.setXYZ(i,v.x,v.y,v.z);}matGeo.computeVertexNormals();
-  const weedMat=mesh(matGeo,weed,CX,WATER_Y-.005,rackZ(WATER_Y)+.13);debris.add(weedMat);
+  // The mat: low, irregular clumps of wrack in three greens that knit together along the bars as debris gathers.
+  const weedMats=[weed,mat(0x5f6e32,{roughness:.9}),mat(0x6b5a30,{roughness:.95})];
+  const clumps=[[-.42,.1,.2,.09,0],[-.12,.16,.26,.12,1],[.2,.12,.24,.1,2],[.45,.08,.18,.09,3],[.02,.25,.2,.08,4],[.3,.27,.16,.07,5],[-.3,.24,.15,.07,6]].map(([dx,dz,sx,sz,j])=>{
+    const o=mesh(matGeo,weedMats[j%3],CX+dx,WATER_Y-.004,rackZ(WATER_Y)+.04+dz);o.rotation.y=j*1.7;debris.add(o);return{o,sx,sz,j,t0:CATCH_T+.6+j*1.15};});
   const foam=[];for(let i=0;i<12;i++){const f=mesh(dotGeo,foamM);f.castShadow=false;f.scale.set(2.4+rnd(i,61)*2,.6,1.6+rnd(i,62));foam.push({f,x:CX+(rnd(i,63)-.5)*1.25,z:rackZ(WATER_Y)+.24+rnd(i,64)*.16,i});}
   const zone=new THREE.Group();zone.name='debris-zone';root.add(zone);
   const zm=mesh(track(new THREE.BoxGeometry(1.32,.5,.42)),mat(0xffffff),CX,WATER_Y+.08,rackZ(WATER_Y)+.14);zm.visible=false;zm.castShadow=zm.receiveShadow=false;zone.add(zm);
@@ -91,15 +94,19 @@ export function buildKit(k){
   bar(wallTop,[wallTop[0],2.4,wallTop[2]],.04,steel);bar([wallTop[0],2.36,wallTop[2]],[-1.92,2.36,1.2],.03,steel);
   const lens=new THREE.Vector3(-1.86,2.34,1.18),look=new THREE.Vector3(CX,WATER_Y+.04,rackZ(WATER_Y)+.1);
   const housing=new THREE.Group();housing.position.copy(lens);housing.lookAt(look);root.add(housing);
-  const hb=box(.16,.14,.32,mat(0xe6ebee,{roughness:.5}),0,0,0);housing.add(hb);hb.position.set(0,0,.03);
+  const hb=box(.16,.14,.32,mat(0x2a3238,{roughness:.45,metalness:.3}),0,0,0);housing.add(hb);hb.position.set(0,0,.03);
+  const ring=cylinder(.058,.035,mat(0xc9d2d7,{metalness:.7,roughness:.3}),0,0,0);housing.add(ring);ring.rotation.x=Math.PI/2;ring.position.set(0,0,.19);
   const hood=box(.2,.025,.36,dark,0,0,0);housing.add(hood);hood.position.set(0,.085,.05);
   const glass=cylinder(.045,.03,mat(0x0a1720,{metalness:.8,roughness:.1}),0,0,0);housing.add(glass);glass.rotation.x=Math.PI/2;glass.position.set(0,0,.2);
   const sensorCam=new THREE.PerspectiveCamera(46,1,.05,30);sensorCam.position.copy(lens).add(new THREE.Vector3().subVectors(look,lens).normalize().multiplyScalar(.24));sensorCam.lookAt(look);root.add(sensorCam);
   // Hut on the deck: back wall, sides, roof, open front; cabinet inside.
   const HUT=[1.75,-1.2];
-  box(.9,1.05,.05,mat(0x9aa8ad),HUT[0],DECK_Y+.525,HUT[1]-.32);for(const s of [-1,1])box(.05,1.05,.64,mat(0x9aa8ad),HUT[0]+s*.45,DECK_Y+.525,HUT[1]);
-  const roof=box(1.04,.05,.8,mat(0x3d5560),HUT[0],DECK_Y+1.1,HUT[1]-.02);roof.rotation.x=.12;
-  const cabinet=props.siteCabinet(HUT[0]-.12,HUT[1]-.05,{y:DECK_Y,label:'SITE GPU'});cabinet.group.scale.setScalar(.82);
+  const HUT_H=2.1,hutWall=mat(0x9aa8ad);
+  box(.9,HUT_H,.05,hutWall,HUT[0],DECK_Y+HUT_H/2,HUT[1]-.32);for(const s of [-1,1])box(.05,HUT_H,.64,hutWall,HUT[0]+s*.45,DECK_Y+HUT_H/2,HUT[1]);
+  box(.9,.26,.05,hutWall,HUT[0],DECK_Y+HUT_H-.13,HUT[1]+.3);                                     // lintel over the open front
+  const roof=box(1.04,.05,.8,mat(0x3d5560),HUT[0],DECK_Y+HUT_H+.05,HUT[1]-.02);roof.rotation.x=.12;
+  props.plate('SITE GPU',.62,.17,{x:HUT[0],y:DECK_Y+HUT_H-.13,z:HUT[1]+.33});
+  const cabinet=props.siteCabinet(HUT[0]-.1,HUT[1]-.05,{y:DECK_Y,label:null})   // the hut's sign names it;cabinet.group.scale.setScalar(.9);
   const port=cabinet.port(),PERSON_START=[HUT[0]+.1,DECK_Y,HUT[1]+.38];
   const pulse=props.pulse([[-1.92,2.37,1.2],[wallTop[0],2.37,wallTop[2]+.05],[wallTop[0]+.06,DECK_Y+.03,wallTop[2]+.05],[wallTop[0]+.06,DECK_Y+.03,-1.5],[HUT[0]-.12,DECK_Y+.03,-1.5],port,
     [HUT[0]-.12,DECK_Y+.03,HUT[1]+.26],[PERSON_START[0],DECK_Y+.03,PERSON_START[2]]]);
@@ -112,7 +119,7 @@ export function buildKit(k){
 
   // ---- Maintenance person: leaves the hut at review and walks the deck to look down at the rack ----
   const person=actors.person({vest:0xff7a1a,shirt:0x34506a,name:'maintenance'});
-  const P_PATH=[PERSON_START,[HUT[0]-.25,DECK_Y,-.98],[CX+.25,DECK_Y,-.98]],P_T0=17.2,P_T1=21.4;
+  const P_PATH=[PERSON_START,[HUT[0]-.25,DECK_Y,-.98],[CX+.25,DECK_Y,-.98]],P_T0=18.4,P_T1=22.2;
 
   function update(t,ctx){
     // Water surface: texture flows toward the rack; gentle ripples; the surface rises slightly in front of the mat.
@@ -129,22 +136,25 @@ export function buildKit(k){
     for(const it of items){
       const o=it.o;
       if(it.kind==='pass'){const z=rackZ(WATER_Y)+(it.arrive-t)*FLOW*1.05;o.visible=z<FRONT_Z-.1&&z>-.66;o.position.set(it.x+.05*Math.sin(t*.8+it.x),WATER_Y+.012,z);o.rotation.set(0,it.yaw+t*.3,0);continue;}
-      const f=it.final,dt=it.arrive-t;
+      const f=it.final,dt=it.arrive-t;o.userData.unmasked=dt>0;   // still drifting: not part of the finding
       if(dt>0){const z=f.z+dt*FLOW*1.05;o.visible=z<FRONT_Z-.12;o.position.set(f.x+.06*Math.sin(t*.7+f.x*3),WATER_Y+.012,z);o.rotation.set(0,it.yaw+dt*.25,0);}
       else{o.visible=true;const e=smooth(0,.6,-dt);o.position.set(f.x,WATER_Y+.012+(f.y-WATER_Y-.012)*e+.004*Math.sin(t*2+f.x*5),f.z+(1-e)*.03);o.rotation.set(f.rx*e,it.yaw*(1-e)+f.ry*e,f.rz*e);}
     }
-    weedMat.visible=gw>.02;weedMat.scale.set(.5*gw+.01,.085*gw+.005,.13*gw+.01);
+    for(const C of clumps){const g=smooth(C.t0,C.t0+2.6,t);C.o.visible=g>.02;C.o.scale.set(C.sx*g+.005,(.035+.012*(C.j%2))*g+.003,C.sz*g+.005);}
     for(const F of foam){const on=smooth(GATHER0+F.i*.6,GATHER0+F.i*.6+.8,t);F.f.visible=on>0;F.f.position.set(F.x+.02*Math.sin(t*1.3+F.i),WATER_Y+.01,F.z+.02*Math.sin(t*1.7+F.i*2));F.f.scale.set((2.4+F.i%3)*on,.6*on,1.8*on);}
     // Glare variation.
     const glare=ctx.variation==='glare'?smooth(4.4,8,t):0;glint.material.opacity=.85*glare;glint.visible=glare>0;
     lensGlare.material.opacity=glare&&ctx.sensor?.95:0;lensGlare.visible=!!(glare&&ctx.sensor);
-    const active=ctx.chapterId==='aiView'||(ctx.chapterId==='review'&&t<P_T0+.3);
+    // The pulse runs in the AI view and on into Review while the camera pulls out to show camera, cabinet and person.
+    const active=ctx.chapterId==='aiView'||(ctx.chapterId==='review'&&t<P_T0+.9);
     cabinet.update(t,active);pulse.update(t,active);
     const shown=t>=P_T0-.2;person.group.visible=shown;
     if(shown){const f=actors.followPath(person.group,P_PATH,P_T0,P_T1,t);
-      if(f.done){const turn=smooth(P_T1,P_T1+.8,t),h=f.heading+Math.atan2(Math.sin(0-f.heading),Math.cos(0-f.heading))*turn;person.group.rotation.y=h;}
-      person.pose({distance:f.distance,weight:f.moving?f.weight:0,look:f.done?.55*smooth(P_T1,P_T1+1.2,t):.05});}
+      // At the rail: turn to the rack below, lean over and point at the mat.
+      const turn=f.done?smooth(P_T1,P_T1+.8,t):0;if(f.done)person.group.rotation.y=f.heading+Math.atan2(Math.sin(-.15-f.heading),Math.cos(-.15-f.heading))*turn;
+      const lookIn=f.done?smooth(P_T1+.3,P_T1+1.4,t):0;
+      person.pose({distance:f.distance,weight:f.moving?f.weight:0,look:.05+.8*lookIn,lean:.22*lookIn,point:f.done?smooth(P_T1+.9,P_T1+1.8,t):0});}
   }
-  return{anchors:{debris:zone,rack},sensors:{'intake-cam':{camera:sensorCam,mode:'mask',targets:[debris],label:'Intake camera 2'}},update,
+  return{anchors:{debris:zone,rack},sensors:{'intake-cam':{camera:sensorCam,mode:'mask',targets:[debris],label:'Intake camera 2',key:()=>items.filter(i=>i.kind!=='pass'&&!i.o.userData.unmasked).length}},update,
     metrics:()=>({debrisVisible:items.filter(i=>i.kind!=='pass'&&i.o.visible).length,growth:null,personVisible:person.group.visible,person:person.group.position.toArray()})};
 }

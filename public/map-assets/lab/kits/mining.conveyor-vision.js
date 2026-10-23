@@ -5,15 +5,15 @@ const V=.55;                       // belt speed, m/s (texture, rollers and rock
 const Z0=.2,BELT_Y=1.0,HEAD_X=2.95,TAIL_X=-2.3;
 const FEED_X=-1.2,FEED_Y=2.35,FEED_TAIL=-2.05,FEED_HEAD=-.3;
 const SPOON=[[-1.72,2.0],[-.8,1.2]];   // chute spoon plate, (x,y) top and lip
-const CLUMP={x:-.58,y:1.27,z:.5};
-const STICK0=6.3,STICK1=15.8,GROW1=16;
+const CLUMP={x:-.58,y:1.27,z:.36};
+const STICK0=4.9,STICK1=10.6,GROW1=11;   // front-loaded: the clump is mostly formed before the AI view at 10 s
 const rnd=(i,s=0)=>{const x=Math.sin(i*127.1+s*311.7+.5)*43758.5453;return x-Math.floor(x);};
 const smooth=(a,b,x)=>{const u=Math.min(1,Math.max(0,(x-a)/(b-a)));return u*u*(3-2*u);};
 const spoonY=x=>SPOON[0][1]+(x-SPOON[0][0])/(SPOON[1][0]-SPOON[0][0])*(SPOON[1][1]-SPOON[0][1]);
 
 export function buildKit(k){
   const {THREE,root,box,cylinder,bar,mesh,mat,steel,dark,yellow,track,props,actors}=k;
-  const ore=mat(0x7d6d5c,{roughness:.95}),ore2=mat(0x6a6058,{roughness:.95}),wet=mat(0x4a3627,{roughness:.7}),cake=mat(0x3e2f22,{roughness:.6});
+  const ore=mat(0x7d6d5c,{roughness:.95}),ore2=mat(0x6a6058,{roughness:.95}),wet=mat(0x8a6238,{roughness:.45,emissive:0x2a1806,emissiveIntensity:.5}),cake=mat(0x9a7444,{roughness:.4,emissive:0x2e1c08,emissiveIntensity:.55});   // wet fines: warm clay, lifted out of the chute shadow
   const frame=mat(0x2f4552,{metalness:.55,roughness:.5}),chuteSteel=mat(0x7b8a92,{metalness:.5,roughness:.55}),liner=mat(0x56636b,{metalness:.4,roughness:.6});
   const hazard=mat(0xf2b134,{roughness:.6});
   // Belt rubber: wear marks on a canvas texture, scrolled at belt speed.
@@ -72,23 +72,29 @@ export function buildKit(k){
   sp.rotation.z=Math.atan2(SPOON[1][1]-SPOON[0][1],SPOON[1][0]-SPOON[0][0]);
   for(const [a,b] of [[[-1.75,1.12,.76],[-1.75,2.78,.76]],[[-.65,1.58,.76],[-.65,2.78,.76]],[[-1.77,2.78,.76],[-.63,2.78,.76]],[[-.65,1.58,-.55],[-.65,1.58,.76]]])bar(a,b,.03,hazard);
   // Skirt boards along the loading zone, low enough to see the outlet over them.
-  for(const s of [-1,1]){box(2.15,.15,.04,liner,-.7,BELT_Y+.12,Z0+s*.5);for(let x=-1.6;x<.4;x+=.5)box(.05,.06,.07,hazard,x,BELT_Y+.21,Z0+s*.52);}
+  for(const s of [-1,1]){box(2.15,.15,.04,liner,-.7,BELT_Y+.12,Z0+s*.5);box(2.15,.018,.046,hazard,-.7,BELT_Y+.2,Z0+s*.5);}
   props.plate('TRANSFER 3',.7,.17,{x:-.62,y:2.45,z:.1,ry:Math.PI/2});
 
   // ---- Inspection camera on a post (the sensor), site cabinet, pulse route ----
-  const post=[-2.45,1.55];bar([post[0],0,post[1]],[post[0],2.55,post[1]],.05,steel);box(.26,.04,.26,dark,post[0],.02,post[1]);
-  bar([post[0],2.5,post[1]],[-2.22,2.5,1.4],.035,steel);
-  const lens=new THREE.Vector3(-2.14,2.47,1.36),look=new THREE.Vector3(CLUMP.x-.02,CLUMP.y-.04,CLUMP.z-.02);
+  // Post on the walkway side, downstream of the chute: the camera looks back up the belt into the outlet,
+  // clear of the chute walls, and stays in the scene shots so the viewer knows where the picture comes from.
+  const post=[1.95,1.42];bar([post[0],0,post[1]],[post[0],2.35,post[1]],.05,steel);box(.26,.04,.26,dark,post[0],.02,post[1]);
+  bar([post[0],2.3,post[1]],[1.78,2.28,1.27],.035,steel);
+  props.plate('CHUTE CAM 3',.5,.13,{x:post[0],y:1.6,z:post[1]+.06,ry:.5});
+  const lens=new THREE.Vector3(1.75,2.26,1.24),look=new THREE.Vector3(CLUMP.x-.02,CLUMP.y-.02,CLUMP.z);
   const housing=new THREE.Group();housing.position.copy(lens);housing.lookAt(look);root.add(housing);
-  const hb=box(.17,.15,.34,mat(0xe6ebee,{roughness:.5}),0,0,.04);housing.add(hb);hb.position.set(0,0,.04);
-  const hood=box(.21,.025,.38,dark,0,0,0);housing.add(hood);hood.position.set(0,.09,.06);
-  const glass=cylinder(.05,.03,mat(0x0a1720,{metalness:.8,roughness:.1}),0,0,0);housing.add(glass);glass.rotation.x=Math.PI/2;glass.position.set(0,0,.215);
-  const sensorCam=new THREE.PerspectiveCamera(50,1,.05,30);sensorCam.position.copy(lens).add(new THREE.Vector3().subVectors(look,lens).normalize().multiplyScalar(.25));sensorCam.lookAt(look);root.add(sensorCam);
+  const camBody=mat(0x2a3238,{roughness:.45,metalness:.3});
+  const hb=box(.15,.14,.32,camBody,0,0,0);housing.add(hb);hb.position.set(0,0,0);
+  const hood=box(.19,.022,.4,dark,0,0,0);housing.add(hood);hood.position.set(0,.085,.05);
+  const ring=cylinder(.062,.04,mat(0xc9d2d7,{metalness:.7,roughness:.3}),0,0,0);housing.add(ring);ring.rotation.x=Math.PI/2;ring.position.set(0,0,.175);
+  const glass=cylinder(.046,.02,mat(0x0a1720,{metalness:.8,roughness:.08}),0,0,0);housing.add(glass);glass.rotation.x=Math.PI/2;glass.position.set(0,0,.19);
+  const tally=box(.025,.025,.01,mat(0xff4b3e,{emissive:0xff2a1a,emissiveIntensity:.9}),0,0,0);housing.add(tally);tally.position.set(.05,.045,.161);
+  const sensorCam=new THREE.PerspectiveCamera(34,1,.05,30);sensorCam.position.copy(lens).add(new THREE.Vector3().subVectors(look,lens).normalize().multiplyScalar(.25));sensorCam.lookAt(look);root.add(sensorCam);
   const cabinet=props.siteCabinet(2.45,-1.45,{rotation:-.35,label:'SITE GPU'});
   const port=cabinet.port();
-  const OP_START=[3.15,0,1.95];
-  const pulse=props.pulse([[-2.22,2.51,1.4],[post[0]+.06,2.51,post[1]],[post[0]+.06,.035,post[1]],[post[0]+.06,.035,-1.85],[2.2,.035,-1.85],port.map((v,i)=>i===1?.035:v),port,
-    port.map((v,i)=>i===1?.035:v),[3.12,.035,-1.0],[3.12,.035,OP_START[2]-.15]]);
+  const OP_START=[2.95,0,-.92];   // beside the cabinet, on the far side of the belt
+  const pulse=props.pulse([[1.78,2.29,1.27],[post[0],2.31,post[1]-.06],[post[0],.035,post[1]-.06],[post[0],.035,-1.85],[2.2,.035,-1.85],port.map((v,i)=>i===1?.035:v),port,
+    port.map((v,i)=>i===1?.035:v),[OP_START[0],.035,-1.6],[OP_START[0],.035,OP_START[2]-.12]]);
 
   // ---- Moving ore: one continuous path per rock ----
   const ROCKS=110,rockGeo=[0,1,2,3].map(i=>{const g=track(new THREE.DodecahedronGeometry(1,0)),a=g.attributes.position;for(let j=0;j<a.count;j++){const x=a.getX(j),y=a.getY(j),z=a.getZ(j),n=1+.22*Math.sin(x*5.3+y*3.1+i*1.9)+.14*Math.cos(z*6.1-x*2.2+i);a.setXYZ(j,x*n*(1+.15*(i%2)),y*n*.85,z*n);}g.computeVertexNormals();return g;});
@@ -103,8 +109,8 @@ export function buildKit(k){
     rocks.push({o,r,lane,xA,yA,landY,tf,zLand,tSlide,dA,dB,tDrop,period,offset:(i/ROCKS)*period+rnd(i,14)*.08});
   }
   // Where the outlet lets rocks through: the clump takes the near side, so lanes squeeze to the far side.
-  const growth=t=>smooth(STICK0,GROW1,t)**.85;
-  const exitZ=(lane,gr)=>{const free=Z0+lane*.2,squeezed=Z0-.22+(lane+1)/2*.26;return free+(squeezed-free)*gr;};
+  const growth=t=>smooth(STICK0,GROW1,t)**.7;
+  const exitZ=(lane,gr)=>{const free=Z0+lane*.2,squeezed=Z0-.27+(lane+1)/2*.22;return free+(squeezed-free)*gr;};
   function placeRock(R,t){
     let s=((t+R.offset)%R.period+R.period)%R.period;const o=R.o,y0=R.r*.8+.012;o.visible=true;
     if(s<R.dA){o.position.set(R.xA,R.yA,FEED_TAIL+.05+s*V);return;}s-=R.dA;
@@ -125,7 +131,7 @@ export function buildKit(k){
   const STUCK=28,stuck=[];
   for(let i=0;i<STUCK;i++){
     const u=i/(STUCK-1),a=rnd(i,21)*Math.PI*2,rad=Math.sqrt(rnd(i,22));
-    const dx=Math.cos(a)*rad*.3,dz=Math.sin(a)*rad*.2,h=(1-rad*rad)*.3;
+    const dx=Math.cos(a)*rad*.3,dz=Math.sin(a)*rad*.16,h=(1-rad*rad)*.3;
     const r=.045+rnd(i,23)*.04,o=mesh(rockGeo[(i+1)%4],i%6===0?ore:wet);buildup.add(o);
     o.scale.set(r*1.2,r*.85,r*1.1);o.rotation.set(rnd(i,24)*6,rnd(i,25)*6,rnd(i,26)*6);
     const to=new THREE.Vector3(CLUMP.x+dx,CLUMP.y-.16+h+rnd(i,27)*.1,CLUMP.z+dz),at=STICK0+(STICK1-STICK0)*u**1.25;
@@ -133,7 +139,7 @@ export function buildKit(k){
   }
   // Overlay / subject zone: the region the camera watches at the outlet (invisible).
   const zone=new THREE.Group();zone.name='buildup-zone';root.add(zone);
-  const zm=mesh(track(new THREE.BoxGeometry(.66,.5,.42)),mat(0xffffff),CLUMP.x,CLUMP.y+.02,CLUMP.z);zm.visible=false;zm.castShadow=zm.receiveShadow=false;zone.add(zm);
+  const zm=mesh(track(new THREE.BoxGeometry(.62,.36,.4)),mat(0xffffff),CLUMP.x,CLUMP.y-.02,CLUMP.z);zm.visible=false;zm.castShadow=zm.receiveShadow=false;zone.add(zm);
 
   // ---- Dust (the "unsure" variation) ----
   const dc=document.createElement('canvas');dc.width=dc.height=64;const dg=dc.getContext('2d'),grad=dg.createRadialGradient(32,32,2,32,32,32);grad.addColorStop(0,'rgba(255,255,255,.9)');grad.addColorStop(1,'rgba(255,255,255,0)');dg.fillStyle=grad;dg.fillRect(0,0,64,64);
@@ -143,7 +149,7 @@ export function buildKit(k){
 
   // ---- Operator: appears at review and walks to the chute ----
   const op=actors.person({vest:0xff7a1a,name:'operator'});
-  const OP_PATH=[OP_START,[1.6,0,1.32],[.38,0,1.18]],OP_T0=17.7,OP_T1=22.2,OP_FACE=Math.atan2(CLUMP.x-.38,CLUMP.z-1.18);
+  const OP_END=[.22,0,-.98],OP_PATH=[OP_START,[1.9,0,-1.0],OP_END],OP_T0=18.2,OP_T1=21.8,OP_FACE=Math.atan2(CLUMP.x-OP_END[0],CLUMP.z-OP_END[2]);
 
   function update(t,ctx){
     const tex=-(t*V/TILE)%1;beltTexB.offset.x=tex;beltTexA.offset.x=tex;
@@ -153,13 +159,15 @@ export function buildKit(k){
     for(const S of stuck){const u=(t-S.at)/.4;S.o.visible=u>=0;if(u<0)continue;const e=Math.min(1,u),p=S.o.position;p.lerpVectors(S.from,S.to,e*e*(3-2*e));p.y+=Math.sin(Math.min(1,e)*Math.PI)*.08;}
     const dusty=ctx.variation==='dust',dAmt=dusty?smooth(4.4,8.5,t):0;
     for(const D of dust){D.m.opacity=dAmt*(.32+.12*Math.sin(t*.7+D.i));const a=D.i*.9+t*.12;D.s.position.set(CLUMP.x+.2+Math.cos(a)*.45,CLUMP.y+.15+Math.sin(D.i*1.7+t*.3)*.25,CLUMP.z+.1+Math.sin(a)*.35);D.s.scale.setScalar(.9+.3*Math.sin(D.i));D.s.visible=dAmt>0;}
-    lensDust.material.opacity=dusty&&ctx.sensor?.62:0;lensDust.visible=dusty&&ctx.sensor;
-    const active=ctx.chapterId==='aiView'||(ctx.chapterId==='review'&&t<OP_T0+.4);
+    lensDust.material.opacity=dusty&&ctx.sensor?.88:0;lensDust.visible=dusty&&ctx.sensor;
+    // The pulse runs in the AI view and on into Review while the camera pulls out to show camera, cabinet and operator.
+    const active=ctx.chapterId==='aiView'||(ctx.chapterId==="review"&&t<OP_T0+1.2);
     cabinet.update(t,active);pulse.update(t,active);
     const shown=t>=OP_T0-.3;op.group.visible=shown;
     if(shown){const f=actors.followPath(op.group,OP_PATH,OP_T0,OP_T1,t);
       if(f.done){const turn=smooth(OP_T1,OP_T1+.8,t);const h=f.heading+Math.atan2(Math.sin(OP_FACE-f.heading),Math.cos(OP_FACE-f.heading))*turn;op.group.rotation.y=h;}
-      op.pose({distance:f.distance,weight:f.moving?f.weight:0,look:f.done?.32*smooth(OP_T1,OP_T1+1,t):.05});}
+      const lookIn=f.done?smooth(OP_T1+.3,OP_T1+1.3,t):0;
+      op.pose({distance:f.distance,weight:f.moving?f.weight:0,look:.05+.3*lookIn,lean:.08*lookIn,point:f.done?smooth(OP_T1+.8,OP_T1+1.7,t):0});}
   }
   return{anchors:{buildup:zone,chute:sp},sensors:{'chute-cam':{camera:sensorCam,mode:'mask',targets:[buildup],label:'Chute camera 3'}},update,
     metrics:()=>({stuckVisible:stuck.filter(s=>s.o.visible).length,rocks:ROCKS,operatorVisible:op.group.visible,operator:op.group.position.toArray()})};

@@ -35,7 +35,7 @@ export function createProps(k){
     for(let i=0;i<4;i++)adopt(g,k.box(.36,.05,.012,mat(0x0e171d),0,.32+i*.08,.248));
     for(let i=0;i<3;i++){adopt(g,k.box(.42,.07,.012,mat(0x101a20),0,.74+i*.1,.248));adopt(g,k.box(.03,.02,.006,mat(0x55d6af,{emissive:0x1d8a68,emissiveIntensity:.6}),.17,.74+i*.1,.256));}
     const ledMat=mat(0x47e3a6,{emissive:0x1fbf84,emissiveIntensity:.5});const led=adopt(g,k.box(.07,.05,.014,ledMat,0,1.05,.25));led.castShadow=false;
-    plate(label,.5,.11,{parent:g,x:0,y:1.2,z:.2,rx:-.25,bg:'#0d2230',fg:'#9fe9ff'});
+    if(label)plate(label,.6,.17,{parent:g,x:0,y:1.25,z:.2,rx:-.2,bg:'#0d2230',fg:'#d8f6ff'});
     const anchor=new THREE.Object3D();anchor.position.set(0,1.0,0);g.add(anchor);
     return{group:g,led,anchor,pulse,
       update(t,active){ledMat.color.set(active?0x7fe8ff:0x47e3a6);ledMat.emissive.set(active?0x19c9ff:0x1fbf84);ledMat.emissiveIntensity=active?1.1+.7*Math.max(0,Math.sin(t*9)):.5;},

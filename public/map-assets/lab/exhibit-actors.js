@@ -42,8 +42,9 @@ export function createActors(k){
       const phi=Math.atan2(fz,-fy),alpha=Math.acos(Math.min(1,(THIGH*THIGH+d*d-SHIN*SHIN)/(2*THIGH*d))),beta=Math.acos(Math.min(1,(THIGH*THIGH+SHIN*SHIN-d*d)/(2*THIGH*SHIN)));
       leg.hip.rotation.x=-(phi+alpha);leg.knee.rotation.x=Math.PI-beta;leg.ankle.rotation.x=-(leg.hip.rotation.x+leg.knee.rotation.x);
     }
-    // distance: metres walked along the path; weight: 0 standing .. 1 full stride; look: head pitch (+ = down).
-    function pose({distance=0,weight=1,look=0,turn=0}={}){
+    // distance: metres walked along the path; weight: 0 standing .. 1 full stride; look: head pitch (+ = down);
+    // lean: torso pitch (+ = forward); point: 0..1 raises the right arm to point forward and down.
+    function pose({distance=0,weight=1,look=0,turn=0,lean=0,point=0}={}){
       const w=Math.max(0,Math.min(1,weight)),stride=CYCLE*STANCE,half=stride/2;
       const hipY=HIP-.014*w*Math.abs(Math.sin(distance/CYCLE*Math.PI*2));pelvis.position.y=hipY;
       for(const leg of legs){
@@ -51,8 +52,9 @@ export function createActors(k){
         if(p<STANCE){fz=half-(p/STANCE)*stride;}else{const u=(p-STANCE)/(1-STANCE);fz=-half+(u*u*(3-2*u))*stride;lift=Math.sin(u*Math.PI)*LIFT;}
         solve(leg,fz*w,(ANKLE+lift*w)-(hipY-.02));
       }
-      for(const arm of arms){const p=distance/CYCLE*Math.PI*2+(arm.side>0?0:Math.PI);arm.shoulder.rotation.x=Math.sin(p)*.42*w;arm.elbow.rotation.x=-.18-.2*w*Math.max(0,Math.sin(p));arm.shoulder.rotation.z=arm.side*.06;}
-      head.rotation.x=look;neck.rotation.y=turn;
+      for(const arm of arms){const p=distance/CYCLE*Math.PI*2+(arm.side>0?0:Math.PI),pt=arm.side<0?Math.max(0,Math.min(1,point)):0;
+        arm.shoulder.rotation.x=Math.sin(p)*.42*w*(1-pt)-.9*pt;arm.elbow.rotation.x=(-.18-.2*w*Math.max(0,Math.sin(p)))*(1-pt)-.05*pt;arm.shoulder.rotation.z=arm.side*(.06+.1*pt);}
+      torso.rotation.x=lean;head.rotation.x=look;neck.rotation.y=turn;
     }
     pose();
     return{group,pose,head};

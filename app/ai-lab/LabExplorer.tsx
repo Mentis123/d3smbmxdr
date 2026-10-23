@@ -79,7 +79,9 @@ export default function LabExplorer({industry}:{industry:LabIndustry}){
    if(e.data?.type==='lab:ready'&&e.data.industry===industry){setReady(true);send('scene:fullscreen',{active:full.current});}
    if(e.data?.type==='lab:hotspot'&&registryRef.current?.FEATURED[industry]?.some(r=>r.id===e.data.recipeId&&r.locationId===e.data.locationId))select(e.data.recipeId);
    if(e.data?.requestId!==request.current||e.data?.id!==idRef.current)return;
-   if(e.data.type==='exhibit:ready'){clearTimeout(loadTimer.current);setLoaded(true);setFailed(false);}
+   if(e.data.type==='exhibit:ready'){clearTimeout(loadTimer.current);setLoaded(true);setFailed(false);
+    // The host draws the chapter caption itself, so the renderer's in-scene caption placard is switched off.
+    if(registryRef.current&&Object.hasOwn(registryRef.current.RECIPES,e.data.id))send('exhibit:command',{action:'captions',value:false});}
    if(e.data.type==='exhibit:error')setFailed(true);
    if(e.data.type==='exhibit:state'&&e.data.close){if(full.current)exitFullscreen();else if(performance.now()>ignoreCloseUntil.current)close();return;}
    if(e.data.type==='exhibit:state'&&typeof e.data.chapterId==='string'){const d=e.data;setRs({chapter:d.chapter,chapterId:d.chapterId,time:d.time,duration:d.duration,playing:d.playing,variation:d.variation??null,hold:!!d.hold,sensor:!!d.sensor,sensorLabel:typeof d.sensorLabel==='string'?d.sensorLabel:null,ended:!!d.ended});}

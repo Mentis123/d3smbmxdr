@@ -31,22 +31,25 @@ export function runRecipe(recipe,stage,host,notify){
   function fitHome(aspect){
     const outward=new THREE.Vector3(Math.sin(HOME.angle)*Math.cos(HOME.elevation),Math.sin(HOME.elevation),Math.cos(HOME.angle)*Math.cos(HOME.elevation));
     const right=new THREE.Vector3().crossVectors(vertical,outward).normalize(),up=new THREE.Vector3().crossVectors(outward,right).normalize();
-    const tanV=Math.tan(THREE.MathUtils.degToRad(orbit.fov/2)),tanH=tanV*aspect,coords=framePoints.map(p=>({x:p.dot(right),y:p.dot(up),z:p.dot(outward)}));
+    // Portrait canvases may crop the plinth's sides a little rather than leave empty bands above and below.
+    const tanV=Math.tan(THREE.MathUtils.degToRad(orbit.fov/2)),tanH=tanV*aspect*(aspect<1?1.3:1),coords=framePoints.map(p=>({x:p.dot(right),y:p.dot(up),z:p.dot(outward)}));
     let sx=0,sy=0,fit=0;
     for(let it=0;it<4;it++){fit=0;for(const p of coords)fit=Math.max(fit,p.z+Math.abs(p.x-sx)/tanH,p.z+Math.abs(p.y-sy)/tanV);if(it===3)break;
       let minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;for(const p of coords){const d=fit-p.z;minX=Math.min(minX,(p.x-sx)/d);maxX=Math.max(maxX,(p.x-sx)/d);minY=Math.min(minY,(p.y-sy)/d);maxY=Math.max(maxY,(p.y-sy)/d);}
       sx+=(minX+maxX)*.5*fit;sy+=(minY+maxY)*.5*fit;}
     return{angle:HOME.angle,elevation:HOME.elevation,distance:fit*1.08,target:center.clone().addScaledVector(right,sx).addScaledVector(up,sy).toArray()};
   }
-  // Tall, narrow canvases: guided close-ups back off a little so the subject keeps its context horizontally.
+  // Tall, narrow canvases: guided close-ups back off a little so the subject keeps its context horizontally,
+  // or use the chapter's own camera.portrait pose (merged over its camera) when the recipe gives one.
   let aspectKey=-1,home=null,camChapters=chapters;
   function framesFor(aspect){
     if(aspect===aspectKey)return;aspectKey=aspect;home=fitHome(aspect);
     const f=aspect<1.2?Math.min(1.6,Math.sqrt(1.2/aspect)):1;
-    camChapters=chapters.map(c=>c.camera?{...c,camera:{...c.camera,distance:c.camera.distance*f}}:c);
+    camChapters=chapters.map(c=>{if(!c.camera)return c;const {portrait,...cam}=c.camera;
+      return{...c,camera:portrait&&aspect<1?{...cam,...portrait}:{...cam,distance:cam.distance*f}};});
   }
 
-  let user=null,easeFrom=null,sensorOff=false,lastIndex=-1,sig='',pose=null,activeCamera=orbit,overlayInfo=null;
+  let captions=true,user=null,easeFrom=null,sensorOff=false,lastIndex=-1,sig='',pose=null,activeCamera=orbit,overlayInfo=null;
   const points=new Map();let gesture=null;
   const outward=new THREE.Vector3();
   function placeOrbit(p){outward.set(Math.sin(p.angle)*Math.cos(p.elevation),Math.sin(p.elevation),Math.cos(p.angle)*Math.cos(p.elevation));
@@ -62,6 +65,8 @@ export function runRecipe(recipe,stage,host,notify){
     else if(ov.state==='review'&&first&&s<SWEEP_SECONDS+REVIEW_AFTER)state='noticed';
     return{anchor:anchors[ov.anchor],label:ov.label,state,sweep:first&&s<SWEEP_SECONDS?s/SWEEP_SECONDS:null};
   }
+  const aiIndex=chapters.findIndex(x=>x.id==='aiView');
+  const captionFor=i=>tl.variation&&recipe.variation?.caption&&aiIndex>=0&&i>=aiIndex?recipe.variation.caption:chapters[i].caption;
   function subjectAnchor(i){const id=chapters[i].overlay?.anchor||chapters.find(c=>c.id==='aiView')?.overlay?.anchor||Object.keys(anchors)[0];return anchors[id];}
   function state(){const i=tl.index;return{id:recipe.id,chapter:i,chapterId:idOf(i),time:tl.time,duration:recipe.duration,playing:tl.playing,variation:tl.variation,hold:tl.hold,sensor:activeCamera!==orbit,sensorLabel:activeCamera!==orbit?(sensors[chapters[i].sensor]?.label||'site camera'):null,ended:tl.ended};}
 
@@ -75,9 +80,11 @@ export function runRecipe(recipe,stage,host,notify){
     pose=user||guidedPose(camChapters,t,home||fitHome(1.6),easeFrom);placeOrbit(pose);
     activeCamera=sensor?sensor.camera:orbit;activeCamera.updateWorldMatrix(true,false);
     overlayInfo=overlayFor(i,t);
-    sensorView.apply(c.sensor,sensor,tl.variation?'unclear':'neutral');
+    // The mask wears the overlay's state colour, so the outlined object and its label tell one story.
+    sensorView.apply(c.sensor,sensor,tl.variation&&aiIndex>=0&&i>=aiIndex?'unclear':overlayInfo?.state||'neutral');
     const rect=overlayInfo?.anchor&&w>0?projectRect(overlayInfo.anchor,activeCamera,w,h):null;
-    overlay.update({rect,label:overlayInfo?.label,state:overlayInfo?.state,sweep:overlayInfo?.sweep,camera:{active:!!sensor,label:'Camera view · '+(sensor?.label||'site camera')}});
+    const sub=captions&&!rect&&w>0?subjectAnchor(i):null,caption=captions?{text:captionFor(i),rect:sub?projectRect(sub,activeCamera,w,h):null,pinned:!!sensor}:null;
+    overlay.update({rect,label:overlayInfo?.label,state:overlayInfo?.state,sweep:overlayInfo?.sweep,caption,camera:{active:!!sensor,label:'Camera view · '+(sensor?.label||'site camera')}});
     const s=state(),next=[s.chapter,s.playing,s.variation,s.hold,s.sensor,s.ended].join('|');
     if(next!==sig){sig=next;notify(s);}
   }
@@ -121,6 +128,7 @@ export function runRecipe(recipe,stage,host,notify){
     else if(action==='variation')tl.setVariation(v===undefined?(tl.variation?null:recipe.variation?.id):v);
     else if(action==='hold')tl.setHold(v===undefined?!tl.hold:!!v);
     else if(action==='sensor'){sensorOff=v===undefined?!sensorOff:!v;if(sensorOff)user=null;}
+    else if(action==='captions')captions=v===undefined?!captions:!!v;
     else return;
     send();
   }
@@ -128,7 +136,7 @@ export function runRecipe(recipe,stage,host,notify){
     const i=tl.index,w=host.clientWidth,h=host.clientHeight,anchor=subjectAnchor(i);activeCamera.updateWorldMatrix(true,false);
     const r=anchor&&h>0?projectRect(anchor,activeCamera,w,h):null;
     const top=r?Math.max(0,r.top):0,bottom=r?Math.min(h,r.bottom):0;
-    return{...state(),title:recipe.title,subjectFraction:r?Math.max(0,bottom-top)/h:0,subjectRect:r,overlay:overlay.state,overlayBoxes:host.querySelectorAll('.exhibit-overlay').length,
+    return{...state(),title:recipe.title,subjectFraction:r?Math.max(0,bottom-top)/h:0,subjectRect:r,overlay:overlay.state,caption:overlay.caption,overlayBoxes:host.querySelectorAll('.exhibit-overlay').length,
       camera:pose&&{angle:pose.angle,elevation:pose.elevation,distance:pose.distance,target:pose.target},userCamera:!!user,kit:kit.metrics?.()||null};
   }
   return{scene,get camera(){return activeCamera;},update,command,

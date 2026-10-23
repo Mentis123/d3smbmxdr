@@ -27,4 +27,6 @@ export default {
       say:'The shopper taps the banana tile to confirm. Beside it the screen shows the scale\'s own reading: the weight comes from the scale and the price from the product list; the camera only named the produce. The pictures are processed on the store GPU in the back.'},
   ],
   variation:{id:'bagged',label:'Bagged and mixed',caption:'Not sure · the shopper picks from a short list',overlay:{anchor:'produce',label:'Not sure · pick one',state:'unclear'}},
+  // Narration (owner's ElevenLabs file, 23 Oct 2026). Delays land 'Bananas go on the scale' on the placement (7.75 s) and the AI line on the suggestion (11.7 s); with the variation on, its clip plays at the AI view and the review stays silent.
+  narration:{base:'/map-assets/lab/audio/retail.produce-recognition/',lines:{scene:'scene.mp3',change:'change.mp3',aiView:'aiView.mp3',review:'review.mp3'},variation:{aiView:'variation.mp3',review:null},delay:{change:2.3,aiView:0.6,review:1.0}},
 };

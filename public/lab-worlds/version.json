@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "sourceRepository": "Mentis123/adamrappaport",
-  "sourceCommit": "233de06a011bcf950abf6f43a8817567654ad6ab",
+  "sourceCommit": "d5da8219a2f6b5f0bf11d6d6b60a05bdf28d202f",
   "experience": "ai-lab",
   "runtimeDependency": "Self-hosted static files; no personal-site requests",
   "files": {
@@ -62,9 +62,9 @@
     "public/map-assets/lab/kits/retail.deli-service.js": "85c3e823a5e64f2d919e474ec4e3ab9cd0025efd6bd15f4b82d70e08950c066b",
     "public/map-assets/lab/kits/retail.produce-availability.js": "4b1c643e70d1cf59c93f61e055335225a8f1c966eac544ce604fd244e8d3c4df",
     "public/map-assets/lab/kits/retail.produce-recognition.js": "5a3cef96c7d3dd8924a7a15af063d651bbad29f2bb87b1b726d8b97f65e9cd9c",
-    "public/map-assets/lab/recipes/energy.corridor-inspection.js": "128e34e8b39995b3bc064b4887d52b9a9b4e34b17111cd270ae32a99a058e504",
-    "public/map-assets/lab/recipes/energy.intake-vision.js": "7fba8ac77af15cf156c1b49b4da0a04354541ae3123bf1da0f985217a6ea1d84",
-    "public/map-assets/lab/recipes/energy.thermal-patrol.js": "19ca711d6fad03d6b9e75e3e8b6a643ac2df700be07761ce799fd58258ee7eb7",
+    "public/map-assets/lab/recipes/energy.corridor-inspection.js": "596aabd2911c865217d18d0da742e081541cf33335f83043dce6540f93d244b1",
+    "public/map-assets/lab/recipes/energy.intake-vision.js": "c5b8b74ceb33b69d1a8c39a811a9b97420c0133562ddd638c98978b7749f14a1",
+    "public/map-assets/lab/recipes/energy.thermal-patrol.js": "63db33f952a2c530f075bdbf65d14038f3133957d1632fa9bf9d8d5224eb1096",
     "public/map-assets/lab/recipes/index.js": "567216c38afa9a8f837e1d8e7bfeba1636ac609e5f5f17f88f6d79b7d64fb5bc",
     "public/map-assets/lab/recipes/mining.conveyor-vision.js": "04f0fdbc9ff7afa014b336ff1d0f4e1f923ca65b1fb5c395b8ff935da02b96b6",
     "public/map-assets/lab/recipes/mining.pump-patrol.js": "89fbbd6d6236c311b587502e620eb7d59a2a479b6b814cd38a4cffbb64ae748e",

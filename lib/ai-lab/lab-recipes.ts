@@ -10,7 +10,7 @@ export type LabRecipe={
  provenance:{label:string;url:string;kind:'verified'|'vendor'|'pattern'}[];
  duration:number;chapters:LabChapter[];
  variation?:{id:string;label:string;caption:string;captions?:Partial<Record<ChapterId,string>>};stub?:boolean;
- narration?:{base:string;lines:Partial<Record<ChapterId,string>>;variation?:Partial<Record<ChapterId,string|null>>};
+ narration?:{base:string;lines:Partial<Record<ChapterId,string>>;variation?:Partial<Record<ChapterId,string|null>>;delay?:Partial<Record<ChapterId,number>>};
 };
 export type LabRegistry={RECIPES:Record<string,LabRecipe>;FEATURED:Record<string,LabRecipe[]>;LEGACY_IDS:readonly string[]};
 export type RecipeState={chapter:number;chapterId:ChapterId;time:number;duration:number;playing:boolean;variation:string|null;hold:boolean;sensor:boolean;sensorLabel:string|null;ended:boolean};
@@ -55,7 +55,7 @@ const MUTE_KEY='ailab.narration.muted';
  * browser still refuses, `blocked` is set and the page offers "Tap for sound"; captions carry the same words.
  */
 export function useNarration(recipe:LabRecipe|null,state:RecipeState|null){
- const audio=useRef<HTMLAudioElement|null>(null),last=useRef({key:'',time:0});
+ const audio=useRef<HTMLAudioElement|null>(null),last=useRef({key:'',time:0}),timer=useRef<ReturnType<typeof setTimeout>>();
  const [muted,setMuted]=useState(false),[blocked,setBlocked]=useState(false);
  useEffect(()=>{try{setMuted(localStorage.getItem(MUTE_KEY)==='1');}catch{/* Storage may be unavailable; sound stays on. */}},[]);
  const clip=recipe&&state?narrationClip(recipe,state.chapterId,!!state.variation):null;
@@ -67,11 +67,18 @@ export function useNarration(recipe:LabRecipe|null,state:RecipeState|null){
   // A new chapter, a variation switch, or the same chapter restarted (time jumped back) starts the clip again.
   const restart=key!==last.current.key||state.time<last.current.time-.5;
   last.current={key,time:state.time};
-  if(restart){a.pause();if(!clip){a.removeAttribute('src');return;}a.src=clip;a.currentTime=0;}
+  // A line may start a moment into its chapter (narration.delay, seconds) so it lands on the event it describes.
+  const delay=(recipe.narration.delay?.[state.chapterId]??0)*1000;
+  if(restart){clearTimeout(timer.current);timer.current=undefined;a.pause();if(!clip){a.removeAttribute('src');return;}a.src=clip;a.currentTime=0;}
   if(!clip)return;
-  if(state.playing&&!muted){if(restart||(a.paused&&!a.ended))start();}else a.pause();
+  if(!state.playing||muted){clearTimeout(timer.current);timer.current=undefined;a.pause();return;}
+  if(restart&&delay>0){timer.current=setTimeout(()=>{timer.current=undefined;start();},delay);return;}
+  // Resumed during the delay (timer cleared by the pause): start now rather than replay the wait.
+  if(!timer.current&&(restart||(a.paused&&!a.ended)))start();
  },[recipe,state,clip,muted,start]);
- useEffect(()=>()=>{audio.current?.pause();audio.current=null;},[]);
- const toggleMute=useCallback(()=>{setMuted(m=>{const next=!m;try{localStorage.setItem(MUTE_KEY,next?'1':'0');}catch{/* Not persisted. */}if(next)audio.current?.pause();return next;});},[]);
- return {available:!!recipe?.narration,muted,blocked,toggleMute,tapForSound:start};
+ useEffect(()=>()=>{clearTimeout(timer.current);audio.current?.pause();audio.current=null;},[]);
+ const toggleMute=useCallback(()=>{setMuted(m=>{const next=!m;try{localStorage.setItem(MUTE_KEY,next?'1':'0');}catch{/* Not persisted. */}if(next){clearTimeout(timer.current);timer.current=undefined;audio.current?.pause();}return next;});},[]);
+ // The host calls rewind() when the visitor jumps to a chapter or replays: the next state restarts that chapter's line.
+ const rewind=useCallback(()=>{last.current={key:'',time:0};},[]);
+ return {available:!!recipe?.narration,muted,blocked,toggleMute,tapForSound:start,rewind};
 }

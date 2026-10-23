@@ -28,7 +28,8 @@ export default function LabExplorer({industry}:{industry:LabIndustry}){
  const legacy=id&&!recipe?EXHIBITS[id]??null:null;
  const title=recipe?.title??legacy?.title;
  const send=useCallback((type:string,data:object={})=>frame.current?.contentWindow?.postMessage({type,requestId:request.current,...data},window.location.origin),[]);
- const command=useCallback((action:string,data:object={})=>send('exhibit:command',{action,...data}),[send]);
+ const rewindNarration=useRef<()=>void>();
+ const command=useCallback((action:string,data:object={})=>{if(action==='chapter'||action==='replay')rewindNarration.current?.();send('exhibit:command',{action,...data});},[send]);
  const isModel=useCallback((next:string)=>!!(registryRef.current&&Object.hasOwn(registryRef.current.RECIPES,next))||!!EXHIBITS[next]?.model,[]);
  const prepare=()=>{try{(frame.current?.contentWindow as TabletopWindow|null)?.__tabletop?.exhibit?.prepare();}catch{/* The renderer prepares itself after loading. */}};
  const exitFullscreen=useCallback(()=>{
@@ -119,6 +120,7 @@ export default function LabExplorer({industry}:{industry:LabIndustry}){
  const variationOn=!!recipe?.variation&&!!rs?.variation;
  const caption=recipe?chapterCaption(recipe,chapterIndex,variationOn):undefined;
  const narration=useNarration(recipe&&id===recipe.id?recipe:null,id&&recipe?rs:null);
+ rewindNarration.current=narration.rewind;
  return <main className="al-container al-explorer al-exhibits" data-industry={industry}>
   <div><LabHeader/><div className="al-world-heading"><div><a className="al-back" href="/ai-lab">← Choose an industry</a><h1>{world.name}</h1><p className="ex-intro">Look around. Select a marker to watch AI help a person.</p></div></div></div>
   <section className="ex-world" aria-label="Explore the industry world">

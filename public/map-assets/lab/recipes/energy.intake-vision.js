@@ -28,5 +28,5 @@ export default {
   ],
   variation:{id:'glare',label:'Glare',caption:'View unclear · another look needed',overlay:{anchor:'debris',label:'View unclear',state:'unclear'}},
   // Narration (owner's ElevenLabs file, 23 Oct 2026). With the variation on, its clip plays at the AI view and the review stays silent.
-  narration:{base:'/map-assets/lab/audio/energy.intake-vision/',lines:{scene:'scene.mp3',change:'change.mp3',aiView:'aiView.mp3',review:'review.mp3'},variation:{aiView:'variation.mp3',review:null}},
+  narration:{base:'/map-assets/lab/audio/energy.intake-vision/',lines:{scene:'scene.mp3',change:'change.mp3',aiView:'aiView.mp3',review:'review.mp3'},variation:{aiView:'variation.mp3',review:null},delay:{change:1.6}},
 };

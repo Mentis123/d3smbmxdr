@@ -31,5 +31,5 @@ export default {
   variation:{id:'reflection',label:'Sun reflection',caption:'View unclear · another look needed',captions:{review:'An inspector asks the robot for another look later'},overlay:{anchor:'connector',label:'View unclear',state:'unclear'}},
   // Narration (ElevenLabs, owner-supplied 23 Oct 2026): one clip per chapter, played by the host from the chapter's start.
   // With the variation on, its clip plays at the AI view and the review stays silent (the normal lines would contradict it).
-  narration:{base:'/map-assets/lab/audio/energy.thermal-patrol/',lines:{scene:'scene.mp3',change:'change.mp3',aiView:'aiView.mp3',review:'review.mp3'},variation:{aiView:'variation.mp3',review:null}},
+  narration:{base:'/map-assets/lab/audio/energy.thermal-patrol/',lines:{scene:'scene.mp3',change:'change.mp3',aiView:'aiView.mp3',review:'review.mp3'},variation:{aiView:'variation.mp3',review:null},delay:{change:1.6}},
 };

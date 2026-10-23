@@ -27,4 +27,6 @@ export default {
       say:'The finding goes from the store GPU to the colleague\'s handheld. In the stockroom doorway the colleague checks the stock record, pushes the trolley out and refills the crate. The camera pointed at the gap; the colleague decided what to do about it.'},
   ],
   variation:{id:'hand-over',label:'Hand over the crate',caption:'View blocked · no finding until the view clears',overlay:{anchor:'crate',label:'View blocked',state:'unclear'}},
+  // Narration (owner's ElevenLabs file, 23 Oct 2026). Delays land each line on its on-screen event; with the variation on, its clip plays at the AI view and the review stays silent.
+  narration:{base:'/map-assets/lab/audio/retail.produce-availability/',lines:{scene:'scene.mp3',change:'change.mp3',aiView:'aiView.mp3',review:'review.mp3'},variation:{aiView:'variation.mp3',review:null},delay:{change:1.0,review:2.0}},
 };

@@ -27,4 +27,6 @@ export default {
       say:'The handheld lights up; the colleague acknowledges it, comes round the partition and serves. The video is processed on the store GPU and stays in the store. The camera only saw a person waiting; serving them is up to the colleague.'},
   ],
   variation:{id:'passer-by',label:'Just passing',caption:'Someone walks through without stopping · no alert',overlay:{anchor:'area',label:'Just passing · no alert',state:'unclear'}},
+  // Narration (owner's ElevenLabs file, 23 Oct 2026). Delays land each line on its on-screen event; with the variation on, its clip plays at the AI view and the review stays silent.
+  narration:{base:'/map-assets/lab/audio/retail.deli-service/',lines:{scene:'scene.mp3',change:'change.mp3',aiView:'aiView.mp3',review:'review.mp3'},variation:{aiView:'variation.mp3',review:null},delay:{change:1.1,review:1.6}},
 };

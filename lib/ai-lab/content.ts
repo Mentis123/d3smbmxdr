@@ -20,7 +20,7 @@ export type LabDefinition = {
   subtitle: string;
   locationId: string;
   view: 'intake' | 'conveyor' | 'workshop' | 'control' | 'tank-detail' | 'tanks' | 'scales' | 'hero';
-  poster: '/map-assets/poster.jpg' | '/map-assets/mining-poster.jpg' | '/map-assets/retail-poster.jpg';
+  poster: '/map-assets/poster.jpg' | '/map-assets/mining-poster.jpg' | '/map-assets/retail-poster.jpg' | '/map-assets/datacenter-poster.jpg';
   observation: string;
   interpretation: string;
   compute: string;
@@ -74,13 +74,13 @@ export const LABS: Record<LabIndustry, LabDefinition> = {
     benefit: 'A local visual suggestion could save searching through produce menus.',
     limitation: 'Bags, mixed items and glare can make the camera unsure, so a person always confirms.',
   },
-  // Reached from /datacenter, not the hub. No datacenter poster exists yet, so the loading backdrop reuses the energy one.
+  // Fourth hub tile (after retail); also served at /datacenter.
   datacenter: {
     title: 'AI-ready datacenter',
     subtitle: 'An illustrative datacenter: power, cooling and structure before the GPUs arrive',
     locationId: 'datacenter.hungry',
     view: 'hero',
-    poster: '/map-assets/poster.jpg',
+    poster: '/map-assets/datacenter-poster.jpg',
     observation: 'Three platforms show why a traditional hall is not ready for a modern AI rack: power density, cooling and floor loading.',
     interpretation: 'Each exhibit compares the assumption with the reality check; the figures are the infographic ranges, not a site assessment.',
     compute: 'Illustrative scenes only. No facility data is read or modelled.',
@@ -118,7 +118,7 @@ export function deriveLabState(_industry: LabIndustry, conditions: LabConditions
 }
 
 /** Display copy per Lab world. Add a world here (and to LabIndustry) and the hub tiles and explorer headings follow. */
-export const LAB_WORLDS: Record<LabIndustry, { name: string; eyebrow: string; frame: string; alt: string; tile: string; tags: string[]; offHub?: boolean; intro?: string; back?: { href: string; label: string } }> = {
+export const LAB_WORLDS: Record<LabIndustry, { name: string; eyebrow: string; frame: string; alt: string; tile: string; tags: string[]; bareEyebrow?: boolean; offHub?: boolean; intro?: string; back?: { href: string; label: string } }> = {
   energy: {
     name: 'Water and energy',
     eyebrow: 'WATER AND ENERGY',
@@ -143,7 +143,7 @@ export const LAB_WORLDS: Record<LabIndustry, { name: string; eyebrow: string; fr
     tile: 'Recognise produce, help a waiting customer, keep displays stocked.',
     tags: ['3D exploration', 'Store cameras', 'A person decides'],
   },
-  // Served at /datacenter (and /ai-lab/datacenter); offHub keeps it off the /ai-lab tiles and counts.
+  // Fourth hub tile, after retail (next to it on desktop, under it on phones). Also served at /datacenter.
   datacenter: {
     name: 'AI-ready datacenter',
     eyebrow: 'AI-READY INFRASTRUCTURE',
@@ -151,9 +151,8 @@ export const LAB_WORLDS: Record<LabIndustry, { name: string; eyebrow: string; fr
     alt: '3D datacenter miniature: power, cooling and structure platforms',
     tile: 'Too hungry, too hot, too heavy: the reality checks before the GPUs arrive.',
     tags: ['3D exploration', 'Power, cooling + structure', 'An engineer decides'],
-    offHub: true,
+    bareEyebrow: true,
     intro: 'Too hungry, too hot, too heavy: select a marker to see the reality check behind each.',
-    back: { href: '/links', label: '← All resources' },
   },
 };
 

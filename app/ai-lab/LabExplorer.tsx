@@ -136,7 +136,7 @@ export default function LabExplorer({industry}:{industry:LabIndustry}){
   <section className="ex-world" aria-label="Explore the industry world">
    <img src={LABS[industry].poster} alt="Overview of the fictional industry world"/>
    <dialog ref={dialog} className="ex-dialog" data-exhibit={!!id} data-recipe={!!recipe} data-scene-fullscreen={fullscreen} role={id||fullscreen?'dialog':'region'} aria-label={id?undefined:'Interactive industry world'} aria-labelledby={id?'ex-title':undefined} onCancel={e=>{e.preventDefault();if(full.current)exitFullscreen();else if(id&&performance.now()>ignoreCloseUntil.current)close();}} onClick={e=>{if(full.current)return;if(id&&e.target===dialog.current)close();}}>
-    {title&&<header className="ex-header"><div><span className="al-eyebrow">{world.offHub?world.eyebrow:`AI IN ${world.eyebrow}`}</span><h2 id="ex-title">{title}</h2></div><button ref={closeButton} onClick={close} aria-label="Close exhibit">Close ×</button></header>}
+    {title&&<header className="ex-header"><div><span className="al-eyebrow">{world.bareEyebrow?world.eyebrow:`AI IN ${world.eyebrow}`}</span><h2 id="ex-title">{title}</h2></div><button ref={closeButton} onClick={close} aria-label="Close exhibit">Close ×</button></header>}
     <div className="ex-body"><div className="ex-visual"><div ref={stage} className="ex-stage" aria-label={id?'Interactive close-up model':'Interactive world'}>
      <div className="ex-viewer-layer" style={id&&!showModel?{display:'none'}:undefined}>
       <iframe ref={frame} title={`${world.frame} interactive world and close-up exhibit`} src={`/lab-worlds/${industry}.html?embed=1&experience=lab&controls=compact&exhibits=1`} allow="fullscreen; pointer-lock"/>

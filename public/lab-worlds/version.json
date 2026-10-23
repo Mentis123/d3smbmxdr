@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "sourceRepository": "Mentis123/adamrappaport",
-  "sourceCommit": "b98845c24474bcb074361adbb3b18748ebc6000b",
+  "sourceCommit": "bbe97c0a07b596f5b636089c8142c818b44b820c",
   "experience": "ai-lab",
   "runtimeDependency": "Self-hosted static files; no personal-site requests",
   "files": {
@@ -18,6 +18,7 @@
     "public/map-assets/builder-utils.js": "d109ab7cd59de28bf3710bb59d3c1c4eb9b86cddcf869374213a4518a923d835",
     "public/map-assets/camera-limits.js": "81debf1686fc3993a460450ae77f2e7704804ff5a046e06b516660c12bd8598d",
     "public/map-assets/datacenter-data.js": "a33b826a83ed35fd95e818dcf3aeed974a8b16e8e9323e5c92f4d65ff75a7aeb",
+    "public/map-assets/datacenter-poster.jpg": "67488c86b45b4534fb7893008fda9cc4b45633e0ec8a0be3dd3a026f508f093f",
     "public/map-assets/datacenter-scene.js": "54d8e08c2e20bbb0295ddfcad5d6fe949de6abef585cac78b492a87540fffc6d",
     "public/map-assets/electrical.js": "cc49e083143cab12430332dad6ef3a182d48c4654e227912b22aca587d3ae7a3",
     "public/map-assets/exhibit-workflows.js": "e1994963f256f2a0184ab00307d57e483f75f18fd3bf7764caa8f908d80643e9",

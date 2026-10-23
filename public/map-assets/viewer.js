@@ -54,11 +54,13 @@ if(params.get('controls')==='compact'){
 const host=document.querySelector('#scene'),loading=document.querySelector('#loading'),error=document.querySelector('#error');
 const openingTilt=Math.atan2(15,Math.hypot(12,23));
 let tilt=openingTilt,targetTilt=openingTilt,azimuth=Math.atan2(12,23);
+let birbFlight=null,birbSaved=null;
 let labLayer,exhibit=null,exhibitSaved=null,exhibitRequest=0;
 const exhibitMode=params.get('exhibits')==='1';
+let labRegistry=null;if(exhibitMode)import('./lab/recipes/index.js').then(m=>{labRegistry=m;},()=>{});
 let sceneFullscreen=false;
 function fullscreenEscape(e){if(e.key==='Escape'&&sceneFullscreen){e.preventDefault();e.stopImmediatePropagation();window.parent.postMessage({type:'scene:exit-fullscreen'},location.origin);}}
-if(exhibitMode)document.addEventListener('keydown',fullscreenEscape,true);
+if(exhibitMode||params.get('birb')==='1')document.addEventListener('keydown',fullscreenEscape,true);
 let renderer,world,camera,pipeline,navigation,raf=0,elapsed=0,last=0,yaw=0,targetYaw=0,zoom=1,targetZoom=1,paused=matchMedia('(prefers-reduced-motion: reduce)').matches,quality='auto',disposed=false,frameTimes=[];
 try {quality=localStorage.getItem('tabletop-quality')||quality;}catch{}
 if(params.has('quality'))quality=['auto','high','low'].includes(params.get('quality'))?params.get('quality'):'auto';if(!['auto','high','low'].includes(quality))quality='auto';if(capture&&!params.has('quality'))quality='high';
@@ -85,8 +87,11 @@ async function handleExhibit(data){
     if(saved?.mode==='fly'){camera.position.copy(saved.position);camera.quaternion.copy(saved.quaternion);camera.updateMatrixWorld();navigation?.enterFly({capture:false});}
     reply('exhibit:closed');return;
   }
-  if(data.type==='exhibit:command'){if(['pause','replay','reset','next'].includes(data.action))exhibit?.command(data.action);return;}
-  if(data.type!=='exhibit:open'||!(isMining?['mining.conveyor-vision','mining.procedure-control','mining.historian-gap']:['energy.intake-vision','energy.drawing-search','energy.alarm-investigation']).includes(data.id))return;
+  if(data.type==='exhibit:command'){if(['play','pause','replay','reset','next','back','chapter','variation','hold','sensor'].includes(data.action))exhibit?.command(data.action,{index:data.index,value:data.value});return;}
+  if(data.type!=='exhibit:open')return;
+  // Allow-list: this world's recipes plus its retired (legacy) ids.
+  const lab=isMining?'mining':'energy',{RECIPES,LEGACY_IDS}=labRegistry||(labRegistry=await import('./lab/recipes/index.js'));
+  if(!(Object.hasOwn(RECIPES,data.id)&&RECIPES[data.id].world===lab)&&!(LEGACY_IDS.includes(data.id)&&data.id.startsWith(lab+'.')))return;
   const request=exhibitRequest=data.requestId;
   try{
     const {createExhibit}=await import('./exhibits.js');if(request!==exhibitRequest)return;
@@ -96,7 +101,7 @@ async function handleExhibit(data){
   }catch(err){reply('exhibit:error',{message:'The close-up could not load.'});}
 }
 function fit(){if(!renderer||!camera)return;const w=host.clientWidth,h=host.clientHeight;if(w<1||h<1)return;if(!exhibitSaved){zoom=clampZoom(zoom,w,h);targetZoom=clampZoom(targetZoom,w,h);}renderer.setPixelRatio(resolutionFor(effectiveProfile,{width:w,height:h,deviceDpr:devicePixelRatio,mobile:mobileDevice,capture}));renderer.setSize(w,h);pipeline?.resize(w,h,renderer.getPixelRatio(),effectiveProfile.bloom);if(!exhibitSaved){camera.aspect=w/h;camera.updateProjectionMatrix();if(!exhibit)positionCamera();}}
-function positionCamera(){if(shot){placeShotCamera();return;}if(navigation?.mode==='fly')return;const dist=orbitDistance(host.clientWidth,host.clientHeight);const direction=new THREE.Vector3(Math.sin(azimuth)*Math.cos(tilt),Math.sin(tilt),Math.cos(azimuth)*Math.cos(tilt));camera.position.copy(target).addScaledVector(direction,Math.max(MIN_ORBIT_DISTANCE,dist/zoom));camera.lookAt(target);camera.updateMatrixWorld();}
+function positionCamera(){if(birbFlight?.active)return;if(shot){placeShotCamera();return;}if(navigation?.mode==='fly')return;const dist=orbitDistance(host.clientWidth,host.clientHeight);const direction=new THREE.Vector3(Math.sin(azimuth)*Math.cos(tilt),Math.sin(tilt),Math.cos(azimuth)*Math.cos(tilt));camera.position.copy(target).addScaledVector(direction,Math.max(MIN_ORBIT_DISTANCE,dist/zoom));camera.lookAt(target);camera.updateMatrixWorld();}
 function metrics(){const gl=renderer.getContext();const ext=gl.getExtension('WEBGL_debug_renderer_info');const box=new THREE.Box3().setFromObject(world.root),xs=[],ys=[];for(const x of [box.min.x,box.max.x])for(const y of [box.min.y,box.max.y])for(const z of [box.min.z,box.max.z]){const p=new THREE.Vector3(x,y,z).project(camera);xs.push(p.x);ys.push(p.y);}return{stage:world.stats.stage,seed:SEED,time:elapsed,paused,yaw,tilt,zoom,quality,adaptive:tuner.metrics(),effectiveQuality:effectiveProfile.name,navigation:navigation?.metrics(),viewport:[host.clientWidth,host.clientHeight],dpr:renderer.getPixelRatio(),projectedBounds:{minX:Math.min(...xs),maxX:Math.max(...xs),minY:Math.min(...ys),maxY:Math.max(...ys)},camera:{position:camera.position.toArray(),quaternion:camera.quaternion.toArray(),target:target.toArray(),fov:camera.fov,near:camera.near,far:camera.far},renderer:ext?gl.getParameter(ext.UNMASKED_RENDERER_WEBGL):gl.getParameter(gl.RENDERER),threeRevision:THREE.REVISION,calls:pipeline.stats.calls,triangles:pipeline.stats.triangles,postprocess:pipeline.stats.postprocessEnabled,countsNote:'calls/triangles describe main scene pass, excluding reservoir reflection, shadow and bloom passes',geometryCount:renderer.info.memory.geometries,textures:renderer.info.memory.textures,frameTimes:[...frameTimes],activity:world.activityDiagnostics?.(elapsed),infrastructure:world.infrastructureDiagnostics?.(elapsed),reflection:world.reflection?.stats,terrain:world.terrainDiagnostics?.(),sceneStats:world.stats,lab:labLayer?.diagnostics()};}
 function render(){if(exhibit){exhibit.update(0);renderer.render(exhibit.scene,exhibit.camera);return;}if(exhibitSaved){pipeline.render(world.scene,camera,effectiveProfile.bloom);return;}positionCamera();navigation?.update(0);world.root.rotation.y=yaw;world.update(elapsed,0);world.onCamera?.(camera);labLayer?.update(camera);world.reflection?.render(renderer,camera,effectiveProfile.index>=3&&!mobileDevice&&!params.has('material'));pipeline.render(world.scene,camera,effectiveProfile.bloom);if(pinsLayer){pinsLayer.setSuppressed(!!shot&&!shot.compiled.spec.pins);pinsLayer.update(camera,{coarse:mobileDevice||document.body.classList.contains('touch-ui'),rangeScale:orbitDistance(host.clientWidth,host.clientHeight)/36});}}
 function pauseButton(){const b=document.querySelector('[data-action=pause]');b.textContent=paused?'Play':'Pause';b.setAttribute('aria-pressed',String(paused));}
@@ -265,6 +270,7 @@ function selectWorldHotspot(spot,notify=true){
 // orbit distance grows with 1/aspect. Views without it (energy, mining) frame exactly as before.
 function viewZoom(v){return v.zoom*(v.portraitZoom&&host.clientWidth<host.clientHeight*.9?v.portraitZoom:1);}
 function glideTo(name,seconds=1.6){
+  birbFlight?.exit();
   if(!Object.hasOwn(views,name))return false;
   if(shot)stopShot('glide');navigation?.exitFly();
   const v=views[name],reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -282,9 +288,9 @@ function stepGlide(now){
   const fov=L(g.from.fov,g.to.fov,e);if(camera.fov!==fov){camera.fov=fov;camera.updateProjectionMatrix();}
   if(u>=1){glide=null;setView(g.name);}
 }
-function setView(name){navigation?.exitFly();const v=views[name]||views.hero;camera.fov=v.fov||42;camera.updateProjectionMatrix();azimuth=v.azimuth??Math.atan2(12,23);tilt=targetTilt=v.tilt??openingTilt;yaw=targetYaw=v.yaw;zoom=targetZoom=viewZoom(v);target.fromArray(v.target);render();}
+function setView(name){birbFlight?.exit();navigation?.exitFly();const v=views[name]||views.hero;camera.fov=v.fov||42;camera.updateProjectionMatrix();azimuth=v.azimuth??Math.atan2(12,23);tilt=targetTilt=v.tilt??openingTilt;yaw=targetYaw=v.yaw;zoom=targetZoom=viewZoom(v);target.fromArray(v.target);render();}
 function reset(){azimuth=Math.atan2(12,23);targetTilt=openingTilt;target.set(0,1,0);targetYaw=0;targetZoom=1;if(matchMedia('(prefers-reduced-motion: reduce)').matches){yaw=0;zoom=1;tilt=targetTilt;}}
-function animate(now){if(disposed)return;if(document.hidden||host.clientWidth<1||host.clientHeight<1){last=0;raf=requestAnimationFrame(animate);return;}const rawDt=last?(now-last)/1000:0,dt=Math.min(rawDt,shot?.25:.05);last=now;if(rawDt>0){frameTimes.push(rawDt*1000);if(frameTimes.length>2000)frameTimes.shift();}if(exhibit){exhibit.update(dt);renderer.render(exhibit.scene,exhibit.camera);raf=requestAnimationFrame(animate);return;}if(exhibitSaved){render();raf=requestAnimationFrame(animate);return;}if(!paused){elapsed+=dt;if(!capture&&!shot&&rawDt>0)tuner.sample(rawDt*1000,now);}if(shot&&!paused)tickShot();if(glide)stepGlide(now);const k=1-Math.exp(-dt*10);yaw+=(targetYaw-yaw)*k;tilt+=(targetTilt-tilt)*k;zoom+=(targetZoom-zoom)*k;navigation?.update(dt);render();raf=requestAnimationFrame(animate);}
+function animate(now){if(disposed)return;if(document.hidden||host.clientWidth<1||host.clientHeight<1){last=0;raf=requestAnimationFrame(animate);return;}const rawDt=last?(now-last)/1000:0,dt=Math.min(rawDt,shot?.25:.05);last=now;if(rawDt>0){frameTimes.push(rawDt*1000);if(frameTimes.length>2000)frameTimes.shift();}if(exhibit){exhibit.update(dt);renderer.render(exhibit.scene,exhibit.camera);raf=requestAnimationFrame(animate);return;}if(exhibitSaved){render();raf=requestAnimationFrame(animate);return;}if(!paused){elapsed+=dt;if(!capture&&!shot&&rawDt>0)tuner.sample(rawDt*1000,now);}if(shot&&!paused)tickShot();if(glide)stepGlide(now);const k=1-Math.exp(-dt*10);yaw+=(targetYaw-yaw)*k;tilt+=(targetTilt-tilt)*k;zoom+=(targetZoom-zoom)*k;if(birbFlight?.active)birbFlight.update(dt);else navigation?.update(dt);render();raf=requestAnimationFrame(animate);}
 function action(name){if(name==='mouse-look')setCameraToolsOpen(false);if(navigation?.action(name))return;if(name==='rotate-left')targetYaw-=Math.PI/8;if(name==='rotate-right')targetYaw+=Math.PI/8;if(name==='zoom-in')targetZoom=clampZoom(targetZoom*1.2,host.clientWidth,host.clientHeight);if(name==='zoom-out')targetZoom=clampZoom(targetZoom/1.2,host.clientWidth,host.clientHeight);if(name==='reset')reset();if(name==='pause'){paused=!paused;tuner.reset(performance.now());pauseButton();}if(name==='retry')location.reload();if(name==='pins')setPins(!pinsOn);}
 function key(e){if(e.target!==host||e.shiftKey||navigation?.mode==='fly')return;const map={p:'pins',P:'pins',ArrowLeft:'rotate-left',ArrowRight:'rotate-right','+':'zoom-in','=':'zoom-in','-':'zoom-out',Home:'reset',' ':'pause'};if(map[e.key]){e.preventDefault();action(map[e.key]);}}
 const onResize=()=>fit(),click=e=>{const b=e.target.closest('[data-action]');if(b)action(b.dataset.action);};
@@ -302,7 +308,7 @@ try{
   }else if(params.get('experience')==='lab'){
     const {createLabLayer}=await import('./lab-layer.js');
     labLayer=createLabLayer(world,isMining?'mining':'energy',host,recipe=>{
-      if(!exhibitMode){labLayer.apply({recipeId:recipe.id});setView(recipe.view);}
+      if(!exhibitMode){labLayer.apply({recipeId:recipe.id});if(recipe.view)setView(recipe.view);}
       if(window.parent!==window)window.parent.postMessage({type:'lab:hotspot',locationId:recipe.locationId,recipeId:recipe.id},location.origin);
     });
   }
@@ -315,19 +321,34 @@ try{
     if(document.body.classList.contains('touch-ui')){document.querySelector('[data-action=mouse-look]').hidden=true;document.querySelector('#hint').textContent=flying?'Hold arrows to move · Drag to look · ↑/↓ height':(tool==='pan'?'Drag to pan':'One finger: rotate / tilt')+' · Two fingers: pan / pinch zoom';}
     document.querySelector('#navigation-status').textContent=flying?'Fly mode. WASD moves, Q and E change height. Escape returns to tabletop.':'Tabletop mode';
   }});
+  if(params.get('birb')==='1'&&!extra){
+    const {createBirbFlight}=await import('./birb/flight.js');
+    birbFlight=createBirbFlight({host,world,camera,onEnter(){
+      if(shot)stopShot('birb');glide=null;
+      birbSaved={paused,mode:navigation.mode,azimuth,tilt,targetTilt,yaw,targetYaw,zoom,targetZoom,target:target.clone(),position:camera.position.clone(),quaternion:camera.quaternion.clone(),fov:camera.fov};
+      navigation.exitFly();navigation.cancelInput();setCameraToolsOpen(false);paused=false;
+      window.parent.postMessage({type:'worlds:birb',active:true},location.origin);
+    },onExit(){
+      const saved=birbSaved;birbSaved=null;if(!saved)return;
+      ({paused,azimuth,tilt,targetTilt,yaw,targetYaw,zoom,targetZoom}=saved);target.copy(saved.target);camera.fov=saved.fov;camera.updateProjectionMatrix();
+      camera.position.copy(saved.position);camera.quaternion.copy(saved.quaternion);camera.updateMatrixWorld();
+      if(saved.mode==='fly')navigation.enterFly({capture:false});pauseButton();
+      window.parent.postMessage({type:'worlds:birb',active:false},location.origin);
+    }});
+  }
   host.addEventListener('keydown',key);window.addEventListener('resize',onResize);document.addEventListener('click',click);qSelect.addEventListener('change',onQuality);document.addEventListener('visibilitychange',onVisibility);resizeObserver=new ResizeObserver(fit);resizeObserver.observe(host);window.visualViewport?.addEventListener('resize',onResize);
   const onWorldFocus=e=>{if(e.origin!==location.origin||e.source!==window.parent)return;
-    if(exhibitMode&&e.data?.type==='scene:fullscreen'){sceneFullscreen=e.data.active===true;return;}
+    if((exhibitMode||params.get('birb')==='1')&&e.data?.type==='scene:fullscreen'){sceneFullscreen=e.data.active===true;return;}
     if(exhibitMode&&typeof e.data?.type==='string'&&e.data.type.startsWith('exhibit:')){handleExhibit(e.data);return;}
     if(e.data?.type==='worlds:focus'&&Object.hasOwn(views,e.data.view)){glideTo(e.data.view,e.data.instant?0:1.6);pinsLayer?.selectView(e.data.view);}if(e.data?.type==='worlds:pins')setPins(!!e.data.on);
     if(e.data?.type==='world:story'&&world.setStory){const view=world.setStory(e.data.id??null,e.data.step??0);if(view&&Object.hasOwn(views,view))glideTo(view);render();}
     if(e.data?.type==='world:select'){const spot=world.hotspots?.find(s=>s.id===e.data.id);if(spot)selectWorldHotspot(spot,false);}if(labLayer&&e.data?.type==='lab:conditions'){labLayer.apply(e.data.conditions);render();window.parent.postMessage({type:'lab:applied',state:labLayer.diagnostics()},location.origin);}};
   window.addEventListener('message',onWorldFocus);
-  const dispose=()=>{if(disposed)return;disposed=true;document.removeEventListener('keydown',fullscreenEscape,true);window.removeEventListener('message',onWorldFocus);cancelAnimationFrame(raf);exhibit?.dispose();navigation.dispose();host.removeEventListener('keydown',key);window.removeEventListener('resize',onResize);document.removeEventListener('click',click);qSelect.removeEventListener('change',onQuality);document.removeEventListener('visibilitychange',onVisibility);resizeObserver?.disconnect();window.visualViewport?.removeEventListener('resize',onResize);labLayer?.dispose();pipeline.dispose();world.dispose();renderer.dispose();renderer.forceContextLoss();renderer.domElement.remove();};
+  const dispose=()=>{if(disposed)return;disposed=true;document.removeEventListener('keydown',fullscreenEscape,true);window.removeEventListener('message',onWorldFocus);cancelAnimationFrame(raf);birbFlight?.dispose();exhibit?.dispose();navigation.dispose();host.removeEventListener('keydown',key);window.removeEventListener('resize',onResize);document.removeEventListener('click',click);qSelect.removeEventListener('change',onQuality);document.removeEventListener('visibilitychange',onVisibility);resizeObserver?.disconnect();window.visualViewport?.removeEventListener('resize',onResize);labLayer?.dispose();pipeline.dispose();world.dispose();renderer.dispose();renderer.forceContextLoss();renderer.domElement.remove();};
   window.addEventListener('pagehide',dispose,{once:true});window.addEventListener('pageshow',e=>{if(e.persisted)location.reload();});
   host.addEventListener('pointerdown',()=>{glide=null;if(shot)stopShot('grabbed');},true);
   window.addEventListener('keydown',e=>{if(shot&&e.code==='Escape'){e.preventDefault();stopShot('escaped');}},true);
-  window.__tabletop={ready:false,flythrough,exhibit:{prepare:prepareExhibit,metrics:()=>exhibit?.metrics()||null,setTime:t=>{exhibit?.setTime(t);render();}},setLabState:s=>labLayer?.apply(s),setState(s={}){if(s.view)setView(s.view);if(s.timeSeconds!==undefined)elapsed=s.timeSeconds;if(s.paused!==undefined)paused=s.paused;if(s.yaw!==undefined)yaw=targetYaw=s.yaw;if(s.zoom!==undefined)zoom=targetZoom=clampZoom(s.zoom,host.clientWidth,host.clientHeight);if(s.quality){quality=s.quality;qSelect.value=quality;onQuality();}pauseButton();render();return metrics();},metrics,auditHydro:()=>world.hydroDiagnostics?.(),auditInfrastructure:()=>isMining?world.audit():auditInfrastructure(world),auditGeometry:()=>auditGeometry(world.root),auditLandmarks:()=>isMining?world.audit():auditLandmarks(world),clearFrameTimes(){frameTimes=[];},reset(){navigation.reset();yaw=targetYaw;zoom=targetZoom;tilt=targetTilt;render();},dispose};
+  window.__tabletop={ready:false,birb:{metrics:()=>birbFlight?.metrics()||null},flythrough,exhibit:{prepare:prepareExhibit,metrics:()=>exhibit?.metrics()||null,setTime:t=>{exhibit?.setTime(t);render();},chapter:n=>{exhibit?.chapter?.(n);render();},command:(action,data)=>{exhibit?.command(action,data);render();}},setLabState:s=>labLayer?.apply(s),setState(s={}){if(s.view)setView(s.view);if(s.timeSeconds!==undefined)elapsed=s.timeSeconds;if(s.paused!==undefined)paused=s.paused;if(s.yaw!==undefined)yaw=targetYaw=s.yaw;if(s.zoom!==undefined)zoom=targetZoom=clampZoom(s.zoom,host.clientWidth,host.clientHeight);if(s.quality){quality=s.quality;qSelect.value=quality;onQuality();}pauseButton();render();return metrics();},metrics,auditHydro:()=>world.hydroDiagnostics?.(),auditInfrastructure:()=>isMining?world.audit():auditInfrastructure(world),auditGeometry:()=>auditGeometry(world.root),auditLandmarks:()=>isMining?world.audit():auditLandmarks(world),clearFrameTimes(){frameTimes=[];},reset(){navigation.reset();yaw=targetYaw;zoom=targetZoom;tilt=targetTilt;render();},dispose};
   renderer.compile(world.scene,camera);setView(params.get('view')||'hero');
   // Location pins belong to the energy and mining maps; extra worlds (datacenter, nextdc) use their own hotspots.
   if(!extra){pinsLayer=createPinsLayer(world,isMining?'mining':'energy',host,{onSelect:p=>{glideTo(p.view);if(window.parent!==window)window.parent.postMessage({type:'worlds:location',view:p.view,id:p.id},location.origin);}});

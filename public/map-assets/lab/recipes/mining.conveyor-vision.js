@@ -1,0 +1,30 @@
+// M1. Pure data: read by the renderer and (via sync) by the Data#3 host.
+export default {
+  id:'mining.conveyor-vision',world:'mining',featured:true,order:1,
+  locationId:'mining.processing.conveyor',label:'Conveyor build-up',view:'conveyor',anchor:[4.82,3.42,-3.12],
+  title:'Catch a growing conveyor build-up',
+  benefit:'The operator hears about material building up in a chute before it chokes the transfer.',
+  limits:'The camera sees the surface of the pile, not inside the chute, and dust or a dirty lens hides it, so an operator always checks in person.',
+  whereItRuns:['Chute camera','Site GPU','Operator'],
+  provenance:[
+    {label:'Pattern: region and persistence rules on video analytics (NVIDIA DeepStream nvdsanalytics)',url:'https://docs.nvidia.com/metropolis/deepstream/8.0/text/DS_plugin_gst-nvdsanalytics.html',kind:'pattern'},
+    {label:'Pattern: promptable video segmentation for the mask (Meta SAM 2)',url:'https://ai.meta.com/research/sam2/',kind:'pattern'},
+    {label:'Pattern: vendor camera offerings for mining sites (Axis)',url:'https://www.axis.com/solutions/industrial/mining',kind:'vendor'},
+  ],
+  duration:26,
+  chapters:[
+    {id:'scene',at:0,caption:'Ore moves along the belt to the next transfer',
+      say:'This is transfer 3: ore drops from the feed belt through a chute onto the main belt. Everything is moving at belt speed. Nothing needs doing.'},
+    {id:'change',at:4,caption:'Material starts staying at transfer 3',
+      camera:{angle:.62,elevation:.3,distance:3.0,target:[-.4,1.22,.4]},
+      say:'Watch the chute outlet: wet material sticks and stays while the ore around it keeps moving. That still clump is the early sign. Left alone it grows until the chute chokes and the belt stops.'},
+    {id:'aiView',at:10,caption:'The site camera sees material building up',sensor:'chute-cam',
+      overlay:{anchor:'buildup',label:'Build-up growing',state:'review'},
+      say:'The fixed camera on the post watches the outlet. The site GPU outlines the material, and a rule flags it only because it stayed and grew across many frames. The video never leaves the plant.'},
+    {id:'review',at:17,caption:'An operator checks the chute before it chokes',
+      camera:{angle:-.22,elevation:.3,distance:5.4,target:[-.1,1.15,.75]},
+      overlay:{anchor:'buildup',label:'Check the chute',state:'review'},
+      say:'The finding reaches the operator as "build-up at transfer 3". They walk out and look before deciding to clean the chute. AI noticed early; the operator decides what happens next.'},
+  ],
+  variation:{id:'dust',label:'Dust',caption:'Camera view unclear · check in person',overlay:{anchor:'buildup',label:'View unclear',state:'unclear'}},
+};

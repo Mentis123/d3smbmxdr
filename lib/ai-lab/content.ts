@@ -87,3 +87,23 @@ export function deriveLabState(_industry: LabIndustry, conditions: LabConditions
 
   return { status, headline, detail, local, cloud };
 }
+
+/** Display copy per Lab world. Add a world here (and to LabIndustry) and the hub tiles and explorer headings follow. */
+export const LAB_WORLDS: Record<LabIndustry, { name: string; eyebrow: string; frame: string; alt: string; tile: string; tags: string[] }> = {
+  energy: {
+    name: 'Water and energy',
+    eyebrow: 'WATER AND ENERGY',
+    frame: 'Energy',
+    alt: '3D water and energy miniature with dam and infrastructure',
+    tile: 'Watch debris gather on a dam intake, a robot find a warm connection in the substation and a drone pick the span to inspect first.',
+    tags: ['3D exploration', 'Camera, robot + drone', 'A person decides'],
+  },
+  mining: {
+    name: 'Mining operations',
+    eyebrow: 'MINING',
+    frame: 'Mining',
+    alt: '3D open-pit mining miniature with haulage and processing plant',
+    tile: 'Catch a growing build-up at a conveyor chute, a robot find a new wet area by a pump and see around the loading-bay corner.',
+    tags: ['3D exploration', 'Camera + robot', 'A person decides'],
+  },
+};

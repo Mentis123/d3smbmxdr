@@ -91,7 +91,7 @@ export function buildMiningPlant(world){
         batch.beam([p.x-side.x*width/2,p.y-.025,p.z-side.z*width/2],[p.x+side.x*width/2,p.y-.025,p.z+side.z*width/2],.035,dark,10);
       }
     }
-    const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));g.setIndex(indices);g.computeVertexNormals();const belt=new THREE.Mesh(g,beltMaterial);belt.name=id+'-moving-belt';belt.receiveShadow=true;group.add(belt);batch.finish();
+    const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));g.setIndex(indices);g.computeVertexNormals();const belt=new THREE.Mesh(g,beltMaterial);belt.name=id+'-moving-belt';belt.receiveShadow=true;belt.userData.birbConveyor={curve,length,speed:()=>labStopped?0:.32};group.add(belt);batch.finish();
     const particles=new THREE.InstancedMesh(new THREE.IcosahedronGeometry(.032,0),ore,80);particles.name=id+'-moving-ore';particles.castShadow=true;group.add(particles);
     const dummy=new THREE.Object3D();updates.push(()=>{const t=conveyorTime;
       for(let i=0;i<80;i++){

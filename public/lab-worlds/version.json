@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "sourceRepository": "Mentis123/adamrappaport",
-  "sourceCommit": "5c501d670e0f84c686dd08e9441db69e0c75f90a",
+  "sourceCommit": "ffcf710be7e1c3f4e24a1a5ef07998faa859f526",
   "experience": "ai-lab",
   "runtimeDependency": "Self-hosted static files; no personal-site requests",
   "files": {
@@ -91,7 +91,7 @@
     "public/map-assets/lab/exhibit-actors.js": "f48587a983cf4f1170926c589cfe3c53b8cf18ea608826961c6849e840f94e73",
     "public/map-assets/lab/exhibit-overlay.js": "4d764ddcc3cab0eceed4c87eed80536e604f533f070b65bd0e98c1a08fd2fe0c",
     "public/map-assets/lab/exhibit-props.js": "dddae98173a6fe4552798c0354956d7f58123959f6b44929b620434c95331d9a",
-    "public/map-assets/lab/exhibit-runner.js": "48f65a3f05f5c27c549111dba0e5bb7dabea4c4f98e2d14fdf1d132d551fa297",
+    "public/map-assets/lab/exhibit-runner.js": "1ebb49137888792cf66188da394a20624b158de32a9ec24dc4109e15261189c2",
     "public/map-assets/lab/exhibit-sensor.js": "842d3c14348c9a1610e7a2cc086ce18100530f35145c8055f20745d267ee679b",
     "public/map-assets/lab/exhibit-timeline.js": "32c8b73a823b43448e15c5bd34fcc18a841d8b39ed515996beb9a1031759dfbb",
     "public/map-assets/lab/kits/_stub.js": "37a3a29a794d833c5207bf3adf994f8279b457179f0394017e0a25ff0f93cd11",

@@ -97,15 +97,29 @@ export function runRecipe(recipe,stage,host,notify,buildKit=KITS[recipe.id]){
   function takeOver(){if(!user)user={...pose,target:[...pose.target]};if(activeCamera!==orbit)sensorOff=true;}
 
   const stop=e=>{e.stopImmediatePropagation();};
-  function down(e){stop(e);if(e.button!==0)return;host.focus({preventScroll:true});points.set(e.pointerId,{x:e.clientX,y:e.clientY});host.setPointerCapture(e.pointerId);gesture=null;e.preventDefault();}
-  function move(e){if(!points.has(e.pointerId))return;stop(e);const old=points.get(e.pointerId);points.set(e.pointerId,{x:e.clientX,y:e.clientY});takeOver();
-    if(points.size===2){const [a,b]=[...points.values()],d=Math.hypot(a.x-b.x,a.y-b.y);if(gesture)user.distance=THREE.MathUtils.clamp(user.distance*gesture/d,1.2,24);gesture=d;}
-    else{user.angle-=(e.clientX-old.x)*.007;user.elevation=THREE.MathUtils.clamp(user.elevation+(e.clientY-old.y)*.005,.05,1.25);}send();}
-  function up(e){if(!points.has(e.pointerId))return;stop(e);points.delete(e.pointerId);gesture=null;if(host.hasPointerCapture(e.pointerId))host.releasePointerCapture(e.pointerId);}
+  // Same gestures as the worlds (navigation.js): drag rotates; right, middle or Shift-drag pans; Alt-drag lifts the target;
+  // two fingers pan and pinch together; the wheel zooms.
+  const panRight=new THREE.Vector3(),panUp=new THREE.Vector3();
+  function pan(dx,dy){orbit.updateMatrixWorld();const units=2*user.distance*Math.tan(THREE.MathUtils.degToRad(orbit.fov/2))/Math.max(1,host.clientHeight);
+    panRight.setFromMatrixColumn(orbit.matrixWorld,0);panUp.setFromMatrixColumn(orbit.matrixWorld,1);
+    const t=new THREE.Vector3().fromArray(user.target).addScaledVector(panRight,-dx*units).addScaledVector(panUp,dy*units);
+    t.x=THREE.MathUtils.clamp(t.x,-8,8);t.y=THREE.MathUtils.clamp(t.y,-1,6);t.z=THREE.MathUtils.clamp(t.z,-8,8);user.target=t.toArray();}
+  const pair=()=>{const [a,b]=[...points.values()];return{x:(a.x+b.x)/2,y:(a.y+b.y)/2,d:Math.max(20,Math.hypot(a.x-b.x,a.y-b.y))};};
+  const dragKind=e=>e.altKey?'crane':e.shiftKey||e.button===1||e.button===2?'pan':'rotate';
+  function down(e){stop(e);if(e.button>2)return;host.focus({preventScroll:true});points.set(e.pointerId,{x:e.clientX,y:e.clientY,kind:dragKind(e)});host.setPointerCapture(e.pointerId);gesture=points.size>1?pair():null;e.preventDefault();}
+  function move(e){if(!points.has(e.pointerId))return;stop(e);const old=points.get(e.pointerId);points.set(e.pointerId,{...old,x:e.clientX,y:e.clientY});takeOver();
+    if(points.size>1){const g=pair();
+      if(gesture){pan(g.x-gesture.x,g.y-gesture.y);user.distance=THREE.MathUtils.clamp(user.distance*gesture.d/g.d,1.2,24);}gesture=g;}
+    else{const dx=e.clientX-old.x,dy=e.clientY-old.y;
+      if(old.kind==='pan')pan(dx,dy);
+      else if(old.kind==='crane'){const t=[...user.target];t[1]=THREE.MathUtils.clamp(t[1]-dy*.01,-1,6);user.target=t;}
+      else{user.angle-=dx*.007;user.elevation=THREE.MathUtils.clamp(user.elevation+dy*.005,.05,1.25);}}send();}
+  function up(e){if(!points.has(e.pointerId))return;stop(e);points.delete(e.pointerId);gesture=points.size>1?pair():null;if(host.hasPointerCapture(e.pointerId))host.releasePointerCapture(e.pointerId);}
   function wheel(e){stop(e);e.preventDefault();takeOver();user.distance=THREE.MathUtils.clamp(user.distance*Math.exp(e.deltaY*.001),1.2,24);send();}
   function keydown(e){
     if(e.key==='Escape'){stop(e);e.preventDefault();notify({close:true});return;}
     if(e.target!==host)return;
+    if(e.shiftKey&&e.key.startsWith('Arrow')){stop(e);e.preventDefault();takeOver();pan(e.key==='ArrowLeft'?35:e.key==='ArrowRight'?-35:0,e.key==='ArrowUp'?35:e.key==='ArrowDown'?-35:0);send();return;}
     const keys={ArrowLeft:1,ArrowRight:1,PageUp:1,PageDown:1,ArrowUp:1,ArrowDown:1,'+':1,'-':1,' ':1,Home:1,r:1,R:1};if(!keys[e.key]&&e.code!=='KeyF')return;
     stop(e);e.preventDefault();
     if(e.key==='ArrowRight'||e.key==='PageDown')seekChapter(tl.index+1);
@@ -115,7 +129,8 @@ export function runRecipe(recipe,stage,host,notify,buildKit=KITS[recipe.id]){
     else if(e.key==='Home'||e.code==='KeyF'){user=null;easeFrom=null;send();}
     else{takeOver();if(e.key==='ArrowUp')user.elevation=Math.min(1.25,user.elevation+.1);if(e.key==='ArrowDown')user.elevation=Math.max(.05,user.elevation-.1);if(e.key==='+')user.distance=Math.max(1.2,user.distance/1.1);if(e.key==='-')user.distance=Math.min(24,user.distance*1.1);send();}
   }
-  const listeners=[['pointerdown',down],['pointermove',move],['pointerup',up],['pointercancel',up],['wheel',wheel]];
+  const menu=e=>{stop(e);e.preventDefault();}; // right-drag pans, so no context menu over the close-up
+  const listeners=[['pointerdown',down],['pointermove',move],['pointerup',up],['pointercancel',up],['wheel',wheel],['contextmenu',menu]];
   listeners.forEach(([n,f])=>host.addEventListener(n,f,{capture:true,passive:false}));document.addEventListener('keydown',keydown,true);
   if(reduced)tl.seek(tl.chapterTime(0));
   update(0);

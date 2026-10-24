@@ -1,4 +1,4 @@
-export type LabIndustry = 'energy' | 'mining' | 'retail' | 'datacenter';
+export type LabIndustry = 'energy' | 'mining' | 'retail' | 'datacenter' | 'local';
 
 export type LabConditions = {
   lighting: 'day' | 'low';
@@ -19,8 +19,8 @@ export type LabDefinition = {
   title: string;
   subtitle: string;
   locationId: string;
-  view: 'intake' | 'conveyor' | 'workshop' | 'control' | 'tank-detail' | 'tanks' | 'scales' | 'hero';
-  poster: '/map-assets/poster.jpg' | '/map-assets/mining-poster.jpg' | '/map-assets/retail-poster.jpg' | '/map-assets/datacenter-poster.jpg';
+  view: 'intake' | 'conveyor' | 'workshop' | 'control' | 'tank-detail' | 'tanks' | 'scales' | 'hero' | 'cpu';
+  poster: '/map-assets/poster.jpg' | '/map-assets/mining-poster.jpg' | '/map-assets/retail-poster.jpg' | '/map-assets/datacenter-poster.jpg' | '/map-assets/local-poster.jpg';
   observation: string;
   interpretation: string;
   compute: string;
@@ -89,6 +89,21 @@ export const LABS: Record<LabIndustry, LabDefinition> = {
     benefit: 'See the three reality checks behind an AI-ready datacenter.',
     limitation: 'Ranges are typical industry figures; every facility differs.',
   },
+  // Fifth hub tile: one laptop, three engines (CPU, GPU, NPU), nothing leaves the desk.
+  local: {
+    title: 'Local AI on your laptop',
+    subtitle: 'An illustrative desk: three AI jobs running on the laptop itself',
+    locationId: 'local.cpu',
+    view: 'cpu',
+    poster: '/map-assets/local-poster.jpg',
+    observation: 'A laptop on a desk does three everyday jobs: meeting notes, a long web form and a question about local files.',
+    interpretation: 'Each exhibit shows which engine does the work (CPU, GPU or NPU) and that the data stays on the device.',
+    compute: 'Illustrative scenes only. No model runs in this page; the chip layout is artistic licence, not a teardown.',
+    response: 'The person checks the notes, presses Submit or opens the cited source themselves.',
+    verification: 'The person, not the model, confirms names, amounts and the clause before anything is sent.',
+    benefit: 'See what a laptop can do with AI without sending your data to the cloud.',
+    limitation: 'Local models are smaller and slower than cloud ones, and which chip Windows uses depends on the device.',
+  },
 };
 
 /** Deterministic demonstration state, separate from any verified physical condition. */
@@ -153,6 +168,17 @@ export const LAB_WORLDS: Record<LabIndustry, { name: string; eyebrow: string; fr
     tags: ['3D exploration', 'Power, cooling + structure', 'An engineer decides'],
     bareEyebrow: true,
     intro: 'Too hungry, too hot, too heavy: select a marker to see the reality check behind each.',
+  },
+  // Fifth hub tile: a Surface Laptop Ultra-style desk.
+  local: {
+    name: 'Local AI on your laptop',
+    eyebrow: 'LOCAL AI',
+    frame: 'Laptop',
+    alt: '3D desk miniature with an open laptop and its CPU, GPU and NPU shown through a glass deck',
+    tile: 'Three jobs, three engines, nothing leaves the desk: meeting notes on the CPU, a browser agent on the GPU, your own files on the NPU.',
+    tags: ['3D exploration', 'CPU, GPU + NPU', 'You decide'],
+    bareEyebrow: true,
+    intro: 'Three jobs on one laptop: select a chip to see what it does and what stays on the device.',
   },
 };
 

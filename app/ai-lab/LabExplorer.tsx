@@ -165,6 +165,7 @@ export default function LabExplorer({industry}:{industry:LabIndustry}){
     {recipe&&<aside className="ex-copy ex-recipe-copy">
      <div className="ex-benefit"><strong>{recipe.benefit}</strong></div>
      <section className="ex-say" aria-live="polite"><h3 className="ex-context-title">Say this{chapter?` · ${chapterName(chapter)}`:''}</h3><p className="ex-explanation">{chapter?.say??recipe.chapters[0].say}</p></section>
+     {recipe.whyLocal&&<section className="ex-why"><span>Why run it locally</span><ul>{recipe.whyLocal.map(w=><li key={w.key}><b>{w.key}</b>{w.text}</li>)}</ul></section>}
      <section className="ex-compute"><span>Where this runs</span><ol className="ex-runs">{recipe.whereItRuns.map((s,i)=><li key={s}><b>{i+1}</b>{s}</li>)}</ol></section>
      <section className="ex-limits"><span>Limits</span><p>{recipe.limits}</p></section>
      <details className="ex-more"><summary>Explain more</summary><ul>{recipe.provenance.map(p=><li key={p.url+p.label}><span className="ex-kind" data-kind={p.kind}>{KIND_LABEL[p.kind]??p.kind}</span><a href={p.url} target="_blank" rel="noopener noreferrer">{p.label}</a></li>)}</ul><p className="ex-disclosure">Fictional site · illustrative AI workflow · simulated inputs</p></details>

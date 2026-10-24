@@ -7,6 +7,8 @@ export type LabChapter={id:ChapterId;at:number;caption:string;say:string;label?:
 export type LabRecipe={
  id:string;world:string;featured:boolean;order:number;locationId:string;label:string;
  title:string;benefit:string;limits:string;whereItRuns:[string,string,string];
+ /** Optional: why running this on the device matters (privacy, cost, latency, security, offline). Shown as its own panel. */
+ whyLocal?:{key:string;text:string}[];
  provenance:{label:string;url:string;kind:'verified'|'vendor'|'pattern'}[];
  duration:number;chapters:LabChapter[];
  variation?:{id:string;label:string;caption:string;captions?:Partial<Record<ChapterId,string>>};stub?:boolean;

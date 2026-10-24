@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "sourceRepository": "Mentis123/adamrappaport",
-  "sourceCommit": "bdb0da7039dc3c0a577e1ec59d72f5cadc13b2e5",
+  "sourceCommit": "6ed1e26e67948756323a9ce7a6b8fce91d1e60c6",
   "experience": "ai-lab",
   "runtimeDependency": "Self-hosted static files; no personal-site requests",
   "files": {
@@ -118,9 +118,9 @@
     "public/map-assets/lab/recipes/energy.intake-vision.js": "c5b8b74ceb33b69d1a8c39a811a9b97420c0133562ddd638c98978b7749f14a1",
     "public/map-assets/lab/recipes/energy.thermal-patrol.js": "63db33f952a2c530f075bdbf65d14038f3133957d1632fa9bf9d8d5224eb1096",
     "public/map-assets/lab/recipes/index.js": "8133086d16050d42313cb540759724d310b8cc2a8b98eb751caccc56e29ab90c",
-    "public/map-assets/lab/recipes/local.browser-agent.js": "5b9c4c2fd71e9b9a92ef431e5d46a854833f49eb462d918133ae4f960e5d68fc",
-    "public/map-assets/lab/recipes/local.files-answer.js": "b58518e005340f0257caba8b3bb00326c3df53de4904228476facd9072d3d803",
-    "public/map-assets/lab/recipes/local.meeting-notes.js": "8f4253501abe2e4d9e80c3df75e1cd6b1ac165cf5f7efacb741c0c09bb7a3639",
+    "public/map-assets/lab/recipes/local.browser-agent.js": "9548d05dc86f08b077d4a73813a68770aca96a26231ad014cad93fa20c44cdc8",
+    "public/map-assets/lab/recipes/local.files-answer.js": "0934e083c07e39e741ec08d3990af9783269d97d521376821814724911d9f9a6",
+    "public/map-assets/lab/recipes/local.meeting-notes.js": "f6083542a3af083f1c8e1ce8b3661d9161dbe737758fc0eff0abf5cc7ce2323a",
     "public/map-assets/lab/recipes/mining.conveyor-vision.js": "dff7a023b2b589d903851d854959c64abbd2989e08affb5a2d8f4eca0c918099",
     "public/map-assets/lab/recipes/mining.pump-patrol.js": "90d601ab3b947505f54f18b1085a4f5b4f1088282f02851634a51e8d4b04af85",
     "public/map-assets/lab/recipes/mining.yard-awareness.js": "77d735d559dbc24a27ed160b42ac8516fb09b3d4b96bac495c1ad3b2cdf679fc",

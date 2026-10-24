@@ -101,7 +101,7 @@ export const LABS: Record<LabIndustry, LabDefinition> = {
     compute: 'Illustrative scenes only. No model runs in this page; the chip layout is artistic licence, not a teardown.',
     response: 'The person checks the notes, presses Submit or opens the cited source themselves.',
     verification: 'The person, not the model, confirms names, amounts and the clause before anything is sent.',
-    benefit: 'See what a laptop can do with AI without sending your data to the cloud.',
+    benefit: 'See what a laptop can do with AI on its own: private, no tokens to pay for, no wait on a server, and it works offline.',
     limitation: 'Local models are smaller and slower than cloud ones, and which chip Windows uses depends on the device.',
   },
 };
@@ -176,7 +176,7 @@ export const LAB_WORLDS: Record<LabIndustry, { name: string; eyebrow: string; fr
     frame: 'Laptop',
     alt: '3D desk miniature with an open laptop and its CPU, GPU and NPU shown through a glass deck',
     tile: 'Three jobs, three engines, nothing leaves the desk: meeting notes on the CPU, a browser agent on the GPU, your own files on the NPU.',
-    tags: ['3D exploration', 'CPU, GPU + NPU', 'You decide'],
+    tags: ['3D exploration', 'Private, no tokens', 'CPU, GPU + NPU'],
     bareEyebrow: true,
     intro: 'Three jobs on one laptop: select a chip to see what it does and what stays on the device.',
   },

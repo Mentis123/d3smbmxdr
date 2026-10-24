@@ -168,3 +168,6 @@
 .ex-dialog[data-recipe=true]:not([data-scene-fullscreen=true]) .ex-fullscreen-toggle{top:11px;right:10px}
 }
 .ex-chapterbar .ex-sensor-tag button{flex:none!important;padding:5px 12px!important;min-height:40px!important}
+
+/* Why run it locally (local world): one row per benefit, the key as a small pill. */
+.ex-why>span{display:block;font:600 15px/1.5 "Helvetica Neue",Arial,sans-serif;color:#78dcff}.ex-why ul{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:10px}.ex-why li{font-size:15px;line-height:1.5;color:#d5e6f0}.ex-why b{display:inline-block;margin-right:8px;padding:1px 8px;border:1px solid #00aeff70;border-radius:999px;font:600 11px/1.6 ui-monospace,monospace;letter-spacing:.5px;color:#78dcff;text-transform:uppercase}

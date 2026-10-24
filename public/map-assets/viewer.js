@@ -318,7 +318,12 @@ try{
     labLayer=createHotspotLayer(world,world.hotspots,host,selectWorldHotspot);
   }else if(labExperience){
     const {createLabLayer}=await import('./lab-layer.js');
-    if(labExtra?.FEATURED?.[labWorld]){const {LAB_LOCATIONS}=await import('./lab-locations.js');LAB_LOCATIONS[labWorld]??=labExtra.FEATURED[labWorld].map(r=>({id:r.id,locationId:r.locationId,label:r.label,view:r.view,anchor:r.anchor,kind:'vision'}));}
+    // Personal-site worlds may carry Ukrainian marker labels (recipe.uk.label). They follow the host page's language
+    // (localStorage siteLang, same origin) at load and live: the host writing siteLang fires 'storage' here.
+    const siteLang=()=>{try{return localStorage.getItem('siteLang');}catch{return null;}};
+    const markerLabel=r=>siteLang()==='uk'&&r.uk?.label||r.label;
+    if(labExtra?.FEATURED?.[labWorld]){const {LAB_LOCATIONS}=await import('./lab-locations.js');LAB_LOCATIONS[labWorld]??=labExtra.FEATURED[labWorld].map(r=>({id:r.id,locationId:r.locationId,label:markerLabel(r),view:r.view,anchor:r.anchor,kind:'vision'}));
+      window.addEventListener('storage',e=>{if(e.key!=='siteLang')return;for(const r of labExtra.FEATURED[labWorld]){const m=host.querySelector(`.lab-hotspot[data-recipe="${r.id}"]`);if(!m)continue;const label=markerLabel(r);m.textContent='◉ '+label;m.setAttribute('aria-label','Open '+label+' demonstration');}});}
     labLayer=createLabLayer(world,labWorld,host,recipe=>{
       if(!exhibitMode){labLayer.apply({recipeId:recipe.id});if(recipe.view)setView(recipe.view);}
       if(window.parent!==window)window.parent.postMessage({type:'lab:hotspot',locationId:recipe.locationId,recipeId:recipe.id},location.origin);

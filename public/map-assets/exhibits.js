@@ -37,7 +37,9 @@ function createStage(){
 
 // Isolated, deterministic museum exhibits. Shares the world's WebGL renderer, never its resources.
 // Recipe exhibits (lab/recipes) run the four-chapter grammar; the four retired ids keep the three-phase workflow path.
-export function createExhibit(id, host, notify) {
+// `extra` is an optional world-local registry {RECIPES, KITS} (personal-site-only worlds); it is checked first.
+export function createExhibit(id, host, notify, extra=null) {
+  if(extra&&Object.hasOwn(extra.RECIPES||{},id)&&typeof extra.KITS?.[id]==='function')return runRecipe(extra.RECIPES[id],createStage(),host,notify,extra.KITS[id]);
   if(Object.hasOwn(RECIPES,id))return runRecipe(RECIPES[id],createStage(),host,notify);
   if(!LEGACY_IDS.includes(id))throw Error('Unsupported exhibit');
   return createLegacyExhibit(id,createStage(),host,notify);

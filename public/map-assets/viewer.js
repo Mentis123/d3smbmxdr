@@ -15,10 +15,17 @@ const params=new URLSearchParams(location.search), capture=params.get('capture')
 const worldKind=document.body.dataset.world||'energy';
 const isMining=worldKind==='mining';
 // Worlds beyond energy and mining load their own module by these generic exports: createWorld, WORLD_SEED, WORLD_VIEWS.
-const EXTRA_WORLDS={datacenter:'./datacenter-scene.js',nextdc:'./nextdc-scene.js',retail:'./retail-scene.js'};
-// AI Lab worlds (markers, exhibits): energy, mining, retail and datacenter. Retail and datacenter load as extra worlds;
-// location pins stay energy/mining/retail. In lab mode the datacenter's own hotspots give way to the three lab markers.
-const labWorld=isMining?'mining':worldKind==='retail'||worldKind==='datacenter'?worldKind:'energy';
+const EXTRA_WORLDS={datacenter:'./datacenter-scene.js',nextdc:'./nextdc-scene.js',retail:'./retail-scene.js',local:'./local-scene.js',ukraine:'./ukraine/ukraine-scene.js'};
+// AI Lab worlds (markers, exhibits): energy, mining, retail, datacenter and local (the laptop). Retail, datacenter and
+// local load as extra worlds; location pins stay energy/mining/retail. In lab mode the datacenter's own hotspots give way
+// to the three lab markers.
+const labWorld=isMining?'mining':['retail','datacenter','local','ukraine'].includes(worldKind)?worldKind:'energy';
+// Personal-site-only worlds carry their own exhibit registry ({RECIPES, FEATURED, KITS}) beside the world module. It is
+// imported only for that world and merged over the shared lab registry, which never imports it (so a host that does
+// not ship the folder is unaffected). Such folders are excluded by scripts/sync-lab-worlds.mjs.
+const LAB_EXTRA={ukraine:'./ukraine/index.js'};
+const labExtra=Object.hasOwn(LAB_EXTRA,labWorld)?await import(LAB_EXTRA[labWorld]).catch(e=>{console.error(e);return null;}):null;
+const loadLabRegistry=()=>import('./lab/recipes/index.js').then(m=>labExtra?{...m,RECIPES:{...m.RECIPES,...labExtra.RECIPES},FEATURED:{...m.FEATURED,...labExtra.FEATURED}}:m);
 const labExperience=params.get('experience')==='lab';
 const extra=Object.hasOwn(EXTRA_WORLDS,worldKind)?await import(EXTRA_WORLDS[worldKind]):null;
 const createScene=isMining?(await import('./mining-scene.js')).createMiningScene:extra?extra.createWorld:createEnergyScene;
@@ -61,7 +68,7 @@ let tilt=openingTilt,targetTilt=openingTilt,azimuth=Math.atan2(12,23);
 let birbFlight=null,birbSaved=null;
 let labLayer,exhibit=null,exhibitSaved=null,exhibitRequest=0;
 const exhibitMode=params.get('exhibits')==='1';
-let labRegistry=null;if(exhibitMode)import('./lab/recipes/index.js').then(m=>{labRegistry=m;},()=>{});
+let labRegistry=null;if(exhibitMode)loadLabRegistry().then(m=>{labRegistry=m;},()=>{});
 let sceneFullscreen=false;
 function fullscreenEscape(e){if(e.key==='Escape'&&sceneFullscreen){e.preventDefault();e.stopImmediatePropagation();window.parent.postMessage({type:'scene:exit-fullscreen'},location.origin);}}
 if(exhibitMode||params.get('birb')==='1')document.addEventListener('keydown',fullscreenEscape,true);
@@ -94,14 +101,14 @@ async function handleExhibit(data){
   if(data.type==='exhibit:command'){if(['play','pause','replay','reset','next','back','chapter','variation','hold','sensor','captions'].includes(data.action))exhibit?.command(data.action,{index:data.index,value:data.value});return;}
   if(data.type!=='exhibit:open')return;
   // Allow-list: this world's recipes plus its retired (legacy) ids.
-  const lab=labWorld,{RECIPES,LEGACY_IDS}=labRegistry||(labRegistry=await import('./lab/recipes/index.js'));
+  const lab=labWorld,{RECIPES,LEGACY_IDS}=labRegistry||(labRegistry=await loadLabRegistry());
   if(!(Object.hasOwn(RECIPES,data.id)&&RECIPES[data.id].world===lab)&&!(LEGACY_IDS.includes(data.id)&&data.id.startsWith(lab+'.')))return;
   const request=exhibitRequest=data.requestId;
   try{
     const {createExhibit}=await import('./exhibits.js');if(request!==exhibitRequest)return;
     prepareExhibit();
     exhibit?.dispose();document.body.classList.add('exhibit-active');
-    exhibit=createExhibit(data.id,host,state=>reply('exhibit:state',state));last=0;render();reply('exhibit:ready');
+    exhibit=createExhibit(data.id,host,state=>reply('exhibit:state',state),labExtra);last=0;render();reply('exhibit:ready');
   }catch(err){reply('exhibit:error',{message:'The close-up could not load.'});}
 }
 function fit(){if(!renderer||!camera)return;const w=host.clientWidth,h=host.clientHeight;if(w<1||h<1)return;if(!exhibitSaved){zoom=clampZoom(zoom,w,h);targetZoom=clampZoom(targetZoom,w,h);}renderer.setPixelRatio(resolutionFor(effectiveProfile,{width:w,height:h,deviceDpr:devicePixelRatio,mobile:mobileDevice,capture}));renderer.setSize(w,h);pipeline?.resize(w,h,renderer.getPixelRatio(),effectiveProfile.bloom);if(!exhibitSaved){camera.aspect=w/h;camera.updateProjectionMatrix();if(!exhibit)positionCamera();}}
@@ -311,6 +318,7 @@ try{
     labLayer=createHotspotLayer(world,world.hotspots,host,selectWorldHotspot);
   }else if(labExperience){
     const {createLabLayer}=await import('./lab-layer.js');
+    if(labExtra?.FEATURED?.[labWorld]){const {LAB_LOCATIONS}=await import('./lab-locations.js');LAB_LOCATIONS[labWorld]??=labExtra.FEATURED[labWorld].map(r=>({id:r.id,locationId:r.locationId,label:r.label,view:r.view,anchor:r.anchor,kind:'vision'}));}
     labLayer=createLabLayer(world,labWorld,host,recipe=>{
       if(!exhibitMode){labLayer.apply({recipeId:recipe.id});if(recipe.view)setView(recipe.view);}
       if(window.parent!==window)window.parent.postMessage({type:'lab:hotspot',locationId:recipe.locationId,recipeId:recipe.id},location.origin);

@@ -9,10 +9,11 @@ import {createActors} from './exhibit-actors.js';
 // Runs one recipe exhibit on the shared stage: timeline, guided camera, sensor view, overlay, controls, messages.
 const OVERLAY_DELAY=.5,SWEEP_SECONDS=1.2,REVIEW_AFTER=2.2,HOME={angle:.55,elevation:.42};
 
-export function runRecipe(recipe,stage,host,notify){
+// buildKit defaults to the shared registry; a world-local registry (exhibits.js `extra`) passes its own.
+export function runRecipe(recipe,stage,host,notify,buildKit=KITS[recipe.id]){
   const {scene,root,camera:orbit,k}=stage;
   k.props=createProps(k);k.actors=createActors(k);
-  const kit=KITS[recipe.id](k);
+  const kit=buildKit(k);
   const sensors=kit.sensors||{},anchors=kit.anchors||{};
   for(const s of Object.values(sensors))if(!s.camera.parent)root.add(s.camera);
   const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;

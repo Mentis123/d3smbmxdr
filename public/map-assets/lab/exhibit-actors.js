@@ -61,7 +61,8 @@ export function createActors(k){
       torso.rotation.x=lean;head.rotation.x=look;neck.rotation.y=turn;
     }
     pose();
-    return{group,pose,head};
+    // joints: the rig's bones for poses beyond walking (rigs/laptop.js seats the person); pose() rewrites them all.
+    return{group,pose,head,joints:{pelvis,torso,neck,head,legs,arms}};
   }
 
   // Deterministic path motion: position on a polyline (root coordinates) at time t, easing in and out over t0..t1.

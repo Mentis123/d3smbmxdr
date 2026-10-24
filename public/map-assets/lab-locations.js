@@ -7,4 +7,5 @@ export const LAB_LOCATIONS={
   mining:FEATURED.mining.map(marker),
   retail:FEATURED.retail.map(marker),
   datacenter:FEATURED.datacenter.map(marker),
+  local:FEATURED.local.map(marker),
 };

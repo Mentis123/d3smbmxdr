@@ -11,10 +11,14 @@ import {buildKit as retailAvailability} from './retail.produce-availability.js';
 import {buildKit as dcHungry} from './datacenter.too-hungry.js';
 import {buildKit as dcHot} from './datacenter.too-hot.js';
 import {buildKit as dcHeavy} from './datacenter.too-heavy.js';
+import {buildKit as localNotes} from './local.meeting-notes.js';
+import {buildKit as localAgent} from './local.browser-agent.js';
+import {buildKit as localFiles} from './local.files-answer.js';
 
 export const KITS=Object.freeze({
   'energy.intake-vision':energyIntake,'energy.thermal-patrol':energyThermal,'energy.corridor-inspection':energyCorridor,
   'mining.conveyor-vision':miningConveyor,'mining.pump-patrol':miningPump,'mining.yard-awareness':miningYard,
   'retail.produce-recognition':retailProduce,'retail.deli-service':retailDeli,'retail.produce-availability':retailAvailability,
   'datacenter.too-hungry':dcHungry,'datacenter.too-hot':dcHot,'datacenter.too-heavy':dcHeavy,
+  'local.meeting-notes':localNotes,'local.browser-agent':localAgent,'local.files-answer':localFiles,
 });

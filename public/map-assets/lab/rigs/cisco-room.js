@@ -39,6 +39,7 @@
 import {createActors} from '../exhibit-actors.js';
 import {createFlowMaterial} from '../../flow-effects.js';
 import {seatedPerson} from './laptop.js';
+import {createDeviceKit} from './cisco-devices.js';
 
 export const ACCENT={camera:0x19d3ff,mic:0xffb02e,speaker:0xc08cff,engine:0x5dff9a};
 export const CSS={camera:'#19d3ff',mic:'#ffb02e',speaker:'#c08cff',engine:'#5dff9a'};
@@ -95,6 +96,8 @@ function createCrowd(k,{parent,seats}){
     shins:{geo:track(new THREE.BoxGeometry(.32,.44,.12)),mat:white(),n:people.length},
     shoes:{geo:track(new THREE.BoxGeometry(.32,.07,.2)),mat:mat(0x1a1a1c,{roughness:.6}),n:people.length},
     torso:{geo:cap(.16,.3),mat:white(),n:people.length},
+    shoulders:{geo:cap(.075,.24),mat:white(),n:people.length},
+    collar:{geo:track(new THREE.CylinderGeometry(.06,.075,.05,12)),mat:white({roughness:.7}),n:people.length},
     upper:{geo:cap(.05,.22),mat:white(),n:people.length*2},
     fore:{geo:cap(.045,.22),mat:white(),n:people.length*2},
     hand:{geo:track(new THREE.SphereGeometry(.045,8,6)),mat:white({roughness:.75}),n:people.length*2},
@@ -107,7 +110,7 @@ function createCrowd(k,{parent,seats}){
   const C=new THREE.Color();
   people.forEach((s,i)=>{const [shirt,pants,hair,skin]=s.outfit;
     for(const id of ['thighs','shins'])mesh[id].setColorAt(i,C.setHex(pants));
-    mesh.torso.setColorAt(i,C.setHex(shirt));for(const j of [0,1])mesh.upper.setColorAt(i*2+j,C.setHex(shirt)),mesh.fore.setColorAt(i*2+j,C.setHex(shirt)),mesh.hand.setColorAt(i*2+j,C.setHex(skin));
+    mesh.torso.setColorAt(i,C.setHex(shirt));mesh.shoulders.setColorAt(i,C.setHex(shirt));mesh.collar.setColorAt(i,C.setHex(i%3?0xf2efe8:shirt).multiplyScalar(i%3?1:.8));for(const j of [0,1])mesh.upper.setColorAt(i*2+j,C.setHex(shirt)),mesh.fore.setColorAt(i*2+j,C.setHex(shirt)),mesh.hand.setColorAt(i*2+j,C.setHex(skin));
     mesh.neck.setColorAt(i,C.setHex(skin));mesh.head.setColorAt(i,C.setHex(skin));mesh.hair.setColorAt(i,C.setHex(hair));});
   for(const m of Object.values(mesh))if(m.instanceColor)m.instanceColor.needsUpdate=true;
   const M=(x=0,y=0,z=0,rx=0,ry=0,rz=0,sx=1,sy=1,sz=1)=>new THREE.Matrix4().compose(new THREE.Vector3(x,y,z),new THREE.Quaternion().setFromEuler(new THREE.Euler(rx,ry,rz)),new THREE.Vector3(sx,sy,sz));
@@ -123,6 +126,8 @@ function createCrowd(k,{parent,seats}){
     mesh.thighs.setMatrixAt(i,b.clone().multiply(M(0,.54,.15)));mesh.shins.setMatrixAt(i,b.clone().multiply(M(0,.27,.37)));mesh.shoes.setMatrixAt(i,b.clone().multiply(M(0,.035,.45)));
     const hip=b.clone().multiply(M(0,.56,-.05,st.lean));
     mesh.torso.setMatrixAt(i,hip.clone().multiply(M(0,.31,0,0,0,0,1.15,1,.72)));
+    mesh.shoulders.setMatrixAt(i,hip.clone().multiply(M(0,.49,-.01,0,0,Math.PI/2,1,1,.8)));
+    mesh.collar.setMatrixAt(i,hip.clone().multiply(M(0,.56,.0)));
     for(const [j,sd] of [[0,-1],[1,1]]){
       const up=sd<0?st.raise:0;
       const sh=hip.clone().multiply(M(sd*.215,.5,0,-.35-up*2.6,0,sd*(.08+up*.1)));
@@ -239,19 +244,9 @@ export function buildMeetingRoom(k,{parent=k.root,x=0,y=0,z=0,scale=1,hero=[],wa
   const glassFront=box(1.2,C_.h-.08,.008,M.glass,0,(C_.h-.04)/2,cz+C_.d/2-.004,credenza);glassFront.castShadow=false;glassFront.userData.sensorKeep=true;
   // Codec (Room Kit Pro G2) and switch: dark 1U boxes with port lights. Port materials are the LEDs the cables light.
   const devices={};
-  function rackBox(name,w,y,ports,accentHex){
-    const g=new THREE.Group();g.name=name;g.position.set(0,y,cz+.02);credenza.add(g);
-    box(w,.044,.3,M.device,0,.022,0,g);box(w,.044,.006,M.black,0,.022,.153,g);
-    const leds=[];for(let i=0;i<ports;i++){const m=mat(0x1f3326,{emissive:accentHex,emissiveIntensity:.15,roughness:.4});const p=box(.016,.012,.006,m,-w/2+.06+i*.026,.03,.157,g);p.castShadow=false;leds.push(m);}
-    const status=mat(0xbfffe0,{emissive:accentHex,emissiveIntensity:.6});box(.012,.012,.006,status,w/2-.03,.022,.157,g).castShadow=false;
-    const lab=canvasTex(k,512,64,(c,w,h)=>{c.fillStyle='#0d1014';c.fillRect(0,0,w,h);c.fillStyle='#e8f0f6';font(c,700,34);c.textBaseline='middle';c.fillText(name==='room-kit-pro-g2'?'ROOM KIT PRO G2':'POE SWITCH',16,h/2+2);});
-    const plateM=add(new THREE.PlaneGeometry(w*.55,w*.55/8),track(new THREE.MeshBasicMaterial({map:lab.texture,toneMapped:false})),w*.12,.022,.1545,g);plateM.castShadow=false;
-    const anchor=new THREE.Object3D();anchor.position.set(0,.03,.1);g.add(anchor);
-    return{group:g,anchor,leds,status,
-      led(a,t){status.emissiveIntensity=.4+.8*a*(.6+.4*Math.sin(t*7));}};
-  }
-  devices.codec=rackBox('room-kit-pro-g2',.44,.42,8,ACCENT.engine);
-  devices.poe=rackBox('poe-switch',.33,.05,8,ACCENT.engine);
+  const DK=createDeviceKit(k);
+  devices.codec=DK.rackUnit(credenza,[0,.42,cz+.02],{w:.44,label:'ROOM KIT PRO G2',ports:8,accent:ACCENT.engine,name:'room-kit-pro-g2'});
+  devices.poe=DK.rackUnit(credenza,[0,.05,cz+.02],{w:.33,label:'POE SWITCH',ports:8,accent:ACCENT.engine,name:'poe-switch'});
   // A thin cable bundle comes down the wall between the displays into the credenza (drawn by the cables below).
 
   // ---- table and its Room Navigator ----
@@ -334,51 +329,12 @@ export function buildMeetingRoom(k,{parent=k.root,x=0,y=0,z=0,scale=1,hero=[],wa
   // ---- the devices ----
   function ledMat(hex){return mat(0x202428,{emissive:hex,emissiveIntensity:.1,roughness:.4});}
   function drop(x0,z0,from,to){add(new THREE.CylinderGeometry(.008,.008,Math.abs(from-to),6),M.steel,x0,(from+to)/2,z0,trayG).castShadow=false;}
-  // Ceiling Microphone Pro: 420 x 420 x 48 mm, a perforated face, three small ultrasonic ports, a status light.
-  const perf=canvasTex(k,256,256,(g,w,h)=>{g.fillStyle='#34373c';g.fillRect(0,0,w,h);g.fillStyle='rgba(10,10,12,.55)';for(let i=6;i<w;i+=9)for(let j=6;j<h;j+=9){g.beginPath();g.arc(i,j,1.6,0,Math.PI*2);g.fill();}}).texture;
-  function micPro(name,pos){
-    const g=new THREE.Group();g.name=name;g.position.set(...pos);g.scale.setScalar(DS);group.add(g);
-    const body=box(.42,.048,.42,M.device,0,0,0,g);void body;
-    const face=add(new THREE.PlaneGeometry(.39,.39),mat(0xffffff,{map:perf,roughness:.9}),0,-.0245,0,g);face.rotation.x=Math.PI/2;face.castShadow=false;
-    for(const [dx,dz] of [[0,-.12],[.1,.07],[-.1,.07]])add(new THREE.CylinderGeometry(.012,.012,.003,10),M.black,dx,-.026,dz,g).castShadow=false;
-    const lm=ledMat(ACCENT.mic);for(const [ex,ez,ew,ed] of [[0,.211,.42,.006],[0,-.211,.42,.006],[.211,0,.006,.42],[-.211,0,.006,.42]])box(ew,.008,ed,lm,ex,-.02,ez,g).castShadow=false;
-    for(const [dx,dz] of [[-.15,-.15],[.15,-.15],[-.15,.15],[.15,.15]])add(new THREE.CylinderGeometry(.002,.002,(TY-.03-pos[1])/DS,4),M.steel,dx,(TY-.03-pos[1])/DS/2,dz,g).castShadow=false;
-    const anchor=new THREE.Object3D();g.add(anchor);const faceAnchor=new THREE.Object3D();faceAnchor.position.y=-.03;g.add(faceAnchor);
-    return{group:g,anchor,face:faceAnchor,ledMat:lm,led(a,t){lm.emissiveIntensity=.12+1.4*a*(.7+.3*Math.sin(t*5));}};
-  }
-  devices.micFront=micPro('ceiling-mic-pro-front',P.micFront);devices.micRear=micPro('ceiling-mic-pro-rear',P.micRear);
-  // Ceiling Speaker Pro: 420 mm wide, 88 mm high, round coaxial body, perforated grille, light ring; hung level.
-  const grille=canvasTex(k,256,256,(g,w,h)=>{g.fillStyle='#2e3135';g.fillRect(0,0,w,h);g.fillStyle='rgba(8,8,10,.6)';for(let r=12;r<w/2;r+=10)for(let a=0;a<Math.PI*2;a+=8/r){g.beginPath();g.arc(w/2+Math.cos(a)*r,h/2+Math.sin(a)*r,1.6,0,Math.PI*2);g.fill();}}).texture;
-  function speakerPro(name,pos){
-    const g=new THREE.Group();g.name=name;g.position.set(...pos);g.scale.setScalar(DS);group.add(g);
-    add(new THREE.CylinderGeometry(.2,.21,.07,40),M.device,0,0,0,g);
-    add(new THREE.CylinderGeometry(.16,.2,.018,40),M.device,0,.044,0,g);
-    const face=add(new THREE.CircleGeometry(.195,40),mat(0xffffff,{map:grille,roughness:.85}),0,-.0355,0,g);face.rotation.x=Math.PI/2;face.castShadow=false;
-    const lm=ledMat(ACCENT.speaker);const ring=add(new THREE.TorusGeometry(.205,.006,6,48),lm,0,-.03,0,g);ring.rotation.x=Math.PI/2;ring.castShadow=false;
-    add(new THREE.CylinderGeometry(.03,.03,.02,12),M.black,0,.06,0,g);
-    const anchor=new THREE.Object3D();g.add(anchor);const faceAnchor=new THREE.Object3D();faceAnchor.position.y=-.04;g.add(faceAnchor);
-    return{group:g,anchor,face:faceAnchor,ledMat:lm,led(a,t){lm.emissiveIntensity=.1+1.6*a*(.75+.25*Math.sin(t*6));}};
-  }
-  devices.spk=P.spk.map((p,i)=>speakerPro('ceiling-speaker-pro-'+['fl','fr','rl','rr'][i],p));
-  for(const d of devices.spk){const p=d.group.position;drop(p.x,p.z,p.y+.07*DS,TY-.03);}
-  // Room Vision PTZ: base, a yoke that pans, a head that tilts, a glass lens and a light. Faces +z by default.
-  function ptz(name,pos,{ry=0,hang=false}={}){
-    const g=new THREE.Group();g.name=name;g.position.set(...pos);g.rotation.y=ry;g.scale.setScalar(DS);group.add(g);
-    const baseY=hang?.0:0;
-    box(.165,.05,.176,M.device,0,baseY+.025,0,g);
-    const yaw=new THREE.Group();yaw.position.y=.05;g.add(yaw);
-    box(.13,.02,.12,M.device,0,.01,0,yaw);for(const s of [-1,1])box(.018,.11,.06,M.device,s*.07,.07,0,yaw);
-    const head=new THREE.Group();head.position.y=.11;yaw.add(head);
-    add(new THREE.BoxGeometry(.12,.1,.14),M.device,0,0,0,head);
-    add(new THREE.CylinderGeometry(.045,.045,.02,24),M.black,0,0,.075,head).rotation.x=Math.PI/2;
-    const lens=add(new THREE.CylinderGeometry(.032,.032,.006,24),mat(0x0b1b2a,{metalness:.9,roughness:.05,emissive:0x0a3550,emissiveIntensity:.4}),0,0,.086,head);lens.rotation.x=Math.PI/2;lens.castShadow=false;
-    const lm=ledMat(ACCENT.camera);box(.012,.008,.004,lm,.042,.036,.071,head).castShadow=false;
-    const mount=new THREE.Object3D();mount.position.set(0,0,.09);head.add(mount);
-    const anchor=new THREE.Object3D();anchor.position.y=.1;g.add(anchor);
-    return{group:g,anchor,head,mount,yaw,ledMat:lm,pan(a){yaw.rotation.y=a;},tilt(a){head.rotation.x=a;},led(a,t){lm.emissiveIntensity=.15+1.4*a*(.7+.3*Math.sin(t*4));}};
-  }
-  devices.camFront=ptz('room-vision-ptz-front',P.camFront);
-  devices.camRear=ptz('room-vision-ptz-rear',[P.camRear[0],P.camRear[1],P.camRear[2]],{ry:Math.PI});
+  // The three Cisco devices, detailed models from lab/rigs/cisco-devices.js (data sheet sizes, Carbon Black).
+  devices.micFront=DK.micPro(group,P.micFront,{DS,hangTo:TY-.03,accent:ACCENT.mic,name:'ceiling-mic-pro-front'});
+  devices.micRear=DK.micPro(group,P.micRear,{DS,hangTo:TY-.03,accent:ACCENT.mic,name:'ceiling-mic-pro-rear'});
+  devices.spk=P.spk.map((p,i)=>DK.speakerPro(group,p,{DS,hangTo:TY-.03,accent:ACCENT.speaker,name:'ceiling-speaker-pro-'+['fl','fr','rl','rr'][i]}));
+  devices.camFront=DK.ptz(group,P.camFront,{DS,accent:ACCENT.camera,name:'room-vision-ptz-front'});
+  devices.camRear=DK.ptz(group,P.camRear,{DS,ry:Math.PI,accent:ACCENT.camera,name:'room-vision-ptz-rear'});
   box(.22,.02,.22,M.black,P.camRear[0],P.camRear[1]-.01,P.camRear[2],trayG);drop(P.camRear[0],P.camRear[2],P.camRear[1],TY-.03);
   devices.camFront.tilt(.22);devices.camRear.tilt(.2);
 
@@ -446,6 +402,19 @@ export function buildMeetingRoom(k,{parent=k.root,x=0,y=0,z=0,scale=1,hero=[],wa
     },JSON.stringify([title,step]));
   }
   farEnd(displays.left);content(displays.right);
+
+  // ---- light and shade on the floor: warm pools under the pendants, a cool spill from the displays, contact shadows ----
+  {const radial=(stops)=>{const c=document.createElement('canvas');c.width=c.height=128;const g=c.getContext('2d'),gr=g.createRadialGradient(64,64,4,64,64,64);stops.forEach(([o,col])=>gr.addColorStop(o,col));g.fillStyle=gr;g.fillRect(0,0,128,128);const t=track(new THREE.CanvasTexture(c));t.colorSpace=THREE.SRGBColorSpace;return t;};
+    const poolM=track(new THREE.MeshBasicMaterial({map:radial([[0,'rgba(255,214,160,.55)'],[.55,'rgba(255,200,140,.18)'],[1,'rgba(255,200,140,0)']]),transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,toneMapped:false}));
+    const spillM=track(new THREE.MeshBasicMaterial({map:radial([[0,'rgba(140,190,255,.4)'],[.6,'rgba(120,170,255,.12)'],[1,'rgba(120,170,255,0)']]),transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,toneMapped:false}));
+    const shadeM=track(new THREE.MeshBasicMaterial({map:radial([[0,'rgba(20,14,10,.55)'],[.6,'rgba(20,14,10,.25)'],[1,'rgba(20,14,10,0)']]),transparent:true,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2}));
+    const decal=(m,x,z,w,d,y=.003,order=-1)=>{const o=add(new THREE.PlaneGeometry(w,d),m,x,y,z);o.rotation.x=-Math.PI/2;o.castShadow=o.receiveShadow=false;o.renderOrder=order;o.userData.sensorKeep=true;o.userData.noFit=true;return o;};
+    for(const pz of [-2.2,-.8,.6])for(const px of [-.75,.75])decal(poolM,px,pz,1.9,1.9,.004,1);
+    for(const px of [-2.4,-.8,.8,2.4])decal(poolM,px,3.2,1.8,1.6,P.riser.h+.004,1);
+    for(const px of D_.x)decal(spillM,px,-3.5,2.6,1.6,.005,1);
+    decal(shadeM,P.table.x,P.table.z,1.9,5.0);decal(shadeM,0,P.credenza.z+.05,4.0,.9);
+    for(const q of seats)decal(shadeM,q.x,q.z,.75,.75,q.y+.002);
+    decal(shadeM,P.lectern[0],P.lectern[1],.8,.7);decal(shadeM,4.4,.85,1.6,2.4);}
 
   // ---- walls that give way to the camera ----
   const tmpV=new THREE.Vector3();

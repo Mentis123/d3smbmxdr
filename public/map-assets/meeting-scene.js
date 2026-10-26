@@ -149,8 +149,8 @@ export function createMeetingScene() {
   world.hotspots = [
     {id: 'camera', label: 'Room Vision PTZ', caption: 'Room Vision PTZ: head detection on the camera; the room engine picks the shot.', view: 'camera', anchor: pin(P.camRear, 0.9)},
     {id: 'mic', label: 'Ceiling Microphone Pro', caption: 'Ceiling Microphone Pro: 64 microphones, 8 AI adaptive beams, noise removed on the device.', view: 'mic', anchor: pin(P.micFront, 0.9)},
-    {id: 'speakers', label: 'Ceiling Speaker Pro', caption: 'Ceiling Speaker Pro: edge AI sets its own level and timing, so every seat hears the same.', view: 'speakers', anchor: pin(P.spk[3], 0.7)},
-    {id: 'engine', label: 'Room engine', caption: 'One cable each into the Room Kit Pro G2: power, control and audio over IP on one network.', view: 'engine', anchor: pin([1.5, 0.75, -3.95], 0.2)},
+    {id: 'speakers', label: 'Ceiling Speaker Pro', caption: 'Ceiling Speaker Pro: no amplifier rack. Power and audio on one cable; it tunes its own level and timing.', view: 'speakers', anchor: pin(P.spk[3], 0.7)},
+    {id: 'engine', label: 'Room engine', caption: 'One cable each into the Room Kit Pro G2: power, control and audio over IP. No amplifier or DSP rack.', view: 'engine', anchor: pin([1.5, 0.75, -3.95], 0.2)},
   ];
   world.onHotspot = spot => {
     // The room engine pin runs the heartbeat at once so the eight cables light while the camera arrives.

@@ -7,12 +7,17 @@
 // The remote voice comes from the left pair, where her picture is (spatial playback of remote voices).
 // Variation "in-room voice": the presenter speaks in the room and only the rear pair lifts the voice for the back rows
 // (datasheet: local presenter reinforcement). Wavefronts are slowed right down to be seen. Pure function of t and ctx.
+// No amplifier: at the start of the Change chapter the old way appears as a red outline (an amplifier rack in the corner
+// and a speaker cable to every speaker), is crossed out, and dissolves as each speaker lights on its own PoE+ cable
+// (data sheet: single-cable IP, PoE+ powered, built-in DSP; the owner's point: no amplifier for multiple speakers).
 import {stageRoom,seatedFigure,speechRibbon,beamFan,shells,tagSprite,ACCENT,CSS,P} from '../rigs/cisco-room.js';
 
 const smooth=(a,b,x)=>{const u=Math.min(1,Math.max(0,(x-a)/(b-a)));return u*u*(3-2*u);};
 const wrap=a=>Math.atan2(Math.sin(a),Math.cos(a));
 const C=2.4,EAR=[0,1.45,3.68],PERIOD=.9;                       // drawn speed of sound (slowed), the back-row target
-const ON=[4.6,5.0,5.4,5.8],LIVE=6.6;                           // speakers come online in turn; the voice moves to them
+const ON=[6.3,6.7,7.1,7.5],LIVE=8.0;                           // speakers come online in turn; the voice moves to them
+const GHOST=[4.3,4.9,6.0,7.0];                                 // the amplifier rack: fade in, crossed out, dissolve start, gone
+const RACK=[3.7,0,-1.0];
 const T={leanEnd:6.2,aiArrive:13.2,cable:16,cableEnd:19};
 const DISPLAY_SRC=[P.displays.x[0],P.displays.y,P.displays.z+.12];
 
@@ -40,7 +45,25 @@ export function buildKit(k){
   const zm=new THREE.Mesh(k.track(new THREE.BoxGeometry(1,1,1)),k.mat(0xffffff));zm.visible=false;zone.add(zm);
   zone.position.set(0,P.riser.h+.8,3.68);zone.scale.set(2.9,1.3,.8);
 
-  const spkTag=tagSprite(k,['CEILING SPEAKER PRO','Audio over IP · one cable each'],CSS.speaker,1.8,{parent:G,x:P.spk[0][0]+.3,y:3.35,z:P.spk[0][2]+.2});
+  const spkTag=tagSprite(k,['CEILING SPEAKER PRO','Power and audio on one cable · PoE+'],CSS.speaker,1.9,{parent:G,x:P.spk[0][0]+.3,y:3.35,z:P.spk[0][2]+.2});
+  const ampTag=tagSprite(k,['NO AMPLIFIER RACK','Each speaker is powered by its own cable'],'#ff6b5e',2.2,{parent:G,x:RACK[0]-.7,y:2.05,z:RACK[2]+.3});
+
+  // ---- the old way, as a red outline: an equipment rack with three amplifiers and a speaker run to every speaker ----
+  const ghost=new THREE.Group();ghost.name='amplifier-rack-ghost';G.add(ghost);
+  const ghostFill=k.track(new THREE.MeshBasicMaterial({color:0xff4b3e,transparent:true,opacity:0,depthWrite:false,blending:THREE.AdditiveBlending,toneMapped:false}));
+  const ghostLine=k.track(new THREE.LineBasicMaterial({color:0xff7a6e,transparent:true,opacity:0,depthWrite:false,toneMapped:false}));
+  const gbox=(w,h,d,x,y,z)=>{const geo=k.track(new THREE.BoxGeometry(w,h,d));const m=new THREE.Mesh(geo,ghostFill);m.position.set(x,y,z);m.userData.sensorKeep=true;m.userData.noFit=true;ghost.add(m);
+    const e=new THREE.LineSegments(k.track(new THREE.EdgesGeometry(geo)),ghostLine);e.position.copy(m.position);e.userData.noFit=true;ghost.add(e);return m;};
+  gbox(.62,1.25,.62,RACK[0],.625,RACK[2]);
+  for(let i=0;i<3;i++){gbox(.56,.13,.05,RACK[0],.45+i*.2,RACK[2]+.32);for(const kx of [-.18,0,.18])gbox(.04,.04,.03,RACK[0]+kx,.45+i*.2,RACK[2]+.36);}
+  gbox(.56,.09,.05,RACK[0],1.08,RACK[2]+.32);
+  // Speaker runs: up the wall from the rack, along the ceiling to each speaker.
+  for(const f of faces){const pts=[[RACK[0]+.2,1.25,RACK[2]],[RACK[0]+.2,P.TRAY+.1,RACK[2]],[f[0],P.TRAY+.1,RACK[2]],[f[0],P.TRAY+.1,f[2]],[f[0],f[1]+.1,f[2]]].map(p=>new THREE.Vector3(...p));
+    const ln=new THREE.Line(k.track(new THREE.BufferGeometry().setFromPoints(pts)),ghostLine);ln.userData.noFit=true;ghost.add(ln);}
+  // The cross: two red bars over the rack.
+  const crossM=k.track(new THREE.MeshBasicMaterial({color:0xff3b2e,transparent:true,opacity:0,depthWrite:false,depthTest:false,toneMapped:false}));
+  const cross=new THREE.Group();cross.position.set(RACK[0],.7,RACK[2]+.35);G.add(cross);
+  for(const s of [-1,1]){const bar=new THREE.Mesh(k.track(new THREE.BoxGeometry(1.25,.07,.02)),crossM);bar.rotation.z=s*.78;bar.renderOrder=9;bar.userData.noFit=true;bar.userData.sensorKeep=true;cross.add(bar);}
 
   function update(t,ctx){
     const v=!!ctx.variation,sensor=!!ctx.sensor,ai=ctx.chapter>=2;
@@ -78,6 +101,11 @@ export function buildKit(k){
     const pp=room.presenter.group.position;room.presenter.pose({distance:0,weight:0,look:.05,point:presenterTalk?.3*Math.max(0,Math.sin(t*1.4)):0,pointPitch:1.1});
     ribP.draw([pp.x,1.72,pp.z],P.micFront,presenterTalk&&!sensor?1:0,t,{lift:.1,width:.025});
     spkTag.visible=!sensor&&t>ON[0]&&t<10;
+    // The amplifier rack that is not needed: in, crossed out, gone as the speakers come alive on their own cables.
+    const g=smooth(GHOST[0],GHOST[1],t)*(1-smooth(GHOST[2],GHOST[3],t))*(ai?0:1);
+    ghost.visible=g>.01;ghostFill.opacity=.1*g;ghostLine.opacity=.9*g;
+    const x=smooth(GHOST[1],GHOST[1]+.35,t)*(1-smooth(GHOST[2],GHOST[3],t))*(ai?0:1);crossM.opacity=.85*x;cross.visible=x>.01;cross.scale.setScalar(.6+.4*x);
+    ampTag.visible=!sensor&&t>GHOST[1]&&t<ON[3]+.6;
   }
   update(0,{variation:null,chapter:0,chapterId:'scene',sensor:false});
 

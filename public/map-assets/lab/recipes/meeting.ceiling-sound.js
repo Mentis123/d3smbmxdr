@@ -35,4 +35,7 @@ export default {
   variation:{id:'in-room',label:'In-room voice',caption:'The presenter’s voice is lifted for the back rows',
     captions:{review:'The back rows hear the presenter; the front stays natural'},
     overlay:{anchor:'backRow',label:'In-room voice · back rows',state:'unclear'}},
+  // Narration (owner's ElevenLabs file, 26 Oct 2026, cut at its pauses). Delays land each line on its on-screen event;
+  // with the variation on, its clip plays at the AI view and the review stays silent (the normal review line would not fit).
+  narration:{base:'/map-assets/lab/audio/meeting.ceiling-sound/',lines:{scene:'scene.mp3',change:'change.mp3',aiView:'aiView.mp3',review:'review.mp3'},variation:{aiView:'variation.mp3',review:null},delay:{scene:0,change:.4,aiView:0,review:1}},
 };

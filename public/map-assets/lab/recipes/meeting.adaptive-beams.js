@@ -34,4 +34,7 @@ export default {
   variation:{id:'one-beam',label:'Two in one beam',caption:'Two voices in one beam · both come through',
     captions:{review:'Both voices come through together, not separated'},
     overlay:{anchor:'talkerA',label:'Two voices · one beam',state:'unclear'}},
+  // Narration (owner's ElevenLabs file, 26 Oct 2026, cut at its pauses). Delays land each line on its on-screen event;
+  // with the variation on, its clip plays at the AI view and the review stays silent (the normal review line would not fit).
+  narration:{base:'/map-assets/lab/audio/meeting.adaptive-beams/',lines:{scene:'scene.mp3',change:'change.mp3',aiView:'aiView.mp3',review:'review.mp3'},variation:{aiView:'variation.mp3',review:null},delay:{scene:0,change:.6,aiView:0,review:1}},
 };

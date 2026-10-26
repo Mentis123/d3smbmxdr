@@ -35,4 +35,7 @@ export default {
   variation:{id:'out-of-zone',label:'Out of zone',caption:'Out of the zone · the camera holds the overview',
     captions:{review:'No hunting: the far end keeps the overview'},
     overlay:{anchor:'subject',label:'Out of zone · overview',state:'unclear'}},
+  // Narration (owner's ElevenLabs file, 26 Oct 2026, cut at its pauses). Delays land each line on its on-screen event;
+  // with the variation on, its clip plays at the AI view and the review stays silent (the normal review line would not fit).
+  narration:{base:'/map-assets/lab/audio/meeting.camera-director/',lines:{scene:'scene.mp3',change:'change.mp3',aiView:'aiView.mp3',review:'review.mp3'},variation:{aiView:'variation.mp3',review:null},delay:{scene:.3,change:2.4,aiView:0,review:1}},
 };

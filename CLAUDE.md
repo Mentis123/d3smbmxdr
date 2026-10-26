@@ -11,6 +11,10 @@ When you add, remove, or rename any page or route on this site, you **must** upd
 - The **Related Sites** section cross-links `adamrappaport.vercel.app/links` (the personal site's own index, which links back here) and Cisco Live. Keep both directions when either site changes.
 - `/contributions` is deliberately not listed (a personal value summary) until the owner decides.
 
+## Three-finger tap QR (every page)
+
+A three-finger tap anywhere shows a QR code for the page. App routes load `/map-assets/qr-tap.js` from `app/layout.js` (`next/script`); every static page in `public/` has `<script src="/map-assets/qr-tap.js" defer></script>` before `</body>`; the synced world wrappers carry it from adamrappaport. Inside an embedded world the tap goes to the page around it, so the QR is the AI Lab page, not the iframe. **Add the tag to any new static page.** The script is synced from adamrappaport; never edit the copy here.
+
 ## Deployment
 
 - Push to `main` — Vercel auto-deploys. Do not start a Next dev server or run the repo's test scripts by default.

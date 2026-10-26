@@ -1,4 +1,5 @@
 import './globals.css'
+import Script from 'next/script'
 
 export const metadata = {
   title: 'Security Assessment | Data#3',
@@ -12,7 +13,11 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        {children}
+        {/* Three-finger tap anywhere shows a QR code for the page (synced from adamrappaport, /map-assets/qr-tap.js). */}
+        <Script src="/map-assets/qr-tap.js" strategy="afterInteractive" />
+      </body>
     </html>
   )
 }

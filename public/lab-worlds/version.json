@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "sourceRepository": "Mentis123/adamrappaport",
-  "sourceCommit": "fb5d64820eef64797266ee368465cf7c0f62e4b7",
+  "sourceCommit": "38ffd049ea0c773ffd341ad362bf29443d1812ee",
   "experience": "ai-lab",
   "runtimeDependency": "Self-hosted static files; no personal-site requests",
   "files": {
@@ -193,6 +193,7 @@
     "public/map-assets/pins.js": "04e74f9ea4da2367a351101919e419285b4ca3dcfbca879c69dc56b413b59c40",
     "public/map-assets/pipeline.js": "30e264dc997566d855d23dcd809b2d43e1bbbd3dde7b4fc37ea1184480471c16",
     "public/map-assets/poster.jpg": "054e935976a4551701f50b669d23b90660f990515370b50c311cfdda64a2e5df",
+    "public/map-assets/qr-tap.js": "52b14cee57f494bcd1cf4f1221ca7275278f4583bd1655d47b6d5e9854505f0d",
     "public/map-assets/reservoir-reflection.js": "0146a160a43735d45f54c7fea7fa1f13e553fd4c3c8184a060e93b726308f11c",
     "public/map-assets/retail-poster.jpg": "b29df1953e5620386a62c88b5af83d0d28305e9398bd4af9807c3580117a53ec",
     "public/map-assets/retail-scene.js": "d825c65fa5b20a9394078ec26b9107f02e4490d84c2495c85e7f5c2060ecfbfa",
@@ -232,12 +233,12 @@
     "public/map-assets/viewer.js": "50926dd1bfd6950034557fbe3546b9d44bc0fed43f08d2ef4089dee09312e60c",
     "public/map-assets/water.js": "1e58fcdf54d9dd65652798778d983d303438ff9691e04707b878309634f66816",
     "public/map-assets/world-shell.js": "d512261ac1f602441e05506e51478605b1b1a795f4e03011229f06f783c75250",
-    "public/lab-worlds/energy.html": "867f380854f9eb924bbdb32cb786364719a1ae50e34fa755f84fa92e68c3f362",
-    "public/lab-worlds/mining.html": "17d462bbf88e6efdc9fe4b8a40abfd9d7834a787ad613194a04b721bf3e8a336",
-    "public/lab-worlds/datacenter.html": "85ced5d466f9fc5f1f224515f308c71353d34d7f398a1c4c0584083ab714cc96",
-    "public/lab-worlds/nextdc.html": "bfcd48ab54aca417f42bb6f8b7ec65fb599377821862028731b26d6db4b65a15",
-    "public/lab-worlds/retail.html": "7ac4560fc085700bdfa9594322cf651a5be368b7ff8daa1877ca208a470b52f8",
-    "public/lab-worlds/local.html": "afd5a3c82e6190cd117b1cc60cf15406f5ce891a0bc93c40e23be522dbc4fc11",
-    "public/lab-worlds/meeting.html": "bb79dc9331ebf4717b93ad256b73b5e47003f3ea8d23775ba6aa52dbb66ca905"
+    "public/lab-worlds/energy.html": "f8ce24563af699990583e56688fb24566019bb8937519bad2c324979e6b18134",
+    "public/lab-worlds/mining.html": "9b75fd75876467b5c5ec6c61872d2d7dea83ca669d6328c14b871323ca632977",
+    "public/lab-worlds/datacenter.html": "9516cb5150ceac626e8a9f4cee8ca37eba0fe3bcea33406bb0a21552f0827f89",
+    "public/lab-worlds/nextdc.html": "a37f2fd13e3ced39db502aedd0e46909953a3b8fa23537461f77d956b194eb6a",
+    "public/lab-worlds/retail.html": "29a3b364e27d38c99cf7a7fc85862958d8a0e1210d20f847195d513b5610ba53",
+    "public/lab-worlds/local.html": "29d5517961d8eee86a48d28c8ae43cc77b929aa80ddbc9b04665ba7f57439896",
+    "public/lab-worlds/meeting.html": "d2107182ec1a0482863a913f37ad517922d543218ef80301ed53680f90757a1a"
   }
 }

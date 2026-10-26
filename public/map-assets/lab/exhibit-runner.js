@@ -72,7 +72,7 @@ export function runRecipe(recipe,stage,host,notify,buildKit=KITS[recipe.id]){
   // From the AI view on, the variation's caption replaces the chapter's; variation.captions[chapterId] overrides it per chapter.
   const captionFor=i=>{const v=tl.variation&&recipe.variation;if(!v||aiIndex<0||i<aiIndex)return chapters[i].caption;return v.captions?.[chapters[i].id]??v.caption??chapters[i].caption;};
   function subjectAnchor(i){const id=chapters[i].overlay?.anchor||chapters.find(c=>c.id==='aiView')?.overlay?.anchor||Object.keys(anchors)[0];return anchors[id];}
-  function state(){const i=tl.index;return{id:recipe.id,chapter:i,chapterId:idOf(i),time:tl.time,duration:recipe.duration,playing:tl.playing,variation:tl.variation,hold:tl.hold,sensor:activeCamera!==orbit,sensorLabel:activeCamera!==orbit?(sensors[chapters[i].sensor]?.label||'site camera'):null,ended:tl.ended};}
+  function state(){const i=tl.index;return{id:recipe.id,chapter:i,chapterId:idOf(i),time:tl.time,duration:recipe.duration,playing:tl.playing,variation:tl.variation,hold:tl.hold,sensor:activeCamera!==orbit,sensorLabel:activeCamera!==orbit?(sensors[chapters[i].sensor]?.label||'site camera'):null,sensorTitle:activeCamera!==orbit?(sensors[chapters[i].sensor]?.title||null):null,ended:tl.ended};}
 
   function update(dt){
     tl.step(dt);
@@ -88,7 +88,7 @@ export function runRecipe(recipe,stage,host,notify,buildKit=KITS[recipe.id]){
     sensorView.apply(c.sensor,sensor,tl.variation&&aiIndex>=0&&i>=aiIndex?'unclear':overlayInfo?.state||'neutral');
     const rect=overlayInfo?.anchor&&w>0?projectRect(overlayInfo.anchor,activeCamera,w,h):null;
     const sub=captions&&!rect&&w>0?subjectAnchor(i):null,caption=captions?{text:captionFor(i),rect:sub?projectRect(sub,activeCamera,w,h):null,pinned:!!sensor}:null;
-    overlay.update({rect,label:overlayInfo?.label,state:overlayInfo?.state,sweep:overlayInfo?.sweep,caption,camera:{active:!!sensor,label:'Camera view · '+(sensor?.label||'site camera')}});
+    overlay.update({rect,label:overlayInfo?.label,state:overlayInfo?.state,sweep:overlayInfo?.sweep,caption,camera:{active:!!sensor,label:(sensor?.title||'Camera view')+' · '+(sensor?.label||'site camera')}});
     const s=state(),next=[s.chapter,s.playing,s.variation,s.hold,s.sensor,s.ended].join('|');
     if(next!==sig){sig=next;notify(s);}
   }

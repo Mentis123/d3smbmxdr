@@ -7,7 +7,7 @@ import {EXHIBITS} from '../../lib/ai-lab/exhibits';
 import {chapterCaption,chapterName,useLabRegistry,type LabRegistry,type RecipeState,useNarration} from '../../lib/ai-lab/lab-recipes';
 
 type TabletopWindow=Window&{__tabletop?:{exhibit?:{prepare:()=>void}}};
-const KIND_LABEL={verified:'Verified',vendor:'Vendor',pattern:'Pattern'} as const;
+const KIND_LABEL={verified:'Verified',vendor:'Vendor',pattern:'Pattern',press:'Press'} as const;
 
 /** Recipe exhibits come from the synced registry for this world; the retired four stay openable by link on the legacy path. */
 function allowed(registry:LabRegistry|null,industry:LabIndustry,id:string){
@@ -85,7 +85,7 @@ export default function LabExplorer({industry}:{industry:LabIndustry}){
     if(registryRef.current&&Object.hasOwn(registryRef.current.RECIPES,e.data.id))send('exhibit:command',{action:'captions',value:false});}
    if(e.data.type==='exhibit:error')setFailed(true);
    if(e.data.type==='exhibit:state'&&e.data.close){if(full.current)exitFullscreen();else if(performance.now()>ignoreCloseUntil.current)close();return;}
-   if(e.data.type==='exhibit:state'&&typeof e.data.chapterId==='string'){const d=e.data;setRs({chapter:d.chapter,chapterId:d.chapterId,time:d.time,duration:d.duration,playing:d.playing,variation:d.variation??null,hold:!!d.hold,sensor:!!d.sensor,sensorLabel:typeof d.sensorLabel==='string'?d.sensorLabel:null,ended:!!d.ended});}
+   if(e.data.type==='exhibit:state'&&typeof e.data.chapterId==='string'){const d=e.data;setRs({chapter:d.chapter,chapterId:d.chapterId,time:d.time,duration:d.duration,playing:d.playing,variation:d.variation??null,hold:!!d.hold,sensor:!!d.sensor,sensorLabel:typeof d.sensorLabel==='string'?d.sensorLabel:null,sensorTitle:typeof d.sensorTitle==='string'?d.sensorTitle:null,ended:!!d.ended});}
    else if(e.data.type==='exhibit:state'){setPhase(e.data.phase);setPlaying(e.data.playing);}
   };
   window.addEventListener('message',message);return()=>window.removeEventListener('message',message);
@@ -148,7 +148,7 @@ export default function LabExplorer({industry}:{industry:LabIndustry}){
      {recipe&&showModel&&loaded&&rs&&chapter&&<>
       <p className="ex-phase ex-caption" aria-live="polite" data-chapter={chapter.id} data-variation={variationOn&&chapterIndex>=2}><span>{chapterIndex+1} / 4 · {chapterName(chapter)}</span>{caption}</p>
       <div className="ex-controls ex-chapterbar" aria-label="Exhibit playback">
-      {rs?.sensor&&<div className="ex-sensor-tag" role="status"><span>Camera view{rs.sensorLabel?<small> · {rs.sensorLabel}</small>:null}</span><button onClick={()=>command('sensor',{value:false})}>Back to scene</button></div>}
+      {rs?.sensor&&<div className="ex-sensor-tag" role="status"><span>{rs.sensorTitle??'Camera view'}{rs.sensorLabel?<small> · {rs.sensorLabel}</small>:null}</span><button onClick={()=>command('sensor',{value:false})}>Back to scene</button></div>}
        <div className="ex-stops" role="group" aria-label="Chapters">{recipe.chapters.map((c,i)=><button key={c.id} data-chapter-stop={c.id} aria-current={i===chapterIndex?'step':undefined} onClick={()=>command('chapter',{index:i})}><b>{i+1}</b>{chapterName(c)}</button>)}</div>
        <div className="ex-actions">
         <button data-action="play" onClick={()=>command(rs?.playing?'pause':'play')}>{rs?.playing?'Pause':rs?.ended?'Play again':'Play'}</button>

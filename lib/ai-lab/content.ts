@@ -1,4 +1,4 @@
-export type LabIndustry = 'energy' | 'mining' | 'retail' | 'datacenter' | 'local';
+export type LabIndustry = 'energy' | 'mining' | 'retail' | 'datacenter' | 'local' | 'meeting';
 
 export type LabConditions = {
   lighting: 'day' | 'low';
@@ -20,7 +20,7 @@ export type LabDefinition = {
   subtitle: string;
   locationId: string;
   view: 'intake' | 'conveyor' | 'workshop' | 'control' | 'tank-detail' | 'tanks' | 'scales' | 'hero' | 'cpu';
-  poster: '/map-assets/poster.jpg' | '/map-assets/mining-poster.jpg' | '/map-assets/retail-poster.jpg' | '/map-assets/datacenter-poster.jpg' | '/map-assets/local-poster.jpg';
+  poster: '/map-assets/poster.jpg' | '/map-assets/mining-poster.jpg' | '/map-assets/retail-poster.jpg' | '/map-assets/datacenter-poster.jpg' | '/map-assets/local-poster.jpg' | '/map-assets/meeting-poster.jpg';
   observation: string;
   interpretation: string;
   compute: string;
@@ -104,6 +104,21 @@ export const LABS: Record<LabIndustry, LabDefinition> = {
     benefit: 'See what a laptop can do with AI on its own: private, no tokens to pay for, no wait on a server, and it works offline.',
     limitation: 'Local models are smaller and slower than cloud ones, and which chip Windows uses depends on the device.',
   },
+  // Sixth hub tile: the Town Hall room, three Cisco Pro room devices, one cable each into the room engine.
+  meeting: {
+    title: 'The Town Hall room',
+    subtitle: 'An illustrative meeting room: Cisco Pro cameras, ceiling microphones and ceiling speakers',
+    locationId: 'meeting.ceiling.mic',
+    view: 'hero',
+    poster: '/map-assets/meeting-poster.jpg',
+    observation: 'A presenter, a full table and two rows behind, with two Room Vision PTZ cameras, two Ceiling Microphone Pros and four Ceiling Speaker Pros.',
+    interpretation: 'Each exhibit shows the AI inside one device: head detection in the camera, adaptive beams in the microphone, self-calibration in the speaker.',
+    compute: 'Illustrative scenes only. Devices are drawn from Cisco data sheet sizes; no device runs in this page.',
+    response: 'The presenter, the people in the room and the people on the call simply carry on; nobody steers a camera or a microphone.',
+    verification: 'A room design in Cisco Workspace Designer and a site survey, not this illustration, confirm what a real room needs.',
+    benefit: 'See how three Cisco Pro devices, one cable each, make a big room work for the people on the call.',
+    limitation: 'Roadmap features (speaker tracking on this camera, voice lift) are shown as roadmap; the room’s own acoustics still matter.',
+  },
 };
 
 /** Deterministic demonstration state, separate from any verified physical condition. */
@@ -179,6 +194,17 @@ export const LAB_WORLDS: Record<LabIndustry, { name: string; eyebrow: string; fr
     tags: ['3D exploration', 'Private, no tokens', 'CPU, GPU + NPU'],
     bareEyebrow: true,
     intro: 'Three jobs on one laptop: select a chip to see what it does and what stays on the device.',
+  },
+  // Sixth hub tile: the Town Hall room (Cisco Room Vision PTZ, Ceiling Microphone Pro, Ceiling Speaker Pro).
+  meeting: {
+    name: 'Meeting rooms',
+    eyebrow: 'MEETING ROOMS',
+    frame: 'Meeting room',
+    alt: '3D meeting room miniature with a presenter, a boardroom table, two audience rows and Cisco room devices hanging from an open cable tray',
+    tile: 'A room that sees who is talking, hears only the voices and sounds the same in every seat: three Cisco Pro devices, one cable each.',
+    tags: ['3D exploration', 'Camera, microphone + speaker', 'One cable each'],
+    bareEyebrow: true,
+    intro: 'Three Cisco Pro devices, each with AI inside: select one to see what it does for the people on the call.',
   },
 };
 

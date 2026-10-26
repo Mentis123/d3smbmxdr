@@ -8,4 +8,5 @@ export const LAB_LOCATIONS={
   retail:FEATURED.retail.map(marker),
   datacenter:FEATURED.datacenter.map(marker),
   local:FEATURED.local.map(marker),
+  meeting:FEATURED.meeting.map(marker),
 };

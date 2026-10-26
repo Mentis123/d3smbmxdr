@@ -15,11 +15,11 @@ const params=new URLSearchParams(location.search), capture=params.get('capture')
 const worldKind=document.body.dataset.world||'energy';
 const isMining=worldKind==='mining';
 // Worlds beyond energy and mining load their own module by these generic exports: createWorld, WORLD_SEED, WORLD_VIEWS.
-const EXTRA_WORLDS={datacenter:'./datacenter-scene.js',nextdc:'./nextdc-scene.js',retail:'./retail-scene.js',local:'./local-scene.js',ukraine:'./ukraine/ukraine-scene.js'};
-// AI Lab worlds (markers, exhibits): energy, mining, retail, datacenter and local (the laptop). Retail, datacenter and
-// local load as extra worlds; location pins stay energy/mining/retail. In lab mode the datacenter's own hotspots give way
+const EXTRA_WORLDS={datacenter:'./datacenter-scene.js',nextdc:'./nextdc-scene.js',retail:'./retail-scene.js',local:'./local-scene.js',meeting:'./meeting-scene.js',ukraine:'./ukraine/ukraine-scene.js'};
+// AI Lab worlds (markers, exhibits): energy, mining, retail, datacenter, local (the laptop) and meeting (the Town Hall
+// room). Retail, datacenter, local and meeting load as extra worlds; location pins stay energy/mining/retail. In lab mode the datacenter's own hotspots give way
 // to the three lab markers.
-const labWorld=isMining?'mining':['retail','datacenter','local','ukraine'].includes(worldKind)?worldKind:'energy';
+const labWorld=isMining?'mining':['retail','datacenter','local','meeting','ukraine'].includes(worldKind)?worldKind:'energy';
 // Personal-site-only worlds carry their own exhibit registry ({RECIPES, FEATURED, KITS}) beside the world module. It is
 // imported only for that world and merged over the shared lab registry, which never imports it (so a host that does
 // not ship the folder is unaffected). Such folders are excluded by scripts/sync-lab-worlds.mjs.
@@ -312,7 +312,7 @@ let resizeObserver;
 try{
   renderer=new THREE.WebGLRenderer({alpha:true,antialias:true,preserveDrawingBuffer:capture,powerPreference:'high-performance'});renderer.setClearColor(0x000000,0);renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1;renderer.shadowMap.enabled=quality==='high';renderer.shadowMap.type=THREE.PCFSoftShadowMap;host.appendChild(renderer.domElement);pipeline=createPipeline(renderer);
   camera=new THREE.PerspectiveCamera(42,1,.1,160);world=createScene();await world.ready;
-  if(extra&&world.hotspots&&!(labExperience&&labWorld==='datacenter')){
+  if(extra&&world.hotspots&&!(labExperience&&['datacenter','meeting'].includes(labWorld))){
     // Pins for extra worlds: same marker layer and camera glide as the lab, driven by world.hotspots.
     const {createHotspotLayer}=await import('./hotspot-layer.js');
     labLayer=createHotspotLayer(world,world.hotspots,host,selectWorldHotspot);

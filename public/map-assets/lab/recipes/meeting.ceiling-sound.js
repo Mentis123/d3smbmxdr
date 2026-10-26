@@ -1,0 +1,37 @@
+// C3. Pure data: read by the renderer and (via sync) by the Data#3 host. Storyboard: docs/three-worlds/MEETING-ROOM-LAB-PLAN.md s3.
+// Features only from Cisco's datasheet (self-calibration of gain and delay, spatial playback, local presenter
+// reinforcement, 120-degree coverage). No level, delay or loudness figures are shown; the wavefronts are slowed to be seen.
+export default {
+  id:'meeting.ceiling-sound', world:'meeting', featured:true, order:3,
+  locationId:'meeting.ceiling.speaker', label:'Speakers', view:'speakers', anchor:[3.68,5.2,3.16],
+  title:'Every seat hears it the same',
+  benefit:'The back row hears a remote speaker as clearly as the front, and the voice comes from where the person is on screen.',
+  whyLocal:[
+    {key:'Latency',text:'Each speaker tunes its own level and timing on the device, so nothing waits on a separate audio rack.'},
+  ],
+  limits:'The speakers even out level and timing; the room’s own echo and hard surfaces are still the room’s. Placing a voice left or right needs more than one speaker, and local voice lift between microphones and speakers is a future software release.',
+  whereItRuns:['Room Kit Pro G2','Ceiling Speaker Pro','Every seat'],
+  provenance:[
+    {label:'Cisco Ceiling Speaker Pro data sheet: edge-AI processing on the device, automatic self-calibration of gain and delay, spatial playback, local presenter reinforcement, 120° coverage, PoE+, AES67',url:'https://www.cisco.com/c/en/us/products/collateral/collaboration-endpoints/collaboration-peripherals/ceiling-speaker-pro-ds.pdf',kind:'verified'},
+    {label:'Cisco blog, WebexOne 2026: the speaker completes audio over IP; edge AI directs sound to where it is needed',url:'https://blog.webex.com/collaboration/the-next-chapter-of-connected-intelligence/',kind:'vendor'},
+    {label:'UC Today: WebexOne 2026 coverage of the Ceiling Speaker Pro for medium and large rooms',url:'https://uctoday.com/webexone-2026-cisco-bets-on-ai-to-redefine-the-meeting-room',kind:'press'},
+  ],
+  duration:26,
+  chapters:[
+    {id:'scene',at:0,label:'The meeting',caption:'A voice from the front. The back row leans in',
+      say:'What: someone on the call is talking, and her voice comes out of the display at the front. By the back row it has faded, so people lean in. So what: the people furthest from the screen miss the point and stop joining in. Now what: bring the ceiling speakers in.'},
+    {id:'change',at:4,label:'Someone speaks',caption:'Four ceiling speakers, placed where the people are',
+      camera:{angle:-.62,elevation:.42,distance:4.8,target:[0,.8,.1],portrait:{angle:-.6,elevation:.46,distance:6.8,target:[0,.85,.1]}},
+      say:'What: the four Ceiling Speaker Pros come online one by one, each on its own cable from the Room Kit Pro G2, and her voice moves to them. So what: no amplifier rack and no speaker cable runs; each speaker carries its own processing. Now what: look at the sound itself.'},
+    {id:'aiView',at:10,label:'Through the device',caption:'Each speaker sets its own level and timing',sensor:'sound-view',
+      overlay:{anchor:'backRow',label:'Back row · in time, in level',state:'noticed'},
+      say:'What: this is the sound, slowed right down. Each speaker covers the seats beneath it; the front pair start first and the rear pair a moment later, so the sound arrives at the back row together. Her voice is louder on the left, where her picture is. So what: the same voice, at the same level, in every seat. Now what: back to the room.'},
+    {id:'review',at:16,label:'Everyone gets it',caption:'The same voice, the same level, in every seat',
+      camera:{angle:2.8,elevation:.3,distance:3.7,target:[-.1,.65,1.3],ease:1.6,portrait:{angle:2.8,elevation:.34,distance:5.6,target:[-.1,.7,1.3]}},
+      overlay:{anchor:'backRow',label:'Same level, every seat',state:'noticed'},
+      say:'What: the back row sits back and joins in, and the call carries on from the ceiling. So what: a big room behaves like a small one for the people on the call. Now what: the speakers tune themselves, but the room’s hard surfaces and echo are still worth checking.'},
+  ],
+  variation:{id:'in-room',label:'In-room voice',caption:'The presenter’s voice is lifted for the back rows',
+    captions:{review:'The back rows hear the presenter; the front stays natural'},
+    overlay:{anchor:'backRow',label:'In-room voice · back rows',state:'unclear'}},
+};

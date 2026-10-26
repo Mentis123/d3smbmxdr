@@ -9,13 +9,13 @@ export type LabRecipe={
  title:string;benefit:string;limits:string;whereItRuns:[string,string,string];
  /** Optional: why running this on the device matters (privacy, cost, latency, security, offline). Shown as its own panel. */
  whyLocal?:{key:string;text:string}[];
- provenance:{label:string;url:string;kind:'verified'|'vendor'|'pattern'}[];
+ provenance:{label:string;url:string;kind:'verified'|'vendor'|'pattern'|'press'}[];
  duration:number;chapters:LabChapter[];
  variation?:{id:string;label:string;caption:string;captions?:Partial<Record<ChapterId,string>>};stub?:boolean;
  narration?:{base:string;lines:Partial<Record<ChapterId,string>>;variation?:Partial<Record<ChapterId,string|null>>;delay?:Partial<Record<ChapterId,number>>};
 };
 export type LabRegistry={RECIPES:Record<string,LabRecipe>;FEATURED:Record<string,LabRecipe[]>;LEGACY_IDS:readonly string[]};
-export type RecipeState={chapter:number;chapterId:ChapterId;time:number;duration:number;playing:boolean;variation:string|null;hold:boolean;sensor:boolean;sensorLabel:string|null;ended:boolean};
+export type RecipeState={chapter:number;chapterId:ChapterId;time:number;duration:number;playing:boolean;variation:string|null;hold:boolean;sensor:boolean;sensorLabel:string|null;sensorTitle?:string|null;ended:boolean};
 
 /** The caption the renderer would show: from the AI view on, the variation's caption (or its per-chapter override) replaces the chapter's. */
 export function chapterCaption(recipe:LabRecipe,index:number,variationOn:boolean){

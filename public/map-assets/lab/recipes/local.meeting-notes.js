@@ -36,4 +36,6 @@ export default {
   ],
   variation:{id:'crosstalk',label:'Cross-talk',caption:'Two voices at once · check this line',
     overlay:{anchor:'cpu',label:'Two voices at once',state:'unclear'}},
+  // Narration (owner's ElevenLabs file, 26 Oct 2026, cut at word boundaries). Delays land each line on its on-screen event.
+  narration:{base:'/map-assets/lab/audio/local.meeting-notes/',lines:{scene:'scene.mp3',change:'change.mp3',aiView:'aiView.mp3',review:'review.mp3'},variation:{aiView:'variation.mp3',review:null},delay:{scene:.3,change:2.5,aiView:1,review:2.8}},
 };

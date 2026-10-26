@@ -35,4 +35,7 @@ export default {
       say:'The agent stops at the Submit button and asks. The person checks two amounts against the receipts, the hotel and the total, and presses Submit themselves. The claim is sent.'},
   ],
   variation:{id:'login',label:'Login wall',caption:'Sign-in needed · the agent stops and asks',overlay:{anchor:'screen',label:'Sign-in needed',state:'unclear'}},
+  // Narration (owner's ElevenLabs file, 26 Oct 2026, cut at word boundaries). Delays land each line on its on-screen event.
+  // The login variation's clip carries 3 s of lead silence so 'A sign-in page' plays once the page has appeared (14 s).
+  narration:{base:'/map-assets/lab/audio/local.browser-agent/',lines:{scene:'scene.mp3',change:'change.mp3',aiView:'aiView.mp3',review:'review.mp3'},variation:{aiView:'variation.mp3',review:null},delay:{scene:.1,change:1.8,aiView:.5,review:1}},
 };

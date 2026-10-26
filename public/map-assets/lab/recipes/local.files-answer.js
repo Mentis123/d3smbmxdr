@@ -38,4 +38,6 @@ export default {
   variation:{id:'versions',label:'Two versions',caption:'Two versions found · which is current?',
     captions:{review:'You check both dates and use the current version'},
     overlay:{anchor:'npu',label:'Two versions found',state:'unclear'}},
+  // Narration (owner's ElevenLabs file, 26 Oct 2026, cut at word boundaries). Delays land each line on its on-screen event.
+  narration:{base:'/map-assets/lab/audio/local.files-answer/',lines:{scene:'scene.mp3',change:'change.mp3',aiView:'aiView.mp3',review:'review.mp3'},variation:{aiView:'variation.mp3',review:'variation-review.mp3'},delay:{scene:.3,change:2.4,aiView:1.4,review:2.6}},
 };

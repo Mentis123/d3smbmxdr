@@ -15,7 +15,7 @@ const params=new URLSearchParams(location.search), capture=params.get('capture')
 const worldKind=document.body.dataset.world||'energy';
 const isMining=worldKind==='mining';
 // Worlds beyond energy and mining load their own module by these generic exports: createWorld, WORLD_SEED, WORLD_VIEWS.
-const EXTRA_WORLDS={datacenter:'./datacenter-scene.js',nextdc:'./nextdc-scene.js',retail:'./retail-scene.js',local:'./local-scene.js',meeting:'./meeting-scene.js',splunk:'./splunk-scene.js',ukraine:'./ukraine/ukraine-scene.js'};
+const EXTRA_WORLDS={datacenter:'./datacenter-scene.js',nextdc:'./nextdc-scene.js',retail:'./retail-scene.js',local:'./local-scene.js',meeting:'./meeting-scene.js',splunk:'./splunk-scene.js','marlow-vale':'./marlow-vale-scene.js',ukraine:'./ukraine/ukraine-scene.js'};
 // AI Lab worlds (markers, exhibits): energy, mining, retail, datacenter, local (the laptop) and meeting (the Town Hall
 // room). Retail, datacenter, local and meeting load as extra worlds; location pins stay energy/mining/retail. In lab mode the datacenter's own hotspots give way
 // to the three lab markers.
@@ -139,7 +139,9 @@ function waterLevel(x,z){
   if(river&&z>-.55&&Math.abs(x-riverCenter(z))<riverHalfWidth(z))return new THREE.Box3().setFromObject(river).max.y;
   return -Infinity;
 }
-function compileNamed(nameOrSpec){const spec=typeof nameOrSpec==='string'?getShot(nameOrSpec):nameOrSpec;const here=isMining?'mining':'energy';if((spec.world||'energy')!==here)throw Error(`shot ${spec.name} is for the ${spec.world||'energy'} world; this is ${here}`);return compileShot(spec,shotContext(spec.yaw||0));}
+// Shots name the world they belong to (energy when absent); extra worlds match by their data-world.
+const shotWorld=isMining?'mining':extra?worldKind:'energy';
+function compileNamed(nameOrSpec){const spec=typeof nameOrSpec==='string'?getShot(nameOrSpec):nameOrSpec;const here=shotWorld;if((spec.world||'energy')!==here)throw Error(`shot ${spec.name} is for the ${spec.world||'energy'} world; this is ${here}`);return compileShot(spec,shotContext(spec.yaw||0));}
 // Fade and backdrop live INSIDE the WebGL frame so a canvas recording carries them: a clip-space black
 // quad drawn last (fade) and the control-room image composited the way viewer.css shows it (backdrop),
 // which otherwise sits behind a transparent canvas as CSS and never reaches a WebM.
@@ -246,7 +248,7 @@ function setupStudio(){
   return {go};
 }
 const flythrough={
-  list:()=>Object.values(SHOTS).filter(s=>(s.world||'energy')===(isMining?'mining':'energy')).map(s=>({name:s.name,title:s.title,duration:s.keys[s.keys.length-1].t})),
+  list:()=>Object.values(SHOTS).filter(s=>(s.world||'energy')===shotWorld).map(s=>({name:s.name,title:s.title,duration:s.keys[s.keys.length-1].t})),
   glideTo,views:()=>Object.keys(views),
   // Authoring helpers: actor schedules and where an actor is at a scene time.
   actors:()=>Object.fromEntries(Object.entries(world.actors||{}).map(([k,a])=>[k,{cycle:a.cycle,phases:a.phases}])),
@@ -280,6 +282,8 @@ function selectWorldHotspot(spot,notify=true){
 // A view may carry portraitZoom: on tall, narrow frames (phones) the camera comes that much closer, because the
 // orbit distance grows with 1/aspect. Views without it (energy, mining) frame exactly as before.
 function viewZoom(v){return v.zoom*(v.portraitZoom&&host.clientWidth<host.clientHeight*.9?v.portraitZoom:1);}
+// portraitFov: a long-lens view can open wider on those same tall frames (Marlow Vale's hero is a 24 degree lens on desktop).
+function viewFov(v){return (v.portraitFov&&host.clientWidth<host.clientHeight*.9?v.portraitFov:v.fov)||42;}
 function glideTo(name,seconds=1.6){
   birbFlight?.exit();
   if(!Object.hasOwn(views,name))return false;
@@ -287,7 +291,7 @@ function glideTo(name,seconds=1.6){
   const v=views[name],reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
   if(reduce||seconds<=0){glide=null;setView(name);return true;}
   let dYaw=(v.yaw-yaw)%(Math.PI*2);if(dYaw>Math.PI)dYaw-=Math.PI*2;if(dYaw<-Math.PI)dYaw+=Math.PI*2;
-  glide={name,t0:performance.now(),ms:seconds*1000,from:{target:target.clone(),azimuth,tilt,yaw,zoom,fov:camera.fov},to:{target:new THREE.Vector3().fromArray(v.target),azimuth:v.azimuth??Math.atan2(12,23),tilt:v.tilt??openingTilt,yaw:yaw+dYaw,zoom:viewZoom(v),fov:v.fov||42}};
+  glide={name,t0:performance.now(),ms:seconds*1000,from:{target:target.clone(),azimuth,tilt,yaw,zoom,fov:camera.fov},to:{target:new THREE.Vector3().fromArray(v.target),azimuth:v.azimuth??Math.atan2(12,23),tilt:v.tilt??openingTilt,yaw:yaw+dYaw,zoom:viewZoom(v),fov:viewFov(v)}};
   return true;
 }
 function stepGlide(now){
@@ -299,7 +303,7 @@ function stepGlide(now){
   const fov=L(g.from.fov,g.to.fov,e);if(camera.fov!==fov){camera.fov=fov;camera.updateProjectionMatrix();}
   if(u>=1){glide=null;setView(g.name);}
 }
-function setView(name){birbFlight?.exit();navigation?.exitFly();const v=views[name]||views.hero;camera.fov=v.fov||42;camera.updateProjectionMatrix();azimuth=v.azimuth??Math.atan2(12,23);tilt=targetTilt=v.tilt??openingTilt;yaw=targetYaw=v.yaw;zoom=targetZoom=viewZoom(v);target.fromArray(v.target);render();}
+function setView(name){birbFlight?.exit();navigation?.exitFly();const v=views[name]||views.hero;camera.fov=viewFov(v);camera.updateProjectionMatrix();azimuth=v.azimuth??Math.atan2(12,23);tilt=targetTilt=v.tilt??openingTilt;yaw=targetYaw=v.yaw;zoom=targetZoom=viewZoom(v);target.fromArray(v.target);render();}
 function reset(){azimuth=Math.atan2(12,23);targetTilt=openingTilt;target.set(0,1,0);targetYaw=0;targetZoom=1;if(matchMedia('(prefers-reduced-motion: reduce)').matches){yaw=0;zoom=1;tilt=targetTilt;}}
 function animate(now){if(disposed)return;if(document.hidden||host.clientWidth<1||host.clientHeight<1){last=0;raf=requestAnimationFrame(animate);return;}const rawDt=last?(now-last)/1000:0,dt=Math.min(rawDt,shot?.25:.05);last=now;if(rawDt>0){frameTimes.push(rawDt*1000);if(frameTimes.length>2000)frameTimes.shift();}if(exhibit){exhibit.update(dt);renderer.render(exhibit.scene,exhibit.camera);raf=requestAnimationFrame(animate);return;}if(exhibitSaved){render();raf=requestAnimationFrame(animate);return;}if(!paused){elapsed+=dt;if(!capture&&!shot&&rawDt>0)tuner.sample(rawDt*1000,now);}if(shot&&!paused)tickShot();if(glide)stepGlide(now);const k=1-Math.exp(-dt*10);yaw+=(targetYaw-yaw)*k;tilt+=(targetTilt-tilt)*k;zoom+=(targetZoom-zoom)*k;if(birbFlight?.active)birbFlight.update(dt);else navigation?.update(dt);render();raf=requestAnimationFrame(animate);}
 function action(name){if(name==='mouse-look')setCameraToolsOpen(false);if(navigation?.action(name))return;if(name==='rotate-left')targetYaw-=Math.PI/8;if(name==='rotate-right')targetYaw+=Math.PI/8;if(name==='zoom-in')targetZoom=clampZoom(targetZoom*1.2,host.clientWidth,host.clientHeight);if(name==='zoom-out')targetZoom=clampZoom(targetZoom/1.2,host.clientWidth,host.clientHeight);if(name==='reset')reset();if(name==='pause'){paused=!paused;tuner.reset(performance.now());pauseButton();}if(name==='retry')location.reload();if(name==='pins')setPins(!pinsOn);}
@@ -312,7 +316,10 @@ let resizeObserver;
 try{
   renderer=new THREE.WebGLRenderer({alpha:true,antialias:true,preserveDrawingBuffer:capture,powerPreference:'high-performance'});renderer.setClearColor(0x000000,0);renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1;renderer.shadowMap.enabled=quality==='high';renderer.shadowMap.type=THREE.PCFSoftShadowMap;host.appendChild(renderer.domElement);pipeline=createPipeline(renderer);
   camera=new THREE.PerspectiveCamera(42,1,.1,160);world=createScene();await world.ready;
-  if(extra&&world.hotspots&&!(labExperience&&['datacenter','meeting','splunk'].includes(labWorld))){
+  // ?sky=<preset> lays the shared atmosphere (atmosphere.js) over any world that has not chosen its own.
+  if(params.get('sky')&&!world.atmosphere){const {applyAtmosphere}=await import('./atmosphere.js');applyAtmosphere(world,params.get('sky'));}
+  // pins=0 on an extra world: the animated world alone (the /worlds hub), no hotspots and no captions.
+  if(extra&&world.hotspots&&params.get('pins')!=='0'&&!(labExperience&&['datacenter','meeting','splunk'].includes(labWorld))){
     // Pins for extra worlds: same marker layer and camera glide as the lab, driven by world.hotspots.
     const {createHotspotLayer}=await import('./hotspot-layer.js');
     labLayer=createHotspotLayer(world,world.hotspots,host,selectWorldHotspot);
@@ -332,7 +339,7 @@ try{
   if(capture&&params.has('only')){const prefix={tanks:'treatment-',grid:'electrical-yard',town:'settlement-'}[params.get('only')];if(prefix)for(const o of world.root.children)if(!o.isLight&&!o.name.startsWith(prefix)){o.visible=false;o.userData.diagnosticHidden=true;}}
   if(capture&&['normal','clay'].includes(params.get('material'))){const normal=params.get('material')==='normal'?new THREE.MeshNormalMaterial():new THREE.MeshStandardMaterial({color:0x91979b,roughness:.85}),originals=[];world.root.traverse(o=>{if(o.isMesh){originals.push([o,o.material]);o.material=normal;}});const originalDispose=world.dispose;world.dispose=()=>{for(const[o,m]of originals)o.material=m;originalDispose();normal.dispose();};}
   applyQualityProfile();pauseButton();
-  navigation=createNavigation({host,camera,captureOnFly:params.get('controls')!=='compact',getOrbit:()=>({target,yaw,tilt,zoom,targetZoom}),setOrbit(s){if(s.target)target.copy(s.target);if(s.azimuth!==undefined)azimuth=s.azimuth;if(s.deltaYaw)targetYaw+=s.deltaYaw;if(s.deltaTilt!==undefined)targetTilt=THREE.MathUtils.clamp(targetTilt+s.deltaTilt,-Math.PI/2+.03,Math.PI/2-.03);if(s.tilt!==undefined)targetTilt=s.tilt;if(s.yaw!==undefined)targetYaw=s.yaw;if(s.zoom!==undefined)targetZoom=clampZoom(s.zoom,host.clientWidth,host.clientHeight);if(s.immediate){yaw=targetYaw;zoom=targetZoom;tilt=targetTilt;}},resetOrbit:reset,onChange({mode,tool,locked}){
+  navigation=createNavigation({host,camera,bounds:world.navigationBounds,captureOnFly:params.get('controls')!=='compact',getOrbit:()=>({target,yaw,tilt,zoom,targetZoom}),setOrbit(s){if(s.target)target.copy(s.target);if(s.azimuth!==undefined)azimuth=s.azimuth;if(s.deltaYaw)targetYaw+=s.deltaYaw;if(s.deltaTilt!==undefined)targetTilt=THREE.MathUtils.clamp(targetTilt+s.deltaTilt,-Math.PI/2+.03,Math.PI/2-.03);if(s.tilt!==undefined)targetTilt=s.tilt;if(s.yaw!==undefined)targetYaw=s.yaw;if(s.zoom!==undefined)targetZoom=clampZoom(s.zoom,host.clientWidth,host.clientHeight);if(s.immediate){yaw=targetYaw;zoom=targetZoom;tilt=targetTilt;}},resetOrbit:reset,onChange({mode,tool,locked}){
     const flying=mode==='fly',wasFlying=document.body.classList.contains('flying');if(flying&&!wasFlying)setCameraToolsOpen(false);document.body.classList.toggle('mouse-locked',locked);const fly=document.querySelector('[data-action=fly]');fly.textContent=flying?'Exit fly':'Fly';fly.setAttribute('aria-pressed',String(flying));document.querySelector('[data-action=pan]').setAttribute('aria-pressed',String(tool==='pan'));document.querySelector('[data-action=mouse-look]').hidden=!flying||locked;
     document.body.classList.toggle('flying',flying);document.querySelector('#hint').textContent=flying?'WASD move · Q/E down/up · Shift faster · '+(locked?'Mouse look':'Drag to look')+' · Esc return':(tool==='pan'?'Drag to pan':'Drag rotate/tilt · Shift/right-drag pan')+' · Alt-drag crane · Scroll zoom';
     if(document.body.classList.contains('touch-ui')){document.querySelector('[data-action=mouse-look]').hidden=true;document.querySelector('#hint').textContent=flying?'Hold arrows to move · Drag to look · ↑/↓ height':(tool==='pan'?'Drag to pan':'One finger: rotate / tilt')+' · Two fingers: pan / pinch zoom';}
@@ -373,6 +380,7 @@ try{
    setPins(q==='1'?true:q==='0'?false:(capture||labLayer)?false:saved!=='0',{persist:q==='0'||q==='1'});}
   window.__tabletop.pins={set:on=>setPins(on),toggle:()=>setPins(!pinsOn),diagnostics:()=>pinsLayer.diagnostics(),select:id=>pinsLayer.select(id)};
   if(window.parent!==window)window.parent.postMessage({type:'worlds:ready',world:labWorld,pins:pinsOn},location.origin);}
+  else if(window.parent!==window)window.parent.postMessage({type:'worlds:ready',world:worldKind},location.origin);
   loading.hidden=true;window.__tabletop.ready=true;if(extra&&window.parent!==window)window.parent.postMessage({type:'world:ready',world:worldKind},location.origin);if(labLayer&&window.parent!==window)window.parent.postMessage({type:'lab:ready',industry:labWorld},location.origin);raf=requestAnimationFrame(animate);
   if(params.get('studio')==='1')setupStudio();
   else if(params.get('shot')){try{playShot(params.get('shot'),{loop:params.get('loop')==='1',record:params.get('record')==='1'});}catch(e){console.error(e);}}

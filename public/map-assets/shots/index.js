@@ -3,5 +3,6 @@
 import damDrone from './dam-drone.js';
 import riverbendOverview from './riverbend-overview.js';
 import ironvaleOverview from './ironvale-overview.js';
-export const SHOTS={[damDrone.name]:damDrone,[riverbendOverview.name]:riverbendOverview,[ironvaleOverview.name]:ironvaleOverview};
+import valeDescent from './vale-descent.js';
+export const SHOTS={[damDrone.name]:damDrone,[riverbendOverview.name]:riverbendOverview,[ironvaleOverview.name]:ironvaleOverview,[valeDescent.name]:valeDescent};
 export function getShot(name){const s=SHOTS[name];if(!s)throw Error(`unknown shot ${name}; have ${Object.keys(SHOTS).join(', ')}`);return s;}

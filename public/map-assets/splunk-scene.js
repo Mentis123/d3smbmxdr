@@ -25,6 +25,8 @@ const SPLUNK_VIEWS_BASE = {
   balancers: {yaw: 0, target: [0, 1.2, -1.2], zoom: 2.6, tilt: 0.62, azimuth: -0.25, fov: 36},
   sites: {yaw: 0, target: [-1.5, 1.2, 3.2], zoom: 2.1, tilt: 0.55, azimuth: 0.15, fov: 36},
   splunk: {yaw: 0, target: [0, 4.4, -0.6], zoom: 2.0, tilt: 0.3, azimuth: 0.5, fov: 36},
+  core: {yaw: 0, target: [-3.4, 1.0, 1.0], zoom: 3.0, tilt: 0.5, azimuth: -0.2, fov: 36},
+  internet: {yaw: 0, target: [-9.4, 2.4, -0.6], zoom: 2.3, tilt: 0.36, azimuth: -0.75, fov: 36},
 };
 export const SPLUNK_VIEWS = Object.fromEntries(Object.entries(SPLUNK_VIEWS_BASE).map(([id, v]) => [id, {...v, portraitZoom: id === 'hero' ? 1.15 : 1.3}]));
 
@@ -104,6 +106,7 @@ export function createSplunkScene() {
     {id: 'sap', label: 'SAP, South data centre', caption: 'Splunk forecasts the SAP instance here hitting 80% by 10:30, and an outage at 11:00.', view: 'sap', anchor: pin([P.south[0], 1.6, P.south[1]], 0.4)},
     {id: 'balancers', label: 'Load balancers', caption: 'The load balancers decide which data centre serves each site. One approved change moves Riverside north.', view: 'balancers', anchor: pin([P.hub[0], 1.3, P.hub[1]])},
     {id: 'sites', label: 'Campus and sites', caption: 'ThousandEyes agents at every site test the paths to the data centres and the SaaS apps.', view: 'sites', anchor: pin([P.sites.campus[0], 1.9, P.sites.campus[1]])},
+    {id: 'internet', label: 'Internet edge', caption: 'The board is your network; the providers float beyond its edge. ThousandEyes shows which side a slowdown is on.', view: 'internet', anchor: pin([P.edge[0], 1.5, P.edge[1]])},
     {id: 'splunk', label: 'Splunk', caption: 'Every device streams telemetry to Splunk: one place to see the campus, the data centres and SaaS.', view: 'splunk', anchor: pin([P.ring[0], P.ring[1] + 0.7, P.ring[2]])},
   ];
 

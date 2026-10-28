@@ -119,7 +119,7 @@ export const LABS: Record<LabIndustry, LabDefinition> = {
     benefit: 'See how three Cisco Pro devices, one cable each, make a big room work for the people on the call.',
     limitation: 'Roadmap features (speaker tracking on this camera, voice lift) are shown as roadmap; the room’s own acoustics still matter.',
   },
-  // Seventh hub tile: inside the network with Splunk (owner's storyline, 28 Oct 2026). One exhibit so far.
+  // Seventh hub tile: inside the network with Splunk (28 Oct 2026): SAP forecast, alert storm, "It's not us".
   splunk: {
     title: 'The outage that never happened',
     subtitle: 'An illustrative network: a campus, two branch sites, North and South data centres and SaaS apps',
@@ -127,12 +127,12 @@ export const LABS: Record<LabIndustry, LabDefinition> = {
     view: 'hero',
     poster: '/map-assets/splunk-poster.jpg',
     observation: 'Splunk watches the campus, both data centres and the SaaS apps, with ThousandEyes testing every path between them.',
-    interpretation: 'Splunk forecasts the South data centre’s SAP instance crossing 80% by 10:30; its AI agent finds the cause and proposes one change.',
+    interpretation: 'Each exhibit shows where the AI helps: a forecast an hour out, forty alerts grouped into one cause, a slowdown placed outside the network.',
     compute: 'Illustrative scenes only. Sites, numbers and the clock are made up; no Splunk instance runs in this page.',
     response: 'The network team approves the change, and the load balancers move one small site to the North data centre.',
     verification: 'The network team, not the agent, approves the change, through the load balancers’ own change process.',
     benefit: 'See an outage stopped an hour before it happens: a forecast, a cause and a fix in one message, and a person says yes.',
-    limitation: 'ITSI forecasts 30 minutes ahead from KPIs it has been trained on; agent workspaces in Splunk were in alpha in October 2026.',
+    limitation: 'The AI suggests causes and next steps; people approve changes. Some agent workspaces in Splunk were in alpha in October 2026.',
   },
 };
 
@@ -221,17 +221,16 @@ export const LAB_WORLDS: Record<LabIndustry, { name: string; eyebrow: string; fr
     bareEyebrow: true,
     intro: 'Three Cisco Pro devices, each with AI inside: select one to see what it does for the people on the call.',
   },
-  // Seventh hub tile: Splunk, inside the network. One exhibit so far (owner, 28 Oct 2026: "only one lab for now").
+  // Seventh hub tile: Splunk, inside the network (three exhibits since 28 Oct 2026).
   splunk: {
     name: 'Inside the network',
     eyebrow: 'SPLUNK',
     frame: 'Network',
     alt: '3D glowing network miniature: a campus, two branch sites, North and South data centres, load balancers, a SaaS cloud and the Splunk ring above',
-    tile: 'Splunk sees the whole network, campus to data centre to SaaS. Watch it forecast an SAP outage at 10:00 and its AI agent ask before it fixes it.',
+    tile: 'Splunk sees the whole network, campus to data centre to SaaS. Stop an SAP outage before it happens, turn forty alerts into one cause, and prove a slowdown isn’t you.',
     tags: ['3D exploration', 'Splunk + ThousandEyes', 'The team approves'],
-    places: 1,
     bareEyebrow: true,
-    intro: 'Campus to data centre to SaaS in one view: select the SAP marker to watch an outage stopped before it happens.',
+    intro: 'Campus to data centre to SaaS in one view: select a marker to see where Splunk’s AI helps the network team.'
   },
 };
 

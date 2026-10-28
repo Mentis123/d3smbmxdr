@@ -7,7 +7,11 @@
 //
 // API: buildNetwork(k, {parent, scale, x, y, z, detail}) ->
 //   {group, P, model, anchors:{southSap, northSap, southGauge, northGauge, riverside, hub, panel, noc, ring, cloud},
-//    cards:{alert, agent, done}, update(t, state)}
+//    cards:{alert, agent, done}, update(t, state), x (scene parts the other labs drive), h (build helpers)}
+//   The campus core pair (Core A, Core B), the internet edge, the two internet providers off the board's edge and the
+//   Microsoft 365 test path were added for the alert-storm and path labs (28 Oct 2026). update() sets every part to its
+//   quiet default each frame, so a kit overrides what its story needs after calling it. pinCards() pins a card sprite to
+//   whichever camera renders.
 //   state: {clock (minutes after 09:00), redirectAt (clock minute the move starts, or null), busy (variation: North has
 //   no headroom), forecast 0..1, alert 0..1, agent null|'propose'|'approved'|'busy', ghost 0..1, approve 0..1 (the
 //   approval pulse NOC -> load balancers), focus 0..1 (highlight Riverside), done 0..1 ("11:00 · no outage")}
@@ -26,6 +30,11 @@ export const P={
   ring:[0,3.35,.35],ringR:1.25,
   cloud:[-.2,3.55,-3.75],
   panel:[3.6,1.85,-3.5],
+  // Alert storm: the campus core pair. Path lab: the internet edge on the board, the providers OFF the board (the board is
+  // your network; anything floating beyond its edge is not).
+  coreA:[-2.55,1.3],coreB:[-1.95,1.3],
+  edge:[-6.05,1.15],
+  ispA:[-7.55,1.45,.15],transit:[-7.2,2.75,-2.3],ispB:[-7.65,1.05,3.35],
 };
 
 const smooth=(a,b,x)=>{const u=Math.min(1,Math.max(0,(x-a)/(b-a)));return u*u*(3-2*u);};
@@ -42,6 +51,20 @@ export const model={
 };
 export const utilCss=u=>u>=80?CSS.bad:u>=62?CSS.warn:CSS.ok;
 
+// Pin a card sprite to whichever camera renders (a guided camera or a sensor view), like a console message. activeCard()
+// returns the sprite to pin, or null; side 'right' keeps a left-hand subject clear on wide canvases, 'top-right' a low one. Width is set in screen pixels (about 520 px, up to 94 % of a narrow canvas) so the
+// type stays readable: on narrow canvases across the top; on wide ones lower left; on the Data#3 host's near-square stage
+// on the left just below the middle (clear of the host caption and above the fold). scale = the rig's scale on the stage.
+export function pinCards(k,net,scale,activeCard,{side='left'}={}){
+  const {THREE}=k,scene=k.root.parent,v=new THREE.Vector3();if(!scene)return;
+  scene.onBeforeRender=(r,sc,c)=>{const card=activeCard();if(!card||!card.visible||!c?.isPerspectiveCamera)return;
+    const px=r.domElement.clientWidth||1000,f=Math.min(.94,Math.max(.42,520/px)),d=3,halfH=Math.tan(THREE.MathUtils.degToRad(c.fov/2))*d,halfW=halfH*c.aspect;
+    const w=2*halfW*f,h=w*card.userData.aspect,x=((side==='right'||side==='top-right')&&f<=.75?1:-1)*(halfW-w/2-halfW*.04);
+    const top=side==='top-right'&&f<=.75,y=f>.75?halfH-h/2-halfH*.04:top?halfH-h/2-halfH*.14:c.aspect>=1.3?-halfH+h/2+halfH*.06:-halfH*.18;
+    v.set(x,y,-d);c.updateMatrixWorld();c.localToWorld(v);net.group.worldToLocal(v);
+    card.position.copy(v);card.scale.set(w/scale,h/scale,1);card.updateMatrixWorld();};
+}
+
 function rng(seed){let a=seed>>>0;return()=>{a=(a+0x6d2b79f5)>>>0;let t=a;t=Math.imul(t^(t>>>15),t|1);t^=t+Math.imul(t^(t>>>7),t|61);return((t^(t>>>14))>>>0)/4294967296;};}
 const font=(g,w,s)=>{g.font=`${w} ${s}px "Inter","Helvetica Neue",Arial,sans-serif`;};
 function rr(g,x,y,w,h,r){g.beginPath();g.moveTo(x+r,y);g.arcTo(x+w,y,x+w,y+h,r);g.arcTo(x+w,y+h,x,y+h,r);g.arcTo(x,y+h,x,y,r);g.arcTo(x,y,x+w,y,r);g.closePath();}
@@ -57,7 +80,7 @@ export function buildNetwork(k,{parent=k.root,scale=1,x=0,y=0,z=0,detail='world'
   const edges=(g,css,opacity,px,py,pz,to=group)=>{const l=new THREE.LineSegments(track(new THREE.EdgesGeometry(g)),lineMat(css,opacity));l.position.set(px,py,pz);to.add(l);return l;};
   const canvas=(w,h,draw)=>{const c=document.createElement('canvas');c.width=w;c.height=h;const g=c.getContext('2d');const t=track(new THREE.CanvasTexture(c));t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=4;const api={c,g,t,redraw(...a){g.clearRect(0,0,w,h);draw(g,w,h,...a);t.needsUpdate=true;}};api.redraw();return api;};
   const sprite=(cv,width,px,py,pz,{depth=false,to=group}={})=>{const s=new THREE.Sprite(track(new THREE.SpriteMaterial({map:cv.t,transparent:true,depthWrite:false,depthTest:depth,toneMapped:false})));
-    s.scale.set(width,width*cv.c.height/cv.c.width,1);s.position.set(px,py,pz);s.userData.noFit=true;s.renderOrder=8;to.add(s);return s;};
+    s.scale.set(width,width*cv.c.height/cv.c.width,1);s.position.set(px,py,pz);s.userData.noFit=true;s.userData.aspect=cv.c.height/cv.c.width;s.userData.home={p:s.position.clone(),s:s.scale.clone()};s.renderOrder=8;to.add(s);return s;};
   const label=(text,css,width,px,py,pz,sub)=>{width*=LS;return sprite(canvas(512,sub?150:96,(g,w,h)=>{g.fillStyle='rgba(4,8,16,.82)';rr(g,3,3,w-6,h-6,16);g.fill();g.strokeStyle=css;g.lineWidth=4;g.stroke();
     g.textAlign='center';g.textBaseline='middle';g.fillStyle=css;font(g,800,46);g.fillText(text,w/2,sub?50:h/2+2);if(sub){g.fillStyle='#dfe8f2';font(g,600,34);g.fillText(sub,w/2,108);}}),width,px,py,pz);};
   const B=BOARD_Y,LS=detail==='world'?1.35:1;
@@ -67,7 +90,7 @@ export function buildNetwork(k,{parent=k.root,scale=1,x=0,y=0,z=0,detail='world'
     for(let i=0;i<=w;i+=16){g.strokeStyle=i%128===0?'rgba(40,170,230,.55)':'rgba(30,110,160,.22)';g.lineWidth=i%128===0?2:1;g.beginPath();g.moveTo(i+.5,0);g.lineTo(i+.5,h);g.stroke();}
     for(let j=0;j<=h;j+=16){g.strokeStyle=j%128===0?'rgba(40,170,230,.55)':'rgba(30,110,160,.22)';g.lineWidth=j%128===0?2:1;g.beginPath();g.moveTo(0,j+.5);g.lineTo(w,j+.5);g.stroke();}});
   const board=add(geo('board',()=>new THREE.BoxGeometry(13.4,B,8.6)),[std(0x07101b,{metalness:.6,roughness:.35}),std(0x07101b,{metalness:.6,roughness:.35}),
-    std(0x0a1622,{map:grid.t,emissiveMap:grid.t,emissive:0xffffff,emissiveIntensity:.55,roughness:.32,metalness:.3}),std(0x07101b),std(0x07101b,{metalness:.6,roughness:.35}),std(0x07101b,{metalness:.6,roughness:.35})],0,B/2,0);
+    std(0x0a1622,{map:grid.t,emissiveMap:grid.t,emissive:0xffffff,emissiveIntensity:.55,roughness:.6,metalness:.2}),std(0x07101b),std(0x07101b,{metalness:.6,roughness:.35}),std(0x07101b,{metalness:.6,roughness:.35})],0,B/2,0);
   board.name='splunk-board';board.castShadow=false;
   edges(geo('board',null),CSS.cyan,.85,0,B/2,0);
 
@@ -151,7 +174,7 @@ export function buildNetwork(k,{parent=k.root,scale=1,x=0,y=0,z=0,detail='world'
     add(geo('te',()=>new THREE.BoxGeometry(.16,.1,.12)),std(0x1d2733),0,.05,0,te);
     add(geo('teAnt',()=>new THREE.CylinderGeometry(.008,.008,.22,6)),std(0x8ca0b0),0,.21,0,te);
     const beacon=add(geo('teB',()=>new THREE.SphereGeometry(.035,10,8)),basic(CSS.te),0,.33,0,te);beacon.userData.sensorKeep=true;
-    return{g,top,te,beacon,tag};
+    return{g,top,te,beacon,tag,winM};
   }
   const campus=site('campus','Campus',P.sites.campus,[[-1.05,-.2,.9,.8,1.3],[.05,-.35,1.0,.7,.85],[1.0,.1,.7,.9,1.05],[-.1,.45,.9,.45,.45]],CSS.campus,[3.2,.04,1.9]);
   const bayside=site('bayside','Bayside site',P.sites.bayside,[[-.25,0,.7,.7,.62],[.42,.12,.5,.5,.4]],CSS.bayside,[1.6,.04,1.2]);
@@ -201,10 +224,65 @@ export function buildNetwork(k,{parent=k.root,scale=1,x=0,y=0,z=0,detail='world'
   for(let i=0;i<24;i++){const a=i/24*Math.PI*2,o=add(geo('tick',()=>new THREE.BoxGeometry(.03,.02,.14)),ringM,Math.sin(a)*P.ringR*.91,.03,Math.cos(a)*P.ringR*.91,ticks);o.rotation.y=a;o.castShadow=false;o.userData.sensorKeep=true;}
   const ringTag=label('Splunk',CSS.splunk,1.0,0,.42,0,'sees it all');ring.add(ringTag);
 
-  // ---------------------------------------------------------------- telemetry: every device streams up into the ring
-  const sources=[];const wp=(o,dy=0)=>{const v=new THREE.Vector3();o.updateWorldMatrix(true,false);o.getWorldPosition(v);group.worldToLocal(v);v.y+=dy;return v;};
+  // Board-local position of any part (for paths that start on a part).
+  const wp=(o,dy=0)=>{const v=new THREE.Vector3();o.updateWorldMatrix(true,false);o.getWorldPosition(v);group.worldToLocal(v);v.y+=dy;return v;};
   group.updateWorldMatrix(true,true);
-  for(const [o,dy] of [[campus.g,campus.top],[bayside.g,bayside.top],[riverside.g,riverside.top],[north.g,.7],[south.g,.7],[hub,.8],[noc,.5],[cloud,-.4]])sources.push(wp(o,dy));
+
+  // ---------------------------------------------------------------- campus core pair (alert storm lab)
+  const lamp=(css,to)=>{const o=add(geo('lamp',()=>new THREE.SphereGeometry(.05,12,10)),basic(css),0,.45,0,to);o.userData.sensorKeep=true;o.castShadow=false;return o;};
+  const LEDC={ok:CSS.cyan,down:CSS.bad,standby:'#4f6f86',active:CSS.ok,warn:CSS.warn};
+  function box(name,[cx,cz],{w=.42,h=.34,d=.3}={}){
+    const g=new THREE.Group();g.name=name;g.position.set(cx,B,cz);group.add(g);
+    add(geo('plinth'+w,()=>new THREE.BoxGeometry(w+.08,.06,d+.1)),std(0x0c1521,{metalness:.6}),0,.03,0,g);
+    add(geo('body'+w+h,()=>new THREE.BoxGeometry(w,h,d)),std(0x18222f,{metalness:.7,roughness:.3}),0,.06+h/2,0,g);
+    edges(geo('body'+w+h,null),CSS.cyan,.9,0,.06+h/2,0,g);
+    const faceM=std(0x000000,{emissive:new THREE.Color(CSS.cyan),emissiveMap:leds.t,emissiveIntensity:1.2});
+    add(geo('face'+w+h,()=>new THREE.PlaneGeometry(w*.86,h*.8)),faceM,0,.06+h/2,d/2+.002,g).castShadow=false;
+    const l=lamp(CSS.ok,g);l.position.y=.06+h+.08;
+    return{g,faceM,lamp:l,set(state,t){const c=LEDC[state]||CSS.cyan,blink=state==='down'?.5+.5*Math.sin(t*9):1;
+      faceM.emissive.set(c);faceM.emissiveIntensity=state==='standby'?.45:state==='down'?.6+.9*blink:1.2;
+      l.material.color.set(state==='down'?CSS.bad:state==='standby'?'#5d7a6a':state==='warn'?CSS.warn:CSS.ok);l.scale.setScalar(state==='down'?.8+.5*blink:1);}};
+  }
+  const coreA=box('core-a',P.coreA),coreB=box('core-b',P.coreB);
+  const coreTag=label('Campus core',CSS.cyan,1.2,(P.coreA[0]+P.coreB[0])/2,B+.95,P.coreA[1]);
+  const upFrom=[P.sites.campus[0]+.85,B+.08,P.sites.campus[1]-.8];
+  const uplinkA=flow([upFrom,[(upFrom[0]+P.coreA[0])/2,B+.32,(upFrom[2]+P.coreA[1])/2+.05],[P.coreA[0],B+.22,P.coreA[1]+.2]],CSS.campus,{r:.035,spacing:.5});
+  const uplinkB=flow([upFrom,[(upFrom[0]+P.coreB[0])/2,B+.45,(upFrom[2]+P.coreB[1])/2+.12],[P.coreB[0],B+.22,P.coreB[1]+.2]],CSS.campus,{r:.035,spacing:.5,level:0});
+
+  // ---------------------------------------------------------------- internet edge, providers and the Microsoft 365 path
+  const edge=box('internet-edge',P.edge,{w:.36,h:.2,d:.28});
+  const edgeTag=label('Internet edge',CSS.cyan,1.25,P.edge[0],B+.78,P.edge[1]);
+  // The edge of your network: a glowing curtain along the board's left side where the path leaves it.
+  const curtainCv=canvas(64,128,(g,w,h)=>{const gr=g.createLinearGradient(0,h,0,0);gr.addColorStop(0,'rgba(25,211,255,.85)');gr.addColorStop(.35,'rgba(25,211,255,.25)');gr.addColorStop(1,'rgba(25,211,255,0)');g.fillStyle=gr;g.fillRect(0,0,w,h);});
+  const curtain=new THREE.Mesh(geo('curtain',()=>new THREE.PlaneGeometry(4.2,1.1)),basic(0xffffff,{map:curtainCv.t,transparent:true,opacity:.35,depthWrite:false,side:THREE.DoubleSide,blending:THREE.AdditiveBlending}));
+  curtain.rotation.y=Math.PI/2;curtain.position.set(-6.72,B+.55,.7);curtain.userData.sensorKeep=true;curtain.userData.noFit=true;group.add(curtain);
+  const edgeLabel=label('Your network ends here',CSS.cyan,1.7,-6.72,B+1.35,2.35);
+  function node(name,p,css){const g=new THREE.Group();g.name=name;g.position.set(...p);group.add(g);
+    const m=std(0x111b27,{metalness:.7,roughness:.3,emissive:new THREE.Color(css),emissiveIntensity:.25});
+    add(geo('node',()=>new THREE.IcosahedronGeometry(.22,0)),m,0,0,0,g);edges(geo('node',null),css,.9,0,0,0,g);
+    const ringM=basic(css,{transparent:true,opacity:.85});const rg=add(geo('nodeRing',()=>new THREE.TorusGeometry(.34,.014,6,40).rotateX(Math.PI/2)),ringM,0,0,0,g);rg.userData.sensorKeep=true;rg.castShadow=false;
+    return{g,m,ringM,set(css,t,pulse=0){m.emissive.set(css);ringM.color.set(css);m.emissiveIntensity=.25+pulse*(.5+.5*Math.sin(t*6));rg.rotation.z=t*.5;}};}
+  const ispA=node('isp-a',P.ispA,CSS.te),transit=node('transit',P.transit,CSS.te),ispB=node('isp-b',P.ispB,CSS.te);
+  const ispATag=label('Telco A',CSS.te,.95,P.ispA[0],P.ispA[1]+.55,P.ispA[2],'internet provider');
+  const ispBTag=label('Telco B',CSS.te,.95,P.ispB[0],P.ispB[1]+.55,P.ispB[2],'second provider');
+  const transitTag=label('Transit',CSS.te,.8,P.transit[0],P.transit[1]+.5,P.transit[2]);
+  // Campus -> internet edge -> Telco A -> transit -> Microsoft 365, one segment per fault domain (the ThousandEyes split:
+  // your network, ISP, transit, provider), plus the alternative through Telco B.
+  const teFrom=wp(campus.te,.33),E=[P.edge[0],B+.32,P.edge[1]],A=P.ispA,TR=P.transit,BB=P.ispB,M365=[P.cloud[0]-1.05,P.cloud[1]-.15,P.cloud[2]+.25];
+  const mid=(a,b,dy)=>[(a[0]+b[0])/2,(a[1]+b[1])/2+dy,(a[2]+b[2])/2];
+  const seg={
+    inside:flow([teFrom.toArray(),mid(teFrom.toArray(),E,.45),E],CSS.te,{r:.03,spacing:.5,seg:48}),
+    toIsp:flow([E,mid(E,A,.25),A],CSS.te,{r:.03,spacing:.5,seg:32}),
+    isp:flow([A,mid(A,TR,.15),TR],CSS.te,{r:.03,spacing:.5,seg:40}),
+    provider:flow([TR,mid(TR,M365,.6),M365],CSS.te,{r:.03,spacing:.5,seg:64}),
+    b1:flow([E,mid(E,BB,.25),BB],CSS.te,{r:.03,spacing:.5,seg:32,level:0}),
+    b2:flow([BB,[BB[0]+.6,4.3,BB[2]-2.2],[M365[0]-.9,4.0,M365[2]+1.2],M365],CSS.te,{r:.03,spacing:.5,seg:80,level:0}),
+  };
+
+  // ---------------------------------------------------------------- telemetry: every device streams up into the ring
+  const sources=[];
+  group.updateWorldMatrix(true,true);
+  for(const [o,dy] of [[campus.g,campus.top],[bayside.g,bayside.top],[riverside.g,riverside.top],[north.g,.7],[south.g,.7],[hub,.8],[noc,.5],[cloud,-.4],[coreA.g,.55],[edge.g,.4]])sources.push(wp(o,dy));
   const ringC=new THREE.Vector3(...P.ring),targets=sources.map(s=>{const d=new THREE.Vector3(s.x-ringC.x,0,s.z-ringC.z);if(d.lengthSq()<1e-4)d.set(0,0,1);d.normalize().multiplyScalar(P.ringR);return ringC.clone().add(d);});
   const telLines=new THREE.LineSegments(track(new THREE.BufferGeometry().setFromPoints(sources.flatMap((s,i)=>[s,targets[i]]))),lineMat(CSS.splunk,.22));telLines.userData.noFit=true;group.add(telLines);
   const PER=detail==='stage'?5:8,dotPos=new Float32Array(sources.length*PER*3);
@@ -333,11 +411,18 @@ export function buildNetwork(k,{parent=k.root,scale=1,x=0,y=0,z=0,detail='world'
     fade(agentS,s.agent?1:0);fade(doneS,s.done||0);
     const wk=(ps.alert>.5&&!(rs!=null&&clock>=rs)?'a':'')+(ps.done>.5?'o':'');if(wk!==wall.key){wall.key=wk;wall.redraw(wk.includes('a')?1:0,wk.includes('o')?1:0);}
     riverside.beacon.material.color.set(s.focus>.5?CSS.riverside:CSS.te);
+    // Quiet defaults for the other labs' parts (their kits override after this call).
+    coreA.set('ok',t);coreB.set('standby',t);edge.set('ok',t);uplinkA.set(.9,t);uplinkB.set(0,t);
+    for(const n of [ispA,transit,ispB])n.set(CSS.te,t);
+    for(const [id,f] of Object.entries(seg)){f.set(id==='b1'||id==='b2'?0:.6,t);f.m.uniforms.uColor.value.set(CSS.te);}
+    curtain.material.opacity=.3;edgeLabel.visible=false;campus.winM.emissiveIntensity=.9;
   }
   update(0,{});
 
   return{group,P,model,update,north,south,campus,bayside,riverside,hub,noc,ring,cloud,panel:panelMesh,flows,
     anchors:{southSap:south.sap,northSap:north.sap,southGauge:south.gauge,northGauge:north.gauge,riverside:riverside.g,hub,panel:panelMesh,noc,ring,cloud},
     cards:{alert:alertS,agent:agentS,done:doneS},
+    x:{coreA,coreB,coreTag,uplinkA,uplinkB,edge,edgeTag,edgeLabel,curtain,ispA,ispB,transit,ispATag,ispBTag,transitTag,seg,access,toNorth,toSouth,tePaths,telLines,dots},
+    h:{canvas,sprite,label,flow,add,std,basic,edges,geo,rr,font,B,wp},
     tags:[campus.tag,bayside.tag,riverside.tag,hubTag,nocTag,cloudTag,ringTag,teTag,north.sapLabel,south.sapLabel]};
 }

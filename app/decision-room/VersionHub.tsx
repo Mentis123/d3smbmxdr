@@ -28,7 +28,7 @@ export const editions = {
   },
   "marlow-vale": {
     number: "04", title: "Marlow Vale", label: "Seller workshop", status: "Ready to run",
-    image: "/decision-room-art/marlow-vale.webp", imageAlt: "Abstract artwork: a branching golden path rising over the night lights of a regional town",
+    image: "/decision-room-art/marlow-vale.webp", imageAlt: "A river valley town at blue hour, with a clock-towered council chambers and glowing gold roads branching to a hilltop office, a water works and a new suburb",
     line: "Every commitment has a cost.",
     description: "Six selling decisions across a year with one fictional council. Choose the next commitment, name what it gives up, and hear why other account teams chose differently. Run it all from the display.",
     tags: ["Data & AI sellers", "Customer conversations", "Six decisions"],

@@ -19,12 +19,15 @@ export const waterAt = z => WATER - dropAt(z);
 export const FLOOR = 0.34;
 
 // River centreline, upstream (far) to downstream (front right). Smoothed with Catmull-Rom below.
+// Traced from the owner's reference (docs/three-worlds/marlow-vale/CRITIQUE.md): screen points cast through the hero
+// camera onto the ground. A broad lazy S: in from the mist far to the left, a wide bend at the left of the frame past
+// the treatment plant, across the middle under the bridge, out at the bottom right. Everything built is on the far bank.
 const RIVER_KEYS = [
-  [-30, -150], [-24, -112], [-17, -84], [-10, -62], [-5.5, -47], [-4.5, -40], [-6.5, -32], [-10.5, -24],
-  [-12.2, -16], [-10.6, -9.5], [-6.6, -4.6], [-1.5, -1.6], [4, 0.2], [9.5, 2.4], [15, 5.8], [22, 10.5], [34, 17],
+  [-40, -150], [-36, -118], [-32, -92], [-28.5, -70], [-26, -56], [-24.5, -45], [-22, -32], [-19, -21],
+  [-16.8, -13.5], [-14, -7.2], [-9, -3.6], [-4, -0.8], [0, 1.6], [3.4, 3.3], [7, 4.8], [10.4, 7.2], [13.8, 9.6], [19, 12.2], [30, 16],
 ];
 // Half-width along the river, by key index (wider at the island, which splits the flow).
-const RIVER_HALF = [2.6, 2.4, 2.1, 1.8, 1.9, 2.9, 1.8, 1.45, 1.4, 1.4, 1.45, 1.5, 1.55, 1.6, 1.7, 1.8, 1.9];
+const RIVER_HALF = [2.8, 2.6, 2.4, 2.2, 2.1, 3.0, 1.9, 1.8, 1.7, 1.65, 1.6, 1.6, 1.6, 1.6, 1.65, 1.75, 1.9, 2.0, 2.1];
 
 function catmull(points, perSegment) {
   const out = [];
@@ -64,19 +67,24 @@ export function riverQuery(x, z) {
 }
 
 // The island, mid-river where the channel widens before it leaves the view.
-export const ISLAND = {x: -4.7, z: -40.2, rx: 1.25, rz: 2.7, top: 0.36};
+export const ISLAND = {x: -24.6, z: -45.2, rx: 1.3, rz: 2.8, top: 0.36};
 
 // Fixed places (other modules anchor to these; keep them in step with the tests).
 export const PLACES = {
   spur: {x: 11.38, z: 28.7, fx: -0.306, fz: -0.952}, // the rocky spur the opening camera stands on, pointing down-valley
   council: {x: 5.2, z: -7.4, top: 1.35},    // council chambers and clock tower on a levelled knoll
-  plant: {x: -6.6, z: -10.6, top: FLOOR + 0.12}, // water treatment plant inside the river bend
-  bridge: {s: null, x: 4.6, z: 0.42},       // road bridge; s filled in below
-  glass: {x: 11.6, z: -18.5, top: 3.05},    // the glass civic building on the far hill
+  plant: {x: -9.2, z: -10.8, top: FLOOR + 0.12}, // water treatment plant on the far bank, just above the bend
+  bridge: {s: null, x: 7.0, z: 4.8},        // road bridge; s filled in below
+  glass: {x: 11.6, z: -18.5, top: 4.1},     // the glass civic building on the far hill
   substation: {x: 14.2, z: -5.6, top: FLOOR + 0.5}, // where the line from Riverbend's dam lands
   square: {x: 5.2, z: -4.6},                // the green in front of the council
 };
 PLACES.bridge.s = riverQuery(PLACES.bridge.x, PLACES.bridge.z).s;
+
+// The far bank (away from the camera), where the reference has every building. Decided by which side of the river
+// the council is on; past the big bend the nearest stretch decides.
+export const FAR_SIDE = riverQuery(PLACES.council.x, PLACES.council.z).side;
+export function onFarBank(x, z) { return riverQuery(x, z).side === FAR_SIDE; }
 
 // ---------------------------------------------------------------- noise (deterministic, value noise)
 function hash2(i, j) { const k = Math.sin(i * 127.1 + j * 311.7) * 43758.5453; return k - Math.floor(k); }
@@ -95,7 +103,7 @@ function land(x, z) {
   const n = fbm2(x * 0.22, z * 0.22), fine = noise2(x * 1.3, z * 1.3);
   let h = FLOOR + (n - 0.5) * 0.35 + (fine - 0.5) * 0.06;
   // Gentle rise away from the river on both banks; the right bank (town side) climbs to the glass building's hill.
-  h += 1.15 * bump(x, z, 12.5, -19, 6.5, 6) + 0.6 * bump(x, z, 15, -10, 5, 7) + 0.5 * bump(x, z, 7, -14, 4, 4);
+  h += 2.4 * bump(x, z, 12.5, -19, 6.5, 6) + 0.7 * bump(x, z, 15, -10, 5, 7) + 0.6 * bump(x, z, 7, -14, 4, 4);
   h += 0.35 * bump(x, z, -20, -6, 6, 8);
   // Rolling farmland in the middle band; the valley walls stay low and far so the eye runs all the way down it.
   const along = Math.max(0, -z - 14);
@@ -107,7 +115,7 @@ function land(x, z) {
   // The lookout: a long rocky spur behind the town that runs toward the valley from where the opening camera stands,
   // falling gently so it fills the bottom of the frame; and a low wooded rise on the near left of the valley floor.
   h += spurRise(x, z) * (0.96 + 0.08 * noise2(x * 0.7, z * 0.7));
-  h += 1.4 * bump(x, z, -10, 6, 6, 4);
+  h += 0.5 * bump(x, z, -6, 9, 7, 4);
   return h;
 }
 // The spur, as a ridge aligned with the opening camera's view (along = toward the valley).
@@ -120,7 +128,7 @@ function spurRise(x, z) {
   return ridge * Math.exp(-((across / (3.2 + Math.max(0, a) * 0.28)) ** 2));
 }
 // A smooth valley axis used for the walls (the river wanders inside it).
-function riverAxis(z) { return z > -10 ? -2 : z > -60 ? -2 - (z + 10) * 0.13 : 4.5 - (z + 60) * 0.35; }
+function riverAxis(z) { return z > -10 ? -2 : -2 + (z + 10) * 0.35; }
 
 // Levelled pads: council knoll, plant terrace, substation, square.
 const PADS = [
@@ -157,17 +165,18 @@ export function height(x, z) {
 // Polylines (smoothed); lamps every LAMP_SPACING along each. The bridge road is the only river crossing.
 const ROAD_KEYS = {
   // From the front left fields over the bridge, up past the square to the council, then on up the hill.
-  main: [[-2.6, 11], [-1.6, 6.4], [1.6, 2.6], [4.0, 1.3], [5.2, -0.5], [5.6, -2.6], [5.4, -4.2], [6.9, -5.6], [8.2, -8.4], [8.9, -11.6], [10.6, -14.2], [11.4, -16.6]],
+  // From the near-bank pasture over the bridge, up past the square to the council, then on up the hill.
+  main: [[1.0, 14.2], [2.2, 12.2], [3.6, 10.2], [4.9, 8.4], [5.9, 6.8], [7.0, 4.8], [8.1, 2.8], [8.4, 0.8], [7.8, -1.6], [6.7, -4.6], [6.9, -6.2], [8.2, -8.4], [8.9, -11.6], [10.6, -14.2], [11.4, -16.6]],
   // The river road along the right bank, east to the substation and west toward the plant's access lane.
-  riverside: [[-3.4, -6.2], [0, -4.3], [3.3, -3.2], [5.4, -3.6], [8.2, -2.2], [11.4, -1.4], [14.2, -3.6], [16.8, -2.4], [21, 1.6]],
+  riverside: [[-3.0, -6.8], [0.2, -4.2], [3.2, -2.6], [5.6, -1.4], [8.4, 0.8], [11, -1.0], [13.6, -1.8], [16.6, -1.0], [20, 1.4]],
   // The ring street behind the council.
   ring: [[5.6, -2.6], [2.6, -5.4], [2.4, -9.2], [4.6, -11.4], [8.2, -11.0], [8.6, -8.6]],
   // A lane into the treatment plant.
-  plant: [[-3.4, -6.2], [-4.6, -8.2], [-5.4, -9.4]],
-  // The south-bank estate loop (front right).
-  estate: [[1.6, 2.6], [4.8, 4.4], [8.4, 6.2], [11.6, 8.6], [14.6, 11.4]],
+  plant: [[-3.0, -6.8], [-5.6, -8.4], [-7.4, -9.6]],
+  // The estate street on the far bank, right of the bridge.
+  estate: [[8.4, 0.8], [10.2, 2.8], [12.6, 4.0], [15.2, 5.0], [17.6, 6.0], [19.5, 7.4]],
   // A long country road out toward the island through the middle band.
-  valley: [[2.4, -9.2], [1.4, -14.5], [-0.8, -21.5], [-1.0, -28.5], [0.6, -34.8], [0.9, -41], [-0.8, -50]],
+  valley: [[2.4, -9.2], [1.4, -14.5], [-0.8, -21.5], [-1.0, -28.5], [-2, -36], [-4, -44], [-6, -52]],
 };
 export const ROADS = Object.fromEntries(Object.entries(ROAD_KEYS).map(([id, keys]) => {
   const pts = catmull(keys, 10); let s = 0;
@@ -199,10 +208,10 @@ function rng(seed) { let s = seed >>> 0; return () => { s = (s * 1664525 + 10139
 // Where houses may stand: town blocks on the right bank, the south-bank estate, and farms scattered up the valley.
 const ZONES = [
   {id: 'town', x0: -1.5, x1: 13.5, z0: -14.5, z1: -2.4, step: 0.62, keep: 0.8},
-  {id: 'estate', x0: 2.5, x1: 16.5, z0: 2.6, z1: 12, step: 0.66, keep: 0.72},
+  {id: 'estate', x0: 9, x1: 20, z0: 0.2, z1: 7.6, step: 0.6, keep: 0.85},
   {id: 'east', x0: 12.5, x1: 20, z0: -12, z1: 1, step: 0.8, keep: 0.45},
   {id: 'farms', x0: -18, x1: 14, z0: -44, z1: -15, step: 2.4, keep: 0.22},
-  {id: 'west', x0: -24, x1: -14, z0: -14, z1: 4, step: 1.9, keep: 0.25},
+  {id: 'west', x0: -24, x1: -10, z0: -22, z1: -9, step: 1.9, keep: 0.3},
 ];
 const KEEP_CLEAR = [
   {x: PLACES.council.x, z: PLACES.council.z, r: 1.9}, {x: PLACES.square.x, z: PLACES.square.z, r: 1.0},
@@ -215,6 +224,8 @@ export const HOUSES = (() => {
     const px = x + (r() - 0.5) * zone.step * 0.7, pz = z + (r() - 0.5) * zone.step * 0.7, keep = r(), size = r(), tone = r(), rot = r();
     if (keep > zone.keep) continue;
     const river = riverQuery(px, pz); if (river.d < river.half + 0.75) continue;
+    // Nothing built on the camera's bank in the hero band: the reference keeps that bank as pasture.
+    if (pz > -22 && !onFarBank(px, pz)) continue;
     if (Math.hypot((px - ISLAND.x) / ISLAND.rx, (pz - ISLAND.z) / ISLAND.rz) < 1.4) continue;
     const road = roadDistance(px, pz), near = zone.id === 'town' || zone.id === 'estate';
     if (road < 0.36) continue;
@@ -222,8 +233,10 @@ export const HOUSES = (() => {
     if (KEEP_CLEAR.some(k => Math.hypot(px - k.x, pz - k.z) < k.r)) continue;
     const y = height(px, pz), slope = Math.abs(height(px + 0.3, pz) - height(px - 0.3, pz)) + Math.abs(height(px, pz + 0.3) - height(px, pz - 0.3));
     if (slope > 0.45 || y < WATER + 0.18 || y > 4.5) continue;
-    const w = 0.3 + size * 0.22, d = 0.26 + ((size * 7.3) % 1) * 0.16;
-    out.push({x: +px.toFixed(3), z: +pz.toFixed(3), y, w, d, h: 0.2 + size * 0.12 + (zone.id === 'town' && size > 0.85 ? 0.16 : 0), rot: rot * Math.PI, tone, zone: zone.id});
+    const w = 0.36 + size * 0.24, d = 0.28 + ((size * 7.3) % 1) * 0.14;
+    // Low houses, wider than tall; estate homes are two storeys, a few town buildings too.
+    const tall = zone.id === 'estate' || (zone.id === 'town' && size > 0.8);
+    out.push({x: +px.toFixed(3), z: +pz.toFixed(3), y, w, d, h: tall ? 0.24 + size * 0.04 : 0.13 + size * 0.05, rot: rot * Math.PI, tone, zone: zone.id});
   }
   return out;
 })();

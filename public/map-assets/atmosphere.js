@@ -13,17 +13,20 @@ import * as THREE from 'three';
 // Colours are linear RGB. Directions are in turntable-local space, +z toward the opening camera.
 
 export const ATMOSPHERES = {
+  // Blue hour, matched to the Marlow Vale reference: a deep blue sky with a thin orange band on the ridge, blue-green
+  // land under skylight, no warm fill. Warmth comes only from lamps and windows.
   dusk: {
-    zenith: [0.002, 0.004, 0.02], upper: [0.006, 0.013, 0.05], horizon: [0.03, 0.046, 0.135],
-    glow: [1.5, 0.46, 0.08], blush: [0.07, 0.028, 0.02], ground: [0.02, 0.025, 0.055],
-    sun: [-0.12, -0.035, -1], stars: 0.85, clouds: 0.75,
-    fog: [0.032, 0.044, 0.12], fogDensity: 0.0095,
-    hemi: {sky: [0.22, 0.3, 0.75], ground: [0.02, 0.022, 0.04], intensity: 0.8},
-    key: {color: [0.5, 0.6, 1], intensity: 0.75, position: [-9, 16, 11]},
-    rim: {color: [1, 0.48, 0.2], intensity: 1.3, position: [-3, 3.5, -30]},
-    warm: {color: [1, 0.62, 0.36], intensity: 0.22, position: [10, 8, 5]},
-    environmentIntensity: 0.42,
+    zenith: [0.004, 0.012, 0.06], upper: [0.012, 0.03, 0.12], horizon: [0.035, 0.055, 0.16],
+    glow: [1.35, 0.42, 0.08], blush: [0.08, 0.04, 0.06], ground: [0.015, 0.025, 0.06],
+    sun: [-0.12, -0.035, -1], stars: 0.7, clouds: 0.8,
+    fog: [0.03, 0.05, 0.14], fogDensity: 0.0095,
+    hemi: {sky: [0.18, 0.3, 0.8], ground: [0.01, 0.015, 0.04], intensity: 1.25},
+    key: {color: [0.4, 0.55, 1], intensity: 0.5, position: [-9, 16, 11]},
+    rim: {color: [1, 0.5, 0.2], intensity: 0.35, position: [-3, 2, -30]},
+    warm: {color: [1, 0.62, 0.36], intensity: 0, position: [10, 8, 5]},
+    environmentIntensity: 0.35,
   },
+
 };
 
 // skyColor(dir) for any shader: same sky the dome draws, so reflections match. Needs uniforms uSkyZenith, uSkyUpper,
@@ -35,14 +38,14 @@ float skyNoise(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);float a=skyHas
 float skyFbm(vec2 p){float v=0.,a=.5;for(int i=0;i<5;i++){v+=skyNoise(p)*a;p=p*2.03+vec2(7.1,3.7);a*=.5;}return v;}
 vec3 skyColor(vec3 dir,bool withStars){
   dir=normalize(dir);float h=dir.y;
-  vec3 c=mix(uSkyHorizon,uSkyUpper,smoothstep(0.,.08,h));c=mix(c,uSkyZenith,smoothstep(.08,.55,h));
+  vec3 c=mix(uSkyHorizon,uSkyUpper,smoothstep(0.,.045,h));c=mix(c,uSkyZenith,smoothstep(.08,.55,h));
   vec2 flat_=normalize(dir.xz+1e-5),sunFlat=normalize(uSunDir.xz);float toward=max(dot(flat_,sunFlat),0.);
   float lift=max(h-uSunDir.y,0.);
-  c+=uSkyGlow*pow(toward,4.)*exp(-lift*70.)+uSkyGlow*.18*pow(toward,2.)*exp(-lift*18.);
-  c+=uSkyBlush*pow(toward,1.5)*exp(-lift*14.);
+  c+=uSkyGlow*pow(toward,4.)*exp(-lift*70.)+uSkyGlow*.12*pow(toward,2.)*exp(-lift*45.);
+  c+=uSkyBlush*pow(toward,1.5)*exp(-lift*30.);
   // Thin cloud bands, lit from the sunset side, dark against the blue elsewhere.
   if(uClouds>0.&&h>.015){vec2 q=dir.xz/(h+.08);float band=skyFbm(q*vec2(1.4,4.6)+vec2(uSkyTime*.006,0.));float cl=smoothstep(.56,.8,band)*smoothstep(.015,.08,h)*(1.-smoothstep(.32,.6,h))*uClouds;
-    vec3 lit=mix(uSkyHorizon*.45,uSkyGlow*.5+uSkyBlush,pow(toward,3.)*exp(-lift*12.));c=mix(c,lit,cl*.8);}
+    vec3 lit=mix(uSkyUpper*.7,uSkyGlow*.35+uSkyBlush,pow(toward,3.)*exp(-lift*22.));c=mix(c,lit,cl*.75);}
   if(withStars&&uStars>0.){vec3 s=floor(dir*420.);float r=skyHash(s);float star=step(.9965,r)*smoothstep(.12,.55,h)*(.55+.45*sin(uSkyTime*1.7+r*80.));c+=vec3(.9,.92,1.)*star*uStars*(1.-pow(toward,4.)*.8);}
   if(h<0.)c=mix(c,uSkyGround,smoothstep(0.,-.12,h));
   return c;

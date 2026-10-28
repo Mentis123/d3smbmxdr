@@ -87,6 +87,11 @@ After any shared-module change, compare paused, fixed-time frames of `/lab-world
 
 Learned 19 Oct 2026 (`/nextdc`): checking the kit first meant the world, pins, controls and host pattern were all reuse. The new code was the scene, its data module, four generic viewer hooks and the panel.
 
+## Canonical references from adamrappaport
+
+- **Kit catalogue:** `adamrappaport/docs/KIT-CATALOG.md` lists every shared world, rig, effect and exhibit piece in one line each. Check it before building any 3D thing here (all of it is synced from adamrappaport).
+- **A/B review:** `adamrappaport/skills/ab-review/SKILL.md` is the canonical blind A/B for any look or feel change, lifted from playthewaters: rubric and win threshold first, one `/ab` URL, the owner's phone decides, the result recorded honestly (28 Oct 2026).
+
 ## Build before you design
 
 Order for any new page, world or infographic here: (1) source the facts and mark the owner's points as theirs, (2) check what the shared kit can build and its limits, probing the current page headless, (3) write the design, (4) build, validate and look at the screenshot. Read `adamrappaport/docs/DATACENTER-DESIGN.md` section 1 for the datacenter, and `adamrappaport/docs/SHARED-WORLDS.md` for the kit.

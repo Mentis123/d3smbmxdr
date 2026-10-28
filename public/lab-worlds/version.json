@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "sourceRepository": "Mentis123/adamrappaport",
-  "sourceCommit": "af9f36088ec238e31b0d4d46376d8e3e7e6c351b",
+  "sourceCommit": "217b135b7171ea9a166b4db936139877c1483aca",
   "experience": "ai-lab",
   "runtimeDependency": "Self-hosted static files; no personal-site requests",
   "files": {
@@ -215,6 +215,7 @@
     "public/map-assets/pins.js": "04e74f9ea4da2367a351101919e419285b4ca3dcfbca879c69dc56b413b59c40",
     "public/map-assets/pipeline.js": "30e264dc997566d855d23dcd809b2d43e1bbbd3dde7b4fc37ea1184480471c16",
     "public/map-assets/poster.jpg": "054e935976a4551701f50b669d23b90660f990515370b50c311cfdda64a2e5df",
+    "public/map-assets/props/house-style.js": "5621306d423afbd04a75652553045acbf123e7040e8779e3f22c6487c5948481",
     "public/map-assets/qr-tap.js": "52b14cee57f494bcd1cf4f1221ca7275278f4583bd1655d47b6d5e9854505f0d",
     "public/map-assets/reservoir-reflection.js": "0146a160a43735d45f54c7fea7fa1f13e553fd4c3c8184a060e93b726308f11c",
     "public/map-assets/retail-poster.jpg": "b29df1953e5620386a62c88b5af83d0d28305e9398bd4af9807c3580117a53ec",

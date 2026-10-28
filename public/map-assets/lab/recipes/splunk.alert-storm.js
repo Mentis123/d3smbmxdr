@@ -35,4 +35,8 @@ export default {
   variation:{id:'two-causes',label:'Two causes',caption:'Two causes, two episodes: Bayside stays separate',
     captions:{review:'Campus fixed. Bayside is its own ticket'},
     overlay:{anchor:'bayside',label:'Separate episode',state:'unclear'}},
+  // Narration (owner's ElevenLabs file, 28 Oct 2026, lines 1-5 of the combined take, cut at its pauses). Delays land
+  // "Core A fails" on the failure, "traces them back" on the links and "The team says yes" on the approval; with the
+  // variation on, its clip plays at the AI view and the review stays silent.
+  narration:{base:'/map-assets/lab/audio/splunk.alert-storm/',lines:{scene:'scene.mp3',change:'change.mp3',aiView:'aiView.mp3',review:'review.mp3'},variation:{aiView:'variation.mp3',review:null},delay:{scene:.3,change:.7,aiView:.4,review:1.3}},
 };

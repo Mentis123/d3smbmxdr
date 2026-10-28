@@ -36,4 +36,8 @@ export default {
   variation:{id:'inside',label:'It is us',caption:'This time the red segment is on the board: the campus edge',
     captions:{review:'Inside: the team fixes its own edge router'},
     overlay:{anchor:'edge',label:'Inside · campus edge',state:'unclear'}},
+  // Narration (owner's ElevenLabs file, 28 Oct 2026, lines 6-10 of the combined take). Delays land "slows down" on the
+  // slowdown, "reads every hop" on the segment readings and "lands in Splunk" on the alert's flight; the AI view line
+  // (7.7 s) ends just inside its 8 s chapter. With the variation on, its clip plays at the AI view; the review is silent.
+  narration:{base:'/map-assets/lab/audio/splunk.path-outside/',lines:{scene:'scene.mp3',change:'change.mp3',aiView:'aiView.mp3',review:'review.mp3'},variation:{aiView:'variation.mp3',review:null},delay:{scene:.4,change:1.0,aiView:.2,review:.8}},
 };

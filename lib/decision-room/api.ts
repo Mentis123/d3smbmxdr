@@ -23,6 +23,7 @@ import { z, ZodError } from "zod";
 import { SCENARIOS, consequenceFor, dashboardFor, factStates, latestOf, publicRound, replay, resolveScenario, roundContent, roundCount, scenarioInfo, scenarioKeyForNewRoom } from "./scenarios";
 import type { Scenario } from "./types";
 import { scheduledVoteSeconds, type SessionSchedule } from "./timing";
+import { isRails, railsFamilyOfVariant } from "./rails";
 import { coastwaterOperation, coastwaterStep, COASTWATER_LAST_STEP, coastwaterLastStep } from "./presentation";
 
 /* ------------------------------------------------------------ plumbing
@@ -333,8 +334,8 @@ function sessionPayload(session: Session, scenario: Scenario) {
     roundStartedAt: session.roundStartedAt, roundClosedAt: session.roundClosedAt, launchedAt: session.launchedAt,
     durationSeconds: scheduledVoteSeconds(scenario.runPlan, session.schedule, session.launchedAt, session.activeRound, round?.durationSeconds ?? 240),
     schedule: session.schedule ?? null,
-    audienceTimer: session.audienceTimer ?? scenario.family !== "coastwater",
-    presentationStep: scenario.family === "coastwater" ? coastwaterStep(session, scenario.key) : null,
+    audienceTimer: session.audienceTimer ?? !isRails(scenario.family),
+    presentationStep: isRails(scenario.family) ? coastwaterStep(session, scenario.key) : null,
   };
 }
 /** The scenario this room was created with. An unknown stored key is refused, never reinterpreted. */
@@ -381,7 +382,7 @@ function consolePayload(session: Session, scenario: Scenario, teams: Team[], dec
     counts: { ...counts, total: teams.length },
     teams: teams.map((t) => ({ id: t.id, displayName: t.displayName, state: t.state, handover: isLive(t) })),
     results: state === "published" && round ? { ...splitFor(decisions, session.activeRound), reveal: round.reveal ?? null } : null,
-    discussion: scenario.family === "coastwater" && (state === "closed" || state === "published") ? splitFor(decisions, session.activeRound) : null,
+    discussion: isRails(scenario.family) && (state === "closed" || state === "published") ? splitFor(decisions, session.activeRound) : null,
     stages: scenario.stages,
     ...(scenario.meters ? { initialMeters: start.meters, meterKeys: scenario.meters } : {}),
     ...(scenario.facts ? { initialFacts: factStates(scenario, start.facts) } : {}),
@@ -417,7 +418,7 @@ function registerDecisionRoomRoutes(app: Express) {
   // Public: which scenario a new room of each edition will run, so the edition pages describe it truthfully.
   app.get("/api/decision-room/editions", async (_req, res, next) => { try {
     const of = (variant: string) => scenarioInfo(SCENARIOS[scenarioKeyForNewRoom(variant)]);
-    res.json({ "ciso-basecamp": of("riverbend"), "agent-0": of("agent0"), coastwater: of("coastwater") });
+    res.json({ "ciso-basecamp": of("riverbend"), "agent-0": of("agent0"), coastwater: of("coastwater"), "marlow-vale": of("marlowvale") });
   } catch (e) { fail(e, res, next); } });
 
   // Facilitator-only review pack: the whole scenario, including preferences, consequences and branches.
@@ -434,7 +435,7 @@ function registerDecisionRoomRoutes(app: Express) {
     if (!ensureAdmin(req, res) || rejectMissingDatabase(res)) return;
     const input = createSchema.parse(req.body ?? {}); await ensureTables();
     const sessionId = randomUUID(), joinCode = code(), displayToken = token();
-    const variant = input.variant === "coastwater" ? "coastwater" : input.variant === "agent0" ? "agent0" : VARIANT;
+    const variant = railsFamilyOfVariant(input.variant) ? input.variant! : input.variant === "agent0" ? "agent0" : VARIANT;
     // Pinned for life: later content revisions never change what this room's choices meant.
     const scenario = scenarioKeyForNewRoom(variant);
     const session: Session = { id: sessionId, joinCode, name: input.name, variant, scenario, status: "lobby", activeRound: 1, resultsVisible: false, revision: 1, displayTokenHash: sha(displayToken), roundStartedAt: null, roundClosedAt: null, launchedAt: null };
@@ -686,14 +687,14 @@ function registerDecisionRoomRoutes(app: Express) {
     const state = roundState(session);
 
     if (input.action === "present") {
-      if (scenario.family !== "coastwater") { res.status(400).json({ message: "Presentation controls belong to Coastwater rooms" }); return; }
+      if (!isRails(scenario.family)) { res.status(400).json({ message: "Presentation controls belong to on-rails rooms" }); return; }
       const current = coastwaterStep(session, scenario.key);
       if (input.step > coastwaterLastStep(scenario.key) || input.expectedStep !== current || Math.abs(input.step - current) !== 1) { res.status(409).json({ message: "The presentation moved on another screen. Refresh and try again." }); return; }
     }
     const operation = input.action === "present" ? coastwaterOperation(session, input.step, scenario.key) : input.action;
 
     if (input.action === "audience-timer") {
-      if (scenario.family !== "coastwater") { res.status(400).json({ message: "This setting belongs to Coastwater" }); return; }
+      if (!isRails(scenario.family)) { res.status(400).json({ message: "This setting belongs to on-rails rooms" }); return; }
       session.audienceTimer = input.enabled;
     } else if (input.action === "schedule") {
       session.schedule = { startsAt: input.startsAt, durationMinutes: input.durationMinutes, timeZone: input.timeZone };
@@ -701,7 +702,7 @@ function registerDecisionRoomRoutes(app: Express) {
       const decisions = await getDecisions(session.id);
       const target = decisions.find((d) => d.id === input.decisionId);
       if (!target || target.roundNo !== session.activeRound) { res.status(404).json({ message: "Response not found in this round" }); return; }
-      if (scenario.family === "coastwater" && input.featured && !target.isLocked) { res.status(409).json({ message: "Lock this response before selecting it for projection" }); return; }
+      if (isRails(scenario.family) && input.featured && !target.isLocked) { res.status(409).json({ message: "Lock this response before selecting it for projection" }); return; }
       const featured = decisions.filter((d) => d.roundNo === session.activeRound && d.isFeatured && d.id !== target.id).length;
       if (input.featured && featured >= MAX_FEATURED) { res.status(409).json({ message: `Deselect one first: at most ${MAX_FEATURED} rationales go on the screen` }); return; }
       if (db) await db.execute(sql`UPDATE workshop_decisions SET is_featured=${input.featured} WHERE id=${input.decisionId}::uuid AND session_id=${session.id}::uuid`);
@@ -743,7 +744,7 @@ function registerDecisionRoomRoutes(app: Express) {
         if (operation === "advance") for (const t of teams) if (t.tokenHash) t.state = "reading";
         if (operation === "reset") { for (const t of teams) Object.assign(t, { state: "not_joined", tokenHash: null, lastSeenAt: null, ...CLEAR_PENDING }); for (const [id, d] of Array.from(memory.decisions.entries())) if (d.sessionId === session.id) memory.decisions.delete(id); }
       }
-      if (scenario.family === "coastwater") {
+      if (isRails(scenario.family)) {
         const updated = { ...session, status, activeRound: round, resultsVisible: visible, roundClosedAt: closed, presentationStep: null };
         const nextStep = input.action === "present" ? input.step : operation === "reset" ? 0 : coastwaterStep(updated, scenario.key);
         session.presentationStep = nextStep;

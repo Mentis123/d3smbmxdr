@@ -1,0 +1,81 @@
+/**
+ * Marlow Vale: fictional seller dilemmas for the Data#3 Data & AI practice. Revision 1.
+ * Built from internal seller enablement (Oct 2026), but this text ships in a public bundle:
+ * no prices, funding amounts, targets, launch dates, competitor names, offer names or real pursuits.
+ */
+export const MARLOWVALE_MODULES = [
+  {
+    id: "first-move", title: "Ride the momentum, or earn the roadmap?", topic: "The first conversation",
+    situation: "The CEO has just seen a Copilot demo and asks for a quote to license all 900 staff. In the same meeting the CIO says nobody can show what the current licences have achieved, and that staff-built agents are appearing without oversight. Finance has signalled one meaningful AI spend this year. You get one follow-up meeting before the budget papers close.",
+    question: "What do you bring to the follow-up meeting?",
+    options: ["A licence proposal for all staff", "A targeted pilot for two teams", "A review of the agents already built", "A use-case workshop to build the roadmap"],
+    tradeoffs: ["Captures executive interest and budget now; IT's doubts stay unanswered and low use could sour the renewal.", "Produces evidence from real work; most staff wait and the CEO may read it as hesitation.", "Addresses a live risk IT cares about; gives the CEO nothing visible this year.", "Gives both sides one prioritised plan; the budget window may close before anything is bought."],
+    discuss: ["What are you giving up by choosing this?", "What would the customer have to tell you to change your call?"],
+    reveal: "Optional probe: the CIO says privately they will block any broad licence purchase until they see a measured result.",
+    reconsider: "Is your next commitment to the person with the budget, or the person who can stop it?",
+    boundary: "Capture who must commit next, what evidence they need, and what the customer is not buying yet.",
+    notes: "Challenge a licence table on adoption and renewal risk; challenge a workshop table on losing the budget window. The practice sells services with licence pull-through, not services instead of licences, so no option is off-strategy. Trap: proposing all four at once. Optional probe: the CEO says \"just give me a number\".",
+  },
+  {
+    id: "funding", title: "Funded door, or funded delivery?", topic: "Partner funding",
+    situation: "The CIO agrees to a structured first engagement if it costs Marlow Vale little or nothing. Microsoft partner funding is available, but under the current terms it covers only a few consulting days and carries proof and timing conditions. Only the first milestone can go in the proposal; the rest depends on later consumption. A properly scoped engagement needs more, and the council has no spare budget until next quarter.",
+    question: "How do you scope the first engagement?",
+    options: ["Scope to what the funding covers", "Ask the council to co-fund the full scope", "Data#3 absorbs the gap to win the door", "Wait and propose the full scope next quarter"],
+    tradeoffs: ["Starts now at no cost to the council; a thin engagement may not produce a result worth building on.", "Funds work that can deliver; the council may decline or delay, and momentum stalls.", "Wins access and goodwill now; spends margin on an uncommitted account and sets a \"free\" expectation.", "The right scope is properly funded; another partner, or Microsoft direct, may start first."],
+    discuss: ["What are you giving up by choosing this?", "What would the customer have to tell you to change your call?"],
+    reveal: "Optional probe: an older proposal template still quotes the previous funding rates, and the CIO has already seen it.",
+    reconsider: "If the funded work is all this customer ever buys, was it worth doing?",
+    boundary: "Capture what the funding pays for, who pays for the rest, the conditions that must be met, and what the proposal must never call free.",
+    notes: "Funding is a nomination, not an approval. Show only the first-milestone amount in the customer's investment summary; the consumption portion is uncertain and can arrive months later. Ask a funding-only table what a few days can credibly deliver. Ask an absorb table what the next paid decision is and when. Traps: stacking programmes, quoting old template rates, or calling the work free. Optional probe: the funding window closes before the council can sign.",
+  },
+  {
+    id: "readiness", title: "Copilot this month, or Copilot safely?", topic: "Readiness and security",
+    situation: "The council's records include child-protection, planning-dispute and personnel files, and a quick check suggests some sit on sites far more people can open than should. The CEO wants Copilot with 100 staff within a month. Targeted controls can protect specified sites within weeks, but not the whole estate; a full information-governance programme would take months. Some controls need entitlements or pay-as-you-go features the council may not have.",
+    question: "What do you propose before Copilot reaches 100 people?",
+    options: ["Readiness assessment, then decide", "Protect the riskiest sites, then pilot", "Pilot now with a low-risk team", "Fix information governance first"],
+    tradeoffs: ["An evidence-based picture of the risk; no protection and no users for weeks.", "Users start with the worst exposure controlled; files outside the protected sites stay exposed.", "Meets the deadline with little exposure; proves little about the teams that matter most.", "Deals with the root cause; Copilot slips months and the sponsor may lose interest."],
+    discuss: ["What are you giving up by choosing this?", "What would the customer have to tell you to change your call?"],
+    reveal: "Optional probe: the customer asks you to confirm in writing that no extra licensing is needed.",
+    reconsider: "What exactly are you willing to promise is protected?",
+    boundary: "Capture which content is protected and which is not, who owns the rest, and any licensing the promise depends on.",
+    notes: "Assessment finds problems, targeted protection fixes specified places, a pilot proves value: they are not interchangeable, though assessment and targeted protection can run side by side. Never call the result \"Copilot ready\". Challenge a protect-then-pilot table on the files it leaves out. Traps: implying estate-wide remediation, or promising no extra licensing before checking the scope. Optional probe: in week two a pilot user finds a personnel file through Copilot.",
+  },
+  {
+    id: "sponsor", title: "Business champion, or IT gatekeeper?", topic: "Who commits next",
+    situation: "The council's asset manager wants live dashboards for roads and drainage before storm season and has some operational budget. IT owns the data platform, has a stalled reporting migration, and wants an architecture plan before anything new is built. Each can quietly slow the other. You can run a bounded proof of value with the asset team, an IT-led design, or a joint discovery that takes both teams' time.",
+    question: "Who do you build the next engagement around?",
+    options: ["The asset manager: a quick proof of value", "IT: assessment and platform design first", "Joint discovery with both teams", "A standard platform foundation through IT"],
+    tradeoffs: ["Creates urgency and a visible win; IT may refuse to support what it did not design.", "Builds on a sound platform; the asset manager waits and storm season arrives first.", "Lowers the risk of a later veto; costs scarce stakeholder time and slows both.", "Gets data flowing on a standard platform quickly; the dashboards the business wanted still aren't built."],
+    discuss: ["What are you giving up by choosing this?", "What would the customer have to tell you to change your call?"],
+    reveal: "Optional probe: the asset manager's budget lapses if it is not spent this quarter.",
+    reconsider: "If the other stakeholder said no next month, would your engagement survive?",
+    boundary: "Capture who must commit next, what each stakeholder gets, and what the other is asked to accept.",
+    notes: "The lesson is neither \"always lead with the business\" nor \"always lead with governance\". Ask each table which stakeholder could invalidate its proposal later. Trap: promising business outcomes before integration and permissions are understood. Optional probe: the asset data sits in a system IT says cannot be connected this year.",
+  },
+  {
+    id: "production", title: "Extend the demo, or price production?", topic: "From prototype to production",
+    situation: "A prototype agent that answers residents' development-application questions impressed the councillors, who want it live on the website next month. Production needs integration with the planning system, governance, testing and a council owner. The agent-building specialists are the practice's scarcest people, and their next opening is unconfirmed. The demo ran on a cleaned copy of the data.",
+    question: "What do you put in front of the councillors?",
+    options: ["Extend the prototype to staff only", "A production build, integrated and governed", "A platform landing zone first", "A business case before any build"],
+    tradeoffs: ["Keeps momentum with limited risk; residents get nothing, and \"temporary\" can become permanent.", "Delivers the real thing properly; costs more, takes longer and the start date is uncertain.", "Lays a governed foundation; it is not the resident service the councillors asked for.", "Tests whether the service is worth its running cost; enthusiasm may fade while it is written."],
+    discuss: ["What are you giving up by choosing this?", "What would the customer have to tell you to change your call?"],
+    reveal: "Optional probe: the planning system's vendor says integration needs their own paid work, available in eight weeks.",
+    reconsider: "What date, if any, can you commit to?",
+    boundary: "Capture what is promised, by when, what it depends on, and who at the council owns the agent after go-live.",
+    notes: "A landing zone is not integrated business automation, and a prototype on clean data is not production. Ask a production-build table what start date it can honestly give. Trap: committing specialist capacity or a launch date you do not control. Optional probe: a councillor asks whether the agent could give a resident wrong planning advice.",
+  },
+  {
+    id: "roadmap", title: "Sell what exists, or what's coming?", topic: "Credibility and the long game",
+    situation: "The pilot worked, and the council now wants a multi-year partner: an ongoing team for new agents and someone to run them after go-live. A large global integrator is offering a managed programme. Data#3's customer material already describes a dedicated team model and a managed AI service, but neither has fully launched; today, ongoing work would be professional services with a handover to council staff. The council chooses within a month.",
+    question: "What do you propose for the next two years?",
+    options: ["Today's services, with an honest handover", "Today's work plus the planned services", "Bring in a partner for the run service", "Bid one strong next phase only"],
+    tradeoffs: ["Commits only to what you can deliver; looks smaller than the integrator's offer.", "Matches the competitor's ambition; you take on launch dates you do not control.", "Covers the whole lifecycle now; shares the relationship and margin and adds a hand-off.", "Keeps you credible and in the account; the integrator may win the programme around you."],
+    discuss: ["What are you giving up by choosing this?", "What would the customer have to tell you to change your call?"],
+    reveal: "Optional probe: the council asks for the managed service's SLA in writing.",
+    reconsider: "What would you need to see before promising a service that has not launched?",
+    boundary: "Capture what is available now, what is planned and how it is described to the customer, and what you will not put in writing.",
+    notes: "Appearing in a customer deck, being deliverable today and being a fully packaged service are three different things. Use the catalogue's boundary for commitments. Ask a planned-services table what happens if the launch slips. Traps: promising unlimited team capacity or a live managed service. Optional probe: the council says it would rather wait for Data#3's managed service than sign with the integrator.",
+  },
+] as const;
+
+export const MARLOWVALE_STORY = "Marlow Vale is a fictional regional council with about 900 staff on Microsoft 365 E5. A handful of people have Copilot licences, and staff have built several agents on their own. The CEO wants AI everywhere by year end; IT wants a roadmap and proof of value first. Budget is tight, and everything you commit to has to be delivered. You are the Data#3 account team: make a call, name what it gives up, and hear why another table chose differently.";

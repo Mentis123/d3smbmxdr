@@ -54,8 +54,11 @@ for (const scenario of Object.values(SCENARIOS)) {
   console.log(`\n2. ${scenario.key}: structure`);
   const n = scenario.rounds.length;
   check("six rounds, numbered in order", n === 6 && scenario.rounds.every((r, i) => r.roundNo === i + 1));
-  check("either meters or named facts", Boolean(scenario.meters) !== Boolean(scenario.facts));
-  check("launch steps cover every terminal line", scenario.launch.steps.length === scenario.launch.lines.length + 1 && scenario.launch.steps.every((s) => s.path.length === scenario.stages.length));
+  // On-rails rooms (Coastwater, Marlow Vale) carry no state model: discussion, not consequences.
+  const rails = ["coastwater", "marlowvale"].includes(scenario.family);
+  if (rails) check("on-rails: no meters, facts or stages", !scenario.meters && !scenario.facts && scenario.stages.length === 0);
+  else check("either meters or named facts", Boolean(scenario.meters) !== Boolean(scenario.facts));
+  if (!rails) check("launch steps cover every terminal line", scenario.launch.steps.length === scenario.launch.lines.length + 1 && scenario.launch.steps.every((s) => s.path.length === scenario.stages.length));
   check("run plan: opening, launch, six rounds, close", scenario.runPlan.segments.length === 9 && scenario.runPlan.segments.at(-1).to === scenario.runPlan.totalMinutes);
   for (const round of scenario.rounds) {
     const where = `round ${round.roundNo}`;

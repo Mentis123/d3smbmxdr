@@ -8,18 +8,22 @@ Open `/decision-room/marlow-vale`, choose Facilitate, enter the facilitator key 
 
 ## The six decisions
 
-1. Ride the momentum, or earn the roadmap? (licence-led vs services-led)
-2. Funded door, or funded delivery? (partner funding covers only a few days)
-3. Copilot this month, or Copilot safely? (oversharing, targeted vs estate-wide)
-4. Business champion, or IT gatekeeper? (data/Fabric; who commits next)
-5. Extend the demo, or price production? (prototype to production, scarce specialists)
-6. Sell what exists, or what's coming? (planned services vs a global integrator)
+Every option names the Data#3 offer it stands for (shown as a gold tag on the display), using only names already in customer-facing material.
+
+1. Ride the momentum, or earn the roadmap? Copilot Scale Deployment, Copilot Pilot, AI Platform & Agent Governance, AI Envisioning: Copilot & Agents. Funding guidance lives in the notes.
+2. Move the reports, or rethink the data? Fabric Foundation Rapid, Analytics Assessment & Design, Data Platform Foundations, AI Envisioning: Azure AI & Fabric.
+3. Copilot this month, or Copilot safely? M365 Copilot Readiness Assessment, Copilot Shield, Copilot Pilot, Readiness and Shield together.
+4. Business champion, or IT gatekeeper? Data Product Factory, AI Data Readiness, Use Case Assessment, or waiting.
+5. Extend the demo, or price production? Agent Prototyping, Iterative Agent Builds, AI Platform & Agent Governance, AI Security & Risk Controls.
+6. One phase, or the whole lifecycle? Iterative Agent Builds, Recurring Support Services, AI Squads, AI Managed Service & Support.
+
+Each discussion asks the customer's view first, then what the table gave up, then each table says its opening line to the customer out loud.
 
 Close: read back each table's pattern (licences or services, business or IT, speed or readiness) and what it refused to promise. No scores.
 
 ## Sources and what stays out
 
-Built 28 Oct 2026 from an M365 Copilot (Work IQ) research pass over internal seller enablement, the customer journey deck, proposals and the 1 Oct and 27 Oct funding guidance (proposals show only the first-milestone funding amount; the consumption portion is never positioned). This page is public, so room text carries no prices, ROMs, funding amounts, FY27 targets, capacity ratings, launch dates, competitor names, offer names or real pursuits. The facilitator maps options to offers out loud.
+Built 28 Oct 2026 from an M365 Copilot (Work IQ) research pass over internal seller enablement, the customer journey deck, proposals and the 1 Oct and 27 Oct funding guidance (proposals show only the first-milestone funding amount; the consumption portion is never positioned). This page is public, so room text (facilitator notes included) carries no prices, ROMs, funding amounts, FY27 targets, capacity ratings, launch dates, competitor names or real pursuits. Offer names are limited to those already in customer-facing material (the AI customer journey deck, Envisioning deck, Fabric brochure and analytics two-pager), per the owner on 29 Oct 2026.
 
 Owner checks before a customer-adjacent run: funding treatment (Microsoft Incentives team), offer status and launch timing (practice leads).
 

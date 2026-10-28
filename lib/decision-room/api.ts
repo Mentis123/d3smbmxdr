@@ -76,8 +76,10 @@ const db = client ? { execute: async <T,>(query: T) => query } : null;
 type TeamState = "not_joined" | "reading" | "debating" | "locked";
 type RoundState = "lobby" | "launched" | "open" | "closed" | "published" | "ended";
 
+/** "physical": one device per table (default). "virtual": everyone joins; the first device in holds the pen, the rest watch. */
+type RoomMode = "physical" | "virtual";
 type Session = {
-  id: string; joinCode: string; name: string; variant: string; scenario: string | null; status: string;
+  id: string; joinCode: string; name: string; variant: string; scenario: string | null; status: string; mode: RoomMode;
   activeRound: number; resultsVisible: boolean; revision: number; displayTokenHash: string;
   roundStartedAt: string | null; roundClosedAt: string | null; launchedAt: string | null;
   schedule?: SessionSchedule | null;
@@ -85,6 +87,8 @@ type Session = {
   audienceTimer?: boolean;
 };
 type Team = { id: string; sessionId: string; teamCode: string; displayName: string; tokenHash: string | null; state: TeamState; lastSeenAt: string | null; pendingHash: string | null; pendingName: string | null; pendingAt: string | null; pendingState: string | null; pendingPolledAt: string | null; pendingReleaseId: string | null; pendingReleaseHash: string | null };
+/** A teammate watching a table in a virtual room: same screen as the owner, no pen. */
+type Viewer = { id: string; sessionId: string; teamId: string; tokenHash: string; name: string | null; lastSeenAt: string | null };
 type Decision = { id: string; sessionId: string; teamId: string; roundNo: number; optionKey: string | null; rationale: string; confidence: number | null; isLocked: boolean; isFeatured: boolean; updatedAt: string };
 
 const MAX_FEATURED = 2;
@@ -92,7 +96,7 @@ const VARIANT = "riverbend";
 /** The most rounds any scenario has; the per-room count is checked against the room's own scenario. */
 const MAX_ROUNDS = 12;
 
-const memory = { sessions: new Map<string, Session>(), teams: new Map<string, Team>(), decisions: new Map<string, Decision>() };
+const memory = { sessions: new Map<string, Session>(), teams: new Map<string, Team>(), viewers: new Map<string, Viewer>(), decisions: new Map<string, Decision>() };
 let tablesReady: Promise<void> | null = null;
 
 const sha = (value: string) => createHash("sha256").update(value).digest("hex");
@@ -150,11 +154,14 @@ async function ensureTables() {
     await db.execute(sql`ALTER TABLE workshop_sessions ADD COLUMN IF NOT EXISTS launched_at timestamptz`);
     // Scenario pinning: NULL means "created before pinning" and resolves to riverbend@1 (scenarios.ts).
     await db.execute(sql`ALTER TABLE workshop_sessions ADD COLUMN IF NOT EXISTS scenario varchar(32)`);
+    // Room mode: physical (one device per table) or virtual (owner plus viewers). Rooms made before it exist are physical.
+    await db.execute(sql`ALTER TABLE workshop_sessions ADD COLUMN IF NOT EXISTS mode varchar(8) NOT NULL DEFAULT 'physical'`);
     await db.execute(sql`ALTER TABLE workshop_sessions DROP CONSTRAINT IF EXISTS workshop_sessions_variant_check`);
     await db.execute(sql`ALTER TABLE workshop_sessions DROP CONSTRAINT IF EXISTS workshop_sessions_active_round_check`);
     await db.execute(sql`CREATE TABLE IF NOT EXISTS workshop_teams (id uuid PRIMARY KEY, session_id uuid NOT NULL REFERENCES workshop_sessions(id) ON DELETE CASCADE, team_code varchar(12) NOT NULL, display_name text NOT NULL, token_hash text, state varchar(16) NOT NULL DEFAULT 'not_joined', last_seen_at timestamptz, created_at timestamptz NOT NULL DEFAULT now(), UNIQUE(session_id, team_code))`);
     // Handover requests: a second phone asking to take over an occupied table waits for the first phone to approve.
     await db.execute(sql`ALTER TABLE workshop_teams ADD COLUMN IF NOT EXISTS pending_token_hash text, ADD COLUMN IF NOT EXISTS pending_name text, ADD COLUMN IF NOT EXISTS pending_at timestamptz, ADD COLUMN IF NOT EXISTS pending_state varchar(12), ADD COLUMN IF NOT EXISTS pending_polled_at timestamptz, ADD COLUMN IF NOT EXISTS pending_release_id uuid, ADD COLUMN IF NOT EXISTS pending_release_hash text`);
+    await db.execute(sql`CREATE TABLE IF NOT EXISTS workshop_viewers (id uuid PRIMARY KEY, session_id uuid NOT NULL REFERENCES workshop_sessions(id) ON DELETE CASCADE, team_id uuid NOT NULL REFERENCES workshop_teams(id) ON DELETE CASCADE, token_hash text NOT NULL, name text, last_seen_at timestamptz, created_at timestamptz NOT NULL DEFAULT now())`);
     await db.execute(sql`CREATE TABLE IF NOT EXISTS workshop_decisions (id uuid PRIMARY KEY, session_id uuid NOT NULL REFERENCES workshop_sessions(id) ON DELETE CASCADE, team_id uuid NOT NULL REFERENCES workshop_teams(id) ON DELETE CASCADE, round_no integer NOT NULL, option_key varchar(4), action text NOT NULL DEFAULT '', accepted_tradeoff text NOT NULL DEFAULT '', reversal_evidence text NOT NULL DEFAULT '', confidence integer, is_locked boolean NOT NULL DEFAULT false, is_featured boolean NOT NULL DEFAULT false, locked_at timestamptz, updated_at timestamptz NOT NULL DEFAULT now(), UNIQUE(team_id, round_no))`);
     await db.execute(sql`ALTER TABLE workshop_decisions DROP CONSTRAINT IF EXISTS workshop_decisions_round_no_check`);
     await db.execute(sql`CREATE TABLE IF NOT EXISTS workshop_events (id uuid PRIMARY KEY, session_id uuid NOT NULL REFERENCES workshop_sessions(id) ON DELETE CASCADE, event_type text NOT NULL, payload jsonb NOT NULL DEFAULT '{}'::jsonb, created_at timestamptz NOT NULL DEFAULT now())`);
@@ -163,7 +170,7 @@ async function ensureTables() {
 }
 
 function mapSession(r: any): Session {
-  return { id: r.id, joinCode: r.join_code, name: r.name, variant: r.variant, scenario: r.scenario ?? null, status: r.status, activeRound: r.active_round, resultsVisible: r.results_visible, revision: r.revision, displayTokenHash: r.display_token_hash, roundStartedAt: r.round_started_at, roundClosedAt: r.round_closed_at ?? null, launchedAt: r.launched_at ?? null };
+  return { id: r.id, joinCode: r.join_code, name: r.name, variant: r.variant, scenario: r.scenario ?? null, status: r.status, mode: r.mode === "virtual" ? "virtual" : "physical", activeRound: r.active_round, resultsVisible: r.results_visible, revision: r.revision, displayTokenHash: r.display_token_hash, roundStartedAt: r.round_started_at, roundClosedAt: r.round_closed_at ?? null, launchedAt: r.launched_at ?? null };
 }
 function mapTeam(r: any): Team {
   return { id: r.id, sessionId: r.session_id, teamCode: r.team_code, displayName: r.display_name, tokenHash: r.token_hash, state: r.state, lastSeenAt: r.last_seen_at, pendingHash: r.pending_token_hash ?? null, pendingName: r.pending_name ?? null, pendingAt: r.pending_at ?? null, pendingState: r.pending_state ?? null, pendingPolledAt: r.pending_polled_at ?? null, pendingReleaseId: r.pending_release_id ?? null, pendingReleaseHash: r.pending_release_hash ?? null };
@@ -188,6 +195,20 @@ async function getTeams(sessionId: string) {
   if (!db) return Array.from(memory.teams.values()).filter((t) => t.sessionId === sessionId);
   return rows<any>(await db.execute(sql`SELECT * FROM workshop_teams WHERE session_id=${sessionId}::uuid ORDER BY created_at`)).map(mapTeam);
 }
+async function getViewers(sessionId: string): Promise<Viewer[]> {
+  if (!db) return Array.from(memory.viewers.values()).filter((v) => v.sessionId === sessionId);
+  return rows<any>(await db.execute(sql`SELECT * FROM workshop_viewers WHERE session_id=${sessionId}::uuid ORDER BY created_at`)).map((r) => ({ id: r.id, sessionId: r.session_id, teamId: r.team_id, tokenHash: r.token_hash, name: r.name ?? null, lastSeenAt: r.last_seen_at ?? null }));
+}
+async function addViewer(viewer: Viewer) {
+  if (db) await db.execute(sql`INSERT INTO workshop_viewers(id,session_id,team_id,token_hash,name,last_seen_at) VALUES(${viewer.id}::uuid,${viewer.sessionId}::uuid,${viewer.teamId}::uuid,${viewer.tokenHash},${viewer.name},now())`);
+  else memory.viewers.set(viewer.id, viewer);
+}
+async function removeViewer(id: string) {
+  if (db) await db.execute(sql`DELETE FROM workshop_viewers WHERE id=${id}::uuid`);
+  else memory.viewers.delete(id);
+}
+/** Viewers seen recently enough to count as in the room. */
+const liveViewers = (viewers: Viewer[], teamId: string) => viewers.filter((v) => v.teamId === teamId && ageMs(v.lastSeenAt) < onlineMs());
 async function getDecisions(sessionId: string) {
   if (!db) return Array.from(memory.decisions.values()).filter((d) => d.sessionId === sessionId);
   return rows<any>(await db.execute(sql`SELECT * FROM workshop_decisions WHERE session_id=${sessionId}::uuid ORDER BY round_no, updated_at`)).map(mapDecision);
@@ -278,9 +299,11 @@ async function closeRequest(team: Team, state: "declined" | null) {
   else Object.assign(team, CLEAR_PENDING);
 }
 /** Moves the table to the asking device, only if `expectedHash` is still the open request; frees the table that device is leaving. */
-async function completeHandover(team: Team, teams: Team[], expectedHash: string | null) {
+async function completeHandover(team: Team, teams: Team[], expectedHash: string | null, session?: Session) {
   if (!expectedHash || !isLive(team) || team.pendingHash !== expectedHash) return false;
-  const name = team.pendingName || team.displayName;
+  // Virtual room: the device losing the pen stays at the table as a viewer; the one taking it stops being one.
+  const demote = session?.mode === "virtual" && team.tokenHash ? { id: randomUUID(), sessionId: team.sessionId, teamId: team.id, tokenHash: team.tokenHash, name: null, lastSeenAt: new Date().toISOString() } : null;
+  const name = session?.mode === "virtual" ? team.displayName : team.pendingName || team.displayName;
   const state: TeamState = team.state === "not_joined" ? "reading" : team.state;
   const releaseId = team.pendingReleaseId, releaseHash = team.pendingReleaseHash;
   if (db) {
@@ -289,6 +312,8 @@ async function completeHandover(team: Team, teams: Team[], expectedHash: string 
     if (releaseId && releaseHash) await db.execute(sql`UPDATE workshop_teams SET token_hash=NULL,state='not_joined' WHERE id=${releaseId}::uuid AND token_hash=${releaseHash}`);
   }
   Object.assign(team, { tokenHash: expectedHash, displayName: name, state, lastSeenAt: new Date().toISOString(), ...CLEAR_PENDING });
+  if (demote) await addViewer(demote);
+  for (const v of (await getViewers(team.sessionId)).filter((v) => v.tokenHash === expectedHash)) await removeViewer(v.id);
   if (!db && releaseId) { const left = teams.find((t) => t.id === releaseId && t.tokenHash === releaseHash); if (left) Object.assign(left, { tokenHash: null, state: "not_joined" }); }
   return true;
 }
@@ -300,6 +325,16 @@ function roundState(session: Session): RoundState {
   if (session.resultsVisible) return "published";
   if (session.roundClosedAt) return "closed";
   return "open";
+}
+/** The table a device belongs to and its role: the owner holds the pen; a viewer (virtual rooms) watches. */
+function memberOf(teams: Team[], viewers: Viewer[], req: Request): { team: Team; role: "owner" | "viewer"; viewer: Viewer | null } | null {
+  const provided = String(req.headers["x-team-token"] ?? "");
+  if (!provided) return null;
+  const owner = teams.find((t) => t.tokenHash && matchesHash(provided, t.tokenHash));
+  if (owner) return { team: owner, role: "owner", viewer: null };
+  const viewer = viewers.find((v) => matchesHash(provided, v.tokenHash));
+  const team = viewer ? teams.find((t) => t.id === viewer.teamId) : null;
+  return viewer && team ? { team, role: "viewer", viewer } : null;
 }
 function teamOf(teams: Team[], req: Request) {
   const provided = String(req.headers["x-team-token"] ?? "");
@@ -329,7 +364,7 @@ function splitFor(decisions: Decision[], roundNo: number) {
 function sessionPayload(session: Session, scenario: Scenario) {
   const round = roundContent(scenario, session.activeRound);
   return {
-    id: session.id, joinCode: session.joinCode, name: session.name, status: session.status, revision: session.revision,
+    id: session.id, joinCode: session.joinCode, name: session.name, status: session.status, revision: session.revision, mode: session.mode,
     activeRound: session.activeRound, roundCount: roundCount(scenario), roundState: roundState(session),
     roundStartedAt: session.roundStartedAt, roundClosedAt: session.roundClosedAt, launchedAt: session.launchedAt,
     durationSeconds: scheduledVoteSeconds(scenario.runPlan, session.schedule, session.launchedAt, session.activeRound, round?.durationSeconds ?? 240),
@@ -345,7 +380,7 @@ function scenarioOf(session: Session, res: Response): Scenario | null {
   return scenario;
 }
 
-function participantPayload(session: Session, scenario: Scenario, team: Team, decisions: Decision[]) {
+function participantPayload(session: Session, scenario: Scenario, team: Team, decisions: Decision[], member: { role: "owner" | "viewer"; viewer: Viewer | null; viewers: Viewer[] } = { role: "owner", viewer: null, viewers: [] }) {
   const state = roundState(session);
   const round = roundContent(scenario, session.activeRound);
   const showRound = Boolean(round) && (state === "open" || state === "closed" || state === "published");
@@ -356,7 +391,11 @@ function participantPayload(session: Session, scenario: Scenario, team: Team, de
     scenario: scenarioInfo(scenario),
     session: sessionPayload(session, scenario),
     team: { id: team.id, displayName: team.displayName, state: team.state },
-    handover: pendingStatus(team) === "pending" ? { requestId: requestIdOf(team), name: team.pendingName, requestedAt: team.pendingAt, expiresInSeconds: handoverSeconds() } : null,
+    role: member.role,
+    viewers: liveViewers(member.viewers, team.id).length,
+    // A viewer's own open request to take the pen, so a reloaded page can keep waiting on it.
+    requesting: member.viewer ? pendingStatus(team) === "pending" && team.pendingHash === member.viewer.tokenHash : false,
+    handover: member.role === "owner" && pendingStatus(team) === "pending" ? { requestId: requestIdOf(team), name: team.pendingName, requestedAt: team.pendingAt, expiresInSeconds: handoverSeconds() } : null,
     organisation: scenario.organisation,
     // Resolved for this table's history: earlier calls change the evidence it is shown.
     round: showRound && round ? publicRound(scenario, round, choices) : null,
@@ -365,7 +404,7 @@ function participantPayload(session: Session, scenario: Scenario, team: Team, de
     results: state === "published" && round ? { ...splitFor(decisions, session.activeRound), consequence, reveal: round.reveal ?? null } : null,
   };
 }
-function consolePayload(session: Session, scenario: Scenario, teams: Team[], decisions: Decision[]) {
+function consolePayload(session: Session, scenario: Scenario, teams: Team[], decisions: Decision[], viewers: Viewer[] = []) {
   const state = roundState(session);
   const round = roundContent(scenario, session.activeRound);
   const counts = { notJoined: 0, joined: 0, locked: 0 };
@@ -380,7 +419,7 @@ function consolePayload(session: Session, scenario: Scenario, teams: Team[], dec
     // The room-wide view: the round as written, before any one table's history.
     round: showRound && round ? publicRound(scenario, round) : null,
     counts: { ...counts, total: teams.length },
-    teams: teams.map((t) => ({ id: t.id, displayName: t.displayName, state: t.state, handover: isLive(t) })),
+    teams: teams.map((t) => ({ id: t.id, displayName: t.displayName, state: t.state, handover: isLive(t), viewers: liveViewers(viewers, t.id).length })),
     results: state === "published" && round ? { ...splitFor(decisions, session.activeRound), reveal: round.reveal ?? null } : null,
     discussion: isRails(scenario.family) && (state === "closed" || state === "published") ? splitFor(decisions, session.activeRound) : null,
     stages: scenario.stages,
@@ -401,7 +440,7 @@ function csvCell(value: unknown) {
   return `"${text.replace(/"/g, '""')}"`;
 }
 
-const createSchema = z.object({ name: z.string().trim().min(2).max(80).default("When the agent attacks"), tableCount: z.number().int().min(2).max(50).default(8), variant: z.string().optional() });
+const createSchema = z.object({ name: z.string().trim().min(2).max(80).default("When the agent attacks"), tableCount: z.number().int().min(2).max(50).default(8), variant: z.string().optional(), mode: z.enum(["physical", "virtual"]).default("physical") });
 const joinSchema = z.object({ joinCode: z.string().trim().min(4).max(8), teamCode: z.string().trim().min(1).max(12), teamName: z.string().trim().max(40).optional() });
 const decisionSchema = z.object({ roundNo: z.number().int().min(1).max(MAX_ROUNDS), optionKey: z.enum(["A", "B", "C", "D"]), rationale: z.string().trim().max(240).default(""), confidence: z.number().int().min(1).max(5).nullable().optional(), lock: z.boolean().default(false) });
 const handoverSchema = z.object({ decision: z.enum(["approve", "decline"]), requestId: z.string().min(8).max(64) });
@@ -438,16 +477,16 @@ function registerDecisionRoomRoutes(app: Express) {
     const variant = railsFamilyOfVariant(input.variant) ? input.variant! : input.variant === "agent0" ? "agent0" : VARIANT;
     // Pinned for life: later content revisions never change what this room's choices meant.
     const scenario = scenarioKeyForNewRoom(variant);
-    const session: Session = { id: sessionId, joinCode, name: input.name, variant, scenario, status: "lobby", activeRound: 1, resultsVisible: false, revision: 1, displayTokenHash: sha(displayToken), roundStartedAt: null, roundClosedAt: null, launchedAt: null };
+    const session: Session = { id: sessionId, joinCode, name: input.name, variant, scenario, status: "lobby", mode: input.mode, activeRound: 1, resultsVisible: false, revision: 1, displayTokenHash: sha(displayToken), roundStartedAt: null, roundClosedAt: null, launchedAt: null };
     if (db) {
-      await db.execute(sql`INSERT INTO workshop_sessions(id,join_code,name,variant,scenario,display_token_hash) VALUES(${sessionId}::uuid,${joinCode},${input.name},${variant},${scenario},${session.displayTokenHash})`);
+      await db.execute(sql`INSERT INTO workshop_sessions(id,join_code,name,variant,scenario,mode,display_token_hash) VALUES(${sessionId}::uuid,${joinCode},${input.name},${variant},${scenario},${input.mode},${session.displayTokenHash})`);
       for (let i = 1; i <= input.tableCount; i++) await db.execute(sql`INSERT INTO workshop_teams(id,session_id,team_code,display_name) VALUES(${randomUUID()}::uuid,${sessionId}::uuid,${String(i)},${`Table ${i}`})`);
     } else {
       memory.sessions.set(sessionId, session);
       for (let i = 1; i <= input.tableCount; i++) { const id = randomUUID(); memory.teams.set(id, { id, sessionId, teamCode: String(i), displayName: `Table ${i}`, tokenHash: null, state: "not_joined", lastSeenAt: null, pendingHash: null, pendingName: null, pendingAt: null, pendingState: null, pendingPolledAt: null, pendingReleaseId: null, pendingReleaseHash: null }); }
     }
-    await event(sessionId, "created", { tableCount: input.tableCount, variant, scenario });
-    res.status(201).json({ sessionId, joinCode, displayToken, scenario });
+    await event(sessionId, "created", { tableCount: input.tableCount, variant, scenario, mode: input.mode });
+    res.status(201).json({ sessionId, joinCode, displayToken, scenario, mode: input.mode });
   } catch (e) { fail(e, res, next); } });
 
   // Public, by room code: which tables are free and which are already joined, so a phone picks its own table.
@@ -456,9 +495,10 @@ function registerDecisionRoomRoutes(app: Express) {
     const session = await findSession(req.params.code);
     if (!session || session.joinCode !== req.params.code.toUpperCase()) { res.status(404).json({ message: "Room not found" }); return; }
     if (session.status === "ended") { res.status(409).json({ message: "This room has ended" }); return; }
-    const tables = (await getTeams(session.id)).map((t) => ({ teamCode: t.teamCode, displayName: t.displayName, taken: Boolean(t.tokenHash) }));
+    const viewers = await getViewers(session.id);
+    const tables = (await getTeams(session.id)).map((t) => ({ teamCode: t.teamCode, displayName: t.displayName, taken: Boolean(t.tokenHash), viewers: liveViewers(viewers, t.id).length }));
     tables.sort((a, b) => (Number(a.teamCode) - Number(b.teamCode)) || a.teamCode.localeCompare(b.teamCode));
-    res.json({ joinCode: session.joinCode, tables });
+    res.json({ joinCode: session.joinCode, mode: session.mode, tables });
   } catch (e) { fail(e, res, next); } });
 
   app.post("/api/decision-room/join", async (req, res, next) => { try {
@@ -475,6 +515,16 @@ function registerDecisionRoomRoutes(app: Express) {
     const cleanName = (input.teamName ?? "").replace(/[\u0000-\u001f\u007f<>]/g, "").trim().slice(0, 40);
     // The device may already hold a table in this room (its own table, or the one it is leaving).
     const current = teamOf(teams, req);
+    if (session.mode === "virtual" && team.tokenHash && isOnline(team) && current?.id !== team.id) {
+      // Virtual room: the table already has an owner, so this device joins as a viewer and can ask for the pen later.
+      const viewers = await getViewers(session.id);
+      const previous = memberOf(teams, viewers, req);
+      if (previous?.viewer) await removeViewer(previous.viewer.id);
+      await addViewer({ id: randomUUID(), sessionId: session.id, teamId: team.id, tokenHash: hash, name: cleanName || null, lastSeenAt: new Date().toISOString() });
+      await bump(session.id);
+      res.json({ teamToken, sessionId: session.id, joinCode: session.joinCode, displayName: team.displayName, role: "viewer" });
+      return;
+    }
     if (team.tokenHash && isOnline(team) && current?.id !== team.id) {
       // Another device is active at this table: ask it first instead of signing it out. One live request at a time.
       if (isLive(team)) { res.status(409).json({ message: "Another device is already asking for this table. Try again in a moment." }); return; }
@@ -493,20 +543,48 @@ function registerDecisionRoomRoutes(app: Express) {
     const displayName = cleanName || team.displayName;
     if (db) await db.execute(sql`UPDATE workshop_teams SET token_hash=${hash},state=${state},display_name=${displayName},last_seen_at=now(),pending_token_hash=NULL,pending_name=NULL,pending_at=NULL,pending_state=NULL,pending_polled_at=NULL,pending_release_id=NULL,pending_release_hash=NULL WHERE id=${team.id}::uuid`);
     else Object.assign(team, { tokenHash: hash, state, displayName, lastSeenAt: new Date().toISOString(), ...CLEAR_PENDING });
+    if (session.mode === "virtual") for (const v of (await getViewers(session.id)).filter((v) => matchesHash(String(req.headers["x-team-token"] ?? ""), v.tokenHash))) await removeViewer(v.id);
     await bump(session.id);
-    res.json({ teamToken, sessionId: session.id, joinCode: session.joinCode, displayName });
+    res.json({ teamToken, sessionId: session.id, joinCode: session.joinCode, displayName, role: "owner" });
+  } catch (e) { fail(e, res, next); } });
+
+  // Virtual rooms: a viewer asks for the pen. The owner gets the usual pop-up; a quiet owner is replaced straight away.
+  app.post("/api/decision-room/sessions/:identifier/ownership", async (req, res, next) => { try {
+    if (rejectMissingDatabase(res)) return;
+    const session = await findSession(req.params.identifier);
+    if (!session) { res.status(404).json({ message: "Room not found" }); return; }
+    if (session.mode !== "virtual") { res.status(400).json({ message: "This room has one device per table" }); return; }
+    const teams = await getTeams(session.id), viewers = await getViewers(session.id);
+    const member = memberOf(teams, viewers, req);
+    if (!member) { res.status(401).json({ message: "Rejoin your table to continue" }); return; }
+    if (member.role === "owner") { res.json({ status: "approved" }); return; }
+    const { team, viewer } = member; const hash = viewer!.tokenHash;
+    if (!isOnline(team)) {
+      // The owner's device has gone quiet: hand the pen over rather than strand the table.
+      await openRequest(team, hash, null, null);
+      if (await completeHandover(team, teams, hash, session)) { await event(session.id, "handover", { teamId: team.id, by: "timeout" }); await bump(session.id); res.json({ status: "approved" }); return; }
+    }
+    if (isLive(team) && team.pendingHash === hash) { res.status(202).json({ status: "pending", expiresInSeconds: handoverSeconds() }); return; }
+    if (isLive(team)) { res.status(409).json({ message: "Someone else is already asking for the pen. Try again in a moment." }); return; }
+    await openRequest(team, hash, viewer!.name, null);
+    await event(session.id, "handover-requested", { teamId: team.id, by: "viewer" });
+    await bump(session.id);
+    res.status(202).json({ status: "pending", expiresInSeconds: handoverSeconds() });
   } catch (e) { fail(e, res, next); } });
 
   app.get("/api/decision-room/sessions/:identifier/participant", async (req, res, next) => { try {
     if (rejectMissingDatabase(res)) return;
     const session = await findSession(req.params.identifier);
     if (!session) { res.status(404).json({ message: "Room not found" }); return; }
-    const team = teamOf(await getTeams(session.id), req);
-    if (!team) { res.status(401).json({ message: "Rejoin your table to continue" }); return; }
+    const teams = await getTeams(session.id), viewers = await getViewers(session.id);
+    const member = memberOf(teams, viewers, req);
+    if (!member) { res.status(401).json({ message: "Rejoin your table to continue" }); return; }
+    const { team } = member;
     const scenario = scenarioOf(session, res); if (!scenario) return;
-    if (db) await db.execute(sql`UPDATE workshop_teams SET last_seen_at=now() WHERE id=${team.id}::uuid`);
+    if (member.viewer) { if (db) await db.execute(sql`UPDATE workshop_viewers SET last_seen_at=now() WHERE id=${member.viewer.id}::uuid`); member.viewer.lastSeenAt = new Date().toISOString(); }
+    else if (db) await db.execute(sql`UPDATE workshop_teams SET last_seen_at=now() WHERE id=${team.id}::uuid`);
     else team.lastSeenAt = new Date().toISOString();
-    res.json(participantPayload(session, scenario, team, await getDecisions(session.id)));
+    res.json(participantPayload(session, scenario, team, await getDecisions(session.id), { role: member.role, viewer: member.viewer, viewers }));
   } catch (e) { fail(e, res, next); } });
 
   app.put("/api/decision-room/sessions/:identifier/decision", async (req, res, next) => { try {
@@ -518,7 +596,12 @@ function registerDecisionRoomRoutes(app: Express) {
     if (input.roundNo > roundCount(scenario)) { res.status(400).json({ message: "No such round in this room" }); return; }
     if (roundState(session) !== "open" || input.roundNo !== session.activeRound) { res.status(409).json({ message: "This round is not accepting responses" }); return; }
     const team = teamOf(await getTeams(session.id), req);
-    if (!team) { res.status(401).json({ message: "Rejoin your table to continue" }); return; }
+    if (!team) {
+      const provided = String(req.headers["x-team-token"] ?? "");
+      const watching = Boolean(provided) && (await getViewers(session.id)).some((v) => matchesHash(provided, v.tokenHash));
+      if (watching) { res.status(403).json({ message: "Only the table owner can save. Ask for the pen from your screen." }); return; }
+      res.status(401).json({ message: "Rejoin your table to continue" }); return;
+    }
     const existing = (await getDecisions(session.id)).find((d) => d.teamId === team.id && d.roundNo === input.roundNo);
     if (existing?.isLocked) { res.status(409).json({ message: "This response is locked. Ask Adam to reopen your table if it must change." }); return; }
     if (input.lock && !input.confidence) { res.status(400).json({ message: "Pick a confidence from 1 to 5 before you lock" }); return; }
@@ -550,7 +633,7 @@ function registerDecisionRoomRoutes(app: Express) {
       if (db) await db.execute(sql`UPDATE workshop_teams SET pending_polled_at=${now} WHERE id=${asked.id}::uuid AND pending_token_hash=${asked.pendingHash}`);
       asked.pendingPolledAt = now.toISOString();
       // The device being asked went quiet while the request was open: hand the table over rather than strand it.
-      if (!isOnline(asked) && await completeHandover(asked, teams, asked.pendingHash)) {
+      if (!isOnline(asked) && await completeHandover(asked, teams, asked.pendingHash, session)) {
         await event(session.id, "handover", { teamId: asked.id, by: "timeout" }); await bump(session.id);
         res.json({ status: "approved", displayName: asked.displayName }); return;
       }
@@ -579,7 +662,7 @@ function registerDecisionRoomRoutes(app: Express) {
     const team = teamOf(teams, req);
     if (!team) { res.status(401).json({ message: "Rejoin your table to continue" }); return; }
     if (!isLive(team) || requestIdOf(team) !== input.requestId) { res.status(409).json({ message: "That request is no longer waiting" }); return; }
-    if (input.decision === "approve") { if (!(await completeHandover(team, teams, team.pendingHash))) { res.status(409).json({ message: "That request is no longer waiting" }); return; } }
+    if (input.decision === "approve") { if (!(await completeHandover(team, teams, team.pendingHash, session))) { res.status(409).json({ message: "That request is no longer waiting" }); return; } }
     else await closeRequest(team, "declined");
     await event(session.id, input.decision === "approve" ? "handover" : "handover-declined", { teamId: team.id, by: "table" });
     await bump(session.id);
@@ -593,7 +676,7 @@ function registerDecisionRoomRoutes(app: Express) {
     const displayToken = String(req.query.displayToken ?? "");
     if ((!displayToken || !matchesHash(displayToken, session.displayTokenHash)) && !ensureAdmin(req, res)) return;
     const scenario = scenarioOf(session, res); if (!scenario) return;
-    res.json(consolePayload(session, scenario, await getTeams(session.id), await getDecisions(session.id)));
+    res.json(consolePayload(session, scenario, await getTeams(session.id), await getDecisions(session.id), await getViewers(session.id)));
   } catch (e) { fail(e, res, next); } });
 
   app.get("/api/decision-room/sessions/:identifier/admin", async (req, res, next) => { try {
@@ -605,7 +688,7 @@ function registerDecisionRoomRoutes(app: Express) {
     const names = new Map(teams.map((t) => [t.id, t.displayName]));
     const round = roundContent(scenario, session.activeRound);
     res.json({
-      ...consolePayload(session, scenario, teams, decisions),
+      ...consolePayload(session, scenario, teams, decisions, await getViewers(session.id)),
       // Facilitator only: the conditional guidance for the active round, the run plan and (V1) the deck's best move.
       guidance: round?.guidance ?? null,
       bestMove: scenario.bestMove?.[session.activeRound] ?? null,
@@ -710,7 +793,7 @@ function registerDecisionRoomRoutes(app: Express) {
     } else if (input.action === "handover") {
       const team = teams.find((t) => t.id === input.teamId);
       if (!team) { res.status(404).json({ message: "Table not found" }); return; }
-      if (!(await completeHandover(team, teams, team.pendingHash))) { res.status(409).json({ message: "No device is waiting to take over that table any more" }); return; }
+      if (!(await completeHandover(team, teams, team.pendingHash, session))) { res.status(409).json({ message: "No device is waiting to take over that table any more" }); return; }
     } else if (input.action === "reopen") {
       if (state === "published") { res.status(409).json({ message: "The split is already on the screen for this round" }); return; }
       const team = teams.find((t) => t.id === input.teamId);

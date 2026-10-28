@@ -643,3 +643,15 @@
 
 .dr-coastwater-console-link{padding:16px 0}.dr-coastwater-console-link>a{white-space:normal}.dr-coastwater-console-link .dr-hint{margin-top:10px}
 .dr-audience-timer{padding:18px 20px;border:1px solid #78dcff44;border-radius:12px;margin:16px 0;background:#0a1b3a99}.dr-audience-timer label{display:flex;align-items:center;gap:12px;font-weight:700;font-size:17px}.dr-audience-timer input{width:20px;height:20px;accent-color:#00aeff}.dr-audience-timer p{font-size:14px;color:#b9ccdf;margin:10px 0 0}
+/* Online rooms: pick where the tables are when creating; owner/viewer banner at the table. */
+.dr-mode-pick{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:6px 0 14px}
+.dr-mode-pick button{text-align:left;padding:12px 14px;border:1px solid rgba(0,174,255,.25);border-radius:10px;background:#071b3a;color:#e6f1ff;cursor:pointer}
+.dr-mode-pick button b{display:block;margin-bottom:4px}
+.dr-mode-pick button small{display:block;font-size:12px;line-height:1.35;color:#b9ccdf}
+.dr-mode-pick button.selected{border-color:#00aeff;box-shadow:0 0 0 1px #00aeff inset}
+.dr-pen p{margin:0}
+.dr-pen .dr-actions{margin-top:10px}
+.dr-vote--viewer .dr-options button:disabled{opacity:1;cursor:default}
+.dr-vote--viewer .dr-options button:disabled:not(.selected){opacity:.55}
+@media(max-width:560px){.dr-mode-pick{grid-template-columns:1fr}}
+.dr-offer{display:block;width:fit-content;margin:4px 0 2px;padding:1px 8px;border:1px solid #ffb20066;border-radius:999px;color:#ffd27a;font-style:normal;font-size:12px;font-weight:600;letter-spacing:.02em}

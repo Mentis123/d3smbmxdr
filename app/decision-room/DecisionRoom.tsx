@@ -31,7 +31,7 @@ import type { SessionSchedule } from "../../lib/decision-room/timing";
 /* ------------------------------------------------------------------ types */
 
 type RoundState = "lobby" | "launched" | "open" | "closed" | "published" | "ended";
-type SessionInfo = { id: string; joinCode: string; name: string; status: string; revision: number; activeRound: number; roundCount: number; roundState: RoundState; roundStartedAt: string | null; roundClosedAt: string | null; launchedAt: string | null; durationSeconds: number; schedule: SessionSchedule | null; audienceTimer: boolean };
+type SessionInfo = { id: string; joinCode: string; name: string; status: string; revision: number; activeRound: number; roundCount: number; roundState: RoundState; roundStartedAt: string | null; roundClosedAt: string | null; launchedAt: string | null; durationSeconds: number; schedule: SessionSchedule | null; audienceTimer: boolean; mode?: "physical" | "virtual" };
 type Organisation = { name: string; tagline: string; estate: string; holds: string; reach: string; objective: string };
 type Feed = { kind: string; who: string; text: string };
 type Round = PublicRound;
@@ -40,10 +40,12 @@ type MeterKey = MeterDef;
 type Stage = { id: string; name: string; sub: string };
 type Split = { locked: number; options: Record<string, number>; confidence: { low: number | null; high: number | null; median: number | null }; featured: { id: string; rationale: string; confidence: number | null }[] };
 type Decision = { id: string; optionKey: string | null; rationale: string; confidence: number | null; isLocked: boolean };
-type ParticipantData = { scenario: ScenarioInfo; session: SessionInfo; team: { id: string; displayName: string; state: string }; handover: { requestId: string; name: string | null; requestedAt: string; expiresInSeconds: number } | null; organisation: Organisation; round: Round | null; decision: Decision | null; dashboard: Dashboard; results: (Split & { consequence: Consequence | null; reveal: Reveal | null }) | null };
-type ConsoleData = { scenario: ScenarioInfo; session: SessionInfo; organisation: Organisation; launch: Launch; round: Round | null; counts: { notJoined: number; joined: number; locked: number; total: number }; teams: { id: string; displayName: string; state: string; handover?: boolean }[]; results: (Split & { reveal: Reveal | null }) | null; stages: Stage[]; initialMeters?: Meters; meterKeys?: MeterKey[]; initialFacts?: FactState[]; decisions?: { id: string; teamId: string; table: string; optionKey: string | null; rationale: string; confidence: number | null; isLocked: boolean; isFeatured: boolean }[]; guidance?: Guidance | null; runPlan?: RunPlan; bestMove?: string | null };
+type ParticipantData = { scenario: ScenarioInfo; session: SessionInfo; team: { id: string; displayName: string; state: string }; role: "owner" | "viewer"; viewers: number; requesting: boolean; handover: { requestId: string; name: string | null; requestedAt: string; expiresInSeconds: number } | null; organisation: Organisation; round: Round | null; decision: Decision | null; dashboard: Dashboard; results: (Split & { consequence: Consequence | null; reveal: Reveal | null }) | null };
+type ConsoleData = { scenario: ScenarioInfo; session: SessionInfo; organisation: Organisation; launch: Launch; round: Round | null; counts: { notJoined: number; joined: number; locked: number; total: number }; teams: { id: string; displayName: string; state: string; handover?: boolean; viewers?: number }[]; results: (Split & { reveal: Reveal | null }) | null; stages: Stage[]; initialMeters?: Meters; meterKeys?: MeterKey[]; initialFacts?: FactState[]; decisions?: { id: string; teamId: string; table: string; optionKey: string | null; rationale: string; confidence: number | null; isLocked: boolean; isFeatured: boolean }[]; guidance?: Guidance | null; runPlan?: RunPlan; bestMove?: string | null };
 
 const API = "/api/decision-room";
+/** "Move fast (Fabric Foundation Rapid)": the offer in brackets becomes its own tag, as on the big screen. */
+const offerLabel = (label: string) => { const m = label.match(/^(.*) \(([^()]+)\)$/); return m ? <>{m[1]}<em className="dr-offer">{m[2]}</em></> : label; };
 /** What people type to reach the join page. The short link redirects to the d3smbmxdr domain, so it is only shown there. */
 const SHORT_JOIN: Record<string, string> = { "d3smbmxdr.vercel.app": "bit.ly/4evinZE" };
 const joinAddress = () => SHORT_JOIN[location.host] ?? `${location.host}/decision-room`;
@@ -203,14 +205,16 @@ function Landing({ presetCode, edition }: { presetCode?: string; edition?: Editi
   const [mode, setMode] = useState<"join" | "facilitate" | "display">("join");
   const [error, setError] = useState(""); const [busy, setBusy] = useState(false);
   const [joinCode, setJoinCode] = useState(presetCode || ""); const [teamCode, setTeamCode] = useState(""); const [teamName, setTeamName] = useState("");
-  const [tables, setTables] = useState<{ teamCode: string; displayName: string; taken: boolean }[] | null>(null);
+  const [tables, setTables] = useState<{ teamCode: string; displayName: string; taken: boolean; viewers?: number }[] | null>(null);
+  const [roomMode, setRoomMode] = useState<"physical" | "virtual">("physical");
+  const [newRoomMode, setNewRoomMode] = useState<"physical" | "virtual">("physical");
   const [tablesError, setTablesError] = useState("");
   // Live table picker: once a room code is typed (or arrives from the QR), show which tables are free and which are taken.
   useEffect(() => {
     if (mode !== "join" || joinCode.trim().length < 6) { setTables(null); setTablesError(""); return; }
     let alive = true;
     const load = async () => {
-      try { const data = await request<{ tables: { teamCode: string; displayName: string; taken: boolean }[] }>(`${API}/rooms/${encodeURIComponent(joinCode.trim())}/tables`); if (alive) { setTables(data.tables); setTablesError(""); } }
+      try { const data = await request<{ mode?: "physical" | "virtual"; tables: { teamCode: string; displayName: string; taken: boolean; viewers?: number }[] }>(`${API}/rooms/${encodeURIComponent(joinCode.trim())}/tables`); if (alive) { setTables(data.tables); setRoomMode(data.mode ?? "physical"); setTablesError(""); } }
       catch (e) { if (alive) { setTables(null); setTablesError((e as Error).message); } }
     };
     const first = setTimeout(load, 250); const id = setInterval(load, POLL_MS);
@@ -218,6 +222,8 @@ function Landing({ presetCode, edition }: { presetCode?: string; edition?: Editi
   }, [joinCode, mode]);
   const picked = tables?.find((t) => t.teamCode === teamCode) ?? null;
   const pickedTaken = Boolean(picked?.taken);
+  // Online room: a taken table is simply joined as a viewer; nobody is asked to hand over.
+  const joinsAsViewer = roomMode === "virtual" && pickedTaken;
   const freeCount = tables ? tables.filter((t) => !t.taken).length : 0;
   // Waiting for the device already signed in as the table to approve a handover.
   const [waiting, setWaiting] = useState<{ code: string; table: string; token: string; status: string } | null>(null);
@@ -248,7 +254,7 @@ function Landing({ presetCode, edition }: { presetCode?: string; edition?: Editi
     let previous = ""; try { previous = localStorage.getItem(`decision-room-prev:${code}`) || localStorage.getItem(`decision-room-team:${code}`) || ""; } catch { /* ignore */ }
     try {
       const data = await request<{ teamToken: string; joinCode: string; pending?: boolean }>(`${API}/join`, json({ joinCode, teamCode, teamName: teamName.trim() || undefined }, previous ? { "x-team-token": previous } : {}));
-      if (data.pending) { setWaiting({ code: data.joinCode, table: teamCode, token: data.teamToken, status: "pending" }); return; }
+      if (data.pending && !joinsAsViewer) { setWaiting({ code: data.joinCode, table: teamCode, token: data.teamToken, status: "pending" }); return; }
       try { localStorage.setItem(`decision-room-team:${data.joinCode}`, data.teamToken); localStorage.removeItem(`decision-room-prev:${data.joinCode}`); } catch { /* private mode: the table rejoins on reload */ }
       navigate(`/decision-room/session/${data.joinCode}`);
     } catch (e) { setError((e as Error).message); } finally { setBusy(false); }
@@ -256,7 +262,7 @@ function Landing({ presetCode, edition }: { presetCode?: string; edition?: Editi
   async function create() {
     setBusy(true); setError("");
     try {
-      const data = await request<{ sessionId: string; joinCode: string; displayToken: string }>(`${API}/sessions`, json({ tableCount, ...(edition ? { name: editions[edition].title, variant: railsFamilyOf ? railsFamilyOf : edition === "agent-0" ? "agent0" : "riverbend" } : {}) }, { "x-admin-key": adminKey }));
+      const data = await request<{ sessionId: string; joinCode: string; displayToken: string }>(`${API}/sessions`, json({ tableCount, mode: newRoomMode, ...(edition ? { name: editions[edition].title, variant: railsFamilyOf ? railsFamilyOf : edition === "agent-0" ? "agent0" : "riverbend" } : {}) }, { "x-admin-key": adminKey }));
       try { localStorage.setItem("decision-room-admin-key", adminKey); localStorage.setItem(`decision-room-display:${data.sessionId}`, data.displayToken); } catch { /* ignore */ }
       navigate(railsFamilyOf ? `/decision-room/${edition}/control?room=${data.sessionId}` : `/decision-room/admin/${data.sessionId}`);
     } catch (e) { setError((e as Error).message); } finally { setBusy(false); }
@@ -278,9 +284,10 @@ function Landing({ presetCode, edition }: { presetCode?: string; edition?: Editi
             <div className="dr-actions"><button onClick={() => { if (waiting.status === "pending" || waiting.status === "expired") void fetch(`${API}/sessions/${waiting.code}/handover`, { method: "DELETE", headers: { "x-team-token": waiting.token }, keepalive: true }).catch(() => undefined); setWaiting(null); }}>{waiting.status === "pending" || waiting.status === "expired" ? "Cancel" : "Back"}</button></div></div>}
           {mode === "join" && !waiting && <><h2>Join your table</h2><p className="dr-hint">The room code is on the big screen. Pick a free table and give it a name — it is what the room will see.</p><label>Room code<input value={joinCode} onChange={(e) => setJoinCode(e.target.value.toUpperCase())} placeholder="ABC123" maxLength={8} autoCapitalize="characters" autoCorrect="off" /></label>{tables ? <div className="dr-tablepick"><span className="dr-label">Pick your table</span><div className="dr-tablegrid" role="group" aria-label="Tables in this room">{tables.map((t) => { const named = t.displayName !== `Table ${t.teamCode}`; return <button type="button" key={t.teamCode} className={`dr-tablechip ${t.taken ? "taken" : "free"} ${teamCode === t.teamCode ? "selected" : ""}`} aria-pressed={teamCode === t.teamCode} aria-label={`Table ${t.teamCode}, ${t.taken ? `taken${named ? ` by ${t.displayName}` : ""}` : "free"}`} onClick={() => { setTeamCode(t.teamCode); if (t.taken) setTeamName(""); }}><b>{t.teamCode}</b><small>{t.taken ? (named ? t.displayName : "taken") : "free"}</small></button>; })}</div><p className="dr-tablelegend"><span className="free">free</span><span className="taken">taken</span><span>{freeCount} of {tables.length} free</span></p></div>
             : <><label>Table number<input value={teamCode} onChange={(e) => setTeamCode(e.target.value)} placeholder="1" maxLength={12} inputMode="numeric" /></label>{tablesError && joinCode.trim().length >= 6 ? <p className="dr-hint">{/not found/i.test(tablesError) ? "No room with that code yet. Check the code on the big screen." : tablesError}</p> : null}</>}
-          {pickedTaken && picked ? <div className="dr-banner dr-banner--warn">Table {picked.teamCode} is already joined{picked.displayName !== `Table ${picked.teamCode}` ? <> as <b>{picked.displayName}</b></> : null}. If this is your table, we will ask that device to approve the handover. If it has been closed or switched off, you get straight in.</div> : null}
-          <label>Team name<input value={teamName} onChange={(e) => setTeamName(e.target.value)} placeholder={pickedTaken && picked ? `${picked.displayName} (keep)` : "e.g. The Night Shift"} maxLength={40} autoComplete="off" /></label><button className="dr-primary" disabled={busy || !joinCode || !teamCode} onClick={join}>{pickedTaken ? "Ask to take over" : "Join room"} <ArrowRight /></button></>}
-          {mode === "facilitate" && <><h2>Create a live room</h2><p className="dr-hint">Facilitator access. Create a new room for each workshop.</p><label>Facilitator key<input type="password" value={adminKey} onChange={(e) => setAdminKey(e.target.value)} autoComplete="off" /></label><label>Tables in the room<input type="number" min={2} max={50} value={tableCount} onChange={(e) => setTableCount(Number(e.target.value))} /></label><button className="dr-primary" disabled={busy || !adminKey} onClick={create}>Create room <ArrowRight /></button></>}
+          {joinsAsViewer && picked ? <div className="dr-banner">Table {picked.teamCode} already has someone holding the pen{picked.viewers ? <> and {picked.viewers} watching</> : null}. You join as a viewer and see the same screen; you can ask for the pen from there.</div>
+          : pickedTaken && picked ? <div className="dr-banner dr-banner--warn">Table {picked.teamCode} is already joined{picked.displayName !== `Table ${picked.teamCode}` ? <> as <b>{picked.displayName}</b></> : null}. If this is your table, we will ask that device to approve the handover. If it has been closed or switched off, you get straight in.</div> : null}
+          <label>{joinsAsViewer ? "Your name (optional)" : "Team name"}<input value={teamName} onChange={(e) => setTeamName(e.target.value)} placeholder={joinsAsViewer ? "e.g. Sam" : pickedTaken && picked ? `${picked.displayName} (keep)` : "e.g. The Night Shift"} maxLength={40} autoComplete="off" /></label><button className="dr-primary" disabled={busy || !joinCode || !teamCode} onClick={join}>{pickedTaken && !joinsAsViewer ? "Ask to take over" : "Join room"} <ArrowRight /></button></>}
+          {mode === "facilitate" && <><h2>Create a live room</h2><p className="dr-hint">Facilitator access. Create a new room for each workshop.</p><label>Facilitator key<input type="password" value={adminKey} onChange={(e) => setAdminKey(e.target.value)} autoComplete="off" /></label><label>Tables in the room<input type="number" min={2} max={50} value={tableCount} onChange={(e) => setTableCount(Number(e.target.value))} /></label><span className="dr-label">Where are the tables?</span><div className="dr-mode-pick" role="radiogroup" aria-label="Room mode"><button type="button" role="radio" aria-checked={newRoomMode === "physical"} className={newRoomMode === "physical" ? "selected" : ""} onClick={() => setNewRoomMode("physical")}><b>In the room</b><small>One device per table.</small></button><button type="button" role="radio" aria-checked={newRoomMode === "virtual"} className={newRoomMode === "virtual" ? "selected" : ""} onClick={() => setNewRoomMode("virtual")}><b>Online</b><small>Everyone joins. The first in each team holds the pen; others watch and can ask for it.</small></button></div><button className="dr-primary" disabled={busy || !adminKey} onClick={create}>Create room <ArrowRight /></button></>}
           {mode === "display" && <><h2>Open a presenter console</h2><p className="dr-hint">Normally you open the console from the facilitator page with one click. This is the recovery path.</p><label>Session ID<input value={sessionId} onChange={(e) => setSessionId(e.target.value)} /></label><label>Display token<input type="password" value={displayToken} onChange={(e) => setDisplayToken(e.target.value)} /></label><button className="dr-primary" disabled={!sessionId || !displayToken} onClick={openDisplay}>Open console <Monitor /></button></>}
           <ErrorText message={error} />
         </section>
@@ -307,6 +314,7 @@ function Participant({ code }: { code: string }) {
   const [saveError, setSaveError] = useState("");
   const [handedOver, setHandedOver] = useState(false);
   const [responding, setResponding] = useState(false);
+  const [penStatus, setPenStatus] = useState<"" | "pending" | "expired" | "declined" | "abandoned" | "superseded">("");
 
   useEffect(() => { if (!token) navigate(`/decision-room/join/${code}`); }, [token, code, navigate]);
   const roundKey = data ? `${data.session.activeRound}:${data.session.roundState}:${data.decision?.isLocked ? 1 : 0}` : "";
@@ -331,10 +339,32 @@ function Participant({ code }: { code: string }) {
     setResponding(true); setSaveError("");
     try {
       await request(`${API}/sessions/${code}/handover`, json({ decision, requestId: data?.handover?.requestId }, headers));
-      if (decision === "approve") { try { localStorage.removeItem(`decision-room-team:${code}`); } catch { /* ignore */ } setHandedOver(true); }
+      // Online room: approving keeps this device at the table as a viewer with the same token.
+      if (decision === "approve" && data?.session.mode !== "virtual") { try { localStorage.removeItem(`decision-room-team:${code}`); } catch { /* ignore */ } setHandedOver(true); }
       else await refresh();
     } catch (e) { setSaveError((e as Error).message); await refresh(); } finally { setResponding(false); }
   }
+
+  // Viewer asks for the pen, then watches the request until it is answered (same statuses as a device handover).
+  async function requestPen() {
+    setResponding(true); setSaveError("");
+    try { await request(`${API}/sessions/${code}/ownership`, json({}, headers)); setPenStatus("pending"); }
+    catch (e) { setSaveError((e as Error).message); } finally { setResponding(false); }
+  }
+  useEffect(() => {
+    if (penStatus !== "pending" && !data?.requesting) return;
+    let alive = true;
+    const id = setInterval(async () => {
+      try {
+        const r = await request<{ status: string }>(`${API}/sessions/${code}/handover`, { headers });
+        if (!alive) return;
+        if (r.status === "approved") { setPenStatus(""); await refresh(); }
+        else if (r.status !== "pending") setPenStatus(r.status as typeof penStatus);
+      } catch { /* keep asking */ }
+    }, 2000);
+    return () => { alive = false; clearInterval(id); };
+  }, [penStatus, data?.requesting, code, headers, refresh]);
+  const isViewer = data?.role === "viewer";
 
   if (!token) return null;
   if (handedOver) return <Frame className="dr-one"><section className="dr-card dr-wait"><Check className="dr-wait-icon" /><h2>Table handed over.</h2><p>This device is signed out. The other device carries on with your table and everything you have saved.</p><div className="dr-actions" style={{ justifyContent: "center" }}><button onClick={() => navigate(`/decision-room/join/${code}`)}>Join a different table</button></div></section></Frame>;
@@ -367,9 +397,10 @@ function Participant({ code }: { code: string }) {
         {results.reveal ? <RevealBlock reveal={results.reveal} /> : null}
       </section>
     : state === "closed" ? <section className="dr-card dr-wait"><Square className="dr-wait-icon" /><h2>Round closed.</h2><p>{isRails(data.scenario.family) ? "Discuss the different views with your facilitator." : "Richard is walking the options on the screen."} Your call{locked ? ` was ${decision?.optionKey}` : " was not locked"}.</p></section>
+    : isViewer ? <section className="dr-card dr-vote dr-vote--viewer"><div className="dr-options">{round.options.map((o) => <button key={o.key} className={decision?.optionKey === o.key ? "selected" : ""} aria-pressed={decision?.optionKey === o.key} disabled><b>{o.key}</b><span>{offerLabel(o.label)}{o.cost ? <small className="dr-opt-cost">{o.cost}</small> : null}</span></button>)}</div>{decision?.rationale ? <p className="dr-hint">“{decision.rationale}”{decision.confidence ? ` · confidence ${decision.confidence} of 5` : ""}</p> : <p className="dr-hint">The owner has not saved a pick yet. Talk it through together.</p>}</section>
     : locked ? <section className="dr-card dr-locked-card"><h2><LockKeyhole /> Locked: {decision?.optionKey}</h2>{decision?.rationale ? <p>“{decision.rationale}”</p> : null}<p className="dr-hint">Confidence {decision?.confidence} of 5. Keep talking. Be ready to explain the downside you accept. Ask your facilitator if this must change.</p></section>
     : <section className="dr-card dr-form dr-vote">
-        <div className="dr-options">{round.options.map((o) => <button key={o.key} className={optionKey === o.key ? "selected" : ""} aria-pressed={optionKey === o.key} disabled={saving} onClick={() => { setOptionKey(o.key); setDirty(true); }}><b>{o.key}</b><span>{o.label}{o.cost ? <small className="dr-opt-cost">{o.cost}</small> : null}</span></button>)}</div>
+        <div className="dr-options">{round.options.map((o) => <button key={o.key} className={optionKey === o.key ? "selected" : ""} aria-pressed={optionKey === o.key} disabled={saving} onClick={() => { setOptionKey(o.key); setDirty(true); }}><b>{o.key}</b><span>{offerLabel(o.label)}{o.cost ? <small className="dr-opt-cost">{o.cost}</small> : null}</span></button>)}</div>
         <label>Because… (one sentence)<textarea value={rationale} maxLength={240} disabled={saving} onChange={(e) => { setRationale(e.target.value); setDirty(true); }} placeholder="The reason we would defend out loud." /><span className="dr-counter">{rationale.length}/240</span></label>
         <span className="dr-label">Confidence</span>
         <div className="dr-scale" role="group" aria-label="Confidence from 1 to 5">{[1, 2, 3, 4, 5].map((v) => <button key={v} type="button" aria-pressed={confidence === v} disabled={saving} onClick={() => { setConfidence(v); setDirty(true); }}>{v}</button>)}</div>
@@ -385,6 +416,13 @@ function Participant({ code }: { code: string }) {
       <div className="dr-head-right">{state === "open" && session.audienceTimer !== false ? <span className={`dr-mini-clock ${clock.over ? "over" : clock.low ? "low" : ""}`}>{clock.label}</span> : null}<Status tone={connection} label={connection} /></div>
     </div>
 
+    {session.mode === "virtual" ? <div className="dr-banner dr-pen">{isViewer
+      ? <><p><b>{data.team.displayName}</b> · someone else holds the pen{data.viewers > 1 ? ` · ${data.viewers} watching` : ""}. You see what they save; only they can lock.</p>
+        {penStatus === "pending" || data.requesting ? <p className="dr-hint"><span className="dr-pulse" />Asked for the pen. Waiting for the owner to approve; if their device has gone quiet you get it within about a minute and a half.</p>
+        : penStatus === "declined" ? <p className="dr-hint">The owner kept the pen. Ask again if that is not right.</p>
+        : penStatus === "expired" || penStatus === "abandoned" || penStatus === "superseded" ? <p className="dr-hint">That request closed without an answer.</p> : null}
+        <div className="dr-actions"><button disabled={responding || penStatus === "pending" || data.requesting} onClick={requestPen}>{penStatus === "pending" || data.requesting ? "Asking…" : "Ask for the pen"}</button></div><ErrorText message={saveError} /></>
+      : <p><b>You hold the pen for {data.team.displayName}</b>{data.viewers ? ` · ${data.viewers} watching` : " · nobody else has joined yet"}. What you save, your teammates see.</p>}</div> : null}
     {connection === "offline" ? <div className="dr-banner dr-banner--warn">No connection. Your last saved response is safe — use the printed lock card and hand it to Adam. The exercise continues.</div> : null}
 
     <div className="dr-table-grid">
@@ -402,11 +440,12 @@ function Participant({ code }: { code: string }) {
 
     {data.handover ? (() => { const left = Math.max(0, Math.ceil(data.handover.expiresInSeconds - (now - new Date(data.handover.requestedAt).getTime()) / 1000)); return <div className="dr-modal" role="alertdialog" aria-modal="true" aria-labelledby="dr-handover-title"><div className="dr-modal-card">
       <span className="dr-kicker">HANDOVER REQUEST</span>
-      <h2 id="dr-handover-title">Another device wants to take over {data.team.displayName}.</h2>
-      <p>Approve if your table is moving to that device: this one signs out and that one carries on with your answers{data.handover.name ? <>, renaming the table <b>{data.handover.name}</b></> : null}.</p>
+      <h2 id="dr-handover-title">{session.mode === "virtual" ? `${data.handover.name || "A teammate"} is asking for the pen.` : `Another device wants to take over ${data.team.displayName}.`}</h2>
+      {session.mode === "virtual" ? <p>Approve and they take over saving and locking for {data.team.displayName}; you stay on this screen as a viewer.</p>
+      : <p>Approve if your table is moving to that device: this one signs out and that one carries on with your answers{data.handover.name ? <>, renaming the table <b>{data.handover.name}</b></> : null}.</p>}
       <p>Decline if you do not recognise it. You stay as you are.</p>
       <ErrorText message={saveError} />
-      <div className="dr-actions"><button disabled={responding} onClick={() => respond("decline")}>Decline</button><button className="dr-primary" disabled={responding} onClick={() => respond("approve")}>{responding ? "…" : "Approve handover"}</button></div>
+      <div className="dr-actions"><button disabled={responding} onClick={() => respond("decline")}>Decline</button><button className="dr-primary" disabled={responding} onClick={() => respond("approve")}>{responding ? "…" : session.mode === "virtual" ? "Hand over the pen" : "Approve handover"}</button></div>
       <p className="dr-hint">{left > 0 ? `Closes in ${left}s. Adam can still approve it after that.` : "Closing…"}</p>
     </div></div>; })() : null}
   </Frame>;
@@ -450,12 +489,12 @@ function Console({ id }: { id: string }) {
 
     {(state === "open" || state === "closed" || state === "published" || state === "ended") && <>
       <section className="dr-metrics"><div className="dr-metric"><small>Joined</small><strong>{counts.joined + counts.locked}<em>/{counts.total}</em></strong></div><div className="dr-metric"><small>Drafting</small><strong>{counts.joined}</strong></div><div className="dr-metric accent"><small>Locked</small><strong>{counts.locked}</strong></div></section>
-      <div className="dr-team-grid dr-team-grid--wide">{data.teams.map((t) => <div className={`dr-team ${t.state}`} key={t.id}><strong>{t.displayName}</strong><small>{TEAM_LABEL[t.state] ?? t.state}</small></div>)}</div>
+      <div className="dr-team-grid dr-team-grid--wide">{data.teams.map((t) => <div className={`dr-team ${t.state}`} key={t.id}><strong>{t.displayName}</strong><small>{TEAM_LABEL[t.state] ?? t.state}{t.viewers ? ` · ${t.viewers} watching` : ""}</small></div>)}</div>
       {state === "published" && results ? <><section className="dr-results-wide">
         <div className="dr-card"><div className="dr-panel-head"><span>Where the room landed</span><span className="dr-chain-note">{results.locked} of {counts.total} tables</span></div><SplitBars split={results} options={round?.options} />{results.confidence.median !== null ? <p className="dr-confidence">Confidence median <strong>{results.confidence.median}</strong> · range <strong>{results.confidence.low}–{results.confidence.high}</strong></p> : null}</div>
         {results.featured.length ? <div className="dr-quotes">{results.featured.map((f) => <blockquote className="dr-quote" key={f.id}><span>From the room</span><strong>{f.rationale}</strong><small>confidence {f.confidence ?? "–"}</small></blockquote>)}</div> : null}
-      </section>{results.reveal ? <section className="dr-card dr-reveal-wide"><div className="dr-panel-head"><span>What the control could and could not do</span></div><RevealBlock reveal={results.reveal} /></section> : null}</> : state === "open" || state === "closed" ? <section className="dr-card"><div className="dr-panel-head"><span>{round?.prompt ?? "What is your priority?"}</span></div>{round?.briefing ? <div className="dr-proj-split"><div className="dr-proj-sit"><div className="dr-proj-lines">{round.situation.map((line, i) => <p key={i}><b>{String(i + 1).padStart(2, "0")}</b>{line}</p>)}</div><ExplainMore key={round.roundNo} title="Full briefing: evidence and context"><BriefingCard b={round.briefing}/></ExplainMore></div><div className="dr-option-list">{round.options.map((o) => <div key={o.key}><b>{o.key}</b><span>{o.label}{o.cost ? <small className="dr-opt-cost">{o.cost}</small> : null}</span></div>)}</div></div>
-        : <div className="dr-option-list">{round?.options.map((o) => <div key={o.key}><b>{o.key}</b><span>{o.label}{o.cost ? <small className="dr-opt-cost">{o.cost}</small> : null}</span></div>)}</div>}<p className="dr-console-note">{state === "closed" ? "Round closed. Responses stay private until Adam shows the split." : "Tables are deciding. Responses stay private until the split is shown."}</p></section> : null}
+      </section>{results.reveal ? <section className="dr-card dr-reveal-wide"><div className="dr-panel-head"><span>What the control could and could not do</span></div><RevealBlock reveal={results.reveal} /></section> : null}</> : state === "open" || state === "closed" ? <section className="dr-card"><div className="dr-panel-head"><span>{round?.prompt ?? "What is your priority?"}</span></div>{round?.briefing ? <div className="dr-proj-split"><div className="dr-proj-sit"><div className="dr-proj-lines">{round.situation.map((line, i) => <p key={i}><b>{String(i + 1).padStart(2, "0")}</b>{line}</p>)}</div><ExplainMore key={round.roundNo} title="Full briefing: evidence and context"><BriefingCard b={round.briefing}/></ExplainMore></div><div className="dr-option-list">{round.options.map((o) => <div key={o.key}><b>{o.key}</b><span>{offerLabel(o.label)}{o.cost ? <small className="dr-opt-cost">{o.cost}</small> : null}</span></div>)}</div></div>
+        : <div className="dr-option-list">{round?.options.map((o) => <div key={o.key}><b>{o.key}</b><span>{offerLabel(o.label)}{o.cost ? <small className="dr-opt-cost">{o.cost}</small> : null}</span></div>)}</div>}<p className="dr-console-note">{state === "closed" ? "Round closed. Responses stay private until Adam shows the split." : "Tables are deciding. Responses stay private until the split is shown."}</p></section> : null}
     </>}
 
     <footer className="dr-console-footer"><span>Join at <strong>{joinAddress()}</strong> · code <span className="dr-join-code">{session.joinCode}</span></span><Status tone={connection} label={connection === "live" ? "Live" : `Last updated ${lastUpdated ? new Date(lastUpdated).toLocaleTimeString() : "—"}`} /></footer>
@@ -511,7 +550,7 @@ function Admin({ id }: { id: string }) {
     <section className="dr-metrics"><div className="dr-metric"><small>Not joined</small><strong>{counts.notJoined}</strong></div><div className="dr-metric"><small>Drafting</small><strong>{counts.joined}</strong></div><div className="dr-metric accent"><small>Locked</small><strong>{counts.locked}</strong></div><div className="dr-metric"><small>Selected for projection</small><strong>{featured}<em>/2</em></strong></div></section>
 
     <section className={`dr-admin-grid${data.guidance ? " has-guidance" : ""}`}>
-      <div className="dr-card"><h2>Tables</h2>{data.teams.map((t) => <div className="dr-admin-row" key={t.id}><span><strong>{t.displayName}</strong><small className={t.handover ? "dr-flag" : ""}>{t.handover ? "handover requested" : TEAM_LABEL[t.state] ?? t.state}</small></span>{t.handover ? <button className="dr-primary" onClick={() => confirm(`Hand ${t.displayName} to the device that is asking? The current device is signed out.`) && act({ action: "handover", teamId: t.id })} disabled={busy}>Approve handover</button> : null}{t.state === "locked" && state !== "published" ? <button onClick={() => confirm(`Reopen ${t.displayName}? Their lock is cleared.`) && act({ action: "reopen", teamId: t.id })} disabled={busy}>Reopen</button> : null}</div>)}</div>
+      <div className="dr-card"><h2>Tables</h2>{data.teams.map((t) => <div className="dr-admin-row" key={t.id}><span><strong>{t.displayName}</strong><small className={t.handover ? "dr-flag" : ""}>{t.handover ? "handover requested" : TEAM_LABEL[t.state] ?? t.state}{t.viewers ? ` · ${t.viewers} watching` : ""}</small></span>{t.handover ? <button className="dr-primary" onClick={() => confirm(`Hand ${t.displayName} to the device that is asking? The current device is signed out.`) && act({ action: "handover", teamId: t.id })} disabled={busy}>Approve handover</button> : null}{t.state === "locked" && state !== "published" ? <button onClick={() => confirm(`Reopen ${t.displayName}? Their lock is cleared.`) && act({ action: "reopen", teamId: t.id })} disabled={busy}>Reopen</button> : null}</div>)}</div>
       {data.guidance ? <GuidanceCard g={data.guidance} /> : null}
       <div className="dr-card"><h2>This round’s responses</h2><p className="dr-hint">Select up to two locked rationales for projection. Unselected comments stay private.</p>{(data.decisions ?? []).length === 0 ? <p>No responses yet.</p> : (data.decisions ?? []).map((d) => <div className="dr-response" key={d.id}><strong><b className="dr-key">{d.optionKey ?? "–"}</b> {d.table} · {d.isLocked ? "locked" : "draft"} · confidence {d.confidence ?? "–"}</strong><p>{d.rationale || <em>no rationale</em>}</p>{d.rationale ? <button onClick={() => act({ action: "feature", decisionId: d.id, featured: !d.isFeatured })} disabled={busy || (!d.isFeatured && (featured >= 2 || (isRails(data.scenario.family) && !d.isLocked)))}>{d.isFeatured ? "Remove from screen" : "Put on screen"}</button> : null}</div>)}</div>
     </section>

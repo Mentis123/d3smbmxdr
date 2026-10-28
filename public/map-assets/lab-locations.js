@@ -9,4 +9,5 @@ export const LAB_LOCATIONS={
   datacenter:FEATURED.datacenter.map(marker),
   local:FEATURED.local.map(marker),
   meeting:FEATURED.meeting.map(marker),
+  splunk:FEATURED.splunk.map(marker),
 };

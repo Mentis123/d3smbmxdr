@@ -17,6 +17,7 @@ import {buildKit as localFiles} from './local.files-answer.js';
 import {buildKit as meetingBeams} from './meeting.adaptive-beams.js';
 import {buildKit as meetingCamera} from './meeting.camera-director.js';
 import {buildKit as meetingSound} from './meeting.ceiling-sound.js';
+import {buildKit as splunkSap} from './splunk.sap-forecast.js';
 
 export const KITS=Object.freeze({
   'energy.intake-vision':energyIntake,'energy.thermal-patrol':energyThermal,'energy.corridor-inspection':energyCorridor,
@@ -25,4 +26,5 @@ export const KITS=Object.freeze({
   'datacenter.too-hungry':dcHungry,'datacenter.too-hot':dcHot,'datacenter.too-heavy':dcHeavy,
   'local.meeting-notes':localNotes,'local.browser-agent':localAgent,'local.files-answer':localFiles,
   'meeting.adaptive-beams':meetingBeams,'meeting.camera-director':meetingCamera,'meeting.ceiling-sound':meetingSound,
+  'splunk.sap-forecast':splunkSap,
 });

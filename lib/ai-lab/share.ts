@@ -20,10 +20,10 @@ export function shareMetadata({ title, description, path, image, alt }: { title:
 
 export const HUB_SHARE = shareMetadata({
   title: 'Data#3 AI Lab',
-  description: 'Six interactive 3D worlds, three places each: water and energy, mining, retail, an AI-ready datacenter, local AI on a laptop and a Cisco meeting room. See where AI could make a difference.',
+  description: 'Seven interactive 3D worlds: water and energy, mining, retail, an AI-ready datacenter, local AI on a laptop, a Cisco meeting room and Splunk inside the network. See where AI could make a difference.',
   path: '/ai-lab',
   image: '/ai-lab-share.jpg',
-  alt: 'The six Data#3 AI Lab worlds: dam and treatment plant, open-pit mine, supermarket, datacenter, laptop desk and meeting room',
+  alt: 'The seven Data#3 AI Lab worlds: dam and treatment plant, open-pit mine, supermarket, datacenter, laptop desk, meeting room and network',
 });
 
 /** One world's card: its name, its hub tile line and its poster (rendered from the world itself). */

@@ -1,4 +1,4 @@
-// Exhibit registry. Pure data: every recipe file, the featured three per world, and the four retired ids.
+// Exhibit registry. Pure data: every recipe file, the featured exhibits per world (three; Splunk one so far), and the four retired ids.
 // Adding an exhibit = a recipe file + a kit file + one import line here and in ../kits/index.js.
 import energyIntake from './energy.intake-vision.js';
 import energyThermal from './energy.thermal-patrol.js';
@@ -18,9 +18,10 @@ import localFiles from './local.files-answer.js';
 import meetingBeams from './meeting.adaptive-beams.js';
 import meetingCamera from './meeting.camera-director.js';
 import meetingSound from './meeting.ceiling-sound.js';
+import splunkSap from './splunk.sap-forecast.js';
 
-const ALL=[energyIntake,energyThermal,energyCorridor,miningConveyor,miningPump,miningYard,retailProduce,retailDeli,retailAvailability,dcHungry,dcHot,dcHeavy,localNotes,localAgent,localFiles,meetingBeams,meetingCamera,meetingSound];
+const ALL=[energyIntake,energyThermal,energyCorridor,miningConveyor,miningPump,miningYard,retailProduce,retailDeli,retailAvailability,dcHungry,dcHot,dcHeavy,localNotes,localAgent,localFiles,meetingBeams,meetingCamera,meetingSound,splunkSap];
 export const RECIPES=Object.freeze(Object.fromEntries(ALL.map(r=>[r.id,r])));
-export const FEATURED=Object.freeze(Object.fromEntries(['energy','mining','retail','datacenter','local','meeting'].map(w=>[w,ALL.filter(r=>r.world===w&&r.featured).sort((a,b)=>a.order-b.order)])));
+export const FEATURED=Object.freeze(Object.fromEntries(['energy','mining','retail','datacenter','local','meeting','splunk'].map(w=>[w,ALL.filter(r=>r.world===w&&r.featured).sort((a,b)=>a.order-b.order)])));
 // Retired from the featured three and the world markers; still openable by id on the old three-phase path.
 export const LEGACY_IDS=Object.freeze(['energy.drawing-search','energy.alarm-investigation','mining.procedure-control','mining.historian-gap']);

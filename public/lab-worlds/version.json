@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "sourceRepository": "Mentis123/adamrappaport",
-  "sourceCommit": "3b6ec64e22ca968cbb3f96fc2c4c6e2ea5fbf0d6",
+  "sourceCommit": "c05905c42e7958c000a5bcff0c01a81747b5a1cb",
   "experience": "ai-lab",
   "runtimeDependency": "Self-hosted static files; no personal-site requests",
   "files": {
@@ -206,7 +206,7 @@
     "public/map-assets/mining-poster.jpg": "5e42d9e1f4f4c260fb37780c9cf99a423a2594762762018c2a59bf4130c36ccd",
     "public/map-assets/mining-scene.js": "75e3e2a719a8dd683bb181066854238d003eacbca4a89f23b84b978908b77f92",
     "public/map-assets/mining-site.js": "21c2210125f0edfcb5e5cb49df4f345a37ba544787d23ca6ebfc915f0504aa70",
-    "public/map-assets/mining-vehicles.js": "1f2e7f6cc46e46cfbdad3e8026dba1c6fa96ebc4b1b688ebe1c8c1321698c188",
+    "public/map-assets/mining-vehicles.js": "e796f3a7565b508b16c66e7c848f1c0347b39e1242b11bddf450b1e42b972dc2",
     "public/map-assets/models/rock-face/cliff-solid-v2.glb": "827a5735800041127168231062285fbfbae19ea20fa61a9daf2d9d78eec02b1a",
     "public/map-assets/navigation.js": "617452eaa88db40d248c2762354e52ee8c73414981dabd320e94203299678a7d",
     "public/map-assets/nextdc-data.js": "25d86e85124443d51de9a805f477f0c065196dead7924b7a27b21bf79c25ab17",
@@ -215,7 +215,7 @@
     "public/map-assets/pins.js": "04e74f9ea4da2367a351101919e419285b4ca3dcfbca879c69dc56b413b59c40",
     "public/map-assets/pipeline.js": "30e264dc997566d855d23dcd809b2d43e1bbbd3dde7b4fc37ea1184480471c16",
     "public/map-assets/poster.jpg": "054e935976a4551701f50b669d23b90660f990515370b50c311cfdda64a2e5df",
-    "public/map-assets/props/arm.js": "b8c4076cd5b001d124bd866a8f545b3595c48be4a5ae620157437251e9b4068f",
+    "public/map-assets/props/arm.js": "3a34926de610b83833d695289c7fe9a399af0aa568f47acb1233c81f2cc2f15b",
     "public/map-assets/props/house-style.js": "5621306d423afbd04a75652553045acbf123e7040e8779e3f22c6487c5948481",
     "public/map-assets/props/pf/articulated-dump-truck-ee50f3.js": "a1d4f40d92749dd5df323f4453cb902d85a584eb3f7d283d8e7e2d5dc9309d3a",
     "public/map-assets/props/pf/manifest.json": "862ac412413884f7e13b5f35f073a44ffc0826dfd0f3ec316cd077aaeda4ffa5",

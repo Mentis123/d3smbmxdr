@@ -3,10 +3,11 @@ import {makeBatch,metal} from './builder-utils.js';
 import {propsArm} from './props/arm.js';
 import {houseStyle,slotsFor,PROFILES} from './props/house-style.js';
 
-// Prop treatment (A/B pilot P1, docs/three-worlds/ab/P1-MINING-PROPS-RUBRIC.md): 'procedural' (default) draws the
-// trucks below; 'house' draws Polyfork's articulated dump truck forked into the mining look, on the same route and
-// schedule. Loaded before the world builds, so neither arm pops in.
-const ARM=propsArm();
+// Prop treatment (A/B P1, docs/three-worlds/ab/P1-MINING-PROPS-RUBRIC.md): 'house' draws Polyfork's articulated dump
+// truck forked into the mining look; 'procedural' draws the trucks below, on the same route and schedule. House is the
+// default since it won the owner's blind A/B 2/2 (28 Oct 2026); ?props=procedural keeps the old trucks as the baseline.
+// Loaded before the world builds, so neither arm pops in.
+const ARM=propsArm('house');
 const PF=ARM==='house'?await import('./props/pf/articulated-dump-truck-ee50f3.js'):null;
 const PF_LENGTH=9.87,PF_WHEEL_R=1.0,HOUSE_LENGTH=.95;
 

@@ -10,8 +10,8 @@ const smooth=(a,b,x)=>{const u=Math.min(1,Math.max(0,(x-a)/(b-a)));return u*u*(3
 const lerp=(a,b,u)=>a+(b-a)*Math.min(1,Math.max(0,u));
 const SCALE=.5,Y=.004;
 // Beats (seconds). The clock is minutes after 09:00: 09:52 -> 10:00 at the alert, slow through the decision, then fast to 11:00.
-const T={alert:8,forecast:[8.4,10.6],agent:14,focus:[14.6,15.6],ghost:[15.6,16.6],approve:22.5,move:23.8,done:30.4,cardOff:[24.8,25.6]};
-const clockAt=(t,v)=>t<T.alert?lerp(52,60,t/T.alert):t<23.5?lerp(60,64,(t-T.alert)/(23.5-T.alert)):v?lerp(64,68,(t-23.5)/8):lerp(64,120,(t-23.5)/7);
+const T={alert:9.5,forecast:[9.9,12.1],agent:15.5,focus:[16.1,17.1],ghost:[17.1,18.1],approve:24,move:25.3,done:31.9,cardOff:[26.3,27.1],decided:25};
+const clockAt=(t,v)=>t<T.alert?lerp(52,60,t/T.alert):t<T.decided?lerp(60,64,(t-T.alert)/(T.decided-T.alert)):v?lerp(64,68,(t-T.decided)/8):lerp(64,120,(t-T.decided)/7);
 
 // Dark, cool stage: the board glows, the room disappears.
 function tronStage(k){

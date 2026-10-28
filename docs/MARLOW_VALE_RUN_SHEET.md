@@ -23,6 +23,10 @@ Built 28 Oct 2026 from an M365 Copilot (Work IQ) research pass over internal sel
 
 Owner checks before a customer-adjacent run: funding treatment (Microsoft Incentives team), offer status and launch timing (practice leads).
 
+## Discussion
+
+Each discussion opens with the customer's view (who pushes back, what they need to hear), then what the table gave up. Seeing the other side's view is the best-evidenced lever in negotiation research, and buyers mostly stall on fear of choosing wrong, not on competitors. Edited in place on 28 Oct 2026, before any room had run.
+
 ## Content changes
 
 Changing a question, option or cost after a room has run needs a new pinned revision (`marlowvale@2`), as Coastwater did, so old votes keep their meaning.

@@ -1,5 +1,5 @@
 /**
- * Marlow Vale: fictional seller dilemmas for the Data#3 Data & AI practice. Revision 1.
+ * Marlow Vale: fictional seller dilemmas for the Data#3 Data & AI practice. Revision 1. Each discussion opens with the customer's view: who pushes back, and what they need to hear.
  * Built from internal seller enablement (Oct 2026), but this text ships in a public bundle:
  * no prices, funding amounts, targets, launch dates, competitor names, offer names or real pursuits.
  */
@@ -10,7 +10,7 @@ export const MARLOWVALE_MODULES = [
     question: "What do you bring to the follow-up meeting?",
     options: ["A licence proposal for all staff", "A targeted pilot for two teams", "A review of the agents already built", "A use-case workshop to build the roadmap"],
     tradeoffs: ["Captures executive interest and budget now; IT's doubts stay unanswered and low use could sour the renewal.", "Produces evidence from real work; most staff wait and the CEO may read it as hesitation.", "Addresses a live risk IT cares about; gives the CEO nothing visible this year.", "Gives both sides one prioritised plan; the budget window may close before anything is bought."],
-    discuss: ["What are you giving up by choosing this?", "What would the customer have to tell you to change your call?"],
+    discuss: ["Who in that meeting pushes back on your choice, and what would they need to hear?", "What are you giving up by choosing this?"],
     reveal: "Optional probe: the CIO says privately they will block any broad licence purchase until they see a measured result.",
     reconsider: "Is your next commitment to the person with the budget, or the person who can stop it?",
     boundary: "Capture who must commit next, what evidence they need, and what the customer is not buying yet.",
@@ -22,7 +22,7 @@ export const MARLOWVALE_MODULES = [
     question: "How do you scope the first engagement?",
     options: ["Scope to what the funding covers", "Ask the council to co-fund the full scope", "Data#3 absorbs the gap to win the door", "Wait and propose the full scope next quarter"],
     tradeoffs: ["Starts now at no cost to the council; a thin engagement may not produce a result worth building on.", "Funds work that can deliver; the council may decline or delay, and momentum stalls.", "Wins access and goodwill now; spends margin on an uncommitted account and sets a \"free\" expectation.", "The right scope is properly funded; another partner, or Microsoft direct, may start first."],
-    discuss: ["What are you giving up by choosing this?", "What would the customer have to tell you to change your call?"],
+    discuss: ["How would you explain the funding to the CIO in one honest sentence?", "What are you giving up by choosing this?"],
     reveal: "Optional probe: an older proposal template still quotes the previous funding rates, and the CIO has already seen it.",
     reconsider: "If the funded work is all this customer ever buys, was it worth doing?",
     boundary: "Capture what the funding pays for, who pays for the rest, the conditions that must be met, and what the proposal must never call free.",
@@ -34,7 +34,7 @@ export const MARLOWVALE_MODULES = [
     question: "What do you propose before Copilot reaches 100 people?",
     options: ["Readiness assessment, then decide", "Protect the riskiest sites, then pilot", "Pilot now with a low-risk team", "Fix information governance first"],
     tradeoffs: ["An evidence-based picture of the risk; no protection and no users for weeks.", "Users start with the worst exposure controlled; files outside the protected sites stay exposed.", "Meets the deadline with little exposure; proves little about the teams that matter most.", "Deals with the root cause; Copilot slips months and the sponsor may lose interest."],
-    discuss: ["What are you giving up by choosing this?", "What would the customer have to tell you to change your call?"],
+    discuss: ["The CEO fears losing momentum; IT fears a data leak. Which fear does your choice answer?", "What are you giving up by choosing this?"],
     reveal: "Optional probe: the customer asks you to confirm in writing that no extra licensing is needed.",
     reconsider: "What exactly are you willing to promise is protected?",
     boundary: "Capture which content is protected and which is not, who owns the rest, and any licensing the promise depends on.",
@@ -46,7 +46,7 @@ export const MARLOWVALE_MODULES = [
     question: "Who do you build the next engagement around?",
     options: ["The asset manager: a quick proof of value", "IT: assessment and platform design first", "Joint discovery with both teams", "A standard platform foundation through IT"],
     tradeoffs: ["Creates urgency and a visible win; IT may refuse to support what it did not design.", "Builds on a sound platform; the asset manager waits and storm season arrives first.", "Lowers the risk of a later veto; costs scarce stakeholder time and slows both.", "Gets data flowing on a standard platform quickly; the dashboards the business wanted still aren't built."],
-    discuss: ["What are you giving up by choosing this?", "What would the customer have to tell you to change your call?"],
+    discuss: ["Who would block your choice, and what would win them over?", "What are you giving up by choosing this?"],
     reveal: "Optional probe: the asset manager's budget lapses if it is not spent this quarter.",
     reconsider: "If the other stakeholder said no next month, would your engagement survive?",
     boundary: "Capture who must commit next, what each stakeholder gets, and what the other is asked to accept.",
@@ -58,7 +58,7 @@ export const MARLOWVALE_MODULES = [
     question: "What do you put in front of the councillors?",
     options: ["Extend the prototype to staff only", "A production build, integrated and governed", "A platform landing zone first", "A business case before any build"],
     tradeoffs: ["Keeps momentum with limited risk; residents get nothing, and \"temporary\" can become permanent.", "Delivers the real thing properly; costs more, takes longer and the start date is uncertain.", "Lays a governed foundation; it is not the resident service the councillors asked for.", "Tests whether the service is worth its running cost; enthusiasm may fade while it is written."],
-    discuss: ["What are you giving up by choosing this?", "What would the customer have to tell you to change your call?"],
+    discuss: ["What would make the councillors confident to say yes, and what would make them nervous?", "What are you giving up by choosing this?"],
     reveal: "Optional probe: the planning system's vendor says integration needs their own paid work, available in eight weeks.",
     reconsider: "What date, if any, can you commit to?",
     boundary: "Capture what is promised, by when, what it depends on, and who at the council owns the agent after go-live.",
@@ -70,7 +70,7 @@ export const MARLOWVALE_MODULES = [
     question: "What do you propose for the next two years?",
     options: ["Today's services, with an honest handover", "Today's work plus the planned services", "Bring in a partner for the run service", "Bid one strong next phase only"],
     tradeoffs: ["Commits only to what you can deliver; looks smaller than the integrator's offer.", "Matches the competitor's ambition; you take on launch dates you do not control.", "Covers the whole lifecycle now; shares the relationship and margin and adds a hand-off.", "Keeps you credible and in the account; the integrator may win the programme around you."],
-    discuss: ["What are you giving up by choosing this?", "What would the customer have to tell you to change your call?"],
+    discuss: ["What does the council fear most about picking a partner, and how does your offer answer it?", "What are you giving up by choosing this?"],
     reveal: "Optional probe: the council asks for the managed service's SLA in writing.",
     reconsider: "What would you need to see before promising a service that has not launched?",
     boundary: "Capture what is available now, what is planned and how it is described to the customer, and what you will not put in writing.",

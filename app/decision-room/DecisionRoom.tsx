@@ -358,7 +358,7 @@ function Participant({ code }: { code: string }) {
     : state === "ended" ? <section className="dr-card dr-wait"><h2>{brand.ended.title}</h2><p>{brand.ended.body}</p></section>
     : null;
   const actCard = !round || !inRound ? null
-    : state === "published" && results && isRails(data.scenario.family) && !isLegacyRails(data.scenario.key) ? <section className="dr-card dr-reveal"><h2>Where did we differ?</h2><SplitBars split={results} options={round.options} /><p>What downside are you accepting by choosing this?</p><p>What evidence or condition would make you change your decision?</p><p className="dr-hint">Your call: {decision?.optionKey || "No locked response"}. Discuss the other tables’ reasoning with your facilitator.</p></section>
+    : state === "published" && results && isRails(data.scenario.family) && !isLegacyRails(data.scenario.key) ? <section className="dr-card dr-reveal"><h2>Where did we differ?</h2><SplitBars split={results} options={round.options} />{(results.reveal?.questions ?? ["What downside are you accepting by choosing this?", "What evidence or condition would make you change your decision?"]).map((q) => <p key={q}>{q}</p>)}<p className="dr-hint">Your call: {decision?.optionKey || "No locked response"}. Discuss the other tables’ reasoning with your facilitator.</p></section>
     : state === "published" && results ? <section className="dr-card dr-reveal" key={`reveal-${round.roundNo}`}>
         <div className="dr-panel-head"><span>Where the room landed</span><span className="dr-chain-note">{results.locked} tables locked</span></div>
         <SplitBars split={results} options={round.options} />

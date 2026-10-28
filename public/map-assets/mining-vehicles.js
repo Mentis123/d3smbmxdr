@@ -1,5 +1,14 @@
 import * as THREE from 'three';
 import {makeBatch,metal} from './builder-utils.js';
+import {propsArm} from './props/arm.js';
+import {houseStyle,slotsFor,PROFILES} from './props/house-style.js';
+
+// Prop treatment (A/B pilot P1, docs/three-worlds/ab/P1-MINING-PROPS-RUBRIC.md): 'procedural' (default) draws the
+// trucks below; 'house' draws Polyfork's articulated dump truck forked into the mining look, on the same route and
+// schedule. Loaded before the world builds, so neither arm pops in.
+const ARM=propsArm();
+const PF=ARM==='house'?await import('./props/pf/articulated-dump-truck-ee50f3.js'):null;
+const PF_LENGTH=9.87,PF_WHEEL_R=1.0,HOUSE_LENGTH=.95;
 
 // Two scale-model haul trucks sharing one open pit-to-crusher route. All state
 // is derived from absolute scene time, so capture, pause and seek stay stable.
@@ -89,7 +98,16 @@ export function buildMiningHaulage(world){
     bodyBox(-.15,.214,.15,.28,.015,.018,steel);
     bodyBox(-.15,.214,-.15,.28,.015,.018,steel);
     body.finish();
-    trucks.push({config,group,bedPivot,load,wheels,cycle});
+    let house=null;
+    if(PF){
+      // Same truck slot, house-styled model: procedural parts hidden, Polyfork's own rig driven by the same schedule.
+      for(const child of group.children)child.visible=false;
+      const k=HOUSE_LENGTH/PF_LENGTH;
+      const m=houseStyle(PF.createAsset({...slotsFor(PROFILES['mining-day'],PF.params),tip:0,load:.85,wear:.45}),'mining-day',{id:config.id+'-house',scale:k});
+      m.rotation.y=Math.PI/2;group.add(m);
+      house={model:m,tip:m.getObjectByName('tip-pose'),load:m.getObjectByName('load'),wheels:['fl','fr','rl','rr'].map(n=>m.getObjectByName('wheel-'+n)).filter(Boolean),radius:PF_WHEEL_R*k};
+    }
+    trucks.push({config,group,bedPivot,load,wheels,cycle,house});
   }
 
   function sample(truck,time){
@@ -128,9 +146,12 @@ export function buildMiningHaulage(world){
       truck.group.visible=true;truck.group.position.copy(s.position);truck.group.rotation.y=s.heading;
       truck.bedPivot.rotation.z=s.bedAngle;truck.load.visible=s.loaded;
       for(const wheel of truck.wheels)wheel.rotation.z=-s.travel/.12;
+      const h=truck.house;
+      if(h){if(h.tip)h.tip.rotation.x=-s.bedAngle;if(h.load)h.load.visible=s.loaded;for(const w of h.wheels)w.rotation.x=s.travel/h.radius;}
     }
   }
   world.updates.push(update);
+  world.stats.props=PF?'house':'procedural';
   // Actor contract for fly-through shots (flythrough.js). Phase starts are in scene time, so each
   // truck's schedule is shifted back by its own offset (its phase clock runs time+offset).
   world.actors=world.actors||{};

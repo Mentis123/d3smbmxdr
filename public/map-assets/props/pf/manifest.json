@@ -1,0 +1,13 @@
+{
+  "schema": 1,
+  "licence": "https://polyfork.dev/licensing",
+  "assets": {
+    "articulated-dump-truck-ee50f3": {
+      "title": "Articulated Dump Truck",
+      "source": "https://polyfork.dev/cdn/articulated-dump-truck-ee50f3.mjs",
+      "sha256": "7c2212e7a9d9afb4999a15f0a9640472500100b60352052ab8a64f2387819195",
+      "triangles": 3078,
+      "imported": "2026-10-28"
+    }
+  }
+}

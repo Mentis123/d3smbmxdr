@@ -4,6 +4,8 @@
 
 ## Run it
 
+When you create the room, choose where the tables are. **In the room**: one device per table, as before. **Online**: everyone joins their table from their own device; the first in holds the pen (option, rationale, confidence, lock) and the rest see the same screen and can **Ask for the pen**. The owner gets a pop-up to hand it over or decline; a quiet owner is replaced after about a minute and a half. Everything else is the same, and the phones show the situation, options and split, so no projector is needed online.
+
 Open `/decision-room/marlow-vale`, choose Facilitate, enter the facilitator key and create a room (one device per table). The private console opens at `/decision-room/marlow-vale/control?room=…`; open the audience display from there. Next moves both screens; Back reviews without reopening votes. Rehearse with no key at `/decision-room/marlow-vale/present`.
 
 ## The six decisions

@@ -19,6 +19,7 @@ the URL, browser storage or a global constant.
 | --- | --- | --- | --- |
 | `riverbend@1` | V1 CISO Basecamp, and every room created before pinning | live | `lib/decision-room/content.ts` |
 | `ironvale@0.1` | V2 Agent 0, the mine keeps moving | preview, pending Rich/Scott review | `lib/decision-room/ironvale.ts` |
+| `ironvale@0.2` | V2 Agent 0 on the rails (29 Oct 2026): same rounds, consequences and guidance, tightened wording and sharper costs | preview | `lib/decision-room/ironvale-v02.ts` (overrides on 0.1) |
 
 - **Existing rooms:** the column is added with `ADD COLUMN IF NOT EXISTS` and
   left NULL. NULL resolves to `riverbend@1`, so every earlier room, including
@@ -27,11 +28,11 @@ the URL, browser storage or a global constant.
 - **Unknown keys** (for example a room made by a newer build, viewed on an
   older one) are refused with a 409, never reinterpreted.
 - **New V1 rooms** (`variant=riverbend`) are pinned to `riverbend@1`.
-- **New Agent 0 rooms** (`variant=agent0`) are pinned to `ironvale@0.1` on
+- **New Agent 0 rooms** (`variant=agent0`) are pinned to `ironvale@0.2` on
   preview and local builds. In production (`VERCEL_ENV=production`) they get
   the revision the site releases in its release file, otherwise `riverbend@1`.
   A `DECISION_ROOM_AGENT0_SCENARIO` environment variable overrides both.
-- **Current release:** the primary site releases `ironvale@0.1`
+- **Current release:** the primary site releases `ironvale@0.2`
   (`lib/decision-room/release.ts`), so new Agent 0 rooms on d3smbmxdr run the
   mining preview. The fallback's `server/decisionRoomRelease.ts` is `null`, so
   new Agent 0 rooms on data3-cisco-live stay on `riverbend@1`. The Agent 0

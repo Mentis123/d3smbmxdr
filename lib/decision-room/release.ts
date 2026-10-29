@@ -6,4 +6,4 @@
  * on Riverbend (null). A DECISION_ROOM_AGENT0_SCENARIO environment variable,
  * when set, overrides this. Existing rooms are pinned and never affected.
  */
-export const AGENT0_PRODUCTION_RELEASE: string | null = "ironvale@0.1";
+export const AGENT0_PRODUCTION_RELEASE: string | null = "ironvale@0.2";

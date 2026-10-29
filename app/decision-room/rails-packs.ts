@@ -4,7 +4,7 @@ import { MARLOWVALE_MODULES, MARLOWVALE_STORY } from "../../lib/decision-room/ma
 import type { RailsFamily } from "../../lib/decision-room/rails";
 
 /** One decision on the rails presenter. Coastwater revision 1 also uses reveal/reconsider/boundary screens. */
-export type RailsModule = { readonly id: string; readonly title: string; readonly topic: string; readonly situation: string; readonly question: string; readonly options: readonly string[]; readonly tradeoffs: readonly string[]; readonly discuss: readonly string[]; readonly reveal: string; readonly reconsider: string; readonly boundary: string; readonly notes: string };
+export type RailsModule = { readonly id: string; readonly title: string; readonly topic: string; readonly situation: string; readonly question: string; readonly options: readonly string[]; readonly tradeoffs: readonly string[]; readonly discuss: readonly string[]; readonly reveal: string; readonly reconsider: string; readonly boundary: string; readonly notes: string; readonly lesson?: { boundary: string; lesson: string } | null };
 
 /** Everything the rails presenter says that belongs to one workshop rather than to the format. */
 export type RailsPack = {
@@ -18,6 +18,12 @@ export type RailsPack = {
   /** What the facilitator captures and exports: "boundaries" for Coastwater. */
   record: { noun: string; missing: string; exportTitle: string; exportFile: string };
   notes: { opening: string; closing: string };
+  /** Workshop length shown on the welcome screen when no schedule is set. */
+  minutes?: number;
+  /** Load the decisions from the server deck (/api/decision-room/deck/<family>) instead of bundling them. */
+  deck?: boolean;
+  /** Show the round's reveal (what the tools did and did not do) on the discussion screen. */
+  showLesson?: boolean;
 };
 
 export const RAILS_PACKS: Record<RailsFamily, RailsPack> = {
@@ -50,5 +56,21 @@ export const RAILS_PACKS: Record<RailsFamily, RailsPack> = {
       footnote: "Captured commitments stay in this browser. Download them before changing devices." },
     record: { noun: "commitments", missing: "No commitment recorded.", exportTitle: "MARLOW VALE · EVERY COMMITMENT HAS A COST", exportFile: "marlow-vale-commitments.txt" },
     notes: { opening: "Introduce Marlow Vale: one fictional council, six moments across a year of selling. One response per table. Seek different reasoning without scoring the tables. Allow about five minutes per decision, including the discussion.", closing: "Read back each table's pattern: where it led with licences or services, the business or IT, speed or readiness, and what it refused to promise. Ask what each seller will do differently next week. Download the record." },
+  },
+  ironvale: {
+    family: "ironvale", edition: "agent-0", name: "Agent 0",
+    modules: [], story: "Ironvale Mining is a fictional hard-rock miner: a remote open pit, a processing plant and a SOC in Perth. Agent 0 builds the night shift's maintenance work packs. On Friday evening it starts behaving oddly. Take six seats through the night, from the duty analyst to the board. Decide as a table, say why, and see what your call changes.",
+    deck: true, showLesson: true, minutes: 90,
+    welcome: { kicker: "AGENT 0 · IRONVALE MINING", title: ["The mine keeps moving.", "Who decides what stops?"], lead: "One agent, one night shift, six calls from the SOC to the board.", footnote: "Synthetic exercise: every organisation, host, identity and alert is fictional. A preview in review." },
+    role: { kicker: "YOUR ROLE · THE SEAT ON EACH SCREEN", highlight: "Keep people safe, keep the plant in a known state, preserve evidence and keep maintenance moving." },
+    console: { title: "The mine keeps moving", captureSummary: "Optional · capture the room's improvement", captureLabel: "Capture what to improve and who owns it", capturePlaceholder: "What supported the process, what was missing, who owns the fix…" },
+    discussHint: "Ask a table that acted fast and one that held back what evidence each relied on.",
+    closing: { kicker: "THE WHOLE-CHAIN DEBRIEF", title: "That is the night.", lead: "Walk the chain from the first alert to the board: what held, what was missing, and who owns the fix.",
+      prompts: [["What supported the process", "Which evidence, controls and people let each seat act with confidence?"], ["What was missing", "Where did a tool, an owner or an authority leave a gap?"], ["Who owns the improvement", "Name an owner and a first step for each gap before you leave."]],
+      perDecision: "What supported the process here, and what was missing?",
+      highlight: "Take one control to test, an owner and a date back to your organisation.",
+      footnote: "Captured improvements stay in this browser. Download them before changing devices." },
+    record: { noun: "improvements", missing: "No improvement recorded.", exportTitle: "AGENT 0 · IRONVALE MINING", exportFile: "agent-0-improvements.txt" },
+    notes: { opening: "Introduce Ironvale and Agent 0: synthetic, a preview in review. One response per table. After each split, every table's phone shows its own consequence and state; this screen shows the room's split and what the tools did and did not do. Allow about twelve minutes per decision, including the debrief.", closing: "Run the whole-chain debrief: from the first alert to the board, what supported the process, what was missing and who owns each improvement. Download the record." },
   },
 };

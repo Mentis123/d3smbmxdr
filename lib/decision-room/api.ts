@@ -460,6 +460,32 @@ function registerDecisionRoomRoutes(app: Express) {
     res.json({ "ciso-basecamp": of("riverbend"), "agent-0": of("agent0"), coastwater: of("coastwater"), "marlow-vale": of("marlowvale") });
   } catch (e) { fail(e, res, next); } });
 
+  // The rails presenter's deck for a family whose content stays on the server (Agent 0 / Ironvale).
+  // Public: what every table sees when a round opens (situation, question, options, costs, discussion
+  // questions). With the facilitator key it adds the facilitator notes and the round's reveal, which
+  // participants only see after the split. Never the consequences or the preferred option on its own.
+  app.get("/api/decision-room/deck/:family", async (req, res, next) => { try {
+    if (!isRails(req.params.family)) { res.status(404).json({ message: "No such deck" }); return; }
+    const key = String(req.query.key ?? "");
+    const scenario = key ? SCENARIOS[key] : latestOf(req.params.family);
+    if (!scenario || scenario.family !== req.params.family) { res.status(404).json({ message: "No such deck" }); return; }
+    const provided = String(req.headers["x-admin-key"] ?? "").trim();
+    const facilitator = Boolean(provided) && facilitatorSecrets().some((k) => safeEqualPlain(provided, k));
+    res.setHeader("Cache-Control", "no-store");
+    res.json({
+      key: scenario.key, facilitator,
+      modules: scenario.rounds.map((r) => ({
+        id: r.id, title: r.title, topic: r.seat, when: r.when, question: r.prompt,
+        situation: r.briefing?.changed ?? r.situation.join(" "),
+        options: r.options.map((o) => o.label), tradeoffs: r.options.map((o) => o.cost ?? ""),
+        discuss: r.reveal?.questions ?? [],
+        reveal: "", reconsider: "", boundary: "",
+        notes: facilitator && r.guidance ? [`Leaning ${r.guidance.preferred} when: ${r.guidance.conditions}`, `Alternative: ${r.guidance.alternative}`, `What would change it: ${r.guidance.changeEvidence}`, ...r.guidance.notes].join(" ") : "",
+        lesson: facilitator && r.reveal ? { boundary: r.reveal.boundary, lesson: r.reveal.lesson } : null,
+      })),
+    });
+  } catch (e) { fail(e, res, next); } });
+
   // Facilitator-only review pack: the whole scenario, including preferences, consequences and branches.
   // Never public: it is the answer key a participant must not read ahead of the room.
   app.get("/api/decision-room/review/:family", async (req, res, next) => { try {

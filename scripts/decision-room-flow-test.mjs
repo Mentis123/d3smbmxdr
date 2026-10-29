@@ -267,7 +267,7 @@ check("admin rows count viewers", (await call("GET", `/sessions/${vid}/admin`, {
 check("ownership endpoint refused in a physical room", (await call("POST", `/sessions/${joinCode}/ownership`, { headers: t1 })).status === 400);
 
 const ag = await call("POST", "/sessions", { body: { tableCount: 3, name: "Agent 0", variant: "agent0" }, headers: KEY });
-check("Agent 0 room pinned to ironvale@0.1", ag.status === 201 && ag.body.scenario === "ironvale@0.1", ag.body);
+check("Agent 0 room pinned to ironvale@0.2", ag.status === 201 && ag.body.scenario === "ironvale@0.2", ag.body);
 const agJoin = (teamCode) => call("POST", "/join", { body: { joinCode: ag.body.joinCode, teamCode } });
 const a1 = { "x-team-token": (await agJoin("1")).body.teamToken }, a2 = { "x-team-token": (await agJoin("2")).body.teamToken };
 const agAct = (body) => act(ag.body.sessionId, body);
@@ -301,8 +301,15 @@ const end1 = await agP(a1), end2 = await agP(a2);
 check("the two tables finish in different named states", JSON.stringify(end1.body.dashboard.facts) !== JSON.stringify(end2.body.dashboard.facts));
 const agRep = await call("GET", `/sessions/${ag.body.sessionId}/report`, { headers: KEY });
 check("report: conditional guidance, no best move, named states per table", agRep.status === 200 && agRep.body.scenario?.brand?.reportMode === "conditional" && agRep.body.rounds.every((r) => r.best === null && r.guidance) && agRep.body.tables.every((t) => Array.isArray(t.facts) && !t.meters), agRep.body.rounds?.[0]);
+const pubDeck = await call("GET", "/deck/ironvale?key=ironvale@0.2");
+check("public Agent 0 deck: six decisions, no notes, no reveals, no preferences", pubDeck.status === 200 && pubDeck.body.modules.length === 6 && pubDeck.body.modules.every((m) => !m.notes && !m.lesson) && !JSON.stringify(pubDeck.body).includes("preferred"), pubDeck.body.modules?.[0]);
+const keyDeck = await call("GET", "/deck/ironvale?key=ironvale@0.2", { headers: KEY });
+check("facilitator deck adds notes and the reveal", keyDeck.body.facilitator === true && keyDeck.body.modules.every((m) => m.notes && m.lesson?.lesson), keyDeck.body.modules?.[0]?.notes);
+check("no deck for a non-rails family", (await call("GET", "/deck/riverbend")).status === 404);
+const agRails = await call("GET", `/sessions/${ag.body.sessionId}/admin`, { headers: KEY });
+check("Agent 0 rooms report a presentation step (on the rails)", typeof agRails.body.session.presentationStep === "number", agRails.body.session.presentationStep);
 const agCsv = await call("GET", `/sessions/${ag.body.sessionId}/export`, { headers: KEY });
-check("CSV records the scenario revision on every row", String(agCsv.body).split("\r\n").slice(1).every((line) => line.includes("ironvale@0.1")));
+check("CSV records the scenario revision on every row", String(agCsv.body).split("\r\n").slice(1).every((line) => line.includes("ironvale@0.2")));
 
 if (server) server.close();
 console.log(`\n${failures === 0 ? "ALL CHECKS PASSED" : `${failures} CHECK(S) FAILED`}`);

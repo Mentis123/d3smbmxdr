@@ -35,7 +35,7 @@ export const editions = {
   },
 } as const;
 const artCaption: Record<Edition, string> = { "ciso-basecamp": "RIVERBEND / WATER & ENERGY", "agent-0": "IRONVALE / MINING OPERATIONS", coastwater: "COASTWATER / AI GOVERNANCE", "marlow-vale": "MARLOW VALE / DATA & AI SELLING" };
-const railsEditions: Edition[] = ["coastwater", "marlow-vale"];
+const railsEditions: Edition[] = ["coastwater", "marlow-vale", "agent-0"];
 
 function SignalTrace() {
   return <svg viewBox="0 0 360 56" fill="none" preserveAspectRatio="none" aria-hidden="true"><path d="M0 35H50L57 28L65 42L74 14L84 48L94 27L103 35H160L174 26L185 35H245L252 29L260 43L270 8L281 48L291 30L300 35H360" /></svg>;
@@ -100,13 +100,13 @@ export function EditionIntro({ edition }: { edition: Edition }) {
   const family = useEditionFamily(edition);
   const agent0 = family === "riverbend"
     ? "Set at Ironvale Mining, where a maintenance agent works across the operation. The mining rounds are in review; until they are approved, rooms opened here run the original six rounds."
-    : "Set at Ironvale Mining, where a maintenance agent works across the operation. Six rounds, from the SOC to the board, each with a sourced briefing. A preview edition, in review with Rich and Scott.";
+    : "Set at Ironvale Mining, where a maintenance agent works across the operation. Six calls, from the SOC to the board, each with a sourced briefing. Run every screen with Next and Back; each table's phone shows what its own choices change. A preview edition, in review with Rich and Scott.";
   return <section className={`vh-edition-intro vh-edition-intro--${edition}`}>
     <a className="vh-back" href="/decision-room"><ArrowLeft size={15} />All experiences</a>
     <div className="vh-eyebrow">{e.number} / {e.label} <span className="vh-status"><i />{e.status}</span></div>
     <img className="vh-edition-art" src={e.image} alt="" width="1200" height="800" />
     <h1>{e.title}</h1><p className="vh-edition-line">{e.line}</p>
-    <p>{edition === "coastwater" ? "Act as Coastwater's board. Six decisions. Different views welcome." : edition === "marlow-vale" ? "Act as the Data#3 account team for one council. Six decisions. Different views welcome." : edition === "agent-0" ? (family === "riverbend" ? "Mining preview. New rooms currently use the original scenario." : "A facilitated mining tabletop. One device per table.") : "Six rounds. One device per table."}</p>
+    <p>{edition === "coastwater" ? "Act as Coastwater's board. Six decisions. Different views welcome." : edition === "marlow-vale" ? "Act as the Data#3 account team for one council. Six decisions. Different views welcome." : edition === "agent-0" ? (family === "riverbend" ? "Mining preview. New rooms currently use the original scenario." : "Act as Ironvale's responders, from the SOC to the board. Six decisions. Different views welcome.") : "Six rounds. One device per table."}</p>
     {railsEditions.includes(edition) ? <p><a className="vh-back" href={`/decision-room/${edition}/present`}>Rehearse the full presentation <ArrowRight size={15} /></a><small style={{ display: "block", fontSize: 14 }}>No key needed to rehearse. Create a live room to collect table votes.</small></p> : null}
     <ExplainMore title={`About ${e.title}`}><p>{edition === "marlow-vale" ? "Six customer conversations at a fictional regional council, from the first meeting to a two-year partnership: Copilot, data platforms, readiness, data products, agents and ongoing services. Every option names a Data#3 offer and carries a visible cost, so sellers practise when to position each one and what it gives up. Run every screen with Next and Back." : edition === "coastwater" ? "Six governance decisions at a fictional water utility. Vote as a table, explain the disagreement, consider new information and capture the permission, conditions, owner and escalation trigger. Dan can run every screen with Next and Back." : edition === "agent-0" ? agent0 : "One device per table. Six rounds, from the SOC floor to the boardroom. Vote A–D, say why, lock it — then see where the room landed."}</p><p>{e.description}</p><div className="vh-tags">{e.tags.map((tag) => <span key={tag}>{tag}</span>)}</div></ExplainMore>
     {edition === "agent-0" ? <a className="vh-back vh-review-link" href="/decision-room/agent-0/review">Facilitator review pack <ArrowRight size={15} /></a> : null}

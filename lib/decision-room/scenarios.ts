@@ -15,13 +15,14 @@
 
 import { RIVERBEND } from "./content";
 import { IRONVALE } from "./ironvale";
+import { IRONVALE_V02 } from "./ironvale-v02";
 import { COASTWATER_V1 } from "./coastwater-v1";
 import { COASTWATER } from "./coastwater";
 import { MARLOWVALE } from "./marlowvale";
 import { AGENT0_PRODUCTION_RELEASE } from "./release";
 import type { Condition, Consequence, Dashboard, FactState, PublicRound, RoundContent, Scenario, ScenarioInfo, StageStatus } from "./types";
 
-export const SCENARIOS: Record<string, Scenario> = { [RIVERBEND.key]: RIVERBEND, [IRONVALE.key]: IRONVALE, [COASTWATER_V1.key]: COASTWATER_V1, [COASTWATER.key]: COASTWATER, [MARLOWVALE.key]: MARLOWVALE };
+export const SCENARIOS: Record<string, Scenario> = { [RIVERBEND.key]: RIVERBEND, [IRONVALE.key]: IRONVALE, [IRONVALE_V02.key]: IRONVALE_V02, [COASTWATER_V1.key]: COASTWATER_V1, [COASTWATER.key]: COASTWATER, [MARLOWVALE.key]: MARLOWVALE };
 /** What a room created before scenario pinning ran. */
 export const LEGACY_SCENARIO_KEY = RIVERBEND.key;
 
@@ -33,7 +34,7 @@ export function scenarioKeyForNewRoom(variant: string) {
   const configured = (process.env.DECISION_ROOM_AGENT0_SCENARIO ?? "").trim();
   if (configured) return SCENARIOS[configured] ? configured : RIVERBEND.key;
   // Preview content reaches production rooms only when this site releases it by name.
-  if (process.env.VERCEL_ENV !== "production") return IRONVALE.key;
+  if (process.env.VERCEL_ENV !== "production") return IRONVALE_V02.key;
   return AGENT0_PRODUCTION_RELEASE && SCENARIOS[AGENT0_PRODUCTION_RELEASE] ? AGENT0_PRODUCTION_RELEASE : RIVERBEND.key;
 }
 

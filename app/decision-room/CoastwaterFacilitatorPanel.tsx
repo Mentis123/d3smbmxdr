@@ -1,7 +1,8 @@
 import type { ReactNode } from "react";
 
 export type CoastwaterSnapshot = {
-  scenario: { family: string; revision: string };
+  scenario: { family: string; revision: string; key?: string };
+  results?: { reveal?: { boundary: string; lesson: string } | null } | null;
   session: { joinCode: string; mode?: "physical" | "virtual"; revision: number; activeRound: number; roundState: string; roundStartedAt: string | null; durationSeconds: number; schedule: import("../../lib/decision-room/timing").SessionSchedule | null; audienceTimer: boolean; presentationStep: number };
   counts: { total: number; joined: number; locked: number; notJoined: number };
   teams: { id: string; displayName: string; state: string; viewers?: number }[];

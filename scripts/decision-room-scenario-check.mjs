@@ -44,7 +44,7 @@ check("an unknown stored scenario is refused, not reinterpreted", resolveScenari
 check("new V1 rooms pin riverbend@1", scenarioKeyForNewRoom("riverbend") === "riverbend@1");
 const env = { ...process.env };
 delete process.env.DECISION_ROOM_AGENT0_SCENARIO;
-process.env.VERCEL_ENV = "preview"; check("new Agent 0 rooms pin the Ironvale preview outside production", scenarioKeyForNewRoom("agent0") === "ironvale@0.1");
+process.env.VERCEL_ENV = "preview"; check("new Agent 0 rooms pin the Ironvale preview outside production", scenarioKeyForNewRoom("agent0") === "ironvale@0.2");
 process.env.VERCEL_ENV = "production"; check(`new Agent 0 rooms in production follow this site's release (${AGENT0_PRODUCTION_RELEASE ?? "none, so riverbend@1"})`, scenarioKeyForNewRoom("agent0") === (AGENT0_PRODUCTION_RELEASE ?? "riverbend@1"));
 process.env.DECISION_ROOM_AGENT0_SCENARIO = "ironvale@0.1"; check("the environment variable overrides the site release", scenarioKeyForNewRoom("agent0") === "ironvale@0.1");
 process.env.DECISION_ROOM_AGENT0_SCENARIO = "ironvale@nope"; check("a misnamed release falls back to riverbend@1", scenarioKeyForNewRoom("agent0") === "riverbend@1");
@@ -99,11 +99,33 @@ check("inject 4 C after a bounded agent keeps cover at 100", replay(rb, new Map(
 check("inject 4 C without one cuts cover to 30", replay(rb, new Map([[1, "C"], [2, "A"], [3, "A"], [4, "B"], [5, "C"]]), 5).meters.cover === 30);
 check("best moves as in the deck", JSON.stringify(rb.bestMove) === JSON.stringify({ 1: "C", 2: "A", 3: "D", 4: "B", 5: "D", 6: "C" }));
 
-console.log("\n5. ironvale@0.1 avoids claims the concept rules out");
+for (const ivKey of ["ironvale@0.1", "ironvale@0.2"]) {
+console.log(`\n5. ${ivKey} avoids claims the concept rules out`);
 // Everything a table or the projector can see; facilitator notes may name a claim in order to rule it out.
-const iv = JSON.stringify({ ...SCENARIOS["ironvale@0.1"], rounds: SCENARIOS["ironvale@0.1"].rounds.map(({ guidance, ...round }) => round) });
+const iv = JSON.stringify({ ...SCENARIOS[ivKey], rounds: SCENARIOS[ivKey].rounds.map(({ guidance, ...round }) => round) });
 for (const [label, pattern] of [["no Riverbend carry-over", /Riverbend|JADEPUFFER|boil-water|billing/i], ["no SOCI status inferred from mining", /\bSOCI\b/], ["no insurance figure", /insur/i], ["no invented AI-incident report", /AI-incident report/i], ["no numeric safety score", /\d+\s*%\s*safe/i], ["no 'passive' sensor claim", /\bpassive\b/i]])
   check(label, !pattern.test(iv), iv.match(pattern)?.[0]);
+}
+
+console.log("\n6. Rails rooms: few words, real trade-offs");
+// Doctrine (owner, 29 Oct 2026): a room reads fast and every option costs something, including the one the
+// facilitator leans to. Rooms written before the rule (coastwater@1, coastwater@2, ironvale@0.1) are exempt.
+const RAILS_FAMILIES = ["coastwater", "marlowvale", "ironvale"], GRANDFATHERED = ["coastwater@1", "coastwater@2", "ironvale@0.1"];
+const words = (t) => t.trim().split(/\s+/).filter(Boolean).length;
+for (const s of Object.values(SCENARIOS)) {
+  if (!RAILS_FAMILIES.includes(s.family) || GRANDFATHERED.includes(s.key)) continue;
+  for (const r of s.rounds) {
+    const situation = r.briefing?.changed ?? r.situation.join(" ");
+    check(`${s.key} r${r.roundNo}: situation at most 55 words`, words(situation) <= 55, words(situation));
+    check(`${s.key} r${r.roundNo}: question at most 12 words`, words(r.prompt) <= 12, words(r.prompt));
+    for (const o of r.options) {
+      const label = o.label.replace(/ \([^()]+\)$/, "");
+      check(`${s.key} r${r.roundNo}${o.key}: option at most 8 words`, words(label) <= 8, label);
+      check(`${s.key} r${r.roundNo}${o.key}: cost is "gain; give-up" in at most 16 words`, Boolean(o.cost) && /;/.test(o.cost) && o.cost.split(";").every((p) => words(p) >= 2) && words(o.cost) <= 16, o.cost);
+    }
+    check(`${s.key} r${r.roundNo}: four different costs`, new Set(r.options.map((o) => o.cost)).size === r.options.length);
+  }
+}
 
 console.log(`\n${failures === 0 ? "ALL CHECKS PASSED" : `${failures} CHECK(S) FAILED`}`);
 process.exit(failures === 0 ? 0 : 1);

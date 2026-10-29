@@ -27,3 +27,9 @@
 @media(max-width:650px){.cw-discussion>.cw-featured{grid-template-columns:1fr}}
 .cw-shell--marlowvale .cw-opening-art{background:linear-gradient(90deg,#000025 0%,#00002544 45%,#00002522),linear-gradient(0deg,#000025,transparent 55%),url('/decision-room-art/marlow-vale.webp') center/cover}
 .cw-offer{display:block;width:fit-content;margin-top:6px;padding:2px 9px;border:1px solid #ffb20066;border-radius:999px;color:#ffd27a;font-style:normal;font-size:clamp(12px,.8vw,14px);font-weight:600;letter-spacing:.02em}
+.cw-shell--ironvale .cw-opening-art{background:linear-gradient(90deg,#000025 0%,#00002544 45%,#00002522),linear-gradient(0deg,#000025,transparent 55%),url('/decision-room-art/agent-0.webp') center/cover}
+.cw-lesson{margin-top:22px;padding:16px 18px;border-left:3px solid #00aeff;background:#071b3a99;border-radius:0 10px 10px 0}
+.cw-lesson p{margin:6px 0;font-size:clamp(15px,1.05vw,19px);line-height:1.45;color:#d6e4f5}
+.cw-lesson .cw-kicker{margin:0 0 6px}
+.cw-lesson .cw-lesson-line{color:#fff}
+

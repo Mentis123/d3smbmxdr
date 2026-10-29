@@ -23,7 +23,7 @@ import ExplainMore from "./ExplainMore";
 import type { Briefing, Condition, Consequence, Dashboard, FactState, Guidance, Launch, MeterDef, PublicRound, Reveal, RunPlan, RunSegment, Scenario, ScenarioInfo, Tone } from "../../lib/decision-room/types";
 import VersionHub, { EditionIntro, HomeFooter, editions, type Edition } from "./VersionHub";
 import CoastwaterPresenter from "./CoastwaterPresenter";
-import { isLegacyRails, isRails, railsEdition, railsFamilyOfEdition } from "../../lib/decision-room/rails";
+import { RAILS, isBranchingRails, isLegacyRails, isRails, railsEdition, railsFamilyOfEdition, showsMicrosoft } from "../../lib/decision-room/rails";
 import AudienceTimerControl from "./AudienceTimerControl";
 import SessionRunClock from "./SessionRunClock";
 import type { SessionSchedule } from "../../lib/decision-room/timing";
@@ -262,14 +262,14 @@ function Landing({ presetCode, edition }: { presetCode?: string; edition?: Editi
   async function create() {
     setBusy(true); setError("");
     try {
-      const data = await request<{ sessionId: string; joinCode: string; displayToken: string }>(`${API}/sessions`, json({ tableCount, mode: newRoomMode, ...(edition ? { name: editions[edition].title, variant: railsFamilyOf ? railsFamilyOf : edition === "agent-0" ? "agent0" : "riverbend" } : {}) }, { "x-admin-key": adminKey }));
+      const data = await request<{ sessionId: string; joinCode: string; displayToken: string; scenario: string }>(`${API}/sessions`, json({ tableCount, mode: newRoomMode, ...(edition ? { name: editions[edition].title, variant: railsFamilyOf ? RAILS[railsFamilyOf].variant : edition === "agent-0" ? "agent0" : "riverbend" } : {}) }, { "x-admin-key": adminKey }));
       try { localStorage.setItem("decision-room-admin-key", adminKey); localStorage.setItem(`decision-room-display:${data.sessionId}`, data.displayToken); } catch { /* ignore */ }
-      navigate(railsFamilyOf ? `/decision-room/${edition}/control?room=${data.sessionId}` : `/decision-room/admin/${data.sessionId}`);
+      navigate(isRails(data.scenario?.split("@")[0]) ? `/decision-room/${railsEdition(data.scenario.split("@")[0] as Parameters<typeof railsEdition>[0])}/control?room=${data.sessionId}` : `/decision-room/admin/${data.sessionId}`);
     } catch (e) { setError((e as Error).message); } finally { setBusy(false); }
   }
   function openDisplay() { try { localStorage.setItem(`decision-room-display:${sessionId}`, displayToken); } catch { /* ignore */ } navigate(railsFamilyOf ? `/decision-room/${edition}/present?room=${sessionId}&display=1&displayToken=${encodeURIComponent(displayToken)}` : `/decision-room/console/${sessionId}?displayToken=${encodeURIComponent(displayToken)}`); }
 
-  return <Frame showMicrosoft={Boolean(edition) && !railsFamilyOf} className={`dr-landing dr-one${edition ? " dr-edition-landing" : ""}`}>
+  return <Frame showMicrosoft={Boolean(edition) && showsMicrosoft(railsFamilyOf ?? "riverbend")} className={`dr-landing dr-one${edition ? " dr-edition-landing" : ""}`}>
     <div className="dr-landing-grid">
       {edition ? <EditionIntro edition={edition} /> : <section className="dr-hero"><a className="vh-back" href="/decision-room">← All experiences</a><span className="dr-kicker">JOIN A LIVE TABLETOP</span><h1>Make the room’s decisions visible.</h1><p>One device per table — a laptop or a phone. Enter your room code to join the experience your facilitator has opened.</p></section>}
       <div className="dr-landing-side">
@@ -388,7 +388,7 @@ function Participant({ code }: { code: string }) {
     : state === "ended" ? <section className="dr-card dr-wait"><h2>{brand.ended.title}</h2><p>{brand.ended.body}</p></section>
     : null;
   const actCard = !round || !inRound ? null
-    : state === "published" && results && isRails(data.scenario.family) && !isLegacyRails(data.scenario.key) ? <section className="dr-card dr-reveal"><h2>Where did we differ?</h2><SplitBars split={results} options={round.options} />{(results.reveal?.questions ?? ["What downside are you accepting by choosing this?", "What evidence or condition would make you change your decision?"]).map((q) => <p key={q}>{q}</p>)}<p className="dr-hint">Your call: {decision?.optionKey || "No locked response"}. Discuss the other tables’ reasoning with your facilitator.</p></section>
+    : state === "published" && results && isRails(data.scenario.family) && !isBranchingRails(data.scenario.family) && !isLegacyRails(data.scenario.key) ? <section className="dr-card dr-reveal"><h2>Where did we differ?</h2><SplitBars split={results} options={round.options} />{(results.reveal?.questions ?? ["What downside are you accepting by choosing this?", "What evidence or condition would make you change your decision?"]).map((q) => <p key={q}>{q}</p>)}<p className="dr-hint">Your call: {decision?.optionKey || "No locked response"}. Discuss the other tables’ reasoning with your facilitator.</p></section>
     : state === "published" && results ? <section className="dr-card dr-reveal" key={`reveal-${round.roundNo}`}>
         <div className="dr-panel-head"><span>Where the room landed</span><span className="dr-chain-note">{results.locked} tables locked</span></div>
         <SplitBars split={results} options={round.options} />
@@ -410,7 +410,7 @@ function Participant({ code }: { code: string }) {
           : <div className="dr-actions"><button disabled={saving || !optionKey} onClick={() => save(false)}>{saving ? "Saving…" : "Save draft"}</button><button className="dr-primary" disabled={!canLock || saving} onClick={() => setConfirming(true)}>Lock response <LockKeyhole /></button></div>}
       </section>;
 
-  return <Frame className="dr-table dr-one" kicker={brand.kicker} showMicrosoft={!isRails(data.scenario.family)}>
+  return <Frame className="dr-table dr-one" kicker={brand.kicker} showMicrosoft={showsMicrosoft(data.scenario.family)}>
     <div className="dr-session-head">
       <div><span className="dr-kicker">{data.team.displayName.toUpperCase()}{round ? ` · ${round.seat.toUpperCase()}` : ""}</span><h1 className="dr-h1-small">{round ? round.title : data.organisation.name}</h1>{round ? <p className="dr-when">{round.when}</p> : <p className="dr-when">{data.organisation.tagline}</p>}</div>
       <div className="dr-head-right">{state === "open" && session.audienceTimer !== false ? <span className={`dr-mini-clock ${clock.over ? "over" : clock.low ? "low" : ""}`}>{clock.label}</span> : null}<Status tone={connection} label={connection} /></div>
@@ -533,7 +533,7 @@ function Admin({ id }: { id: string }) {
     { label: session.activeRound >= session.roundCount ? "Final round" : `Next · round ${session.activeRound + 1}`, action: "advance", enabled: session.status === "live" && session.activeRound < session.roundCount, icon: <ArrowRight />, primary: state === "published" && session.activeRound < session.roundCount },
   ];
 
-  return <Frame wide className="dr-admin dr-one" kicker={data.scenario.brand.kicker} showMicrosoft={!isRails(data.scenario.family)}>
+  return <Frame wide className="dr-admin dr-one" kicker={data.scenario.brand.kicker} showMicrosoft={showsMicrosoft(data.scenario.family)}>
     <section className="dr-admin-head"><div><span className="dr-kicker">FACILITATOR CONTROLS · NOT FOR PROJECTION</span><h1 className="dr-h1-small">Room <span className="dr-join-code">{session.joinCode}</span></h1><p className="dr-when">{round ? `${round.seat} · ${round.title}` : state} · {state === "open" ? `clock ${clock.label}` : state}</p></div><div className="dr-qr"><QRCodeSVG value={joinUrl} size={118} bgColor="#ffffff" fgColor="#000025" /><button onClick={() => navigator.clipboard?.writeText(joinUrl)}><Copy />Copy join link</button></div></section>
 
       {isRails(data.scenario.family) ? <div className="dr-coastwater-console-link"><a className="dr-button dr-primary" href={`/decision-room/${railsEdition(data.scenario.family)}/control?room=${id}`} target="_blank" rel="noreferrer"><Monitor />Open facilitator console · tables, comments and Next/Back</a><p className="dr-hint">Keep the console on your private screen. Open its audience display on the projector.</p></div> : null}
@@ -594,7 +594,7 @@ function Report({ id }: { id: string }) {
   const factCols = data.tables.find((t) => t.facts?.length)?.facts ?? [];
   const useFacts = factCols.length > 0;
   const date = new Date(data.room.launchedAt ?? data.generatedAt);
-  return <Frame wide className="dr-report" kicker={brand.kicker} showMicrosoft={!isRails(data.scenario.family)}>
+  return <Frame wide className="dr-report" kicker={brand.kicker} showMicrosoft={showsMicrosoft(data.scenario.family)}>
     <section className="dr-report-head">
       <div><span className="dr-kicker">AFTER-ACTION REPORT · ROOM {data.room.joinCode} · {date.toLocaleDateString("en-AU", { day: "numeric", month: "long", year: "numeric" })}</span><h1>{brand.reportTitle}</h1><p>{data.tables.length} tables · {played.length} of {data.rounds.length} rounds decided · {conditional ? "facilitator guidance is conditional, not an answer key; tables are shown as journeys, never ranked." : "Richard’s best move is from the deck; tables are shown as journeys, never ranked."} <a className="dr-report-switch" href={`/decision-room/report/${id}/rounds`}>Round by round, with every table’s reasons →</a></p></div>
       <button className="dr-report-print" onClick={() => window.print()}><Printer />Print or save PDF</button>
@@ -731,7 +731,7 @@ function RoundsReport({ id }: { id: string }) {
     setDeckError(""); setBuilding(true);
     try { await downloadRoundsDeck(model); } catch (e) { setDeckError(`PowerPoint failed: ${(e as Error).message}`); } finally { setBuilding(false); }
   }
-  return <Frame wide className="dr-report dr-rounds" kicker={data.scenario.brand.kicker} showMicrosoft={!isRails(data.scenario.family)}>
+  return <Frame wide className="dr-report dr-rounds" kicker={data.scenario.brand.kicker} showMicrosoft={showsMicrosoft(data.scenario.family)}>
     <section className="dr-report-head">
       <div><span className="dr-kicker">ROUND-BY-ROUND REPORT · ROOM {model.roomCode} · {model.dateLabel.toUpperCase()}</span><h1>Round by round: the question, and how each table answered</h1>
         <p>{model.tables.length} tables · {model.footnote} <a className="dr-report-switch" href={`/decision-room/report/${id}`}>One-page summary →</a></p></div>
@@ -796,7 +796,7 @@ function ReviewPack({ family }: { family: string }) {
   if (!key || (!data && /facilitator access/i.test(error))) return <Frame><section className="dr-card dr-form"><a className="vh-back" href="/decision-room/agent-0">← Agent 0</a><h2>Agent 0 review pack</h2><p className="dr-hint">Facilitator key required. This page holds the preferences and every consequence, so it is never shown to tables.</p><label>Facilitator key<input type="password" value={draftKey} onChange={(e) => setDraftKey(e.target.value)} autoComplete="off" /></label><button className="dr-primary" disabled={!draftKey.trim()} onClick={() => { try { localStorage.setItem("decision-room-admin-key", draftKey.trim()); } catch { /* ignore */ } setKey(draftKey.trim()); }}>Open review pack</button><ErrorText message={error} /></section></Frame>;
   if (!data) return <Frame wide><section className="dr-card"><h2>Opening the review pack…</h2><ErrorText message={error} /></section></Frame>;
   const { scenario: s, info } = data;
-  return <Frame wide className="dr-review" kicker={s.brand.kicker} showMicrosoft={!isRails(s.family)}>
+  return <Frame wide className="dr-review" kicker={s.brand.kicker} showMicrosoft={showsMicrosoft(s.family)}>
     <section className="dr-review-head">
       <div><span className="dr-kicker">FACILITATOR REVIEW PACK · NOT FOR PROJECTION · {info.key}</span><h1>{s.organisation.name}: the six decisions</h1>
         <p>{s.organisation.tagline}</p>

@@ -766,3 +766,5 @@
   .dr-solo-bar--reflect button:first-child{padding:13px 12px}
 }
 .dr-solo-held{color:var(--aqua)}
+.dr-solo-loading{display:flex;align-items:center;justify-content:center;gap:12px;min-height:180px;color:#9db0c5}
+.dr-solo-loading p{margin:0}

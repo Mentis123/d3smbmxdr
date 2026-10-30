@@ -874,6 +874,9 @@ function Solo({ edition }: { edition: Edition }) {
   const answered = Object.keys(log.choices).length;
   const [step, setStep] = useState<{ round: number; phase: "intro" | "decide" | "reflect" | "end" }>(() => answered ? { round: answered, phase: "reflect" } : { round: 1, phase: "intro" });
   const [data, setData] = useState<SoloRound | null>(null); const [error, setError] = useState(""); const [pick, setPick] = useState(""); const [switching, setSwitching] = useState(false);
+  // Which step the data on screen belongs to. Until the new step's data arrives, nothing from the old one is shown or tappable.
+  const [loadedFor, setLoadedFor] = useState("");
+  const stepKey = `${step.phase}:${step.round}`;
   useEffect(() => { try { localStorage.setItem(soloStore(edition), JSON.stringify(log)); } catch { /* private mode: progress lasts this visit */ } }, [edition, log]);
   const load = useCallback(async (round: number, choices: Record<number, string>) => {
     setError("");
@@ -888,7 +891,7 @@ function Solo({ edition }: { edition: Edition }) {
       if (!alive || !d) return;
       if (log.key && log.key !== d.scenario.key) { setLog({ key: d.scenario.key, choices: {}, notes: {} }); setStep({ round: 1, phase: "intro" }); return; }
       if (!log.key) setLog((l) => ({ ...l, key: d.scenario.key }));
-      setData(d);
+      setData(d); setLoadedFor(`${step.phase}:${step.round}`);
     });
     return () => { alive = false; };
   }, [step, load]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -943,6 +946,8 @@ function Solo({ edition }: { edition: Edition }) {
       <div className="dr-actions"><button onClick={restart}><RotateCcw size={16} />Start over</button><a className="dr-primary dr-linkbtn" href={`/decision-room/${edition}`}>Run it with a group <ArrowRight /></a></div>
     </section>, `SOLO · ${editions[edition].title.toUpperCase()}`);
   }
+
+  if (loadedFor !== stepKey) return frame(<><div className="dr-session-head"><div><span className="dr-kicker">CALL {step.round} OF {total}</span><h1 className="dr-h1-small">{step.phase === "reflect" ? "What your call changed…" : "Next call…"}</h1></div></div><section className="dr-card dr-wait dr-solo-loading" aria-live="polite"><span className="dr-pulse" />{error ? <><ErrorText message={error} /><div className="dr-actions"><button onClick={() => setStep({ ...step })}>Try again</button></div></> : <p>Loading</p>}</section></>);
 
   const round = data.round; const n = round.roundNo; const last = n >= total;
   const head = <div className="dr-session-head"><div><span className="dr-kicker">CALL {n} OF {total} · {round.seat.toUpperCase()}</span><h1 className="dr-h1-small">{round.title}</h1><p className="dr-when">{round.when}</p></div>

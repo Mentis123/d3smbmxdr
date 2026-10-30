@@ -17,3 +17,9 @@ User clarified that each place must launch an animated, narrated activation like
 Browser checks: all three rendered without application errors; operations link-loss view, engineering dispatch outcome, terminal investigation and handover; media seek at 26.24 / 32.64 / 30.32 seconds; play/pause; return to world; narrow viewport without horizontal overflow. Dedicated homepage has only the three experience launch links, all target=_blank, led by the Mining Lab showcase. No SharePoint industry link or security-assessment chatbot on the homepage. Production Next build passed.
 
 Not claimed: physical mobile/device testing, formal user acceptance or exact word-level forced alignment. Audio boundaries were located by local transcription; visual timing was checked in the browser.
+
+## Rotation and playback correction
+
+Replaced repeated hard seeks (which cleared the user camera roughly fourteen times per second) with a continuous render-frame media clock. Host updates now provide time anchors without resetting orbit, pan or zoom. Camera takeover survives narration chapter boundaries. Reset view restores guided framing independently of audio; replay resets both deliberately. Keyboard chapter and playback commands route to the media player.
+
+Validation: three clock tests passed (frame interpolation; pause/backward seek; rate/clamping/invalid samples). Browser checked rotation held during playback and across chapters, zoom/pan, Reset view without audio restart, and keyboard media controls. Existing Mining AI Lab pump activation opened without application errors. Normal AI Lab timelines retain their original path unless a media clock is explicitly attached.

@@ -98,6 +98,7 @@ async function handleExhibit(data){
     if(saved?.mode==='fly'){camera.position.copy(saved.position);camera.quaternion.copy(saved.quaternion);camera.updateMatrixWorld();navigation?.enterFly({capture:false});}
     reply('exhibit:closed');return;
   }
+  if(data.type==='exhibit:command'&&data.action==='clock'&&Number.isFinite(data.time)){exhibit?.setClock?.({time:data.time,playing:data.playing===true,rate:data.rate});return;}
   if(data.type==='exhibit:command'&&data.action==='seek'&&Number.isFinite(data.time)){exhibit?.setTime(data.time);render();return;}
   if(data.type==='exhibit:command'){if(['play','pause','replay','reset','next','back','chapter','variation','hold','sensor','captions'].includes(data.action))exhibit?.command(data.action,{index:data.index,value:data.value});return;}
   if(data.type!=='exhibit:open')return;

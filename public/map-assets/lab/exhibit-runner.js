@@ -5,6 +5,7 @@ import {createSensorView,fitSensorCamera} from './exhibit-sensor.js';
 import {createOverlay,projectRect} from './exhibit-overlay.js';
 import {createProps} from './exhibit-props.js';
 import {createActors} from './exhibit-actors.js';
+import {createMediaClock} from './exhibit-media-clock.js';
 
 // Runs one recipe exhibit on the shared stage: timeline, guided camera, sensor view, overlay, controls, messages.
 const OVERLAY_DELAY=.5,SWEEP_SECONDS=1.2,REVIEW_AFTER=2.2,HOME={angle:.55,elevation:.42};
@@ -50,7 +51,7 @@ export function runRecipe(recipe,stage,host,notify,buildKit=KITS[recipe.id]){
       return{...c,camera:portrait&&aspect<1?{...cam,...portrait}:{...cam,distance:cam.distance*f}};});
   }
 
-  let captions=true,user=null,easeFrom=null,sensorOff=false,lastIndex=-1,sig='',pose=null,activeCamera=orbit,overlayInfo=null;
+  let captions=true,user=null,easeFrom=null,sensorOff=false,lastIndex=-1,sig='',pose=null,activeCamera=orbit,overlayInfo=null,mediaClock=null;
   const points=new Map();let gesture=null;
   const outward=new THREE.Vector3();
   function placeOrbit(p){outward.set(Math.sin(p.angle)*Math.cos(p.elevation),Math.sin(p.elevation),Math.cos(p.angle)*Math.cos(p.elevation));
@@ -72,12 +73,12 @@ export function runRecipe(recipe,stage,host,notify,buildKit=KITS[recipe.id]){
   // From the AI view on, the variation's caption replaces the chapter's; variation.captions[chapterId] overrides it per chapter.
   const captionFor=i=>{const v=tl.variation&&recipe.variation;if(!v||aiIndex<0||i<aiIndex)return chapters[i].caption;return v.captions?.[chapters[i].id]??v.caption??chapters[i].caption;};
   function subjectAnchor(i){const id=chapters[i].overlay?.anchor||chapters.find(c=>c.id==='aiView')?.overlay?.anchor||Object.keys(anchors)[0];return anchors[id];}
-  function state(){const i=tl.index;return{id:recipe.id,chapter:i,chapterId:idOf(i),time:tl.time,duration:recipe.duration,playing:tl.playing,variation:tl.variation,hold:tl.hold,sensor:activeCamera!==orbit,sensorLabel:activeCamera!==orbit?(sensors[chapters[i].sensor]?.label||'site camera'):null,sensorTitle:activeCamera!==orbit?(sensors[chapters[i].sensor]?.title||null):null,ended:tl.ended};}
+  function state(){const i=tl.index;return{id:recipe.id,chapter:i,chapterId:idOf(i),time:tl.time,duration:recipe.duration,playing:mediaClock?mediaClock.playing:tl.playing,variation:tl.variation,hold:tl.hold,sensor:activeCamera!==orbit,sensorLabel:activeCamera!==orbit?(sensors[chapters[i].sensor]?.label||'site camera'):null,sensorTitle:activeCamera!==orbit?(sensors[chapters[i].sensor]?.title||null):null,ended:tl.ended};}
 
   function update(dt){
-    tl.step(dt);
+    if(mediaClock)tl.seek(mediaClock.at(performance.now()));else tl.step(dt);
     const t=tl.time,i=tl.index,w=host.clientWidth,h=host.clientHeight;
-    if(i!==lastIndex){if(lastIndex>=0&&user)easeFrom={index:i,pose:user};else if(lastIndex>=0&&i!==lastIndex+1)easeFrom=null;user=null;sensorOff=false;lastIndex=i;}
+    if(i!==lastIndex){if(!mediaClock){if(lastIndex>=0&&user)easeFrom={index:i,pose:user};else if(lastIndex>=0&&i!==lastIndex+1)easeFrom=null;user=null;sensorOff=false;}lastIndex=i;}
     const c=chapters[i],sensor=c.sensor&&!sensorOff?sensors[c.sensor]:null;
     kit.update(t,{...ctxFor(i),sensor:!!sensor});
     if(w>0&&h>0){const aspect=w/h;framesFor(aspect);orbit.aspect=aspect;orbit.updateProjectionMatrix();if(sensor)fitSensorCamera(sensor.camera,aspect);}
@@ -122,6 +123,12 @@ export function runRecipe(recipe,stage,host,notify,buildKit=KITS[recipe.id]){
     if(e.shiftKey&&e.key.startsWith('Arrow')){stop(e);e.preventDefault();takeOver();pan(e.key==='ArrowLeft'?35:e.key==='ArrowRight'?-35:0,e.key==='ArrowUp'?35:e.key==='ArrowDown'?-35:0);send();return;}
     const keys={ArrowLeft:1,ArrowRight:1,PageUp:1,PageDown:1,ArrowUp:1,ArrowDown:1,'+':1,'-':1,' ':1,Home:1,r:1,R:1};if(!keys[e.key]&&e.code!=='KeyF')return;
     stop(e);e.preventDefault();
+    if(mediaClock){
+      if(e.key===' '){notify({mediaAction:'toggle'});return;}
+      if(e.key==='ArrowRight'||e.key==='PageDown'){notify({mediaAction:'chapter',index:tl.index+1});return;}
+      if(e.key==='ArrowLeft'||e.key==='PageUp'){notify({mediaAction:'chapter',index:tl.index-1});return;}
+      if(e.key==='r'||e.key==='R'){notify({mediaAction:'chapter',index:tl.index});return;}
+    }
     if(e.key==='ArrowRight'||e.key==='PageDown')seekChapter(tl.index+1);
     else if(e.key==='ArrowLeft'||e.key==='PageUp')seekChapter(tl.index-1);
     else if(e.key==='r'||e.key==='R')seekChapter(tl.index);
@@ -159,6 +166,7 @@ export function runRecipe(recipe,stage,host,notify,buildKit=KITS[recipe.id]){
       camera:pose&&{angle:pose.angle,elevation:pose.elevation,distance:pose.distance,target:pose.target},userCamera:!!user,kit:kit.metrics?.()||null};
   }
   return{scene,get camera(){return activeCamera;},update,command,
+    setClock(sample){mediaClock??=createMediaClock(recipe.duration);mediaClock.sample(sample,performance.now());tl.pause();update(0);},
     setTime(t){const before=tl.index;tl.pause();tl.seek(t);user=null;easeFrom=null;if(tl.index!==before)sensorOff=false;lastIndex=tl.index;send();},
     chapter(n){seekChapter(n);tl.pause();send();},
     metrics,

@@ -115,8 +115,8 @@ Facilitate form's room mode and the join hint; a chip ("Online group ·
 change") goes back. Editions without solo skip straight to "Where is the
 group?". `/decision-room/join/:code` is unchanged.
 
-**Solo** (`/decision-room/agent-0/solo`): one person, own pace, no room and
-no database. `POST /api/decision-room/solo/:edition` with
+**Solo** (`/decision-room/<edition>/solo`, all four editions): one person,
+own pace, no room and no database. `POST /api/decision-room/solo/:edition` with
 `{ round, choices }` returns the round resolved for the earlier choices
 (briefing variants, path, state). Once that round's choice is included it
 adds the consequence, the state after, every option's cost, the reveal and
@@ -130,10 +130,24 @@ expert view" (labelled a view, not a verdict) and "What the tools did, and
 did not do". The end page lists the six calls beside the expert leaning,
 with "Replay from here" on each.
 
-Solo exposes the guidance that the room keeps facilitator-only. That is the
-point of solo, and it means anyone who plays solo first knows Rich's
-leanings in a live room. Editions opt in through `SOLO_EDITIONS` (API and
-client); Agent 0 is the only one so far. The fallback site does not carry
+What each edition's reflection page carries depends on its content:
+
+| Edition | After the call | Trade-offs | Twist | Expert view | Takeaways |
+| --- | --- | --- | --- | --- | --- |
+| CISO Basecamp (`riverbend@1`) | consequence, meters | what each option would have done (no costs in V1) | none | Richard's best move, as a leaning | none |
+| Agent 0 (`ironvale@0.2`) | consequence, the states it moved | every option's cost | none | preference, conditions, the case for another call, what would change it | what the tools did and did not do, two questions |
+| Coastwater (`coastwater@2`) | the cost you accepted | every option's cost | the optional probe, then "keep or change your call" | none (no answer key) | what to capture, two questions, the facilitator's notes |
+| Marlow Vale (`marlowvale@1`) | the cost you accepted | every option's cost, offer tags | the optional probe, then "keep or change your call" | none (no answer key) | what to capture, the customer-first questions, the facilitator's notes |
+
+A changed call after the twist is recorded beside the first ("C, then moved
+to A"), never instead of it. On phones the reflection reads top to bottom
+(call, costs, twist, view, takeaways) with a pinned action bar; laptops show
+two columns.
+
+Solo exposes the guidance that the room keeps facilitator-only (Agent 0's
+leanings, Riverbend's best move). That is the point of solo, and it means
+anyone who plays solo first knows the leanings in a live room. Editions opt
+in through `SOLO_EDITIONS` (API and client). The fallback site does not carry
 solo or the picker (it runs Riverbend for Agent 0).
 
 The rails instructions screen now reads "No wrong answers. Only trade-offs."

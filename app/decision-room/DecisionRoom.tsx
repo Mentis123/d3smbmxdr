@@ -24,6 +24,7 @@ import ExplainMore from "./ExplainMore";
 import type { Briefing, Condition, Consequence, Dashboard, FactState, Guidance, Launch, MeterDef, PublicRound, Reveal, RunPlan, RunSegment, Scenario, ScenarioInfo, Tone } from "../../lib/decision-room/types";
 import VersionHub, { EditionIntro, HomeFooter, editions, type Edition } from "./VersionHub";
 import CoastwaterPresenter from "./CoastwaterPresenter";
+import { RAILS_PACKS } from "./rails-packs";
 import { RAILS, isBranchingRails, isLegacyRails, isRails, railsEdition, railsFamilyOfEdition, showsMicrosoft } from "../../lib/decision-room/rails";
 import AudienceTimerControl from "./AudienceTimerControl";
 import SessionRunClock from "./SessionRunClock";
@@ -849,21 +850,30 @@ function ReviewPack({ family }: { family: string }) {
 }
 
 /* ------------------------------------------------------------------ solo */
-/** Editions that can be played alone. The server says which scenario each one runs (POST /solo/:edition). */
-const SOLO_EDITIONS: Edition[] = ["agent-0"];
+/** Editions that can be played alone. The server says which scenario each one runs (POST /solo/:edition); keep in step with api.ts. */
+const SOLO_EDITIONS: Edition[] = ["ciso-basecamp", "agent-0", "coastwater", "marlow-vale"];
 type SoloView = { leaning: string; conditions?: string; alternative?: string; changeEvidence?: string };
 type SoloRound = { scenario: ScenarioInfo; organisation: Organisation; total: number; round: Round; dashboard: Dashboard;
-  chosen?: string; consequence?: Consequence | null; after?: Dashboard; options?: { key: string; label: string; cost: string }[]; reveal?: Reveal | null; view?: SoloView | null };
-type SoloLog = { key: string; choices: Record<number, string>; notes: Record<number, { title: string; label: string; you: string; leaning?: string }> };
+  chosen?: string; consequence?: Consequence | null; after?: Dashboard | null; options?: { key: string; label: string; cost: string; outcome?: string }[]; reveal?: Reveal | null; view?: SoloView | null;
+  twist?: { probe: string; reconsider: string }; discuss?: string[]; capture?: string; notes?: string };
+type SoloNote = { title: string; label: string; you: string; leaning?: string; second?: string; held?: boolean };
+type SoloLog = { key: string; choices: Record<number, string>; notes: Record<number, SoloNote> };
 const soloStore = (edition: Edition) => `decision-room-solo:${edition}`;
 const stripOffer = (label: string) => label.replace(/ \(([^()]+)\)$/, "");
+const lowerFirst = (text: string) => (text ? text[0].toLowerCase() + text.slice(1) : text);
+const upperFirst = (text: string) => (text ? text[0].toUpperCase() + text.slice(1) : text);
+const before = (record: Record<number, unknown>, round: number) => Object.fromEntries(Object.entries(record).filter(([n]) => Number(n) < round));
 
-/** One person, own pace. Each call, then a page to sit with it: what it changed, what every option cost, one expert view. */
+/**
+ * One person, own pace. Each call, then a page to sit with it, in this order: what the call changed, what every
+ * option cost, a twist that asks whether your view holds (discussion workshops), one expert view (where the
+ * scenario has one), what the tools did and did not do, and questions to take away. Phones get a pinned action bar.
+ */
 function Solo({ edition }: { edition: Edition }) {
   const [log, setLog] = useState<SoloLog>(() => { try { return JSON.parse(localStorage.getItem(soloStore(edition)) || "") as SoloLog; } catch { return { key: "", choices: {}, notes: {} }; } });
   const answered = Object.keys(log.choices).length;
   const [step, setStep] = useState<{ round: number; phase: "intro" | "decide" | "reflect" | "end" }>(() => answered ? { round: answered, phase: "reflect" } : { round: 1, phase: "intro" });
-  const [data, setData] = useState<SoloRound | null>(null); const [error, setError] = useState(""); const [pick, setPick] = useState("");
+  const [data, setData] = useState<SoloRound | null>(null); const [error, setError] = useState(""); const [pick, setPick] = useState(""); const [switching, setSwitching] = useState(false);
   useEffect(() => { try { localStorage.setItem(soloStore(edition), JSON.stringify(log)); } catch { /* private mode: progress lasts this visit */ } }, [edition, log]);
   const load = useCallback(async (round: number, choices: Record<number, string>) => {
     setError("");
@@ -874,8 +884,7 @@ function Solo({ edition }: { edition: Edition }) {
   useEffect(() => {
     let alive = true;
     const round = step.phase === "end" ? 1 : step.round;
-    const choices = step.phase === "reflect" ? log.choices : Object.fromEntries(Object.entries(log.choices).filter(([n]) => Number(n) < round));
-    void load(round, choices).then((d) => {
+    void load(round, step.phase === "reflect" ? log.choices : before(log.choices, round) as Record<number, string>).then((d) => {
       if (!alive || !d) return;
       if (log.key && log.key !== d.scenario.key) { setLog({ key: d.scenario.key, choices: {}, notes: {} }); setStep({ round: 1, phase: "intro" }); return; }
       if (!log.key) setLog((l) => ({ ...l, key: d.scenario.key }));
@@ -883,52 +892,54 @@ function Solo({ edition }: { edition: Edition }) {
     });
     return () => { alive = false; };
   }, [step, load]); // eslint-disable-line react-hooks/exhaustive-deps
-  useEffect(() => { window.scrollTo({ top: 0, behavior: "smooth" }); setPick(step.phase === "decide" ? log.choices[step.round] ?? "" : ""); }, [step]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { window.scrollTo({ top: 0, behavior: "smooth" }); setSwitching(false); setPick(step.phase === "decide" ? log.choices[step.round] ?? "" : ""); }, [step]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function commit() {
     if (!pick || !data) return;
     const label = data.round.options.find((o) => o.key === pick)?.label ?? "";
-    setLog((l) => {
-      const choices = Object.fromEntries(Object.entries(l.choices).filter(([n]) => Number(n) < step.round)); choices[step.round] = pick;
-      const notes = Object.fromEntries(Object.entries(l.notes).filter(([n]) => Number(n) < step.round)); notes[step.round] = { title: data.round.title, label, you: "" };
-      return { ...l, choices, notes };
-    });
+    setLog((l) => ({ ...l, choices: { ...before(l.choices, step.round) as Record<number, string>, [step.round]: pick }, notes: { ...before(l.notes, step.round) as Record<number, SoloNote>, [step.round]: { title: data.round.title, label, you: "" } } }));
     setStep({ round: step.round, phase: "reflect" });
   }
-  // Once the reflection arrives, keep a one-line note of it for the whole-night summary.
+  // Once the reflection arrives, keep a one-line note of it for the end page.
   useEffect(() => {
-    if (step.phase !== "reflect" || !data?.consequence || data.round.roundNo !== step.round) return;
-    const r = step.round; const you = data.consequence.you; const leaning = data.view?.leaning;
+    if (step.phase !== "reflect" || !data?.chosen || data.round.roundNo !== step.round) return;
+    const r = step.round; const you = data.consequence?.you ?? data.options?.find((o) => o.key === data.chosen)?.cost ?? ""; const leaning = data.view?.leaning;
     setLog((l) => (l.notes[r]?.you === you && l.notes[r]?.leaning === leaning ? l : { ...l, notes: { ...l.notes, [r]: { ...(l.notes[r] ?? { title: data.round.title, label: "" }), you, leaning } } }));
   }, [data, step]);
-  const replayFrom = (round: number) => { setLog((l) => ({ ...l, choices: Object.fromEntries(Object.entries(l.choices).filter(([n]) => Number(n) < round)), notes: Object.fromEntries(Object.entries(l.notes).filter(([n]) => Number(n) < round)) })); setStep({ round, phase: "decide" }); };
+  // The twist: after new information, a player may move to another option. Recorded beside the first call, not instead of it.
+  const reconsider = (key: string) => { const r = step.round; setLog((l) => ({ ...l, notes: { ...l.notes, [r]: { ...(l.notes[r] ?? { title: "", label: "", you: "" }), second: key === l.choices[r] ? undefined : key, held: key === l.choices[r] } } })); setSwitching(false); };
+  const unsettle = () => { const r = step.round; setLog((l) => ({ ...l, notes: { ...l.notes, [r]: { ...(l.notes[r] ?? { title: "", label: "", you: "" }), second: undefined, held: false } } })); };
+  const replayFrom = (round: number) => { setLog((l) => ({ ...l, choices: before(l.choices, round) as Record<number, string>, notes: before(l.notes, round) as Record<number, SoloNote> })); setStep({ round, phase: "decide" }); };
   const restart = () => { setLog((l) => ({ ...l, choices: {}, notes: {} })); setStep({ round: 1, phase: "intro" }); };
 
   const brand = data?.scenario.brand; const total = data?.total ?? 6;
-  const frame = (children: ReactNode, kicker?: string) => <Frame className="dr-table dr-one dr-solo" kicker={kicker ?? brand?.kicker} showMicrosoft={showsMicrosoft(data?.scenario.family ?? "ironvale")}>{children}</Frame>;
+  const family = data?.scenario.family; const pack = isRails(family) ? RAILS_PACKS[family] : null;
+  const frame = (children: ReactNode, kicker?: string) => <Frame className="dr-table dr-one dr-solo" kicker={kicker ?? brand?.kicker} showMicrosoft={showsMicrosoft(family ?? "coastwater")}>{children}</Frame>;
   if (!data) return frame(<section className="dr-card dr-wait"><h2>{error ? "Could not load the scenario." : "Loading…"}</h2><ErrorText message={error} />{error ? <div className="dr-actions"><button onClick={() => setStep({ ...step })}>Try again</button></div> : null}</section>);
 
   if (step.phase === "intro") return frame(<section className="dr-solo-intro">
     <a className="vh-back" href={`/decision-room/${edition}`}><ArrowLeft size={15} />Back</a>
     <span className="dr-kicker">SOLO · {editions[edition].title.toUpperCase()}</span>
-    <h1>{data.organisation.name}</h1>
-    <p className="dr-solo-lead">{data.organisation.tagline}</p>
+    <h1>{pack ? <>{pack.welcome.title[0]} <em>{pack.welcome.title[1]}</em></> : data.organisation.name}</h1>
+    <p className="dr-solo-lead">{pack ? pack.welcome.lead : data.organisation.tagline}</p>
     <ol className="dr-solo-rules"><li><b>{total} calls.</b> Each one costs something.</li><li><b>No wrong answers.</b> Only trade-offs.</li><li><b>After each call,</b> see what it changed and what the others would have cost.</li></ol>
     <button className="dr-primary" onClick={() => setStep({ round: 1, phase: "decide" })}>Start <ArrowRight /></button>
-    {brand?.simulationNote ? <small className="dr-synth">{brand.simulationNote}</small> : null}
+    <small className="dr-synth">{pack?.welcome.footnote ?? brand?.simulationNote ?? "Fictional exercise."}</small>
   </section>);
 
   if (step.phase === "end") {
     const rows = Array.from({ length: total }, (_, i) => i + 1);
+    const anyView = rows.some((n) => log.notes[n]?.leaning);
     return frame(<section className="dr-solo-end">
       <span className="dr-kicker">SOLO · YOUR {total} CALLS</span>
-      <h1>That’s the night.</h1>
-      <p className="dr-solo-lead">Where your call and the expert view part ways is the place to look. Neither is the answer.</p>
+      <h1>{pack ? pack.closing.title : "That’s the night."}</h1>
+      <p className="dr-solo-lead">{anyView ? "Where your call and the expert view part ways is the place to look. Neither is the answer." : "Every call gave something up. Which of those costs would you accept again?"}</p>
       <ol className="dr-solo-path">{rows.map((n) => { const note = log.notes[n]; const mine = log.choices[n]; return <li key={n}>
         <span className="dr-solo-n">{String(n).padStart(2, "0")}</span>
-        <div><b>{note?.title ?? `Call ${n}`}</b><p><span className="dr-solo-key">{mine ?? "–"}</span>{note?.label ? stripOffer(note.label) : "Not made"}</p>{note?.you ? <small>{note.you}</small> : null}</div>
+        <div><b>{note?.title ?? `Call ${n}`}</b><p><span className="dr-solo-key">{mine ?? "–"}</span>{note?.label ? stripOffer(note.label) : "Not made"}{note?.second ? <em className="dr-solo-moved">then moved to {note.second}</em> : null}</p>{note?.you ? <small>{note.you}</small> : null}</div>
         <div className="dr-solo-side">{note?.leaning ? <span className={`dr-solo-lean ${note.leaning === mine ? "same" : ""}`}>Expert view leans {note.leaning}</span> : null}<button onClick={() => replayFrom(n)}><RotateCcw size={14} />Replay from here</button></div>
       </li>; })}</ol>
+      {pack ? <p className="dr-solo-take">{pack.closing.highlight}</p> : null}
       <div className="dr-actions"><button onClick={restart}><RotateCcw size={16} />Start over</button><a className="dr-primary dr-linkbtn" href={`/decision-room/${edition}`}>Run it with a group <ArrowRight /></a></div>
     </section>, `SOLO · ${editions[edition].title.toUpperCase()}`);
   }
@@ -936,49 +947,64 @@ function Solo({ edition }: { edition: Edition }) {
   const round = data.round; const n = round.roundNo; const last = n >= total;
   const head = <div className="dr-session-head"><div><span className="dr-kicker">CALL {n} OF {total} · {round.seat.toUpperCase()}</span><h1 className="dr-h1-small">{round.title}</h1><p className="dr-when">{round.when}</p></div>
     <div className="dr-solo-dots" aria-label={`Call ${n} of ${total}`}>{Array.from({ length: total }, (_, i) => <i key={i} className={i + 1 < n || (i + 1 === n && step.phase === "reflect") ? "done" : i + 1 === n ? "now" : ""} />)}</div></div>;
-  const status = (d: Dashboard) => <div className="dr-site-context"><ExplainMore title="Site status and context" label="Site status"><section className="dr-card dr-dash"><div className="dr-panel-head"><span>{brand?.pathTitle}</span><span className="dr-chain-note">{round.when}</span></div><div className="dr-dash-grid"><PathPanel path={d.path} stages={d.stages} /><div><div className="dr-panel-head"><span>Live state</span></div><StatePanel facts={d.facts} meters={d.meters} keys={d.meterKeys} note={brand?.simulationNote} /></div></div></section></ExplainMore></div>;
+  const hasSite = (d: Dashboard) => d.stages.length > 0 || Boolean(d.facts?.length) || Boolean(d.meterKeys?.length);
+  const status = (d: Dashboard) => hasSite(d) ? <div className="dr-site-context"><ExplainMore title="Site status and context" label="Site status"><section className="dr-card dr-dash"><div className="dr-panel-head"><span>{brand?.pathTitle}</span><span className="dr-chain-note">{round.when}</span></div><div className="dr-dash-grid"><PathPanel path={d.path} stages={d.stages} /><div><div className="dr-panel-head"><span>Live state</span></div><StatePanel facts={d.facts} meters={d.meters} keys={d.meterKeys} note={brand?.simulationNote} /></div></div></section></ExplainMore></div> : null;
 
-  if (step.phase === "decide") return frame(<>{head}
-    <div className="dr-table-grid">{status(data.dashboard)}<div className="dr-table-work">
-      <div className="dr-slot dr-slot--brief"><section className="dr-card dr-brief"><h2 className="dr-task">{round.prompt}</h2>{round.briefing ? <BriefingCard b={round.briefing} compact /> : <div className="dr-situation">{round.situation.map((line, i) => <p key={i}><b>{String(i + 1).padStart(2, "0")}</b>{line}</p>)}</div>}</section></div>
-      <div className="dr-slot dr-slot--act"><section className="dr-card dr-form dr-vote">
-        <div className="dr-options">{round.options.map((o) => <button key={o.key} className={pick === o.key ? "selected" : ""} aria-pressed={pick === o.key} onClick={() => setPick(o.key)}><b>{o.key}</b><span>{offerLabel(o.label)}{o.cost ? <small className="dr-opt-cost">{o.cost}</small> : null}</span></button>)}</div>
-        <ErrorText message={error} />
-        <div className="dr-actions"><button className="dr-primary" disabled={!pick} onClick={commit}>Make this call <ArrowRight /></button></div>
-      </section></div>
-    </div></div>
-  </>);
+  if (step.phase === "decide") {
+    const picked = round.options.find((o) => o.key === pick);
+    return frame(<>{head}
+      <div className="dr-table-grid">{status(data.dashboard)}<div className="dr-table-work">
+        <div className="dr-slot dr-slot--brief"><section className="dr-card dr-brief"><h2 className="dr-task">{round.prompt}</h2>{round.briefing ? <BriefingCard b={round.briefing} compact /> : <div className="dr-situation">{round.situation.map((line, i) => <p key={i}>{round.situation.length > 1 ? <b>{String(i + 1).padStart(2, "0")}</b> : null}{line}</p>)}</div>}{round.feed.length ? <ExplainMore title="Incoming messages"><FeedPanel feed={round.feed} /></ExplainMore> : null}</section></div>
+        <div className="dr-slot dr-slot--act"><section className="dr-card dr-form dr-vote">
+          <div className="dr-options">{round.options.map((o) => <button key={o.key} className={pick === o.key ? "selected" : ""} aria-pressed={pick === o.key} onClick={() => setPick(o.key)}><b>{o.key}</b><span>{offerLabel(o.label)}{o.cost ? <small className="dr-opt-cost">{o.cost}</small> : null}</span></button>)}</div>
+          <ErrorText message={error} />
+        </section></div>
+      </div></div>
+      <div className="dr-solo-bar"><span>{picked ? <><b>{picked.key}</b> {stripOffer(picked.label)}</> : "Pick one. Every option costs something."}</span><button className="dr-primary" disabled={!pick} onClick={commit}>Make this call <ArrowRight /></button></div>
+    </>);
+  }
 
   // reflect
-  const c = data.consequence; const view = data.view; const mine = data.chosen;
+  const c = data.consequence; const view = data.view; const mine = data.chosen; const note = log.notes[n];
   const leanLabel = view ? data.options?.find((o) => o.key === view.leaning)?.label : "";
-  // Only the states this call moved; the full picture folds away.
   const was = new Map((data.dashboard.facts ?? []).map((f) => [f.id, f.value]));
   const moved = (data.after?.facts ?? []).filter((f) => was.get(f.id) !== f.value);
+  const questions = data.reveal?.questions.length ? data.reveal.questions : data.discuss ?? [];
+  const outcomes = (data.options ?? []).some((o) => o.outcome);
   return frame(<>{head}
     <div className="dr-solo-reflect"><div className="dr-solo-col">
-      <section className="dr-card dr-solo-what">
-        {c ? <div className="dr-conseq"><span className="tag">Your call · {mine}</span><strong>{c.you}</strong><p>{c.body}</p><div className="dr-changes">{c.changes.map((ch) => <span className={`chg chg--${ch.d}`} key={ch.t}>{ch.t}</span>)}</div></div> : null}
+      <section className="dr-card dr-solo-what dr-o1">
+        {c ? <div className="dr-conseq"><span className="tag">Your call · {mine}</span><strong>{c.you}</strong><p>{c.body}</p><div className="dr-changes">{c.changes.map((ch) => <span className={`chg chg--${ch.d}`} key={ch.t}>{ch.t}</span>)}</div></div>
+          : <div className="dr-conseq"><span className="tag">Your call · {mine}</span><strong>{stripOffer(data.options?.find((o) => o.key === mine)?.label ?? "")}</strong><p>{data.options?.find((o) => o.key === mine)?.cost}</p></div>}
         {moved.length ? <><span className="dr-solo-sub">On site now</span><FactsPanel facts={moved} /></> : null}
-        {data.after ? <ExplainMore title="Full site state" label="Full site state"><StatePanel facts={data.after.facts} meters={data.after.meters} keys={data.after.meterKeys} note={brand?.simulationNote} /></ExplainMore> : null}
+        {data.after && hasSite(data.after) ? <ExplainMore title="Full site state" label="Full site state"><StatePanel facts={data.after.facts} meters={data.after.meters} keys={data.after.meterKeys} note={brand?.simulationNote} /></ExplainMore> : null}
       </section>
-      {data.reveal ? <section className="dr-card dr-solo-tools"><h2>What the tools did, and did not do</h2><p>{data.reveal.boundary}</p><p className="dr-solo-lesson">{data.reveal.lesson}</p>
-        {data.reveal.questions.length ? <><span className="tag">Sit with it</span><ul>{data.reveal.questions.slice(0, 2).map((q) => <li key={q}>{q}</li>)}</ul></> : null}</section> : null}
+      {data.twist?.probe ? <section className="dr-card dr-solo-twist dr-o3"><h2>A twist</h2><p className="dr-solo-probe">{upperFirst(data.twist.probe)}</p><p><b>{data.twist.reconsider}</b></p>
+        {switching ? <div className="dr-solo-switch" role="group" aria-label="Move to another option">{(data.options ?? []).filter((o) => o.key !== mine).map((o) => <button key={o.key} onClick={() => reconsider(o.key)}><b>{o.key}</b>{stripOffer(o.label)}</button>)}<button className="dr-solo-cancel" onClick={() => setSwitching(false)}>Cancel</button></div>
+          : note?.second ? <p className="dr-solo-moved-line">You moved from {mine} to {note.second}. <button onClick={unsettle}>Undo</button></p>
+          : note?.held ? <p className="dr-solo-moved-line dr-solo-held">You kept {mine}. <button onClick={unsettle}>Undo</button></p>
+          : <div className="dr-actions dr-solo-keep"><button onClick={() => reconsider(mine ?? "")}>Keep {mine}</button><button onClick={() => setSwitching(true)}>Change my call</button></div>}
+      </section> : null}
+      {data.reveal || questions.length || data.capture ? <section className="dr-card dr-solo-tools dr-o5">
+        {data.reveal ? <><h2>What the tools did, and did not do</h2><p>{data.reveal.boundary}</p><p className="dr-solo-lesson">{data.reveal.lesson}</p></> : <h2>Before you move on</h2>}
+        {data.capture ? <p className="dr-solo-lesson">{data.capture}</p> : null}
+        {questions.length ? <><span className="tag">Sit with it</span><ul>{questions.slice(0, 2).map((q) => <li key={q}>{q}</li>)}</ul></> : null}
+        {data.notes ? <ExplainMore title="From the facilitator’s notes" label="Facilitator’s notes"><p className="dr-solo-notes">{data.notes}</p></ExplainMore> : null}
+      </section> : null}
       </div><div className="dr-solo-col">
-      <section className="dr-card dr-solo-costs"><h2>Every option costs something</h2>
-        <ul>{(data.options ?? []).map((o) => <li key={o.key} className={o.key === mine ? "mine" : ""}><b>{o.key}</b><div><span>{offerLabel(o.label)}{o.key === mine ? <em className="dr-solo-you">your call</em> : null}</span>{o.cost ? <small>{o.cost}</small> : null}</div></li>)}</ul>
+      <section className="dr-card dr-solo-costs dr-o2"><h2>{outcomes ? "What each option would have done" : "Every option costs something"}</h2>
+        <ul>{(data.options ?? []).map((o) => <li key={o.key} className={`${o.key === mine ? "mine" : ""} ${o.key === note?.second ? "moved" : ""}`.trim()}><b>{o.key}</b><div><span>{offerLabel(o.label)}{o.key === mine ? <em className="dr-solo-you">your call</em> : o.key === note?.second ? <em className="dr-solo-you">moved here</em> : null}</span>{o.cost || o.outcome ? <small>{o.cost || o.outcome}</small> : null}</div></li>)}</ul>
       </section>
-      {view?.conditions ? <section className="dr-card dr-solo-view"><h2>One expert view</h2>
+      {view?.conditions ? <section className="dr-card dr-solo-view dr-o4"><h2>One expert view</h2>
         <p><b>Leans {view.leaning}{leanLabel ? ` · ${stripOffer(leanLabel)}` : ""}</b> when {lowerFirst(view.conditions)}</p>
         {view.alternative ? <p><span className="tag">The case for another call</span>{view.alternative}</p> : null}
         {view.changeEvidence ? <p><span className="tag">What would change it</span>{view.changeEvidence}</p> : null}
         <small className="dr-hint">A view, not a verdict.</small>
-      </section> : view ? <section className="dr-card dr-solo-view"><h2>One expert view</h2><p><b>Leans {view.leaning}{leanLabel ? ` · ${stripOffer(leanLabel)}` : ""}.</b> A view, not a verdict.</p></section> : null}
+      </section> : view ? <section className="dr-card dr-solo-view dr-o4"><h2>One expert view</h2><p><b>Leans {view.leaning}{leanLabel ? ` · ${stripOffer(leanLabel)}` : ""}.</b> A view, not a verdict.</p></section> : null}
     </div></div>
-    <div className="dr-actions dr-solo-next"><button onClick={() => replayFrom(n)}><RotateCcw size={16} />Try another call</button><button className="dr-primary" onClick={() => setStep(last ? { round: n, phase: "end" } : { round: n + 1, phase: "decide" })}>{last ? "See your night" : `Call ${n + 1}`} <ArrowRight /></button></div>
+    <div className="dr-solo-bar dr-solo-bar--reflect"><button onClick={() => replayFrom(n)}><RotateCcw size={16} />Try another call</button><button className="dr-primary" onClick={() => setStep(last ? { round: n, phase: "end" } : { round: n + 1, phase: "decide" })}>{last ? "See all your calls" : `Call ${n + 1}`} <ArrowRight /></button></div>
   </>);
 }
-const lowerFirst = (text: string) => (text ? text[0].toLowerCase() + text.slice(1) : text);
 
 export default function DecisionRoom() {
   const [path] = useLocation();

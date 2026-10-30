@@ -49,11 +49,53 @@ After each call, in this order:
 The end page lists every call beside the expert leaning, with **Replay from here** on each. Where they part
 ways is the place to look, not a score.
 
+## Practices the four rooms have converged on
+
+Read from the git history of every edition (Riverbend 12–19 Oct, Ironvale 16–29 Oct, Coastwater 21 Oct,
+Marlow Vale 28 Oct). A new room should start from all of them.
+
+- **Few words, real trade-offs** (29 Oct, enforced by the scenario check): situation ≤ 55 words, question
+  ≤ 12, option ≤ 8, and every option carries "what you gain; what you give up" in ≤ 16 words.
+- **Four genuinely different moves**, and the preferred one must bite too (Marlow Vale's rebalance).
+- **Context on demand** (19 Oct): the decision and the model first; evidence, glossary, controls and site
+  state behind an "Explain more" or "Site status" button.
+- **The other side speaks first** (Marlow Vale): the first discussion question is the customer's or
+  stakeholder's view; the last is "what are you giving up". Seller rooms end with your opening line.
+- **A twist, then reconsider** (Coastwater): an optional probe of new information and one question that
+  asks whether the call still holds. Solo turns it into "keep or change your call".
+- **Capture the boundary** (Coastwater, Marlow Vale): what to record before moving on, in one line.
+- **Name the trap in the facilitator's notes** ("Trap: proposing all four at once").
+- **Pinned revisions**: a room keeps the meaning of its choices; content changes add a revision.
+- **Public text is public**: room text and facilitator notes ship to every device, so no prices, funding,
+  real pursuits or internal names. Offer names only if already customer-facing.
+- **Labelled models**: state panels say they are an exercise model, not telemetry.
+- **Mobile first**: one device per table is often a phone. Every screen is checked at 360 and 390 px wide,
+  with no sideways scroll and the next action reachable by thumb.
+
 ## Branching: keep it shallow
 
 Conditional consequences and briefing variants, not forked storylines. A forked plot multiplies the
 writing and needs a facilitator to keep tables in step. Conditions on earlier calls and on state give every
 player a story that is clearly theirs, with one set of rounds.
+
+## Note for the build after next: the story reacts to the call
+
+Owner, 30 Oct 2026. Not the personality types; the story. In the Alpha 2026 game (data3-cisco-live
+`/2026alpha`, `incident-v04-data.ts`) each option moves four running scores, and the next decision's
+opening line has two or three versions chosen by thresholds on those scores (for example containment ≥ 45
+gives "the retry rate is easing", otherwise "retries are still adding load"). Agent 0 does the same with
+conditions on earlier calls and on named state (`briefing.variants`, consequence `variants`,
+`pathVariants`).
+
+Why it is worth it: the player sees their own story, and replaying from a call shows a different one.
+Why it stays cheap: variants hang off **state**, not off every combination of calls. Six rounds of four
+options is 4,096 paths; two or three state-keyed versions of each round's "what changed" line is twelve to
+eighteen short passages. The extra work is up front: deciding which states matter and the thresholds where
+the story turns.
+
+For the builder: draft one base "what changed" per round plus one or two variants keyed on a state the
+earlier rounds move. The balance check flags a variant no path can reach and a round whose variants never
+differ in substance. Solo shows it naturally, because the round is resolved for the player's own choices.
 
 ## The builder (next): document in, workshop out
 

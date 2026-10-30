@@ -106,3 +106,40 @@ Generated with the built-in ImageGen tool; compressed to WebP for the site.
 Prompts are recorded in `artwork-prompts.md` alongside this note.
 Ambient animation is illustrative, not live customer or system telemetry.
 Reduced-motion preferences disable ambient motion and hover transforms.
+
+## Start picker and solo (30 Oct 2026)
+
+Every edition page opens on a two-tap start: **Solo** or **With a group**,
+then for a group **In the room** or **Online**. The group choice presets the
+Facilitate form's room mode and the join hint; a chip ("Online group ·
+change") goes back. Editions without solo skip straight to "Where is the
+group?". `/decision-room/join/:code` is unchanged.
+
+**Solo** (`/decision-room/agent-0/solo`): one person, own pace, no room and
+no database. `POST /api/decision-room/solo/:edition` with
+`{ round, choices }` returns the round resolved for the earlier choices
+(briefing variants, path, state). Once that round's choice is included it
+adds the consequence, the state after, every option's cost, the reveal and
+the facilitator's conditional view (preference, conditions, alternative,
+what would change it) **for that round only**; it refuses a round whose
+earlier calls are missing. The browser keeps progress in
+`decision-room-solo:<edition>` and restarts if the scenario key changes.
+After each call the learner sees: what the call changed (only the states it
+moved; the full state folds away), "Every option costs something", "One
+expert view" (labelled a view, not a verdict) and "What the tools did, and
+did not do". The end page lists the six calls beside the expert leaning,
+with "Replay from here" on each.
+
+Solo exposes the guidance that the room keeps facilitator-only. That is the
+point of solo, and it means anyone who plays solo first knows Rich's
+leanings in a live room. Editions opt in through `SOLO_EDITIONS` (API and
+client); Agent 0 is the only one so far. The fallback site does not carry
+solo or the picker (it runs Riverbend for Agent 0).
+
+The rails instructions screen now reads "No wrong answers. Only trade-offs."
+with three steps (pick A–D together, say why in a line, name what you give
+up), and edition intros end "No wrong answers, only trade-offs."
+
+The format and the planned builder are written up in
+`docs/DECISION_ROOM_PATTERN.md`.
+

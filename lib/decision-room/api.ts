@@ -453,6 +453,9 @@ const actionSchema = z.discriminatedUnion("action", [
   z.object({ action: z.literal("reopen"), teamId: z.string().uuid() }), z.object({ action: z.literal("handover"), teamId: z.string().uuid() }), z.object({ action: z.literal("feature"), decisionId: z.string().uuid(), featured: z.boolean() }),
 ]);
 
+/** Editions that can be played solo, and the room variant whose scenario they run. */
+const SOLO_EDITIONS: Record<string, string> = { "agent-0": "agent0" };
+
 function registerDecisionRoomRoutes(app: Express) {
   // Public: which scenario a new room of each edition will run, so the edition pages describe it truthfully.
   app.get("/api/decision-room/editions", async (_req, res, next) => { try {
@@ -485,6 +488,40 @@ function registerDecisionRoomRoutes(app: Express) {
       })),
     });
   } catch (e) { fail(e, res, next); } });
+
+  // Solo: one person works through an edition at their own pace. No room and no database: the browser keeps
+  // its choices and sends them with every call. Without this round's choice the call returns the round,
+  // resolved for the earlier choices (briefing variants, path, state). With it, the call adds what that call
+  // changed, every option's cost, what the tools did and did not do, and the facilitator's conditional view
+  // for this round only. The view is the answer key, so the edition's live room is told apart on purpose:
+  // solo never reads a room, and a room never reads solo.
+  app.post("/api/decision-room/solo/:edition", async (req, res, next) => { try {
+    const variant = SOLO_EDITIONS[req.params.edition];
+    const scenario = variant ? SCENARIOS[scenarioKeyForNewRoom(variant)] : null;
+    if (!scenario) { res.status(404).json({ message: "Solo is not available for this experience" }); return; }
+    const body = z.object({ round: z.number().int().min(1).max(roundCount(scenario)), choices: z.record(z.string(), z.enum(["A", "B", "C", "D"])).default({}) }).parse(req.body ?? {});
+    const round = roundContent(scenario, body.round);
+    if (!round) { res.status(404).json({ message: "No such round" }); return; }
+    // Only choices for earlier rounds (and this one) that name a real option count.
+    const choices = new Map<number, string>();
+    for (const [k, v] of Object.entries(body.choices)) { const n = Number(k); if (Number.isInteger(n) && n >= 1 && n <= body.round && roundContent(scenario, n)?.options.some((o) => o.key === v)) choices.set(n, v); }
+    for (let n = 1; n < body.round; n += 1) if (!choices.has(n)) { res.status(400).json({ message: `Make call ${n} first` }); return; }
+    res.setHeader("Cache-Control", "no-store");
+    const before = new Map([...choices].filter(([n]) => n < body.round));
+    const base = { scenario: scenarioInfo(scenario), organisation: scenario.organisation, total: roundCount(scenario), round: publicRound(scenario, round, before), dashboard: dashboardFor(scenario, before, body.round - 1, round) };
+    const chosen = choices.get(body.round);
+    if (!chosen) { res.json(base); return; }
+    const next = roundContent(scenario, body.round + 1);
+    const g = round.guidance; const best = scenario.bestMove?.[body.round];
+    res.json({
+      ...base, chosen,
+      consequence: consequenceFor(scenario, body.round, chosen, choices),
+      after: dashboardFor(scenario, choices, body.round, next ?? round),
+      options: round.options.map((o) => ({ key: o.key, label: o.label, cost: o.cost ?? "" })),
+      reveal: round.reveal ?? null,
+      view: g ? { leaning: g.preferred, conditions: g.conditions, alternative: g.alternative, changeEvidence: g.changeEvidence } : best ? { leaning: best } : null,
+    });
+  } catch (e) { if (e instanceof ZodError) { res.status(400).json({ message: "Bad solo request" }); return; } fail(e, res, next); } });
 
   // Facilitator-only review pack: the whole scenario, including preferences, consequences and branches.
   // Never public: it is the answer key a participant must not read ahead of the room.

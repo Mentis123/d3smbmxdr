@@ -8,6 +8,7 @@
  *   /decision-room/session/:code       one device per table: dashboard, vote A–D, lock
  *   /decision-room/console/:id         the projector: launch, timer, who's locked, the split
  *   /decision-room/admin/:id           Adam's private controls
+ *   /decision-room/<edition>/solo      one person, own pace: each call, then what it changed and the trade-offs
  *
  * Nothing here ranks tables or declares a winner. The "best move" lives on
  * Richard's slide and is never sent to a device.
@@ -16,7 +17,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { QRCodeSVG } from "qrcode.react";
-import { AlertTriangle, ArrowRight, Check, Copy, Download, Eye, FileText, Printer, LockKeyhole, Monitor, Play, Radio, RotateCcw, ShieldCheck, Square, Users, Zap } from "lucide-react";
+import { AlertTriangle, ArrowLeft, ArrowRight, Check, Copy, Download, Eye, FileText, Globe, Printer, LockKeyhole, Monitor, Play, Radio, RotateCcw, ShieldCheck, Square, User, Users, Zap } from "lucide-react";
 import "./decision-room.css";
 import { downloadRoundsDeck, type RoundsModel, type RoundsRow } from "./rounds-deck";
 import ExplainMore from "./ExplainMore";
@@ -208,6 +209,11 @@ function Landing({ presetCode, edition }: { presetCode?: string; edition?: Editi
   const [tables, setTables] = useState<{ teamCode: string; displayName: string; taken: boolean; viewers?: number }[] | null>(null);
   const [roomMode, setRoomMode] = useState<"physical" | "virtual">("physical");
   const [newRoomMode, setNewRoomMode] = useState<"physical" | "virtual">("physical");
+  // Edition pages open on a two-tap start: solo or a group, then where the group is. A room code in the link skips it.
+  const soloOk = Boolean(edition && SOLO_EDITIONS.includes(edition));
+  const [how, setHow] = useState<"solo" | "group" | null>(edition && soloOk ? null : "group");
+  const [where, setWhere] = useState<"physical" | "virtual" | null>(edition ? null : "physical");
+  const pickWhere = (w: "physical" | "virtual") => { setWhere(w); setNewRoomMode(w); setMode("join"); };
   const [tablesError, setTablesError] = useState("");
   // Live table picker: once a room code is typed (or arrives from the QR), show which tables are free and which are taken.
   useEffect(() => {
@@ -273,6 +279,16 @@ function Landing({ presetCode, edition }: { presetCode?: string; edition?: Editi
     <div className="dr-landing-grid">
       {edition ? <EditionIntro edition={edition} /> : <section className="dr-hero"><a className="vh-back" href="/decision-room">← All experiences</a><span className="dr-kicker">JOIN A LIVE TABLETOP</span><h1>Make the room’s decisions visible.</h1><p>One device per table — a laptop or a phone. Enter your room code to join the experience your facilitator has opened.</p></section>}
       <div className="dr-landing-side">
+        {how === null || where === null ? <section className="dr-card dr-start" aria-live="polite">
+          {how === null ? <><h2>How are you playing?</h2><div className="dr-start-pick" role="group" aria-label="How are you playing?">
+            <button type="button" onClick={() => navigate(`/decision-room/${edition}/solo`)}><User /><b>Solo</b><small>Your own pace. Make each call, then see what it cost.</small></button>
+            <button type="button" onClick={() => setHow("group")}><Users /><b>With a group</b><small>Tables decide together. A facilitator runs it.</small></button>
+          </div></> : <><h2>Where is the group?</h2><div className="dr-start-pick" role="group" aria-label="Where is the group?">
+            <button type="button" onClick={() => pickWhere("physical")}><Monitor /><b>In the room</b><small>One device per table. A big screen up front.</small></button>
+            <button type="button" onClick={() => pickWhere("virtual")}><Globe /><b>Online</b><small>Everyone on their own screen. One person per team holds the pen.</small></button>
+          </div>{soloOk ? <button type="button" className="dr-start-back" onClick={() => setHow(null)}><ArrowLeft size={15} />Back</button> : null}</>}
+        </section> : <>
+        {edition ? <button type="button" className="dr-start-chip" onClick={() => { setWhere(null); }} aria-label="Change how you are playing"><ArrowLeft size={14} />{where === "virtual" ? "Online group" : "Group in the room"} · change</button> : null}
         <nav className="dr-tabs" aria-label="Choose view"><button className={mode === "join" ? "active" : ""} onClick={() => setMode("join")}><Users />Join a table</button><button className={mode === "facilitate" ? "active" : ""} onClick={() => setMode("facilitate")}><ShieldCheck />Facilitate</button><button className={mode === "display" ? "active" : ""} onClick={() => setMode("display")}><Monitor />Open console</button></nav>
         <section className="dr-card dr-form">
           {mode === "join" && waiting && <div className="dr-handover-wait" aria-live="polite"><h2>Asking Table {waiting.table}…</h2>
@@ -282,7 +298,7 @@ function Landing({ presetCode, edition }: { presetCode?: string; edition?: Editi
               : waiting.status === "declined" ? <p>The device signed in as Table {waiting.table} declined the handover. If that is not right, ask Adam.</p>
               : <p>Another device asked for this table after you, so this request was replaced.</p>}
             <div className="dr-actions"><button onClick={() => { if (waiting.status === "pending" || waiting.status === "expired") void fetch(`${API}/sessions/${waiting.code}/handover`, { method: "DELETE", headers: { "x-team-token": waiting.token }, keepalive: true }).catch(() => undefined); setWaiting(null); }}>{waiting.status === "pending" || waiting.status === "expired" ? "Cancel" : "Back"}</button></div></div>}
-          {mode === "join" && !waiting && <><h2>Join your table</h2><p className="dr-hint">The room code is on the big screen. Pick a free table and give it a name — it is what the room will see.</p><label>Room code<input value={joinCode} onChange={(e) => setJoinCode(e.target.value.toUpperCase())} placeholder="ABC123" maxLength={8} autoCapitalize="characters" autoCorrect="off" /></label>{tables ? <div className="dr-tablepick"><span className="dr-label">Pick your table</span><div className="dr-tablegrid" role="group" aria-label="Tables in this room">{tables.map((t) => { const named = t.displayName !== `Table ${t.teamCode}`; return <button type="button" key={t.teamCode} className={`dr-tablechip ${t.taken ? "taken" : "free"} ${teamCode === t.teamCode ? "selected" : ""}`} aria-pressed={teamCode === t.teamCode} aria-label={`Table ${t.teamCode}, ${t.taken ? `taken${named ? ` by ${t.displayName}` : ""}` : "free"}`} onClick={() => { setTeamCode(t.teamCode); if (t.taken) setTeamName(""); }}><b>{t.teamCode}</b><small>{t.taken ? (named ? t.displayName : "taken") : "free"}</small></button>; })}</div><p className="dr-tablelegend"><span className="free">free</span><span className="taken">taken</span><span>{freeCount} of {tables.length} free</span></p></div>
+          {mode === "join" && !waiting && <><h2>Join your table</h2><p className="dr-hint">{where === "virtual" ? "Your facilitator shares the room code. Pick your team; if someone is already in, you watch and can ask for the pen." : "The room code is on the big screen. Pick a free table and give it a name — it is what the room will see."}</p><label>Room code<input value={joinCode} onChange={(e) => setJoinCode(e.target.value.toUpperCase())} placeholder="ABC123" maxLength={8} autoCapitalize="characters" autoCorrect="off" /></label>{tables ? <div className="dr-tablepick"><span className="dr-label">Pick your table</span><div className="dr-tablegrid" role="group" aria-label="Tables in this room">{tables.map((t) => { const named = t.displayName !== `Table ${t.teamCode}`; return <button type="button" key={t.teamCode} className={`dr-tablechip ${t.taken ? "taken" : "free"} ${teamCode === t.teamCode ? "selected" : ""}`} aria-pressed={teamCode === t.teamCode} aria-label={`Table ${t.teamCode}, ${t.taken ? `taken${named ? ` by ${t.displayName}` : ""}` : "free"}`} onClick={() => { setTeamCode(t.teamCode); if (t.taken) setTeamName(""); }}><b>{t.teamCode}</b><small>{t.taken ? (named ? t.displayName : "taken") : "free"}</small></button>; })}</div><p className="dr-tablelegend"><span className="free">free</span><span className="taken">taken</span><span>{freeCount} of {tables.length} free</span></p></div>
             : <><label>Table number<input value={teamCode} onChange={(e) => setTeamCode(e.target.value)} placeholder="1" maxLength={12} inputMode="numeric" /></label>{tablesError && joinCode.trim().length >= 6 ? <p className="dr-hint">{/not found/i.test(tablesError) ? "No room with that code yet. Check the code on the big screen." : tablesError}</p> : null}</>}
           {joinsAsViewer && picked ? <div className="dr-banner">Table {picked.teamCode} already has someone holding the pen{picked.viewers ? <> and {picked.viewers} watching</> : null}. You join as a viewer and see the same screen; you can ask for the pen from there.</div>
           : pickedTaken && picked ? <div className="dr-banner dr-banner--warn">Table {picked.teamCode} is already joined{picked.displayName !== `Table ${picked.teamCode}` ? <> as <b>{picked.displayName}</b></> : null}. If this is your table, we will ask that device to approve the handover. If it has been closed or switched off, you get straight in.</div> : null}
@@ -290,7 +306,7 @@ function Landing({ presetCode, edition }: { presetCode?: string; edition?: Editi
           {mode === "facilitate" && <><h2>Create a live room</h2><p className="dr-hint">Facilitator access. Create a new room for each workshop.</p><label>Facilitator key<input type="password" value={adminKey} onChange={(e) => setAdminKey(e.target.value)} autoComplete="off" /></label><label>Tables in the room<input type="number" min={2} max={50} value={tableCount} onChange={(e) => setTableCount(Number(e.target.value))} /></label><span className="dr-label">Where are the tables?</span><div className="dr-mode-pick" role="radiogroup" aria-label="Room mode"><button type="button" role="radio" aria-checked={newRoomMode === "physical"} className={newRoomMode === "physical" ? "selected" : ""} onClick={() => setNewRoomMode("physical")}><b>In the room</b><small>One device per table.</small></button><button type="button" role="radio" aria-checked={newRoomMode === "virtual"} className={newRoomMode === "virtual" ? "selected" : ""} onClick={() => setNewRoomMode("virtual")}><b>Online</b><small>Everyone joins. The first in each team holds the pen; others watch and can ask for it.</small></button></div><button className="dr-primary" disabled={busy || !adminKey} onClick={create}>Create room <ArrowRight /></button></>}
           {mode === "display" && <><h2>Open a presenter console</h2><p className="dr-hint">Normally you open the console from the facilitator page with one click. This is the recovery path.</p><label>Session ID<input value={sessionId} onChange={(e) => setSessionId(e.target.value)} /></label><label>Display token<input type="password" value={displayToken} onChange={(e) => setDisplayToken(e.target.value)} /></label><button className="dr-primary" disabled={!sessionId || !displayToken} onClick={openDisplay}>Open console <Monitor /></button></>}
           <ErrorText message={error} />
-        </section>
+        </section></>}
       </div>
     </div>
     {edition ? <HomeFooter /> : null}
@@ -832,11 +848,144 @@ function ReviewPack({ family }: { family: string }) {
   </Frame>;
 }
 
+/* ------------------------------------------------------------------ solo */
+/** Editions that can be played alone. The server says which scenario each one runs (POST /solo/:edition). */
+const SOLO_EDITIONS: Edition[] = ["agent-0"];
+type SoloView = { leaning: string; conditions?: string; alternative?: string; changeEvidence?: string };
+type SoloRound = { scenario: ScenarioInfo; organisation: Organisation; total: number; round: Round; dashboard: Dashboard;
+  chosen?: string; consequence?: Consequence | null; after?: Dashboard; options?: { key: string; label: string; cost: string }[]; reveal?: Reveal | null; view?: SoloView | null };
+type SoloLog = { key: string; choices: Record<number, string>; notes: Record<number, { title: string; label: string; you: string; leaning?: string }> };
+const soloStore = (edition: Edition) => `decision-room-solo:${edition}`;
+const stripOffer = (label: string) => label.replace(/ \(([^()]+)\)$/, "");
+
+/** One person, own pace. Each call, then a page to sit with it: what it changed, what every option cost, one expert view. */
+function Solo({ edition }: { edition: Edition }) {
+  const [log, setLog] = useState<SoloLog>(() => { try { return JSON.parse(localStorage.getItem(soloStore(edition)) || "") as SoloLog; } catch { return { key: "", choices: {}, notes: {} }; } });
+  const answered = Object.keys(log.choices).length;
+  const [step, setStep] = useState<{ round: number; phase: "intro" | "decide" | "reflect" | "end" }>(() => answered ? { round: answered, phase: "reflect" } : { round: 1, phase: "intro" });
+  const [data, setData] = useState<SoloRound | null>(null); const [error, setError] = useState(""); const [pick, setPick] = useState("");
+  useEffect(() => { try { localStorage.setItem(soloStore(edition), JSON.stringify(log)); } catch { /* private mode: progress lasts this visit */ } }, [edition, log]);
+  const load = useCallback(async (round: number, choices: Record<number, string>) => {
+    setError("");
+    try { return await request<SoloRound>(`${API}/solo/${edition}`, json({ round, choices })); }
+    catch (e) { setError((e as Error).message); return null; }
+  }, [edition]);
+  // Load whatever the step needs. A new scenario release starts the run again rather than mixing revisions.
+  useEffect(() => {
+    let alive = true;
+    const round = step.phase === "end" ? 1 : step.round;
+    const choices = step.phase === "reflect" ? log.choices : Object.fromEntries(Object.entries(log.choices).filter(([n]) => Number(n) < round));
+    void load(round, choices).then((d) => {
+      if (!alive || !d) return;
+      if (log.key && log.key !== d.scenario.key) { setLog({ key: d.scenario.key, choices: {}, notes: {} }); setStep({ round: 1, phase: "intro" }); return; }
+      if (!log.key) setLog((l) => ({ ...l, key: d.scenario.key }));
+      setData(d);
+    });
+    return () => { alive = false; };
+  }, [step, load]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { window.scrollTo({ top: 0, behavior: "smooth" }); setPick(step.phase === "decide" ? log.choices[step.round] ?? "" : ""); }, [step]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  function commit() {
+    if (!pick || !data) return;
+    const label = data.round.options.find((o) => o.key === pick)?.label ?? "";
+    setLog((l) => {
+      const choices = Object.fromEntries(Object.entries(l.choices).filter(([n]) => Number(n) < step.round)); choices[step.round] = pick;
+      const notes = Object.fromEntries(Object.entries(l.notes).filter(([n]) => Number(n) < step.round)); notes[step.round] = { title: data.round.title, label, you: "" };
+      return { ...l, choices, notes };
+    });
+    setStep({ round: step.round, phase: "reflect" });
+  }
+  // Once the reflection arrives, keep a one-line note of it for the whole-night summary.
+  useEffect(() => {
+    if (step.phase !== "reflect" || !data?.consequence || data.round.roundNo !== step.round) return;
+    const r = step.round; const you = data.consequence.you; const leaning = data.view?.leaning;
+    setLog((l) => (l.notes[r]?.you === you && l.notes[r]?.leaning === leaning ? l : { ...l, notes: { ...l.notes, [r]: { ...(l.notes[r] ?? { title: data.round.title, label: "" }), you, leaning } } }));
+  }, [data, step]);
+  const replayFrom = (round: number) => { setLog((l) => ({ ...l, choices: Object.fromEntries(Object.entries(l.choices).filter(([n]) => Number(n) < round)), notes: Object.fromEntries(Object.entries(l.notes).filter(([n]) => Number(n) < round)) })); setStep({ round, phase: "decide" }); };
+  const restart = () => { setLog((l) => ({ ...l, choices: {}, notes: {} })); setStep({ round: 1, phase: "intro" }); };
+
+  const brand = data?.scenario.brand; const total = data?.total ?? 6;
+  const frame = (children: ReactNode, kicker?: string) => <Frame className="dr-table dr-one dr-solo" kicker={kicker ?? brand?.kicker} showMicrosoft={showsMicrosoft(data?.scenario.family ?? "ironvale")}>{children}</Frame>;
+  if (!data) return frame(<section className="dr-card dr-wait"><h2>{error ? "Could not load the scenario." : "Loading…"}</h2><ErrorText message={error} />{error ? <div className="dr-actions"><button onClick={() => setStep({ ...step })}>Try again</button></div> : null}</section>);
+
+  if (step.phase === "intro") return frame(<section className="dr-solo-intro">
+    <a className="vh-back" href={`/decision-room/${edition}`}><ArrowLeft size={15} />Back</a>
+    <span className="dr-kicker">SOLO · {editions[edition].title.toUpperCase()}</span>
+    <h1>{data.organisation.name}</h1>
+    <p className="dr-solo-lead">{data.organisation.tagline}</p>
+    <ol className="dr-solo-rules"><li><b>{total} calls.</b> Each one costs something.</li><li><b>No wrong answers.</b> Only trade-offs.</li><li><b>After each call,</b> see what it changed and what the others would have cost.</li></ol>
+    <button className="dr-primary" onClick={() => setStep({ round: 1, phase: "decide" })}>Start <ArrowRight /></button>
+    {brand?.simulationNote ? <small className="dr-synth">{brand.simulationNote}</small> : null}
+  </section>);
+
+  if (step.phase === "end") {
+    const rows = Array.from({ length: total }, (_, i) => i + 1);
+    return frame(<section className="dr-solo-end">
+      <span className="dr-kicker">SOLO · YOUR {total} CALLS</span>
+      <h1>That’s the night.</h1>
+      <p className="dr-solo-lead">Where your call and the expert view part ways is the place to look. Neither is the answer.</p>
+      <ol className="dr-solo-path">{rows.map((n) => { const note = log.notes[n]; const mine = log.choices[n]; return <li key={n}>
+        <span className="dr-solo-n">{String(n).padStart(2, "0")}</span>
+        <div><b>{note?.title ?? `Call ${n}`}</b><p><span className="dr-solo-key">{mine ?? "–"}</span>{note?.label ? stripOffer(note.label) : "Not made"}</p>{note?.you ? <small>{note.you}</small> : null}</div>
+        <div className="dr-solo-side">{note?.leaning ? <span className={`dr-solo-lean ${note.leaning === mine ? "same" : ""}`}>Expert view leans {note.leaning}</span> : null}<button onClick={() => replayFrom(n)}><RotateCcw size={14} />Replay from here</button></div>
+      </li>; })}</ol>
+      <div className="dr-actions"><button onClick={restart}><RotateCcw size={16} />Start over</button><a className="dr-primary dr-linkbtn" href={`/decision-room/${edition}`}>Run it with a group <ArrowRight /></a></div>
+    </section>, `SOLO · ${editions[edition].title.toUpperCase()}`);
+  }
+
+  const round = data.round; const n = round.roundNo; const last = n >= total;
+  const head = <div className="dr-session-head"><div><span className="dr-kicker">CALL {n} OF {total} · {round.seat.toUpperCase()}</span><h1 className="dr-h1-small">{round.title}</h1><p className="dr-when">{round.when}</p></div>
+    <div className="dr-solo-dots" aria-label={`Call ${n} of ${total}`}>{Array.from({ length: total }, (_, i) => <i key={i} className={i + 1 < n || (i + 1 === n && step.phase === "reflect") ? "done" : i + 1 === n ? "now" : ""} />)}</div></div>;
+  const status = (d: Dashboard) => <div className="dr-site-context"><ExplainMore title="Site status and context" label="Site status"><section className="dr-card dr-dash"><div className="dr-panel-head"><span>{brand?.pathTitle}</span><span className="dr-chain-note">{round.when}</span></div><div className="dr-dash-grid"><PathPanel path={d.path} stages={d.stages} /><div><div className="dr-panel-head"><span>Live state</span></div><StatePanel facts={d.facts} meters={d.meters} keys={d.meterKeys} note={brand?.simulationNote} /></div></div></section></ExplainMore></div>;
+
+  if (step.phase === "decide") return frame(<>{head}
+    <div className="dr-table-grid">{status(data.dashboard)}<div className="dr-table-work">
+      <div className="dr-slot dr-slot--brief"><section className="dr-card dr-brief"><h2 className="dr-task">{round.prompt}</h2>{round.briefing ? <BriefingCard b={round.briefing} compact /> : <div className="dr-situation">{round.situation.map((line, i) => <p key={i}><b>{String(i + 1).padStart(2, "0")}</b>{line}</p>)}</div>}</section></div>
+      <div className="dr-slot dr-slot--act"><section className="dr-card dr-form dr-vote">
+        <div className="dr-options">{round.options.map((o) => <button key={o.key} className={pick === o.key ? "selected" : ""} aria-pressed={pick === o.key} onClick={() => setPick(o.key)}><b>{o.key}</b><span>{offerLabel(o.label)}{o.cost ? <small className="dr-opt-cost">{o.cost}</small> : null}</span></button>)}</div>
+        <ErrorText message={error} />
+        <div className="dr-actions"><button className="dr-primary" disabled={!pick} onClick={commit}>Make this call <ArrowRight /></button></div>
+      </section></div>
+    </div></div>
+  </>);
+
+  // reflect
+  const c = data.consequence; const view = data.view; const mine = data.chosen;
+  const leanLabel = view ? data.options?.find((o) => o.key === view.leaning)?.label : "";
+  // Only the states this call moved; the full picture folds away.
+  const was = new Map((data.dashboard.facts ?? []).map((f) => [f.id, f.value]));
+  const moved = (data.after?.facts ?? []).filter((f) => was.get(f.id) !== f.value);
+  return frame(<>{head}
+    <div className="dr-solo-reflect"><div className="dr-solo-col">
+      <section className="dr-card dr-solo-what">
+        {c ? <div className="dr-conseq"><span className="tag">Your call · {mine}</span><strong>{c.you}</strong><p>{c.body}</p><div className="dr-changes">{c.changes.map((ch) => <span className={`chg chg--${ch.d}`} key={ch.t}>{ch.t}</span>)}</div></div> : null}
+        {moved.length ? <><span className="dr-solo-sub">On site now</span><FactsPanel facts={moved} /></> : null}
+        {data.after ? <ExplainMore title="Full site state" label="Full site state"><StatePanel facts={data.after.facts} meters={data.after.meters} keys={data.after.meterKeys} note={brand?.simulationNote} /></ExplainMore> : null}
+      </section>
+      {data.reveal ? <section className="dr-card dr-solo-tools"><h2>What the tools did, and did not do</h2><p>{data.reveal.boundary}</p><p className="dr-solo-lesson">{data.reveal.lesson}</p>
+        {data.reveal.questions.length ? <><span className="tag">Sit with it</span><ul>{data.reveal.questions.slice(0, 2).map((q) => <li key={q}>{q}</li>)}</ul></> : null}</section> : null}
+      </div><div className="dr-solo-col">
+      <section className="dr-card dr-solo-costs"><h2>Every option costs something</h2>
+        <ul>{(data.options ?? []).map((o) => <li key={o.key} className={o.key === mine ? "mine" : ""}><b>{o.key}</b><div><span>{offerLabel(o.label)}{o.key === mine ? <em className="dr-solo-you">your call</em> : null}</span>{o.cost ? <small>{o.cost}</small> : null}</div></li>)}</ul>
+      </section>
+      {view?.conditions ? <section className="dr-card dr-solo-view"><h2>One expert view</h2>
+        <p><b>Leans {view.leaning}{leanLabel ? ` · ${stripOffer(leanLabel)}` : ""}</b> when {lowerFirst(view.conditions)}</p>
+        {view.alternative ? <p><span className="tag">The case for another call</span>{view.alternative}</p> : null}
+        {view.changeEvidence ? <p><span className="tag">What would change it</span>{view.changeEvidence}</p> : null}
+        <small className="dr-hint">A view, not a verdict.</small>
+      </section> : view ? <section className="dr-card dr-solo-view"><h2>One expert view</h2><p><b>Leans {view.leaning}{leanLabel ? ` · ${stripOffer(leanLabel)}` : ""}.</b> A view, not a verdict.</p></section> : null}
+    </div></div>
+    <div className="dr-actions dr-solo-next"><button onClick={() => replayFrom(n)}><RotateCcw size={16} />Try another call</button><button className="dr-primary" onClick={() => setStep(last ? { round: n, phase: "end" } : { round: n + 1, phase: "decide" })}>{last ? "See your night" : `Call ${n + 1}`} <ArrowRight /></button></div>
+  </>);
+}
+const lowerFirst = (text: string) => (text ? text[0].toLowerCase() + text.slice(1) : text);
+
 export default function DecisionRoom() {
   const [path] = useLocation();
   const search = useSearchParams();
   const parts = path.split("/").filter(Boolean);
   if (parts[1] === "agent-0" && parts[2] === "review") return <ReviewPack family="ironvale" />;
+  if (parts[2] === "solo" && SOLO_EDITIONS.includes(parts[1] as Edition)) return <Solo edition={parts[1] as Edition} />;
   const rails = railsFamilyOfEdition(parts[1]);
   if (rails && (parts[2] === "present" || parts[2] === "control")) return <CoastwaterPresenter family={rails} key={`${rails}:${parts[2]}:${search.get("room") || "rehearsal"}:${search.get("display") || ""}`} room={search.get("room") || ""} operator={parts[2] === "control"} displayOnly={search.get("display") === "1"} displayToken={search.get("displayToken") || ""} />;
   if (parts[1] === "ciso-basecamp" || parts[1] === "agent-0" || rails) return <Landing key={parts[1]} edition={parts[1] as Edition} />;

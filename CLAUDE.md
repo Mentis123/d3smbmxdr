@@ -141,3 +141,7 @@ Since 29 Oct 2026 Agent 0 (`ironvale`) runs on the rails presenter too (`/decisi
 
 **Content rule for every rails room (owner, 29 Oct 2026):** few words and real trade-offs. Situation at most 55 words, question at most 12, option at most 8 (a trailing "(Offer name)" is free), and every option's cost is "what you gain; what you give up" in at most 16 words, written so the facilitator's preferred option bites too. `npm run check:decision-room-scenarios` enforces it (section 6); coastwater@1, coastwater@2 and ironvale@0.1 predate it and are exempt.
 
+## Solo and the start picker (30 Oct 2026)
+
+Edition pages open on "How are you playing?" (Solo / With a group) then "Where is the group?" (In the room / Online). Solo is `/decision-room/<edition>/solo`, served by the stateless `POST /api/decision-room/solo/:edition` (choices travel from the browser; no database). It returns one round's guidance only after that round's call, and never a later round. Editions opt in via `SOLO_EDITIONS` in `lib/decision-room/api.ts` and `app/decision-room/DecisionRoom.tsx`; keep the two lists equal. Owner rule for the copy (30 Oct 2026): fewer words on every screen before the activity, and the message is "no wrong answers, only trade-offs". The format and builder plan are in `docs/DECISION_ROOM_PATTERN.md`.
+

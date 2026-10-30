@@ -684,7 +684,6 @@
 .dr-solo-dots i.done{background:var(--aqua)}
 .dr-solo-dots i.now{background:var(--blue);box-shadow:0 0 10px var(--blue)}
 .dr-solo .dr-vote .dr-actions .dr-primary{min-width:220px}
-.dr-solo-reflect{display:grid;grid-template-columns:1.1fr .9fr;gap:16px;align-items:start}
 .dr-solo-reflect .dr-card{padding:20px 22px}
 .dr-solo-reflect h2{font-size:15px!important;letter-spacing:.12em;text-transform:uppercase;color:#78dcff!important;margin:0 0 12px!important}
 .dr-solo-what .dr-conseq{margin-top:0}
@@ -703,7 +702,6 @@
 .dr-solo-view>p>b{color:#ffd75e}
 .dr-solo-lesson{color:#fff;font-weight:700}
 .dr-solo-tools ul{display:grid;gap:5px;list-style:disc;padding-left:18px!important;font-size:15px;line-height:1.45}
-.dr-solo-next{justify-content:space-between}
 .dr-solo-end{max-width:980px;display:grid;gap:14px}
 .dr-solo-end h1{margin:0!important}
 .dr-solo-path{display:grid;gap:10px;margin:8px 0!important}
@@ -718,11 +716,53 @@
 .dr-solo-side button:hover{border-color:var(--aqua);color:var(--aqua)}
 .dr-solo-lean{font-size:12px;letter-spacing:.06em;color:#ffd75e}
 .dr-solo-lean.same{color:#9db0c5}
-@media(max-width:860px){.dr-solo-reflect{grid-template-columns:1fr}}
-@media(max-width:620px){.dr-solo-path li{grid-template-columns:32px 1fr}.dr-solo-side{grid-column:1/-1;justify-items:start;grid-auto-flow:column;align-items:center}.dr-solo-next{display:grid}}
-.dr-solo-col{display:grid;gap:16px;align-content:start}
+@media(max-width:620px){.dr-solo-path li{grid-template-columns:32px 1fr}.dr-solo-side{grid-column:1/-1;justify-items:start;grid-auto-flow:column;align-items:center}}
 .dr-solo-sub{display:block;margin:16px 0 6px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#78dcff;font-weight:800}
 .dr-solo-what .dr-facts{margin-top:0}
 .dr-solo-what .dr-explain,.dr-solo-what details{margin-top:12px}
 .dr-solo-you{white-space:nowrap}
 .dr-solo-what .dr-explain-button{margin-top:14px}
+
+/* Solo reflection: two columns on laptops (the call and the takeaways left, the trade-offs right).
+   On phones the columns dissolve and the cards read call, costs, twist, view, takeaways. */
+.dr-solo-reflect{display:grid;grid-template-columns:1.1fr .9fr;gap:16px;align-items:start}
+.dr-solo-col{display:grid;gap:16px;align-content:start}
+@media(max-width:860px){
+  .dr-solo-reflect{grid-template-columns:1fr}
+  .dr-solo-col{display:contents}
+  .dr-o1{order:1}.dr-o2{order:2}.dr-o3{order:3}.dr-o4{order:4}.dr-o5{order:5}
+}
+.dr-solo-twist{border-color:rgba(255,0,255,.35)!important}
+.dr-solo-twist h2{color:#ff8cf0!important}
+.dr-solo-probe{font-size:16px;margin:0 0 10px;color:#fff}
+.dr-solo-twist p{margin:0 0 10px;line-height:1.5}
+.dr-solo-keep{justify-content:flex-start!important;margin-top:4px!important;flex-wrap:wrap}
+.dr-solo-switch{display:grid;gap:8px}
+.dr-solo-switch button{display:flex;gap:10px;align-items:center;text-align:left;padding:10px 12px;border:1px solid #25466e;border-radius:10px;background:#000025;color:#eee;font-weight:700}
+.dr-solo-switch button b{display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:#123a66;flex:none}
+.dr-solo-switch button:hover{border-color:var(--aqua)}
+.dr-solo-switch .dr-solo-cancel{justify-content:center;color:#9db0c5;font-weight:600}
+.dr-solo-moved-line{color:#ffd75e}
+.dr-solo-moved-line button{margin-left:6px;color:#9db0c5;text-decoration:underline}
+.dr-solo-moved{margin-left:8px;font-style:normal;color:#ffd75e;font-size:13px}
+.dr-solo-costs li.moved{border-color:#ffd75e}
+.dr-solo-notes{font-size:15px;line-height:1.55}
+.dr-solo-take{font-size:18px;color:#fff;font-weight:700;margin:4px 0!important}
+.dr-solo-intro h1 em{font-style:normal;color:var(--aqua)}
+
+/* Pinned action bar: on a phone the next step is always one thumb away. */
+.dr-solo-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:20px}
+.dr-solo-bar>span{color:#c8d8e9;font-size:15px;min-width:0}
+.dr-solo-bar>span b{display:inline-grid;place-items:center;width:24px;height:24px;margin-right:6px;border-radius:50%;background:var(--aqua);color:#000025;font-size:13px}
+.dr-solo-bar button{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:13px 20px;border:1px solid rgba(0,174,255,.25);border-radius:10px;background:rgba(7,27,58,.8);color:#eee;font-weight:800;white-space:nowrap}
+.dr-solo-bar button svg{width:18px}
+.dr-solo-bar .dr-primary{min-width:180px}
+.dr-solo-bar .dr-primary:disabled{opacity:.45}
+@media(max-width:760px){
+  .dr-solo{padding-bottom:96px!important}
+  .dr-solo-bar{position:fixed;left:0;right:0;bottom:0;z-index:30;margin:0;padding:10px 14px calc(10px + env(safe-area-inset-bottom));background:rgba(0,0,37,.94);border-top:1px solid #25466e;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+  .dr-solo-bar>span{font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .dr-solo-bar .dr-primary{min-width:0;flex:none}
+  .dr-solo-bar--reflect button:first-child{padding:13px 12px}
+}
+.dr-solo-held{color:var(--aqua)}

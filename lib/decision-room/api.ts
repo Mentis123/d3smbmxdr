@@ -25,6 +25,8 @@ import type { Scenario } from "./types";
 import { scheduledVoteSeconds, type SessionSchedule } from "./timing";
 import { isRails, railsFamilyOfVariant } from "./rails";
 import { coastwaterOperation, coastwaterStep, COASTWATER_LAST_STEP, coastwaterLastStep } from "./presentation";
+import { COASTWATER_MODULES } from "./coastwater-content";
+import { MARLOWVALE_MODULES } from "./marlowvale-content";
 
 /* ------------------------------------------------------------ plumbing
  * Ported from the Express version with the handlers untouched: a tiny
@@ -454,7 +456,9 @@ const actionSchema = z.discriminatedUnion("action", [
 ]);
 
 /** Editions that can be played solo, and the room variant whose scenario they run. */
-const SOLO_EDITIONS: Record<string, string> = { "agent-0": "agent0" };
+const SOLO_EDITIONS: Record<string, string> = { "ciso-basecamp": "riverbend", "agent-0": "agent0", coastwater: "coastwater", "marlow-vale": "marlowvale" };
+/** The discussion workshops' per-decision extras (the twist, the reconsider question, the facilitator notes). Public content already. */
+const SOLO_MODULES: Record<string, readonly { reveal: string; reconsider: string; boundary: string; notes: string; discuss: readonly string[] }[]> = { "coastwater@2": COASTWATER_MODULES, "marlowvale@1": MARLOWVALE_MODULES };
 
 function registerDecisionRoomRoutes(app: Express) {
   // Public: which scenario a new room of each edition will run, so the edition pages describe it truthfully.
@@ -513,13 +517,18 @@ function registerDecisionRoomRoutes(app: Express) {
     if (!chosen) { res.json(base); return; }
     const next = roundContent(scenario, body.round + 1);
     const g = round.guidance; const best = scenario.bestMove?.[body.round];
+    const module = SOLO_MODULES[scenario.key]?.[body.round - 1];
+    // Discussion workshops have no per-option outcome; the scenario's generic one only repeats the cost.
+    const consequence = module ? null : consequenceFor(scenario, body.round, chosen, choices);
+    const withChoice = (key: string) => new Map([...choices, [body.round, key]]);
     res.json({
-      ...base, chosen,
-      consequence: consequenceFor(scenario, body.round, chosen, choices),
-      after: dashboardFor(scenario, choices, body.round, next ?? round),
-      options: round.options.map((o) => ({ key: o.key, label: o.label, cost: o.cost ?? "" })),
-      reveal: round.reveal ?? null,
+      ...base, chosen, consequence,
+      after: module ? null : dashboardFor(scenario, choices, body.round, next ?? round),
+      // Every option with its cost; where a scenario has no costs (Riverbend), what each option would have done instead.
+      options: round.options.map((o) => ({ key: o.key, label: o.label, cost: o.cost ?? "", ...(o.cost || module ? {} : { outcome: consequenceFor(scenario, body.round, o.key, withChoice(o.key))?.you ?? "" }) })),
+      reveal: module ? null : round.reveal ?? null,
       view: g ? { leaning: g.preferred, conditions: g.conditions, alternative: g.alternative, changeEvidence: g.changeEvidence } : best ? { leaning: best } : null,
+      ...(module ? { twist: { probe: module.reveal.replace(/^Optional probe:\s*/i, ""), reconsider: module.reconsider }, discuss: module.discuss, capture: module.boundary, notes: module.notes } : {}),
     });
   } catch (e) { if (e instanceof ZodError) { res.status(400).json({ message: "Bad solo request" }); return; } fail(e, res, next); } });
 

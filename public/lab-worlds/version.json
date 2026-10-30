@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "sourceRepository": "Mentis123/adamrappaport",
-  "sourceCommit": "667e86d2db322e28268e1bd01d7acbb2bd9e525a",
+  "sourceCommit": "da9d0f108d4e2ab1c5378cff136ed94017fb2f3b",
   "experience": "ai-lab",
   "runtimeDependency": "Self-hosted static files; no personal-site requests",
   "files": {
@@ -204,6 +204,10 @@
     "public/map-assets/meeting-poster.jpg": "cdd550a49b2e713054ae71a041fe8f6e94b0e0d07e70ae2ab128e7e1ca3ced82",
     "public/map-assets/meeting-scene.js": "a221156af3d61e22d480ad9c5e7bda66ca72a887aef4b33d3ac89a90f294d2d7",
     "public/map-assets/mining-buildings.js": "3fdb1cfc2e950eb6323e6674da53fee4bafd8ca6b2d97c95b83d2d3d71c26d81",
+    "public/map-assets/mining-business-captions.js": "ce637f3768ce4fb3a28c353dbae061bbc99595564e3de304199ee00b8c1cb363",
+    "public/map-assets/mining-business-kits.js": "69e4ef1fb7720cd0b5ffe6e40c25d3a87f734b1385d3e621dda5d24239b8f662",
+    "public/map-assets/mining-business-labs.js": "93ddbfc50799be4d6f8d7650617a6c16b62fa4451d4bf96abebbbc955448fe45",
+    "public/map-assets/mining-business-timing.js": "693d074bc82110ad736a2379a4596a1e8bf7ae98704fa69ce2707710d456ac41",
     "public/map-assets/mining-layout.js": "d81c2e73a1085e9ea2f946c00b363d7abe0b189bc82d86e125546fbf183367f9",
     "public/map-assets/mining-loader.js": "aedfe943b0be023253fc9389f640570c66323749b6669f0551e7f8e9e8086aa8",
     "public/map-assets/mining-plant.js": "f74f2af93387574d4ae789cf85dc0907fcf50403a2f220d05f3d3372ad2c832e",
@@ -266,7 +270,7 @@
     "public/map-assets/vendor/three.core.min.js": "61ba0df005b05991361d040d8ff670e1aadfd0ce7aeebd1fdb0725957a8957de",
     "public/map-assets/vendor/three.module.min.js": "e2b5ee6bccd38fd6d8a2428546b83c5f2426d84b152ef82be8055556e3b40eb6",
     "public/map-assets/viewer.css": "9349c4a71acbd54763ded20296ddf5507cd47c15e2daf02837c953275b0425c3",
-    "public/map-assets/viewer.js": "17449d1fd07b200900e4ca66f0d316f03ae077995688e9f0f6a054e3809ef12c",
+    "public/map-assets/viewer.js": "6dbe8b721c6daab38e27e49732a4115e0f0c3b772d0d966c65ecb85de2a86a0e",
     "public/map-assets/water.js": "1e58fcdf54d9dd65652798778d983d303438ff9691e04707b878309634f66816",
     "public/map-assets/world-shell.js": "d512261ac1f602441e05506e51478605b1b1a795f4e03011229f06f783c75250",
     "public/lab-worlds/mining-region.html": "7e5716d1309ca83a5a92b48780e73bd075f91926aa41a9a5a488a622e14b4041",

@@ -19,11 +19,11 @@ const EXTRA_WORLDS={'mining-region':'./mining-region-scene.js',datacenter:'./dat
 // AI Lab worlds (markers, exhibits): energy, mining, retail, datacenter, local (the laptop) and meeting (the Town Hall
 // room). Retail, datacenter, local and meeting load as extra worlds; location pins stay energy/mining/retail. In lab mode the datacenter's own hotspots give way
 // to the three lab markers.
-const labWorld=isMining?'mining':['retail','datacenter','local','meeting','splunk','ukraine'].includes(worldKind)?worldKind:'energy';
+const labWorld=worldKind==='mining-region'?'mining-region':isMining?'mining':['retail','datacenter','local','meeting','splunk','ukraine'].includes(worldKind)?worldKind:'energy';
 // Personal-site-only worlds carry their own exhibit registry ({RECIPES, FEATURED, KITS}) beside the world module. It is
 // imported only for that world and merged over the shared lab registry, which never imports it (so a host that does
 // not ship the folder is unaffected). Such folders are excluded by scripts/sync-lab-worlds.mjs.
-const LAB_EXTRA={ukraine:'./ukraine/index.js'};
+const LAB_EXTRA={'mining-region':'./mining-business-labs.js',ukraine:'./ukraine/index.js'};
 const labExtra=Object.hasOwn(LAB_EXTRA,labWorld)?await import(LAB_EXTRA[labWorld]).catch(e=>{console.error(e);return null;}):null;
 const loadLabRegistry=()=>import('./lab/recipes/index.js').then(m=>labExtra?{...m,RECIPES:{...m.RECIPES,...labExtra.RECIPES},FEATURED:{...m.FEATURED,...labExtra.FEATURED}}:m);
 const labExperience=params.get('experience')==='lab';
@@ -98,6 +98,7 @@ async function handleExhibit(data){
     if(saved?.mode==='fly'){camera.position.copy(saved.position);camera.quaternion.copy(saved.quaternion);camera.updateMatrixWorld();navigation?.enterFly({capture:false});}
     reply('exhibit:closed');return;
   }
+  if(data.type==='exhibit:command'&&data.action==='seek'&&Number.isFinite(data.time)){exhibit?.setTime(data.time);render();return;}
   if(data.type==='exhibit:command'){if(['play','pause','replay','reset','next','back','chapter','variation','hold','sensor','captions'].includes(data.action))exhibit?.command(data.action,{index:data.index,value:data.value});return;}
   if(data.type!=='exhibit:open')return;
   // Allow-list: this world's recipes plus its retired (legacy) ids.

@@ -88,6 +88,10 @@ After any shared-module change, compare paused, fixed-time frames of `/lab-world
 
 Learned 19 Oct 2026 (`/nextdc`): checking the kit first meant the world, pins, controls and host pattern were all reuse. The new code was the scene, its data module, four generic viewer hooks and the panel.
 
+## Mining Lab (`/mining/lab`) and the one rule it broke
+
+`/mining/lab` (rewrite to `public/mining.html`, built 30 Oct 2026) is a narrated three-story page over its own world, `mining-region`, with an audio-driven exhibit clock. Its renderer parts (the world modules, `mining-business-*.js`, `lab/exhibit-media-clock.js`, the viewer registrations and `setClock`) were first written into the synced copies here; the next sync from adamrappaport overwrote `viewer.js`, the viewer no longer knew `mining-region`, and the page silently showed the energy world. They now live in adamrappaport and sync from there. **Renderer code never goes under `public/map-assets/` or `public/lab-worlds/` here, whatever the session**; put it in adamrappaport and re-sync. The page's own "Region overview" button sits bottom-left because the embedded viewer's Camera controls toggle owns the bottom-right corner.
+
 ## Canonical references from adamrappaport
 
 - **Kit catalogue:** `adamrappaport/docs/KIT-CATALOG.md` lists every shared world, rig, effect and exhibit piece in one line each. Check it before building any 3D thing here (all of it is synced from adamrappaport).

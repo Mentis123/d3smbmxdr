@@ -23,3 +23,7 @@ Not claimed: physical mobile/device testing, formal user acceptance or exact wor
 Replaced repeated hard seeks (which cleared the user camera roughly fourteen times per second) with a continuous render-frame media clock. Host updates now provide time anchors without resetting orbit, pan or zoom. Camera takeover survives narration chapter boundaries. Reset view restores guided framing independently of audio; replay resets both deliberately. Keyboard chapter and playback commands route to the media player.
 
 Validation: three clock tests passed (frame interpolation; pause/backward seek; rate/clamping/invalid samples). Browser checked rotation held during playback and across chapters, zoom/pan, Reset view without audio restart, and keyboard media controls. Existing Mining AI Lab pump activation opened without application errors. Normal AI Lab timelines retain their original path unless a media clock is explicitly attached.
+
+## Mining landing route correction
+
+/mining now serves the full three-experience landing page. The narrated Mining Lab lives at /mining/lab; its existing /mining.html entry remains valid. Shared /mining?site=operations|engineering|terminal links redirect to the corresponding lab activation. The root retains the same showcase and its Mining Lab launch now points to /mining/lab. The lab has a clear return to all mining experiences.

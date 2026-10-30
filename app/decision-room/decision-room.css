@@ -794,3 +794,8 @@
   .dr-solo-fit .dr-solo-rules{font-size:clamp(13px,2vh,17px)}
   .dr-solo-fit .dr-solo-rules li{padding:clamp(4px,.8vh,8px) 10px}
 }
+
+/* The site's body is light (globals.css). Behind every Decision Room screen the page itself is navy, so a
+   bounce, a short page or a growing browser bar never shows white. The solo intro does not bounce at all. */
+html:has(.dr-shell),html:has(.dr-shell) body,html:has(.vh-shell),html:has(.vh-shell) body{background:#000025}
+html:has(.dr-solo-fit),html:has(.dr-solo-fit) body{overscroll-behavior:none}

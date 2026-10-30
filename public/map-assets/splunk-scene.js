@@ -20,7 +20,7 @@ export const toWorld = ([x, y, z]) => [x * S, Y0 + y * S, BOARD_Z + z * S];
 
 // Views for the shared viewer (distance is about 36 / zoom on a desktop screen). Azimuth 0 looks from the front (+z).
 const SPLUNK_VIEWS_BASE = {
-  hero: {yaw: 0, target: [0.3, 0.9, -0.2], zoom: 1.04, tilt: 0.7, azimuth: 0.3, fov: 34},
+  hero: {yaw: 0, target: [-0.6, 1.1, -0.6], zoom: 1.22, tilt: 0.68, azimuth: 0.3, fov: 34},
   sap: {yaw: 0, target: [5.2, 2.0, -4.6], zoom: 2.7, tilt: 0.42, azimuth: 0.28, fov: 36},
   balancers: {yaw: 0, target: [0, 1.2, -1.2], zoom: 2.6, tilt: 0.62, azimuth: -0.25, fov: 36},
   sites: {yaw: 0, target: [-1.5, 1.2, 3.2], zoom: 2.1, tilt: 0.55, azimuth: 0.15, fov: 36},
@@ -95,7 +95,23 @@ export function createSplunkScene() {
 
   const net = buildNetwork(k, {parent: holder, scale: S, y: Y0, z: BOARD_Z, detail: 'world'});
 
+  // In the AI Lab (experience=lab, or any embed) the three lab markers are the only things to click, so the board drops
+  // every floating sign, card and the forecast panel and runs a calm, healthy network: traffic, path tests and telemetry
+  // moving, gauges green. The stories play inside the exhibits. The standalone wrapper keeps its labels, pins and the
+  // SAP story loop. Owner, 30 Oct 2026: "no more weird signs on the main world that confuse from the landmarks".
+  const query = new URLSearchParams(location.search);
+  const LAB = query.get('experience') === 'lab' || query.get('embed') === '1';
+  const signs = [];
+  if (LAB) {
+    net.group.traverse(o => { if (o.isSprite) signs.push(o); });
+    net.panel.visible = false;
+  }
   world.updates.push(t => {
+    if (LAB) {
+      net.update(t, {clock: 44});
+      for (const o of signs) o.visible = false;
+      return;
+    }
     const s = ((t % CYCLE) + CYCLE) % CYCLE;
     net.update(t, storyAt(world.storyNow != null ? world.storyNow : s));
   });

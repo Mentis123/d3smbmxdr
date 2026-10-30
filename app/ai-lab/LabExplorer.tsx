@@ -22,8 +22,12 @@ export default function LabExplorer({industry}:{industry:LabIndustry}){
  const request=useRef(0),returnFocus=useRef<HTMLElement|null>(null),idRef=useRef<string|null>(null),pushed=useRef(false),full=useRef(false),nativeFull=useRef(false),ignoreCloseUntil=useRef(0),fullscreenButton=useRef<HTMLButtonElement>(null);
  const [id,setId]=useState<string|null>(null),[ready,setReady]=useState(false),[loaded,setLoaded]=useState(false),[failed,setFailed]=useState(false),[phase,setPhase]=useState(0),[playing,setPlaying]=useState(true);
  const [fullscreen,setFullscreen]=useState(false),[rs,setRs]=useState<RecipeState|null>(null);
+ // Play all three (owner, 30 Oct 2026: "an easy way to play all three"): the places play in order, each moving on a
+ // moment after it ends. Choosing a place yourself or closing the close-up ends the run.
+ const [tour,setTour]=useState(false),tourRef=useRef(false);tourRef.current=tour;
  const {registry,failed:registryFailed}=useLabRegistry(),registryRef=useRef(registry);registryRef.current=registry;
  const world=LAB_WORLDS[industry],featured=registry?.FEATURED[industry]??[];
+ const placeIndex=id?featured.findIndex(r=>r.id===id):-1,nextPlace=placeIndex>=0?featured[placeIndex+1]??null:null;
  const recipe=id&&registry&&Object.hasOwn(registry.RECIPES,id)?registry.RECIPES[id]:null;
  const legacy=id&&!recipe?EXHIBITS[id]??null:null;
  const title=recipe?.title??legacy?.title;
@@ -55,8 +59,11 @@ export default function LabExplorer({industry}:{industry:LabIndustry}){
   if(!id&&!fullscreen)return;const overflow=document.body.style.overflow;document.body.style.overflow='hidden';
   return()=>{document.body.style.overflow=overflow;};
  },[id,fullscreen]);
- const select=useCallback((next:string,history=true)=>{
+ const select=useCallback((next:string,history=true,fromTour=false)=>{
   if(!allowed(registryRef.current,industry,next))return;
+  if(!fromTour)setTour(false);
+  // Moving between places inside the close-up replaces the URL rather than stacking history, so Close still leaves.
+  if(idRef.current&&history){const url=new URL(window.location.href);url.searchParams.set('example',next);window.history.replaceState({...window.history.state,labExhibit:true},'',url);history=false;}
   if(full.current)exitFullscreen();
   returnFocus.current=document.activeElement instanceof HTMLElement?document.activeElement:null;
   if(history){const url=new URL(window.location.href);url.searchParams.set('example',next);window.history.pushState({...window.history.state,labExhibit:true},'',url);pushed.current=true;}
@@ -65,9 +72,17 @@ export default function LabExplorer({industry}:{industry:LabIndustry}){
   setId(next);
  },[industry,exitFullscreen,isModel]);
  const close=useCallback(()=>{
+  setTour(false);
   if(pushed.current){pushed.current=false;window.history.back();}
   else{const url=new URL(window.location.href);url.searchParams.delete('example');window.history.replaceState({...window.history.state,labExhibit:false},'',url);setId(null);}
  },[]);
+ // Play all: a moment after a place ends, the next one opens; after the last, the run ends.
+ useEffect(()=>{
+  if(!tour||!rs?.ended)return;
+  if(!nextPlace){setTour(false);return;}
+  const t=setTimeout(()=>{if(tourRef.current)select(nextPlace.id,true,true);},2600);
+  return()=>clearTimeout(t);
+ },[tour,rs?.ended,nextPlace,select]);
  useEffect(()=>{
   if(!registry)return;
   const read=()=>{pushed.current=!!window.history.state?.labExhibit;const query=new URLSearchParams(window.location.search).get('example');const ok=!!query&&allowed(registry,industry,query);if(ok&&isModel(query))prepare();setId(ok?query:null);};
@@ -151,10 +166,12 @@ export default function LabExplorer({industry}:{industry:LabIndustry}){
       {rs?.sensor&&<div className="ex-sensor-tag" role="status"><span>{rs.sensorTitle??'Camera view'}{rs.sensorLabel?<small> · {rs.sensorLabel}</small>:null}</span><button onClick={()=>command('sensor',{value:false})}>Back to scene</button></div>}
        <div className="ex-stops" role="group" aria-label="Chapters">{recipe.chapters.map((c,i)=><button key={c.id} data-chapter-stop={c.id} aria-current={i===chapterIndex?'step':undefined} onClick={()=>command('chapter',{index:i})}><b>{i+1}</b>{chapterName(c)}</button>)}</div>
        <div className="ex-actions">
+        {tour&&placeIndex>=0&&<span className="ex-tour" role="status">Playing all · {placeIndex+1} of {featured.length}{rs?.ended&&nextPlace?' · next in a moment':''}</span>}
         <button data-action="play" onClick={()=>command(rs?.playing?'pause':'play')}>{rs?.playing?'Pause':rs?.ended?'Play again':'Play'}</button>
         <button data-action="replay" onClick={()=>command('replay')}>Replay</button>
         <button data-action="hold" aria-pressed={!!rs?.hold} onClick={()=>command('hold',{value:!rs?.hold})} title="Pause at the end of each chapter">Hold at chapters</button>
         {narration.available&&(narration.blocked&&!narration.muted?<button data-action="sound" onClick={narration.tapForSound}>Tap for sound</button>:<button data-action="sound" aria-pressed={!narration.muted} onClick={narration.toggleMute} title="Narration">{narration.muted?'Sound off':'Sound on'}</button>)}
+        {rs?.ended&&nextPlace&&<button data-action="next-place" onClick={()=>select(nextPlace.id,true,tour)}>Next: {nextPlace.title} →</button>}
         {recipe.variation&&<button data-action="variation" aria-pressed={variationOn} onClick={()=>command('variation',{value:variationOn?null:recipe.variation!.id})} title={recipe.variation.caption}>{recipe.variation.label}</button>}
        </div>
       </div>
@@ -173,6 +190,6 @@ export default function LabExplorer({industry}:{industry:LabIndustry}){
    </dialog>
   </section>
 
-  <div className="ex-bottom"><nav className="ex-places" aria-label="Places to explore"><span className="al-eyebrow">PLACES TO EXPLORE</span>{featured.map(r=><button key={r.id} data-recipe-choice={r.id} onClick={()=>select(r.id)}>{r.title}<span>↗</span></button>)}{!registry&&!registryFailed&&<p className="ex-places-loading">Loading places…</p>}{registryFailed&&<p className="ex-places-loading">Places could not load. Select a marker in the world.</p>}</nav><p className="ex-disclosure">Fictional industry worlds · illustrative AI workflows</p><LabFooter/></div>
+  <div className="ex-bottom"><nav className="ex-places" aria-label="Places to explore"><span className="al-eyebrow">PLACES TO EXPLORE</span>{featured.length>1&&<button className="ex-play-all" data-action="play-all" onClick={()=>{const first=featured[0];if(!first)return;setTour(true);select(first.id,true,true);}}>▶ Play all {featured.length===3?'three':featured.length}<span>{featured.length} short stories, one after another</span></button>}{featured.map(r=><button key={r.id} data-recipe-choice={r.id} onClick={()=>select(r.id)}>{r.title}<span>↗</span></button>)}{!registry&&!registryFailed&&<p className="ex-places-loading">Loading places…</p>}{registryFailed&&<p className="ex-places-loading">Places could not load. Select a marker in the world.</p>}</nav><p className="ex-disclosure">Fictional industry worlds · illustrative AI workflows</p><LabFooter/></div>
  </main>;
 }

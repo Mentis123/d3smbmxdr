@@ -48,10 +48,16 @@ export function createLabLayer(world, industry, host, onSelect) {
     const ordered=[...markers].sort((a,b)=>Number(b.recipe.id===active.id)-Number(a.recipe.id===active.id));
     for(const {recipe,marker,width}of ordered){
       projected.fromArray(recipe.anchor);projected.y+=.65;world.root.localToWorld(projected);projected.project(camera);
-      const x=(projected.x*.5+.5)*host.clientWidth,y=(-projected.y*.5+.5)*host.clientHeight;
-      const overlap=placed.some(p=>Math.abs(p.x-x)<(p.width+width)/2+8&&Math.abs(p.y-y)<52);
-      marker.hidden=overlap||x-width/2<8||x+width/2>host.clientWidth-8||y<48||projected.z>1||projected.z< -1||Math.abs(projected.x)>.94||Math.abs(projected.y)>.9;
-      marker.style.left=x+'px';marker.style.top=y+'px';if(!marker.hidden)placed.push({x,y,width});
+      // A marker whose anchor is on screen is never dropped for space (30 Oct 2026: on a phone-sized AI Lab canvas the
+      // third marker vanished, e.g. "Speakers"): it is clamped inside the edges and, if it would cover a marker already
+      // placed, it steps up or down a row until it fits. Only an anchor behind the camera or well off screen hides it.
+      const W=host.clientWidth,H=host.clientHeight,ax=(projected.x*.5+.5)*W,ay=(-projected.y*.5+.5)*H;
+      const offscreen=projected.z>1||projected.z< -1||Math.abs(projected.x)>1.02||Math.abs(projected.y)>.98;
+      const clampX=v=>Math.min(Math.max(v,width/2+8),W-width/2-8);let x=clampX(ax),y=null;
+      const tries=[[0,0],[0,-54],[0,54],[width+12,0],[-width-12,0],[0,-108],[0,108],[width+12,-54],[-width-12,-54]];
+      for(const [dx,dy] of tries){const cx=clampX(ax+dx),cy=ay+dy;if(cy<48||cy>H-4)continue;if(!placed.some(p=>Math.abs(p.x-cx)<(p.width+width)/2+8&&Math.abs(p.y-cy)<52)){x=cx;y=cy;break;}}
+      marker.hidden=offscreen||y===null||W<width+16;
+      marker.style.left=x+'px';marker.style.top=(y??ay)+'px';if(!marker.hidden)placed.push({x,y,width});
     }
   }
   function diagnostics(){return{locationId:active.locationId,recipeId:active.id,industry,...state,recipes:recipes.map(r=>({id:r.id,locationId:r.locationId,view:r.view})),issueVisible:issue.visible,occlusionVisible:cover.visible,keyIntensity:world.key.intensity,issuePieces:issue.children.length,simulation:true,inference:false,controlConnected:false};}

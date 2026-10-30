@@ -171,3 +171,9 @@
 
 /* Why run it locally (local world): one row per benefit, the key as a small pill. */
 .ex-why>span{display:block;font:600 15px/1.5 "Helvetica Neue",Arial,sans-serif;color:#78dcff}.ex-why ul{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:10px}.ex-why li{font-size:15px;line-height:1.5;color:#d5e6f0}.ex-why b{display:inline-block;margin-right:8px;padding:1px 8px;border:1px solid #00aeff70;border-radius:999px;font:600 11px/1.6 ui-monospace,monospace;letter-spacing:.5px;color:#78dcff;text-transform:uppercase}
+/* Play all three and Next place (30 Oct 2026). */
+.ex-places .ex-play-all{flex:1 1 100%;min-height:56px;background:linear-gradient(90deg,#00aeff26,#06182c 70%);border-color:#00aeff;font-weight:600}
+.ex-places .ex-play-all>span{color:#9fd8f0;font-weight:400;font-size:13px}
+.ex-actions button[data-action=next-place]{background:#00aeff;border-color:#78dcff;color:#00121f;font-weight:700}
+.ex-tour{font-size:12px;color:#78dcff;padding:0 6px}
+

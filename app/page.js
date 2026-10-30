@@ -4,10 +4,10 @@ import styles from './page.module.css'
 
 function MiningExperiences() {
   return <section aria-label="Explore mining" style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(220px,1fr))',gap:14,padding:'22px 4vw',background:'#000025'}}>{[
-    ['/decision-room/agent-0','Agent 0','A mining cyber tabletop, from the SOC to the board.'],
-    ['/ai-lab/mining','Mining AI Lab','Explore industrial AI through animated exhibits.'],
-    ['/mining','Mining Lab','Site operations, engineering and export. Explore the wider mining business.']
-  ].map(([href,title,text])=><a key={href} href={href} style={{display:'block',padding:20,border:'1px solid #ffffff26',borderRadius:8,color:'#fff',textDecoration:'none',background:'#0c1b2d'}}><strong style={{fontSize:19}}>{title} ↗</strong><p style={{fontSize:13,lineHeight:1.6,color:'#abc0ce',marginBottom:0}}>{text}</p></a>)}</section>
+    ['/decision-room/agent-0','The Cybersecurity and AI Mining Tabletop: “Agent 0”','Get customers talking about real tradeoffs in a scenario.'],
+    ['/ai-lab/mining','The Mining AI Lab','Explore Local AI Use Cases in an immersive 3D environment.'],
+    ['/mining','The Mining Lab',<>Explore Industry use cases from our <a href="https://data3.sharepoint.com/sites/d3_saleshub/SitePages/Mining-Resources-Industry.aspx" target="_blank" rel="noopener noreferrer" style={{color:'#c492ff',textDecoration:'underline'}}>Mining Industry Page</a> brought to life.</>]
+  ].map(([href,title,text])=><article key={href} style={{padding:20,border:'1px solid #ffffff26',borderRadius:8,color:'#fff',background:'#0c1b2d'}}><a href={href} style={{color:'inherit',textDecoration:'none'}}><strong style={{fontSize:19}}>{title} ↗</strong></a><p style={{fontSize:13,lineHeight:1.6,color:'#abc0ce',marginBottom:0}}>{text}</p></article>)}</section>
 }
 
 // Image generation prompt template (locked)

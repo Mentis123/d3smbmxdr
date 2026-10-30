@@ -2,6 +2,14 @@
 import { useState, useRef, useEffect } from 'react'
 import styles from './page.module.css'
 
+function MiningExperiences() {
+  return <section aria-label="Explore mining" style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(220px,1fr))',gap:14,padding:'22px 4vw',background:'#000025'}}>{[
+    ['/decision-room/agent-0','Agent 0','A mining cyber tabletop, from the SOC to the board.'],
+    ['/ai-lab/mining','Mining AI Lab','Explore industrial AI through animated exhibits.'],
+    ['/mining','Mining Lab','Site operations, engineering and export. Explore the wider mining business.']
+  ].map(([href,title,text])=><a key={href} href={href} style={{display:'block',padding:20,border:'1px solid #ffffff26',borderRadius:8,color:'#fff',textDecoration:'none',background:'#0c1b2d'}}><strong style={{fontSize:19}}>{title} ↗</strong><p style={{fontSize:13,lineHeight:1.6,color:'#abc0ce',marginBottom:0}}>{text}</p></a>)}</section>
+}
+
 // Image generation prompt template (locked)
 const IMAGE_SYSTEM = `SYSTEM STYLE — LOCKED: Clean, modern enterprise cybersecurity illustration system. High-end SaaS visual language suitable for B2B and boardroom contexts. Flat plus subtle 3D hybrid with soft depth and smooth surfaces. Minimalist, uncluttered composition with excellent legibility. Restrained dark-mode palette with deep navy or charcoal background, subtle gradients, and accent colours limited to blue, cyan, and soft teal. Soft diffused studio lighting, gentle glow effects only where meaningful. Calm, professional, trustworthy tone. Perspective is straight-on or very slight isometric. Vector-like clarity, consistent line weight, studio-polished finish. No visual noise, no grunge, no photorealism, no branding.`
 
@@ -335,9 +343,11 @@ export default function Home() {
     return (
       <div className={styles.container}>
         <header className={styles.header}>
+        <nav aria-label="Mining experiences" style={{display:"flex",gap:18,flexWrap:"wrap",fontSize:13}}><a href="/decision-room/agent-0">Agent 0</a><a href="/ai-lab/mining">Mining AI Lab</a><a href="/mining">Mining Lab ↗</a></nav>
           <a href="https://www.data3.com" className={styles.logo} target="_blank">Data<sup>#</sup>3</a>
         </header>
-        <main className={styles.main}>
+        <MiningExperiences />
+      <main className={styles.main}>
           <div className={styles.closedCard}>
             <div className={styles.closedIcon}>&#10003;</div>
             <h2>Thanks for chatting!</h2>
@@ -353,9 +363,11 @@ export default function Home() {
   return (
     <div className={styles.container}>
       <header className={styles.header}>
+        <nav aria-label="Mining experiences" style={{display:"flex",gap:18,flexWrap:"wrap",fontSize:13}}><a href="/decision-room/agent-0">Agent 0</a><a href="/ai-lab/mining">Mining AI Lab</a><a href="/mining">Mining Lab ↗</a></nav>
         <a href="https://www.data3.com" className={styles.logo} target="_blank">Data<sup>#</sup>3</a>
       </header>
 
+      <MiningExperiences />
       <main className={styles.main}>
         <div className={styles.chatPanel}>
           <div className={styles.chatHeader}>

@@ -14,6 +14,7 @@ const nextConfig = {
   },
   async rewrites() {
     return [
+      { source: "/mining", destination: "/mining.html" },
       // Static pages have no icon link, so browsers ask for /favicon.ico; serve the SVG icon instead of a 404.
       {
         source: '/favicon.ico',

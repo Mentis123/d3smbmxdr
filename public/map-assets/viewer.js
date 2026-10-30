@@ -15,7 +15,7 @@ const params=new URLSearchParams(location.search), capture=params.get('capture')
 const worldKind=document.body.dataset.world||'energy';
 const isMining=worldKind==='mining';
 // Worlds beyond energy and mining load their own module by these generic exports: createWorld, WORLD_SEED, WORLD_VIEWS.
-const EXTRA_WORLDS={datacenter:'./datacenter-scene.js',nextdc:'./nextdc-scene.js',retail:'./retail-scene.js',local:'./local-scene.js',meeting:'./meeting-scene.js',splunk:'./splunk-scene.js','marlow-vale':'./marlow-vale-scene.js',ukraine:'./ukraine/ukraine-scene.js'};
+const EXTRA_WORLDS={'mining-region':'./mining-region-scene.js',datacenter:'./datacenter-scene.js',nextdc:'./nextdc-scene.js',retail:'./retail-scene.js',local:'./local-scene.js',meeting:'./meeting-scene.js',splunk:'./splunk-scene.js','marlow-vale':'./marlow-vale-scene.js',ukraine:'./ukraine/ukraine-scene.js'};
 // AI Lab worlds (markers, exhibits): energy, mining, retail, datacenter, local (the laptop) and meeting (the Town Hall
 // room). Retail, datacenter, local and meeting load as extra worlds; location pins stay energy/mining/retail. In lab mode the datacenter's own hotspots give way
 // to the three lab markers.

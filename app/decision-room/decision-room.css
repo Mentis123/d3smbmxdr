@@ -768,3 +768,29 @@
 .dr-solo-held{color:var(--aqua)}
 .dr-solo-loading{display:flex;align-items:center;justify-content:center;gap:12px;min-height:180px;color:#9db0c5}
 .dr-solo-loading p{margin:0}
+
+/* Solo intro as one tile card that always fits the screen: header, card and footer visible without scrolling.
+   Sizes follow the viewport height, so a phone with browser bars (about 550-660 px tall) still fits. */
+.dr-shell.dr-solo-fit{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;padding-top:clamp(12px,2.2vh,28px)!important;padding-bottom:clamp(10px,1.8vh,24px)!important}
+.dr-solo-fit .dr-brand{margin-bottom:clamp(10px,2.2vh,32px)!important;flex:none}
+.dr-solo-fit>footer{margin-top:clamp(8px,1.6vh,24px)!important;flex:none}
+.dr-solo-fit .dr-solo-intro{flex:0 1 auto;align-self:center;width:100%;max-width:680px;margin:auto;align-content:center;justify-items:stretch;gap:clamp(8px,1.5vh,16px);
+  padding:clamp(16px,2.8vh,34px) clamp(16px,4vw,34px);border:1px solid rgba(0,174,255,.28);border-radius:20px;background:linear-gradient(150deg,rgba(7,27,58,.95),rgba(0,0,37,.85));box-shadow:0 20px 60px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.05)}
+.dr-solo-fit .dr-solo-intro .vh-back{justify-self:start;margin:0}
+.dr-solo-fit .dr-solo-intro .dr-kicker{margin:0}
+.dr-solo-fit .dr-solo-intro h1{font-size:clamp(28px,min(8.6vw,6.2vh),60px)!important;line-height:1.02}
+.dr-solo-fit .dr-solo-lead{font-size:clamp(15px,2.3vh,20px);line-height:1.4}
+.dr-solo-fit .dr-solo-rules{gap:clamp(5px,1vh,8px);margin:0!important;font-size:clamp(14px,2.15vh,18px)}
+.dr-solo-fit .dr-solo-rules li{padding:clamp(5px,1vh,10px) 12px;line-height:1.35}
+.dr-solo-fit .dr-solo-intro .dr-primary{justify-content:center;width:100%;padding:clamp(11px,1.9vh,15px) 20px}
+.dr-solo-fit .dr-synth{font-size:11px;line-height:1.4}
+@media(min-width:761px){.dr-solo-fit .dr-solo-intro .dr-primary{width:auto;justify-self:start}}
+@media(max-height:720px){
+  .dr-solo-fit .dr-brand small,.dr-solo-fit>footer{display:none}
+  .dr-solo-fit .dr-brand{margin-bottom:10px!important}
+  .dr-solo-fit .dr-solo-intro{gap:clamp(6px,1.2vh,12px);padding-top:clamp(12px,2.2vh,24px);padding-bottom:clamp(12px,2.2vh,24px)}
+  .dr-solo-fit .dr-solo-intro h1{font-size:clamp(24px,min(8vw,5.3vh),52px)!important}
+  .dr-solo-fit .dr-solo-lead{font-size:clamp(14px,2.1vh,18px)}
+  .dr-solo-fit .dr-solo-rules{font-size:clamp(13px,2vh,17px)}
+  .dr-solo-fit .dr-solo-rules li{padding:clamp(4px,.8vh,8px) 10px}
+}

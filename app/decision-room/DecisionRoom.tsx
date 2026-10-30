@@ -917,7 +917,7 @@ function Solo({ edition }: { edition: Edition }) {
 
   const brand = data?.scenario.brand; const total = data?.total ?? 6;
   const family = data?.scenario.family; const pack = isRails(family) ? RAILS_PACKS[family] : null;
-  const frame = (children: ReactNode, kicker?: string) => <Frame className="dr-table dr-one dr-solo" kicker={kicker ?? brand?.kicker} showMicrosoft={showsMicrosoft(family ?? "coastwater")}>{children}</Frame>;
+  const frame = (children: ReactNode, kicker?: string, fit = false) => <Frame className={`dr-table dr-one dr-solo${fit ? " dr-solo-fit" : ""}`} kicker={kicker ?? brand?.kicker} showMicrosoft={showsMicrosoft(family ?? "coastwater")}>{children}</Frame>;
   if (!data) return frame(<section className="dr-card dr-wait"><h2>{error ? "Could not load the scenario." : "Loading…"}</h2><ErrorText message={error} />{error ? <div className="dr-actions"><button onClick={() => setStep({ ...step })}>Try again</button></div> : null}</section>);
 
   if (step.phase === "intro") return frame(<section className="dr-solo-intro">
@@ -928,7 +928,7 @@ function Solo({ edition }: { edition: Edition }) {
     <ol className="dr-solo-rules"><li><b>{total} calls.</b> Each one costs something.</li><li><b>No wrong answers.</b> Only trade-offs.</li><li><b>After each call,</b> see what it changed and what the others would have cost.</li></ol>
     <button className="dr-primary" onClick={() => setStep({ round: 1, phase: "decide" })}>Start <ArrowRight /></button>
     <small className="dr-synth">{pack?.welcome.footnote ?? brand?.simulationNote ?? "Fictional exercise."}</small>
-  </section>);
+  </section>, undefined, true);
 
   if (step.phase === "end") {
     const rows = Array.from({ length: total }, (_, i) => i + 1);
